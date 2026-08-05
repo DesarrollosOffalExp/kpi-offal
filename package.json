@@ -1,0 +1,23 @@
+{
+  "name": "kpi-offal",
+  "version": "1.0.0",
+  "description": "Tablero de KPIs de Offal — indicadores por sector alimentados desde el KPI.xlsx del SharePoint (Microsoft Graph). Parte del ecosistema Offal (login único Entra ID + padrón acceso).",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "client": "npm --prefix client run dev",
+    "client:build": "npm --prefix client install && npm --prefix client run build"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "helmet": "^8.3.0",
+    "mssql": "^11.0.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
