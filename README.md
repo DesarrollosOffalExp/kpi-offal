@@ -76,7 +76,7 @@ Mismo patrón que el resto del ecosistema:
 
 Push a `main` dispara el workflow y deploya.
 
-## Pendientes de infraestructura (los resuelve el inge/admin)
+## Pendientes de infraestructura (lo resuelve infra)
 
 - [ ] App registration + permiso Graph + consentimiento + client secret.
 - [ ] Crear el App Service `kpi-offal` + Basic auth + publish profile.
