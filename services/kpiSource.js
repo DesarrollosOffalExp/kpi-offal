@@ -126,6 +126,40 @@ async function leerHoja(hoja, base, token) {
   return { key: hoja.sector.toLowerCase().replace(/\s+/g, '-'), nombre: hoja.sector, estado: 'ok', kpis, graficos };
 }
 
+// ---- Lectura de una hoja en modo "última semana" (una sola fila) ----
+// Cada fila es una semana; se toma la de la ÚLTIMA semana (máx. de columnaSemana)
+// y se leen las columnas A→R de esa fila. Es una foto, no una serie.
+async function leerUltimaSemana(hoja, base, token) {
+  async function rango(address) {
+    const r = await gget(`${base}/worksheets('${encodeURIComponent(hoja.sheet)}')/range(address='${address}')?$select=values`, token);
+    return aplanar(r.values);
+  }
+
+  const col = hoja.columnaSemana;
+  const semanas = await rango(`${col}${hoja.filas.desde}:${col}${hoja.filas.hasta}`);
+  let idx = -1, maxSem = -Infinity;
+  semanas.forEach((v, i) => { const n = Number(v); if (v !== '' && v != null && !Number.isNaN(n) && n > maxSem) { maxSem = n; idx = i; } });
+  if (idx < 0) throw new Error(`${hoja.sheet}: no encontré semanas en la columna ${col}.`);
+
+  const fila = hoja.filas.desde + idx;
+  const valores = await rango(`A${fila}:R${fila}`);
+  const valCol = (letra) => valores[letra.charCodeAt(0) - 65]; // A=0 … R=17
+
+  const kpis = hoja.kpis.map((k) => {
+    const base_ = { id: k.id, titulo: k.titulo, unidad: k.unidad || '', formato: k.formato, sentido: k.sentido, meta: k.meta ?? null, info: k.info };
+    base_.valor = normalizarValor(valCol(k.col), k.formato);
+    if (k.desglose) base_.desglose = k.desglose.map((d) => ({ nombre: d.nombre, valor: normalizarValor(valCol(d.col), k.formato) }));
+    return base_;
+  });
+
+  const graficos = (hoja.graficos || []).map((g) => ({
+    tipo: 'bar', titulo: g.titulo, info: g.info,
+    datos: g.columnas.map((c) => ({ nombre: c.nombre, valor: normalizarValor(valCol(c.col), 'numero') })),
+  }));
+
+  return { key: hoja.sector.toLowerCase().replace(/\s+/g, '-'), nombre: hoja.sector, estado: 'ok', periodo: `Semana ${maxSem}`, kpis, graficos };
+}
+
 async function leerDesdeGraph() {
   const token = await obtenerToken();
   const share = encodeShareUrl(process.env.KPI_FILE_SHARE_URL);
@@ -138,7 +172,7 @@ async function leerDesdeGraph() {
       sectores.push({ key: hoja.sector.toLowerCase().replace(/\s+/g, '-'), nombre: hoja.sector, estado: 'pendiente', kpis: [], graficos: [] });
       continue;
     }
-    sectores.push(await leerHoja(hoja, base, token));
+    sectores.push(hoja.modo === 'ultimaSemana' ? await leerUltimaSemana(hoja, base, token) : await leerHoja(hoja, base, token));
   }
   sectores.sort((a, b) => ORDEN_SECTORES.indexOf(a.nombre) - ORDEN_SECTORES.indexOf(b.nombre));
   return { origen: 'graph', actualizado: new Date().toISOString(), archivo: item.name, sectores };

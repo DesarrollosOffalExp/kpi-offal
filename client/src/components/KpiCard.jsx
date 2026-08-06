@@ -77,9 +77,7 @@ export default function KpiCard({ kpi, onExpand }) {
               <span className="desglose-chip" key={d.nombre}>{d.nombre} <b>{fmt(d.valor, kpi.formato, kpi.unidad)}</b></span>
             ))}
           </div>
-        ) : (
-          <span className="kpi-var neutro">Sin histórico</span>
-        )}
+        ) : null}
       </div>
     </div>
   );

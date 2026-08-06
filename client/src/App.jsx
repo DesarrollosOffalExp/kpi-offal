@@ -119,6 +119,7 @@ export default function App() {
           </div>
         ) : (
           <section className="sector">
+            {sector.periodo && <div className="sector-periodo">Datos de la <b>{sector.periodo}</b></div>}
             <div className="kpi-grid">
               {sector.kpis.map((k) => <KpiCard key={k.id} kpi={k} onExpand={setExpandido} />)}
             </div>
