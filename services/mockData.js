@@ -129,16 +129,65 @@ const SISTEMAS = {
   ],
 };
 
-// Sectores todavía sin integrar (se muestran como "en preparación").
-const PENDIENTES = ['Logística'].map((nombre) => ({
-  key: nombre.toLowerCase().replace(/\s+/g, '-'), nombre, estado: 'pendiente', kpis: [], graficos: [],
-}));
+// LOGÍSTICA: hoja con 6 bloques distintos (períodos mixtos) → se agrupan en
+// secciones. Valores de la última carga (Matriz de Costo mensual = Junio; resto semanal).
+const G = { costo: 'Matriz de Costo · mensual (Junio)', flota: 'Disponibilidad de Flota · Sem 30',
+  lavado: 'Lavado de Camiones · Sem 30', tambores: 'Cuenta de Tambores · Sem 31',
+  gasoil: 'Consumo de Gasoil · Sem 31', frig: 'Costo por Frigorífico · Sem 31' };
+const LOGISTICA = {
+  key: 'logística', nombre: 'Logística', estado: 'ok',
+  kpis: [
+    // Matriz de Costo (mensual, Junio)
+    { id: 'costo_log', grupo: G.costo, titulo: 'Costo total de Logística', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 1051942271,
+      info: 'Costo total del mes de Logística. Se filtra por mes (el mes está en la fila 19). (MATRIZ DE COSTO)' },
+    { id: 'costo_general', grupo: G.costo, titulo: 'Costo General del mes', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 1176272936,
+      info: 'Costo general del mes (incluye descarga, fletes y lavatachos). (MATRIZ DE COSTO)' },
+    // Disponibilidad de Flota (Sem 30)
+    { id: 'disp_general', grupo: G.flota, titulo: 'Disponibilidad de flota', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: null, valor: 84,
+      desglose: [{ nombre: 'Disponibles', valor: 67 }, { nombre: 'Total', valor: 80 }],
+      info: '67 de 80 unidades disponibles en la semana. (DISPONIBILIDAD DE FLOTA)' },
+    { id: 'fuera_serv', grupo: G.flota, titulo: 'Unidades fuera de servicio', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 13,
+      info: 'Unidades de la flota fuera de servicio en la semana. (DISPONIBILIDAD DE FLOTA)' },
+    // Lavado de Camiones (Sem 30)
+    { id: 'camiones_lav', grupo: G.lavado, titulo: 'Camiones lavados', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 215,
+      info: 'Total de camiones lavados en la semana. (LAVADO DE CAMIONES)' },
+    { id: 'hs_lavado', grupo: G.lavado, titulo: 'Horas de lavado', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 686,
+      info: 'Horas totales de lavado en la semana. (LAVADO DE CAMIONES)' },
+    { id: 'operarios', grupo: G.lavado, titulo: 'Operarios presentes', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 21,
+      desglose: [{ nombre: 'Por nómina', valor: 23 }], info: 'Operarios presentes vs. nómina. (LAVADO DE CAMIONES)' },
+    // Cuenta de Tambores (Sem 31)
+    { id: 'stock_tambores', grupo: G.tambores, titulo: 'Stock final de tambores', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: -280,
+      desglose: [{ nombre: 'Enviados', valor: 18761 }, { nombre: 'Recibidos', valor: 18809 }],
+      info: 'Stock final de tambores por matadero (negativo = a favor). (CUENTA DE TAMBORES)' },
+    // Consumo de Gasoil (Sem 31)
+    { id: 'kg_lt', grupo: G.gasoil, titulo: 'Rendimiento KG/LT', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 6.21,
+      info: 'Kilos transportados por litro de gasoil en la semana. Más alto es mejor. (CONSUMO DE GASOIL)' },
+    { id: 'total_lt', grupo: G.gasoil, titulo: 'Total litros (sem)', unidad: 'Lt', formato: 'numero', sentido: 'down', meta: null, valor: 8446,
+      info: 'Litros de gasoil consumidos en la semana. (CONSUMO DE GASOIL)' },
+    { id: 'total_kg_gas', grupo: G.gasoil, titulo: 'Total Kg transportados', unidad: 'Kg', formato: 'numero', sentido: 'up', meta: null, valor: 2011585,
+      info: 'Kilos transportados en la semana. (CONSUMO DE GASOIL)' },
+    // Costo por Frigorífico (Sem 31)
+    { id: 'valor_viajes', grupo: G.frig, titulo: 'Valor de los viajes', unidad: '', formato: 'moneda', sentido: 'up', meta: null, valor: 49033031,
+      info: 'Valor total de los viajes de la semana. (COSTO POR FRIGORÍFICO)' },
+    { id: 'kgs_transp', grupo: G.frig, titulo: 'Kgs transportados', unidad: 'Kg', formato: 'numero', sentido: 'up', meta: null, valor: 1294641,
+      info: 'Kilos transportados a frigoríficos en la semana. (COSTO POR FRIGORÍFICO)' },
+    { id: 'valor_exc', grupo: G.frig, titulo: 'Valor excedente', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 534057,
+      info: 'Valor excedente total de los frigoríficos en la semana. (COSTO POR FRIGORÍFICO)' },
+  ],
+  graficos: [
+    { tipo: 'line', grupo: G.costo, titulo: 'Costo de Logística mensual', info: 'Evolución del costo total de Logística mes a mes ($).',
+      periodos: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+      series: [{ nombre: 'Costo Logística', datos: [728504360, 799312646, 927394289, 664053176, 811971678, 1051942271] }] },
+    { tipo: 'bar', grupo: G.flota, titulo: 'Disponibilidad por flota (%)', info: 'Indicador de disponibilidad por tipo de unidad (semana).',
+      datos: [{ nombre: 'Tractor', valor: 94 }, { nombre: 'Torito', valor: 100 }, { nombre: 'Chasis', valor: 97 }, { nombre: 'Balancín', valor: 100 }, { nombre: 'Semi', valor: 80 }, { nombre: 'Bateas', valor: 92 }] },
+  ],
+};
 
 function construirMock() {
   return {
     origen: 'mock',
     actualizado: new Date().toISOString(),
-    sectores: [INSUMOS, COMPRAS, HIELO, ...PENDIENTES, SISTEMAS],
+    sectores: [INSUMOS, COMPRAS, HIELO, LOGISTICA, SISTEMAS],
   };
 }
 

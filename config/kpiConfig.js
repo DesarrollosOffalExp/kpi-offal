@@ -128,8 +128,23 @@ const HOJAS = [
     ],
   },
 
-  // Pendiente: se completa cuando llegue la pestaña de Logística.
-  { sheet: 'LOGISTICA', sector: 'Logística', pendiente: true },
+  {
+    // LOGÍSTICA: hoja con 6 bloques DISTINTOS, cada uno con su mecánica:
+    //   1. Matriz de Costo    → mensual (el mes está en la fila 19); se toma el último mes.
+    //   2. Disponibilidad de Flota → semanal (nuevo arriba); tabla por tipo de unidad.
+    //   3. Cuenta de Tambores → semanal, cuadro completo (stock por matadero).
+    //   4. Consumo de Gasoil  → semanal, cuadro completo (serie por semana, KG/LT).
+    //   5. Costo por Frigorífico → semanal, cuadro completo (por proveedor).
+    //   6. Lavado de Camiones → semanal (camiones/hs/operarios).
+    // Se muestran agrupados en secciones (grupo). ⚠️ RANGOS A CONFIRMAR: los
+    // screenshots recibidos están muy alejados para leer las celdas exactas de
+    // cada bloque. Hoy Logística vive en mock/demo con los valores legibles; para
+    // cablear el Excel real falta un screenshot por bloque con números de fila/columna.
+    // Hasta entonces se marca pendiente para que el lector no intente rangos inválidos.
+    sheet: 'LOGISTICA',
+    sector: 'Logística',
+    pendiente: true,
+  },
 
   {
     // SISTEMAS: misma mecánica que COMPRAS (una fila = la última semana), pero en
