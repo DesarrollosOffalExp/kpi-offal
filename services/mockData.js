@@ -63,8 +63,32 @@ const COMPRAS = {
   ],
 };
 
+// FÁBRICA DE HIELO: productividad de la semana (tabla semanal que se sobrescribe).
+// KPIs de la fila RESUMEN; gráficos de las filas diarias. Datos de la Semana 31.
+const HIELO = {
+  key: 'fábrica-de-hielo', nombre: 'Fábrica de Hielo', estado: 'ok', periodo: 'Semana 31',
+  kpis: [
+    { id: 'barras', titulo: 'Barras producidas', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 30680,
+      info: 'Barras de hielo producidas en la semana (total). (FABRICA DE HIELO, resumen col. D)' },
+    { id: 'prod_dia', titulo: 'Productividad Hombre/Barra Día', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 1278,
+      info: 'Productividad: barras por persona en la semana (barras / personal). (resumen col. E)' },
+    { id: 'prod_hs', titulo: 'Productividad Hom/Barra Hs', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 34,
+      info: 'Productividad: barras por hora de máquina (barras / horas). (resumen col. G)' },
+    { id: 'consumo', titulo: 'Consumo', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 35085,
+      info: 'Consumo total de la semana. (FABRICA DE HIELO, resumen col. H)' },
+    { id: 'horas', titulo: 'Horas trabajadas', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 899,
+      info: 'Horas de máquina trabajadas en la semana (total). (resumen col. F)' },
+  ],
+  graficos: [
+    { tipo: 'bar', titulo: 'Barras por día', info: 'Producción diaria de barras de hielo en la semana.',
+      datos: [{ nombre: 'Lun', valor: 5920 }, { nombre: 'Mar', valor: 5920 }, { nombre: 'Mié', valor: 4040 }, { nombre: 'Jue', valor: 5920 }, { nombre: 'Vie', valor: 5920 }, { nombre: 'Sáb', valor: 2960 }] },
+    { tipo: 'bar', titulo: 'Consumo por día', info: 'Consumo diario en la semana.',
+      datos: [{ nombre: 'Lun', valor: 7205 }, { nombre: 'Mar', valor: 7335 }, { nombre: 'Mié', valor: 6725 }, { nombre: 'Jue', valor: 6520 }, { nombre: 'Vie', valor: 1530 }, { nombre: 'Sáb', valor: 5770 }] },
+  ],
+};
+
 // Sectores todavía sin integrar (se muestran como "en preparación").
-const PENDIENTES = ['Fábrica de Hielo', 'Logística', 'Sistemas'].map((nombre) => ({
+const PENDIENTES = ['Logística', 'Sistemas'].map((nombre) => ({
   key: nombre.toLowerCase().replace(/\s+/g, '-'), nombre, estado: 'pendiente', kpis: [], graficos: [],
 }));
 
@@ -72,7 +96,7 @@ function construirMock() {
   return {
     origen: 'mock',
     actualizado: new Date().toISOString(),
-    sectores: [INSUMOS, COMPRAS, ...PENDIENTES],
+    sectores: [INSUMOS, COMPRAS, HIELO, ...PENDIENTES],
   };
 }
 

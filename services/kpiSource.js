@@ -58,10 +58,15 @@ async function gget(path, token) {
 const MESES_ABBR = { enero: 'Ene', febrero: 'Feb', marzo: 'Mar', abril: 'Abr', mayo: 'May', junio: 'Jun',
   julio: 'Jul', agosto: 'Ago', septiembre: 'Sep', octubre: 'Oct', noviembre: 'Nov', diciembre: 'Dic' };
 
+const DIAS_ABBR = { lunes: 'Lun', martes: 'Mar', 'miércoles': 'Mié', miercoles: 'Mié',
+  jueves: 'Jue', viernes: 'Vie', 'sábado': 'Sáb', sabado: 'Sáb', domingo: 'Dom' };
+
 function etiqueta(v) {
   const s = String(v ?? '').trim();
   const m = MESES_ABBR[s.toLowerCase()];
   if (m) return m;
+  const d = DIAS_ABBR[s.toLowerCase()];
+  if (d) return d;
   const sem = s.match(/S\s*(\d+)/i); // "Máx S 23" → "S23"
   if (sem) return 'S' + sem[1];
   return s;
@@ -110,20 +115,46 @@ async function leerHoja(hoja, base, token) {
     kpis.push({ id: k.id, titulo: k.titulo, unidad: k.unidad, formato: k.formato, sentido: k.sentido, meta: k.meta, serie, info: k.info });
   }
 
-  // Gráficos derivados de los KPIs ya leídos (por id).
+  // Gráficos: pueden derivar de los KPIs (por id, ej. INSUMOS) o leer sus propios
+  // rangos (ej. FÁBRICA DE HIELO: series diarias de una tabla semanal).
   const porId = new Map(kpis.map((k) => [k.id, k]));
-  const graficos = (hoja.graficos || []).map((g) => {
-    if (g.tipo === 'line') {
-      const fuentes = g.desde.map((id) => porId.get(id)).filter(Boolean);
-      const periodos = fuentes[0]?.serie.map((p) => p.periodo) || [];
-      return { tipo: 'line', titulo: g.titulo, info: g.info, periodos,
-        series: fuentes.map((k) => ({ nombre: k.titulo, datos: k.serie.map((p) => p.valor) })) };
+  async function construirGrafico(g) {
+    if (g.desde) { // derivado de KPIs ya leídos
+      if (g.tipo === 'line') {
+        const fuentes = (Array.isArray(g.desde) ? g.desde : [g.desde]).map((id) => porId.get(id)).filter(Boolean);
+        return { tipo: 'line', titulo: g.titulo, info: g.info,
+          periodos: fuentes[0]?.serie.map((p) => p.periodo) || [],
+          series: fuentes.map((k) => ({ nombre: k.titulo, datos: k.serie.map((p) => p.valor) })) };
+      }
+      const k = porId.get(g.desde);
+      return { tipo: 'bar', titulo: g.titulo, info: g.info, datos: (k?.serie || []).map((p) => ({ nombre: p.periodo, valor: p.valor })) };
     }
-    const k = porId.get(g.desde);
-    return { tipo: 'bar', titulo: g.titulo, info: g.info, datos: (k?.serie || []).map((p) => ({ nombre: p.periodo, valor: p.valor })) };
-  });
+    if (g.tipo === 'line') { // rangos propios
+      const labels = (await rango(g.periodos.range)).map(etiqueta);
+      const series = [];
+      for (const s of g.series) series.push({ nombre: s.nombre, vals: (await rango(s.valores.range)).map((v) => normalizarValor(v, 'numero')) });
+      const keep = labels.map((l, i) => (l !== '' ? i : -1)).filter((i) => i >= 0);
+      return { tipo: 'line', titulo: g.titulo, info: g.info,
+        periodos: keep.map((i) => labels[i]),
+        series: series.map((s) => ({ nombre: s.nombre, datos: keep.map((i) => s.vals[i]) })) };
+    }
+    const cats = (await rango(g.categorias.range)).map(etiqueta);
+    const vals = (await rango(g.valores.range)).map((v) => normalizarValor(v, 'numero'));
+    const datos = [];
+    cats.forEach((c, i) => { if (c !== '') datos.push({ nombre: c, valor: vals[i] }); });
+    return { tipo: 'bar', titulo: g.titulo, info: g.info, datos };
+  }
+  const graficos = [];
+  for (const g of hoja.graficos || []) graficos.push(await construirGrafico(g));
 
-  return { key: hoja.sector.toLowerCase().replace(/\s+/g, '-'), nombre: hoja.sector, estado: 'ok', kpis, graficos };
+  let periodo;
+  if (hoja.periodoCell) {
+    const raw = String((await celda(hoja.periodoCell)) ?? '').trim();
+    const m = raw.match(/semana\s*(\d+)/i);
+    periodo = m ? `Semana ${m[1]}` : raw || undefined;
+  }
+
+  return { key: hoja.sector.toLowerCase().replace(/\s+/g, '-'), nombre: hoja.sector, estado: 'ok', ...(periodo ? { periodo } : {}), kpis, graficos };
 }
 
 // ---- Lectura de una hoja en modo "última semana" (una sola fila) ----

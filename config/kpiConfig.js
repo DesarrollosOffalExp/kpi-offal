@@ -88,8 +88,34 @@ const HOJAS = [
     ],
   },
 
+  {
+    // FÁBRICA DE HIELO: tabla semanal completa (se sobrescribe cada semana). Los
+    // KPIs salen de la fila RESUMEN (fila 106) y los gráficos de las filas diarias
+    // (Lun→Dom, en filas 93,95,…,105 con filas en blanco intercaladas → se filtran).
+    sheet: 'FABRICA DE HIELO',
+    sector: 'Fábrica de Hielo',
+    periodoCell: 'A89',                 // "SEMANA 31"
+    kpis: [
+      { id: 'barras', titulo: 'Barras producidas', unidad: '', formato: 'numero', sentido: 'up', tipo: 'valor', valor: { cell: 'D106' },
+        info: 'Barras de hielo producidas en la semana (total). (FABRICA DE HIELO, resumen col. D)' },
+      { id: 'prod_dia', titulo: 'Productividad Hombre/Barra Día', unidad: '', formato: 'numero', sentido: 'up', tipo: 'valor', valor: { cell: 'E106' },
+        info: 'Productividad: barras por persona en la semana (barras / personal). (resumen col. E)' },
+      { id: 'prod_hs', titulo: 'Productividad Hom/Barra Hs', unidad: '', formato: 'numero', sentido: 'up', tipo: 'valor', valor: { cell: 'G106' },
+        info: 'Productividad: barras por hora de máquina (barras / horas). (resumen col. G)' },
+      { id: 'consumo', titulo: 'Consumo', unidad: '', formato: 'numero', sentido: 'down', tipo: 'valor', valor: { cell: 'H106' },
+        info: 'Consumo total de la semana. (FABRICA DE HIELO, resumen col. H)' },
+      { id: 'horas', titulo: 'Horas trabajadas', unidad: '', formato: 'numero', sentido: 'up', tipo: 'valor', valor: { cell: 'F106' },
+        info: 'Horas de máquina trabajadas en la semana (total). (resumen col. F)' },
+    ],
+    graficos: [
+      { tipo: 'bar', titulo: 'Barras por día', info: 'Producción diaria de barras de hielo en la semana.',
+        categorias: { range: 'A93:A105' }, valores: { range: 'D93:D105' } },
+      { tipo: 'bar', titulo: 'Consumo por día', info: 'Consumo diario en la semana.',
+        categorias: { range: 'A93:A105' }, valores: { range: 'H93:H105' } },
+    ],
+  },
+
   // Pendientes: se completan cuando lleguen las pestañas correspondientes.
-  { sheet: 'FABRICA DE HIELO', sector: 'Fábrica de Hielo', pendiente: true },
   { sheet: 'LOGISTICA', sector: 'Logística', pendiente: true },
   { sheet: 'SISTEMAS', sector: 'Sistemas', pendiente: true },
 ];
