@@ -58,13 +58,25 @@ async function gget(path, token) {
 const MESES_ABBR = { enero: 'Ene', febrero: 'Feb', marzo: 'Mar', abril: 'Abr', mayo: 'May', junio: 'Jun',
   julio: 'Jul', agosto: 'Ago', septiembre: 'Sep', octubre: 'Oct', noviembre: 'Nov', diciembre: 'Dic' };
 
+const DIAS_ABBR = { lunes: 'Lun', martes: 'Mar', 'miércoles': 'Mié', miercoles: 'Mié',
+  jueves: 'Jue', viernes: 'Vie', 'sábado': 'Sáb', sabado: 'Sáb', domingo: 'Dom' };
+
 function etiqueta(v) {
   const s = String(v ?? '').trim();
   const m = MESES_ABBR[s.toLowerCase()];
   if (m) return m;
+  const d = DIAS_ABBR[s.toLowerCase()];
+  if (d) return d;
   const sem = s.match(/S\s*(\d+)/i); // "Máx S 23" → "S23"
   if (sem) return 'S' + sem[1];
   return s;
+}
+
+// Letra de columna Excel → índice 0-based ("A"→0, "R"→17, "L"→11, "AA"→26).
+function colIdx(s) {
+  let n = 0;
+  for (const ch of String(s).toUpperCase()) n = n * 26 + (ch.charCodeAt(0) - 64);
+  return n - 1;
 }
 
 // Aplana la matriz de un rango a un array 1D (fila o columna).
@@ -99,7 +111,7 @@ async function leerHoja(hoja, base, token) {
       const valor = normalizarValor(await celda(k.valor.cell), k.formato);
       const desglose = [];
       for (const d of k.desglose || []) desglose.push({ nombre: d.nombre, valor: normalizarValor(await celda(d.cell), k.formato) });
-      kpis.push({ id: k.id, titulo: k.titulo, unidad: k.unidad, formato: k.formato, sentido: k.sentido, meta: k.meta, valor, desglose, info: k.info });
+      kpis.push({ id: k.id, titulo: k.titulo, unidad: k.unidad, formato: k.formato, sentido: k.sentido, meta: k.meta, valor, desglose, info: k.info, ...(k.grupo ? { grupo: k.grupo } : {}) });
       continue;
     }
     const periodos = (await rango(k.periodos.range)).map(etiqueta);
@@ -107,23 +119,87 @@ async function leerHoja(hoja, base, token) {
     const serie = periodos
       .map((p, i) => ({ periodo: p, valor: valores[i] }))
       .filter((pt) => pt.periodo !== '' && pt.valor != null);
-    kpis.push({ id: k.id, titulo: k.titulo, unidad: k.unidad, formato: k.formato, sentido: k.sentido, meta: k.meta, serie, info: k.info });
+    kpis.push({ id: k.id, titulo: k.titulo, unidad: k.unidad, formato: k.formato, sentido: k.sentido, meta: k.meta, serie, info: k.info, ...(k.grupo ? { grupo: k.grupo } : {}) });
   }
 
-  // Gráficos derivados de los KPIs ya leídos (por id).
+  // Gráficos: pueden derivar de los KPIs (por id, ej. INSUMOS) o leer sus propios
+  // rangos (ej. FÁBRICA DE HIELO: series diarias de una tabla semanal).
   const porId = new Map(kpis.map((k) => [k.id, k]));
-  const graficos = (hoja.graficos || []).map((g) => {
-    if (g.tipo === 'line') {
-      const fuentes = g.desde.map((id) => porId.get(id)).filter(Boolean);
-      const periodos = fuentes[0]?.serie.map((p) => p.periodo) || [];
-      return { tipo: 'line', titulo: g.titulo, info: g.info, periodos,
-        series: fuentes.map((k) => ({ nombre: k.titulo, datos: k.serie.map((p) => p.valor) })) };
+  async function construirGrafico(g) {
+    if (g.desde) { // derivado de KPIs ya leídos
+      if (g.tipo === 'line') {
+        const fuentes = (Array.isArray(g.desde) ? g.desde : [g.desde]).map((id) => porId.get(id)).filter(Boolean);
+        return { tipo: 'line', titulo: g.titulo, info: g.info,
+          periodos: fuentes[0]?.serie.map((p) => p.periodo) || [],
+          series: fuentes.map((k) => ({ nombre: k.titulo, datos: k.serie.map((p) => p.valor) })) };
+      }
+      const k = porId.get(g.desde);
+      return { tipo: 'bar', titulo: g.titulo, info: g.info, datos: (k?.serie || []).map((p) => ({ nombre: p.periodo, valor: p.valor })) };
     }
-    const k = porId.get(g.desde);
-    return { tipo: 'bar', titulo: g.titulo, info: g.info, datos: (k?.serie || []).map((p) => ({ nombre: p.periodo, valor: p.valor })) };
+    if (g.tipo === 'line') { // rangos propios
+      const labels = (await rango(g.periodos.range)).map(etiqueta);
+      const series = [];
+      for (const s of g.series) series.push({ nombre: s.nombre, vals: (await rango(s.valores.range)).map((v) => normalizarValor(v, 'numero')) });
+      const keep = labels.map((l, i) => (l !== '' ? i : -1)).filter((i) => i >= 0);
+      return { tipo: 'line', titulo: g.titulo, info: g.info,
+        periodos: keep.map((i) => labels[i]),
+        series: series.map((s) => ({ nombre: s.nombre, datos: keep.map((i) => s.vals[i]) })) };
+    }
+    const cats = (await rango(g.categorias.range)).map(etiqueta);
+    const vals = (await rango(g.valores.range)).map((v) => normalizarValor(v, 'numero'));
+    let datos = [];
+    cats.forEach((c, i) => { if (c !== '') datos.push({ nombre: c, valor: vals[i] }); });
+    if (g.top) datos = datos.filter((d) => d.valor != null).sort((a, b) => b.valor - a.valor).slice(0, g.top);
+    return { tipo: 'bar', titulo: g.titulo, info: g.info, datos, ...(g.horizontal ? { horizontal: true } : {}) };
+  }
+  const graficos = [];
+  for (const g of hoja.graficos || []) { const gr = await construirGrafico(g); if (g.grupo) gr.grupo = g.grupo; graficos.push(gr); }
+
+  let periodo;
+  if (hoja.periodoCell) {
+    const raw = String((await celda(hoja.periodoCell)) ?? '').trim();
+    const m = raw.match(/semana\s*(\d+)/i);
+    periodo = m ? `Semana ${m[1]}` : raw || undefined;
+  }
+
+  return { key: hoja.sector.toLowerCase().replace(/\s+/g, '-'), nombre: hoja.sector, estado: 'ok', ...(periodo ? { periodo } : {}), kpis, graficos };
+}
+
+// ---- Lectura de una hoja en modo "última semana" (una sola fila) ----
+// Cada fila es una semana; se toma la de la ÚLTIMA semana (máx. de columnaSemana)
+// y se leen las columnas A→R de esa fila. Es una foto, no una serie.
+async function leerUltimaSemana(hoja, base, token) {
+  async function rango(address) {
+    const r = await gget(`${base}/worksheets('${encodeURIComponent(hoja.sheet)}')/range(address='${address}')?$select=values`, token);
+    return aplanar(r.values);
+  }
+
+  const col = hoja.columnaSemana;
+  const semanas = await rango(`${col}${hoja.filas.desde}:${col}${hoja.filas.hasta}`);
+  let idx = -1, maxSem = -Infinity;
+  semanas.forEach((v, i) => { const n = Number(v); if (v !== '' && v != null && !Number.isNaN(n) && n > maxSem) { maxSem = n; idx = i; } });
+  if (idx < 0) throw new Error(`${hoja.sheet}: no encontré semanas en la columna ${col}.`);
+
+  const fila = hoja.filas.desde + idx;
+  const desde = hoja.columnas?.desde || 'A';
+  const hasta = hoja.columnas?.hasta || 'R';
+  const valores = await rango(`${desde}${fila}:${hasta}${fila}`);
+  const baseIdx = colIdx(desde);
+  const valCol = (letra) => valores[colIdx(letra) - baseIdx]; // relativo a la 1ª columna
+
+  const kpis = hoja.kpis.map((k) => {
+    const base_ = { id: k.id, titulo: k.titulo, unidad: k.unidad || '', formato: k.formato, sentido: k.sentido, meta: k.meta ?? null, info: k.info };
+    base_.valor = normalizarValor(valCol(k.col), k.formato);
+    if (k.desglose) base_.desglose = k.desglose.map((d) => ({ nombre: d.nombre, valor: normalizarValor(valCol(d.col), k.formato) }));
+    return base_;
   });
 
-  return { key: hoja.sector.toLowerCase().replace(/\s+/g, '-'), nombre: hoja.sector, estado: 'ok', kpis, graficos };
+  const graficos = (hoja.graficos || []).map((g) => ({
+    tipo: 'bar', titulo: g.titulo, info: g.info,
+    datos: g.columnas.map((c) => ({ nombre: c.nombre, valor: normalizarValor(valCol(c.col), 'numero') })),
+  }));
+
+  return { key: hoja.sector.toLowerCase().replace(/\s+/g, '-'), nombre: hoja.sector, estado: 'ok', periodo: `Semana ${maxSem}`, kpis, graficos };
 }
 
 async function leerDesdeGraph() {
@@ -138,7 +214,7 @@ async function leerDesdeGraph() {
       sectores.push({ key: hoja.sector.toLowerCase().replace(/\s+/g, '-'), nombre: hoja.sector, estado: 'pendiente', kpis: [], graficos: [] });
       continue;
     }
-    sectores.push(await leerHoja(hoja, base, token));
+    sectores.push(hoja.modo === 'ultimaSemana' ? await leerUltimaSemana(hoja, base, token) : await leerHoja(hoja, base, token));
   }
   sectores.sort((a, b) => ORDEN_SECTORES.indexOf(a.nombre) - ORDEN_SECTORES.indexOf(b.nombre));
   return { origen: 'graph', actualizado: new Date().toISOString(), archivo: item.name, sectores };

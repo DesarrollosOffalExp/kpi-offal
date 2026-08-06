@@ -292,6 +292,77 @@ body {
 }
 .desglose-chip b { color: var(--text); font-weight: 700; }
 
+/* ---------- Meta siempre visible + acciones de la card ---------- */
+.kpi-acciones { display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.kpi-meta-row {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--bg-2); align-self: flex-start;
+}
+.kpi-meta-label { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.kpi-meta-val { font-size: 13px; font-weight: 700; color: var(--primary-bright); font-variant-numeric: tabular-nums; }
+.kpi-var-lbl { font-size: 11px; color: var(--muted); }
+
+.expand-btn {
+  display: grid; place-items: center; width: 26px; height: 26px; padding: 0;
+  border: 1px solid var(--line); border-radius: 8px; background: transparent;
+  color: var(--muted); cursor: pointer; transition: color .15s, border-color .15s, background .15s;
+}
+.expand-btn svg { width: 15px; height: 15px; }
+.expand-btn:hover { color: var(--primary-bright); border-color: var(--primary); background: rgba(99, 102, 241, .1); }
+.panel-head .expand-btn { flex-shrink: 0; }
+
+/* ---------- Modal (ver en grande) ---------- */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 100; background: rgba(4, 8, 18, .72);
+  backdrop-filter: blur(4px); display: grid; place-items: center; padding: clamp(12px, 4vw, 40px);
+  animation: fadeIn .12s ease;
+}
+.modal {
+  width: min(1000px, 100%); max-height: 92vh; overflow: auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .6);
+}
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 18px 22px; border-bottom: 1px solid var(--line); position: sticky; top: 0;
+  background: var(--panel); border-radius: 16px 16px 0 0;
+}
+.modal-head h3 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -.01em; }
+.modal-x {
+  width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line);
+  background: transparent; color: var(--muted); font-size: 15px; cursor: pointer;
+}
+.modal-x:hover { color: var(--text); border-color: var(--primary); background: rgba(99, 102, 241, .1); }
+.modal-body { padding: 22px; }
+
+.detalle-kpi { display: flex; flex-direction: column; gap: 16px; }
+.detalle-cifras { display: flex; flex-wrap: wrap; gap: 24px; }
+.detalle-cifras > div { display: flex; flex-direction: column; gap: 4px; }
+.detalle-lbl { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.detalle-val { font-size: 34px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.detalle-val.meta { color: var(--primary-bright); }
+.detalle-info { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; max-width: 70ch; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .modal-backdrop { animation: none; } }
+
+/* ---------- Período del sector (ej. "Semana 31") ---------- */
+.sector-periodo {
+  display: inline-block; margin-bottom: 16px; font-size: 12px; color: var(--muted);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px;
+}
+.sector-periodo b { color: var(--primary-bright); font-weight: 700; }
+
+/* ---------- Secciones dentro de un sector (grupos) ---------- */
+.grupo { margin-bottom: 8px; }
+.grupo + .grupo { margin-top: 22px; }
+.grupo-titulo {
+  margin: 0 0 14px; font-size: 14px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase;
+  color: var(--muted); display: flex; align-items: center; gap: 12px;
+}
+.grupo-titulo::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
 /* ---------- Sector en preparación ---------- */
 .tab-dot { color: var(--warn, #fbbf24); margin-left: 6px; }
 .vacio-sector {
