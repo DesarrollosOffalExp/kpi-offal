@@ -260,3 +260,43 @@ body {
   .user-meta { display: none; }
   .nav-btn-txt { display: none; }
 }
+
+/* ---------- Ayudas al usuario (ⓘ tooltip) ---------- */
+.kpi-titulo { display: inline-flex; align-items: center; gap: 6px; }
+.panel-head h3 { display: inline-flex; align-items: center; gap: 6px; }
+.info { position: relative; display: inline-flex; align-items: center; }
+.info-btn {
+  width: 15px; height: 15px; border-radius: 50%; border: 1px solid var(--line);
+  color: var(--muted); background: transparent; font-size: 10px; font-weight: 700;
+  font-style: normal; display: grid; place-items: center; cursor: help;
+}
+.info-btn:hover, .info-btn:focus { color: var(--info); border-color: var(--info); outline: none; }
+.info .tip {
+  position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  width: 240px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 12px; font-size: 12px; font-weight: 400; line-height: 1.45; color: var(--text);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .5); z-index: 20; text-transform: none; letter-spacing: normal;
+  visibility: hidden; opacity: 0; transition: opacity .12s; pointer-events: none;
+}
+.info .tip::after {
+  content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-top-color: var(--line);
+}
+.info:hover .tip, .info:focus-within .tip { visibility: visible; opacity: 1; }
+
+/* ---------- Desglose (KPI de valor único) ---------- */
+.desglose { display: flex; gap: 8px; flex-wrap: wrap; }
+.desglose-chip {
+  font-size: 11px; color: var(--muted); background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 999px; padding: 3px 9px;
+}
+.desglose-chip b { color: var(--text); font-weight: 700; }
+
+/* ---------- Sector en preparación ---------- */
+.tab-dot { color: var(--warn, #fbbf24); margin-left: 6px; }
+.vacio-sector {
+  background: var(--panel); border: 1px dashed var(--line); border-radius: var(--radius);
+  padding: 48px 24px; text-align: center; color: var(--muted);
+}
+.vacio-sector b { color: var(--text); font-size: 16px; }
+.vacio-sector p { margin: 8px auto 0; max-width: 52ch; font-size: 14px; }

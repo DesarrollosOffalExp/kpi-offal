@@ -1,4 +1,5 @@
-// Formatea un número según el tipo de KPI.
+import InfoTip from './InfoTip';
+
 function fmt(valor, formato, unidad) {
   if (valor == null || Number.isNaN(valor)) return '—';
   if (formato === 'porcentaje') return `${redondear(valor)}%`;
@@ -6,80 +7,72 @@ function fmt(valor, formato, unidad) {
   const n = valor.toLocaleString('es-AR');
   return unidad ? `${n} ${unidad}` : n;
 }
-function redondear(v) {
-  return Math.round(v * 10) / 10;
-}
+const redondear = (v) => Math.round(v * 10) / 10;
 
-// Sparkline minimalista (SVG propio, sin dependencias) para el mini-histórico.
-function Sparkline({ serie, color }) {
+function Sparkline({ serie }) {
   const vals = serie.map((s) => s.valor).filter((v) => !Number.isNaN(v));
   if (vals.length < 2) return null;
-  const min = Math.min(...vals);
-  const max = Math.max(...vals);
-  const span = max - min || 1;
-  const W = 120;
-  const H = 32;
-  const pts = vals.map((v, i) => {
-    const x = (i / (vals.length - 1)) * W;
-    const y = H - ((v - min) / span) * H;
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  });
+  const min = Math.min(...vals), max = Math.max(...vals), span = (max - min) || 1;
+  const W = 90, H = 28;
+  const pts = vals.map((v, i) => `${(i / (vals.length - 1) * W).toFixed(1)},${(H - (v - min) / span * H).toFixed(1)}`);
   return (
     <svg className="spark" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
-      <polyline points={pts.join(' ')} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+      <polyline points={pts.join(' ')} fill="none" stroke="var(--primary-bright)" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
     </svg>
   );
 }
 
 /**
- * Tarjeta de un KPI: valor actual, variación vs. período anterior (coloreada
- * según el sentido del indicador), meta y mini-histórico.
+ * Tarjeta de un KPI. Soporta dos formas:
+ *  - con serie temporal → valor actual + variación + mini-histórico
+ *  - de valor único (kpi.valor) → valor + desglose (ej. por turno)
+ * Muestra un ícono ⓘ con la ayuda (kpi.info) para el usuario final.
  */
 export default function KpiCard({ kpi }) {
-  const serie = kpi.serie || [];
-  const actual = serie.length ? serie[serie.length - 1].valor : null;
-  const previo = serie.length > 1 ? serie[serie.length - 2].valor : null;
+  const tieneSerie = Array.isArray(kpi.serie) && kpi.serie.length > 0;
+  const actual = tieneSerie ? kpi.serie[kpi.serie.length - 1].valor : kpi.valor ?? null;
 
-  let variacion = null;
-  let bueno = null;
-  if (actual != null && previo != null && previo !== 0) {
-    variacion = ((actual - previo) / Math.abs(previo)) * 100;
-    const subio = variacion >= 0;
-    bueno = kpi.sentido === 'down' ? !subio : subio;
+  let variacion = null, bueno = null;
+  if (tieneSerie && kpi.serie.length > 1) {
+    const previo = kpi.serie[kpi.serie.length - 2].valor;
+    if (previo !== 0) {
+      variacion = ((actual - previo) / Math.abs(previo)) * 100;
+      const subio = variacion >= 0;
+      bueno = kpi.sentido === 'down' ? !subio : subio;
+    }
   }
 
-  const metaOk =
-    kpi.meta != null && actual != null
-      ? kpi.sentido === 'down'
-        ? actual <= kpi.meta
-        : actual >= kpi.meta
-      : null;
-
-  const color = 'var(--primary-bright)';
+  const metaOk = kpi.meta != null && actual != null
+    ? (kpi.sentido === 'down' ? actual <= kpi.meta : actual >= kpi.meta) : null;
 
   return (
     <div className="kpi">
       <div className="kpi-top">
-        <span className="kpi-titulo">{kpi.titulo}</span>
-        {metaOk != null && (
-          <span className={`kpi-meta-badge ${metaOk ? 'ok' : 'off'}`}>
-            {metaOk ? '✓ meta' : 'bajo meta'}
-          </span>
-        )}
+        <span className="kpi-titulo">{kpi.titulo}{kpi.info && <InfoTip text={kpi.info} />}</span>
+        {metaOk != null && <span className={`kpi-meta-badge ${metaOk ? 'ok' : 'off'}`}>{metaOk ? '✓ meta' : 'bajo meta'}</span>}
       </div>
 
       <div className="kpi-valor">{fmt(actual, kpi.formato, kpi.unidad)}</div>
 
       <div className="kpi-foot">
         {variacion != null ? (
-          <span className={`kpi-var ${bueno ? 'up' : 'down'}`}>
-            {variacion >= 0 ? '▲' : '▼'} {Math.abs(redondear(variacion))}%
-          </span>
+          <>
+            <span className={`kpi-var ${bueno ? 'up' : 'down'}`}>{variacion >= 0 ? '▲' : '▼'} {Math.abs(redondear(variacion))}%</span>
+            {kpi.meta != null && <span className="kpi-meta">meta {fmt(kpi.meta, kpi.formato, kpi.unidad)}</span>}
+            <span className="kpi-spark"><Sparkline serie={kpi.serie} /></span>
+          </>
+        ) : kpi.desglose?.length ? (
+          <div className="desglose">
+            {kpi.desglose.map((d) => (
+              <span className="desglose-chip" key={d.nombre}>{d.nombre} <b>{fmt(d.valor, kpi.formato, kpi.unidad)}</b></span>
+            ))}
+          </div>
         ) : (
-          <span className="kpi-var neutro">—</span>
+          <>
+            <span className="kpi-var neutro">—</span>
+            {kpi.meta != null && <span className="kpi-meta">meta {fmt(kpi.meta, kpi.formato, kpi.unidad)}</span>}
+          </>
         )}
-        {kpi.meta != null && <span className="kpi-meta">meta {fmt(kpi.meta, kpi.formato, kpi.unidad)}</span>}
-        <span className="kpi-spark"><Sparkline serie={serie} color={color} /></span>
       </div>
     </div>
   );

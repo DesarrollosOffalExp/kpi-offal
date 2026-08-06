@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { getMe, getKpis } from './api';
 import Navbar from './components/Navbar';
 import KpiCard from './components/KpiCard';
-import TrendChart from './components/charts/TrendChart';
-import DistribChart from './components/charts/DistribChart';
+import SectorCharts from './components/SectorCharts';
 
 function formatearFecha(iso) {
   if (!iso) return '';
@@ -69,34 +68,27 @@ export default function App() {
 
         <nav className="tabs">
           {data?.sectores?.map((s) => (
-            <button
-              key={s.key}
-              className={`tab ${s.key === sector?.key ? 'on' : ''}`}
-              onClick={() => setSectorActivo(s.key)}
-            >
-              {s.nombre}
+            <button key={s.key} className={`tab ${s.key === sector?.key ? 'on' : ''}`} onClick={() => setSectorActivo(s.key)}>
+              {s.nombre}{s.estado === 'pendiente' && <span className="tab-dot">•</span>}
             </button>
           ))}
         </nav>
 
-        {sector && (
+        {sector && (sector.estado === 'pendiente' ? (
+          <div className="vacio-sector">
+            <b>Sector {sector.nombre}</b>
+            <p>Se completa cuando integremos su pestaña del Excel. La estructura del tablero ya está lista para recibir sus indicadores.</p>
+          </div>
+        ) : (
           <section className="sector">
             <div className="kpi-grid">
-              {sector.kpis.map((k) => (
-                <KpiCard key={k.id} kpi={k} />
-              ))}
+              {sector.kpis.map((k) => <KpiCard key={k.id} kpi={k} />)}
             </div>
-
-            <div className="charts-grid">
-              <TrendChart periodos={data.periodos} kpis={sector.kpis} />
-              {sector.distribucion && <DistribChart dist={sector.distribucion} />}
-            </div>
+            <SectorCharts graficos={sector.graficos} />
           </section>
-        )}
+        ))}
 
-        <footer className="pie">
-          <span>Offal · Tablero de indicadores</span>
-        </footer>
+        <footer className="pie"><span>Offal · Tablero de indicadores</span></footer>
       </main>
     </>
   );

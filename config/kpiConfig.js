@@ -1,41 +1,69 @@
 /**
- * Configuración del mapeo del Excel de KPIs → modelo del tablero.
+ * Mapeo del Excel de KPIs → modelo del tablero, POR RANGOS EXPLÍCITOS.
  *
- * ⚠️ Esta configuración asume una CONVENCIÓN de armado del Excel. Cuando tengamos
- * la estructura real del KPI.xlsx, se ajusta acá (idealmente sin tocar código):
+ * El KPI.xlsx no es una tabla simple: cada pestaña tiene varios bloques en
+ * posiciones fijas y se refresca semana a semana sobre las MISMAS celdas. Por eso
+ * el mapeo declara, para cada indicador, el rango exacto (notación A1) de donde se
+ * leen las etiquetas de período y los valores. Cuando cambie el Excel, se ajusta acá.
  *
- * Convención asumida (una hoja por SECTOR):
- *   - Fila 1 = encabezados. Debe incluir, en algún orden, las columnas:
- *       "KPI"     → nombre del indicador
- *       "Unidad"  → % | t | h | $ | días | (vacío)
- *       "Meta"    → objetivo (número, opcional)
- *       "Sentido" → "up" si más alto es mejor, "down" si más bajo es mejor
- *     y luego UNA COLUMNA POR PERÍODO (ej. Ene, Feb, Mar, ...) con los valores.
- *   - Cada fila siguiente = un KPI.
- *   - El nombre de la hoja se usa como nombre del sector (salvo alias abajo).
+ * Estructura de cada KPI:
+ *   id, titulo, unidad, formato ('porcentaje'|'numero'|'moneda'), sentido ('up'|'down'), meta
+ *   info        → texto de ayuda que se muestra al usuario (ícono ⓘ)
+ *   periodicidad→ 'mensual' | 'semanal'
+ *   periodos    → { range } con las etiquetas (ej. meses en K7:K18)
+ *   valores     → { range } con los valores (ej. % en P7:P18)
+ *   -- o, para un indicador de valor único (sin serie): --
+ *   tipo:'valor', valor:{ cell }, desglose:[{ nombre, cell }]
  *
- * Si el Excel real tiene otra forma, se cambia mapearUsedRange() en kpiSource.js.
+ * Nota Graph: al leer con valuesOnly, los porcentajes vienen como fracción (0.9974).
+ * kpiSource los normaliza a 0-100 cuando el formato es 'porcentaje'.
  */
 
-// Orden en el que se muestran los sectores (los que no figuren van al final).
-const ORDEN_SECTORES = ['Producción', 'Calidad', 'Logística', 'Compras', 'RRHH', 'Comercial'];
+const HOJAS = [
+  {
+    sheet: 'INSUMOS',
+    sector: 'Insumos',
+    kpis: [
+      {
+        id: 'recepcion', titulo: 'Eficiencia en Recepción', unidad: '%', formato: 'porcentaje',
+        sentido: 'up', meta: 100, periodicidad: 'mensual',
+        periodos: { range: 'K7:K18' }, valores: { range: 'P7:P18' },
+        info: 'Recepciones de materiales sin error sobre el total del mes. 100% = ninguna recepción con error. (Hoja INSUMOS, columna P — mensual)',
+      },
+      {
+        id: 'entrega', titulo: 'Eficiencia en Entrega', unidad: '%', formato: 'porcentaje',
+        sentido: 'up', meta: 99, periodicidad: 'mensual',
+        periodos: { range: 'R7:R18' }, valores: { range: 'U7:U18' },
+        info: 'Egresos sin diferencias sobre el total de egresos del mes. Más alto es mejor. (Hoja INSUMOS, columna U — mensual)',
+      },
+      {
+        id: 'formadoras', titulo: 'Cumplimiento de Formadoras', unidad: '%', formato: 'porcentaje',
+        sentido: 'up', meta: 100, periodicidad: 'semanal',
+        periodos: { range: 'B105:J105' }, valores: { range: 'B111:J111' },
+        info: 'Máximo de producción de las formadoras respecto del estándar (72 cajas), por semana. 100% = alcanzó el estándar. (Hoja INSUMOS, fila 111 — semanal)',
+      },
+      {
+        id: 'productividad', titulo: 'Productividad de armado de cajas', unidad: '%', formato: 'porcentaje',
+        sentido: 'up', meta: 100, tipo: 'valor',
+        valor: { cell: 'G14' },
+        desglose: [{ nombre: 'Día', cell: 'G22' }, { nombre: 'Noche', cell: 'G30' }],
+        info: 'Índice de armado: cajas por hora reales vs. ideal por formadora, en la semana en curso. Con desglose por turno. (Hoja INSUMOS)',
+      },
+    ],
+    graficos: [
+      { tipo: 'line', titulo: 'Eficiencia mensual', info: 'Recepción vs. entrega de materiales, mes a mes.', desde: ['recepcion', 'entrega'] },
+      { tipo: 'bar', titulo: 'Cumplimiento de formadoras por semana', info: 'KPI semanal de las formadoras vs. estándar (72 cajas).', desde: 'formadoras' },
+    ],
+  },
 
-// Hojas a ignorar (portada, notas, tablas auxiliares, etc.).
-const HOJAS_IGNORADAS = ['Portada', 'Índice', 'Indice', 'Notas', 'Config'];
+  // Pendientes: se completan cuando lleguen las pestañas correspondientes.
+  { sheet: 'COMPRAS', sector: 'Compras', pendiente: true },
+  { sheet: 'FABRICA DE HIELO', sector: 'Fábrica de Hielo', pendiente: true },
+  { sheet: 'LOGISTICA', sector: 'Logística', pendiente: true },
+  { sheet: 'SISTEMAS', sector: 'Sistemas', pendiente: true },
+];
 
-// Alias opcional: nombre de hoja → nombre de sector a mostrar.
-const ALIAS_SECTOR = {
-  Prod: 'Producción',
-  Cal: 'Calidad',
-  Log: 'Logística',
-};
+// Orden de los sectores en el tablero.
+const ORDEN_SECTORES = HOJAS.map((h) => h.sector);
 
-// Nombres de columnas aceptados para cada campo (case-insensitive).
-const COLUMNAS = {
-  kpi: ['kpi', 'indicador', 'nombre'],
-  unidad: ['unidad', 'um', 'u.m.'],
-  meta: ['meta', 'objetivo', 'target'],
-  sentido: ['sentido', 'direccion', 'dirección'],
-};
-
-module.exports = { ORDEN_SECTORES, HOJAS_IGNORADAS, ALIAS_SECTOR, COLUMNAS };
+module.exports = { HOJAS, ORDEN_SECTORES };
