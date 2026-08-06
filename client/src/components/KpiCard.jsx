@@ -1,4 +1,5 @@
 import InfoTip from './InfoTip';
+import ExpandButton from './ExpandButton';
 
 function fmt(valor, formato, unidad) {
   if (valor == null || Number.isNaN(valor)) return '—';
@@ -23,12 +24,11 @@ function Sparkline({ serie }) {
 }
 
 /**
- * Tarjeta de un KPI. Soporta dos formas:
- *  - con serie temporal → valor actual + variación + mini-histórico
- *  - de valor único (kpi.valor) → valor + desglose (ej. por turno)
- * Muestra un ícono ⓘ con la ayuda (kpi.info) para el usuario final.
+ * Tarjeta de un KPI. Muestra siempre la META (objetivo) del indicador, un ícono ⓘ
+ * con la ayuda, y un botón para ampliarlo a pantalla grande. Soporta serie temporal
+ * (valor + variación + histórico) o valor único con desglose (ej. por turno).
  */
-export default function KpiCard({ kpi }) {
+export default function KpiCard({ kpi, onExpand }) {
   const tieneSerie = Array.isArray(kpi.serie) && kpi.serie.length > 0;
   const actual = tieneSerie ? kpi.serie[kpi.serie.length - 1].valor : kpi.valor ?? null;
 
@@ -49,16 +49,26 @@ export default function KpiCard({ kpi }) {
     <div className="kpi">
       <div className="kpi-top">
         <span className="kpi-titulo">{kpi.titulo}{kpi.info && <InfoTip text={kpi.info} />}</span>
-        {metaOk != null && <span className={`kpi-meta-badge ${metaOk ? 'ok' : 'off'}`}>{metaOk ? '✓ meta' : 'bajo meta'}</span>}
+        <div className="kpi-acciones">
+          {metaOk != null && <span className={`kpi-meta-badge ${metaOk ? 'ok' : 'off'}`}>{metaOk ? '✓ meta' : 'bajo meta'}</span>}
+          <ExpandButton onClick={() => onExpand({ kind: 'kpi', kpi })} />
+        </div>
       </div>
 
       <div className="kpi-valor">{fmt(actual, kpi.formato, kpi.unidad)}</div>
+
+      {kpi.meta != null && (
+        <div className="kpi-meta-row">
+          <span className="kpi-meta-label">Meta</span>
+          <span className="kpi-meta-val">{fmt(kpi.meta, kpi.formato, kpi.unidad)}</span>
+        </div>
+      )}
 
       <div className="kpi-foot">
         {variacion != null ? (
           <>
             <span className={`kpi-var ${bueno ? 'up' : 'down'}`}>{variacion >= 0 ? '▲' : '▼'} {Math.abs(redondear(variacion))}%</span>
-            {kpi.meta != null && <span className="kpi-meta">meta {fmt(kpi.meta, kpi.formato, kpi.unidad)}</span>}
+            <span className="kpi-var-lbl">vs. período anterior</span>
             <span className="kpi-spark"><Sparkline serie={kpi.serie} /></span>
           </>
         ) : kpi.desglose?.length ? (
@@ -68,10 +78,7 @@ export default function KpiCard({ kpi }) {
             ))}
           </div>
         ) : (
-          <>
-            <span className="kpi-var neutro">—</span>
-            {kpi.meta != null && <span className="kpi-meta">meta {fmt(kpi.meta, kpi.formato, kpi.unidad)}</span>}
-          </>
+          <span className="kpi-var neutro">Sin histórico</span>
         )}
       </div>
     </div>

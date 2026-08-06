@@ -23,6 +23,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    # El publish profile se expone como env para poder condicionar el deploy:
+    # mientras no exista el secret (App Service todavía no creado), el build corre
+    # igual y el deploy se SALTEA — así el workflow queda en verde en vez de fallar.
+    env:
+      PUBLISH_PROFILE: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_KPIOFFAL }}
 
     steps:
       - uses: actions/checkout@v4
@@ -42,10 +47,15 @@ jobs:
           npm run build
 
       - name: 'Deploy to Azure Web App'
+        if: ${{ env.PUBLISH_PROFILE != '' }}
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'kpi-offal'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_KPIOFFAL }}
+          publish-profile: ${{ env.PUBLISH_PROFILE }}
+
+      - name: Deploy omitido (sin publish profile)
+        if: ${{ env.PUBLISH_PROFILE == '' }}
+        run: echo "::notice::Deploy omitido — falta el secret AZUREAPPSERVICE_PUBLISHPROFILE_KPIOFFAL (App Service aún no creado). El build pasó OK."

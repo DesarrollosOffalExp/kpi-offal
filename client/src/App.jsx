@@ -3,11 +3,48 @@ import { getMe, getKpis } from './api';
 import Navbar from './components/Navbar';
 import KpiCard from './components/KpiCard';
 import SectorCharts from './components/SectorCharts';
+import Chart from './components/Chart';
+import Modal from './components/Modal';
 
 function formatearFecha(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   return d.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+function fmt(v, formato, unidad) {
+  if (v == null || Number.isNaN(v)) return '—';
+  if (formato === 'porcentaje') return `${Math.round(v * 10) / 10}%`;
+  if (formato === 'moneda') return `$ ${v.toLocaleString('es-AR')}`;
+  const n = v.toLocaleString('es-AR');
+  return unidad ? `${n} ${unidad}` : n;
+}
+
+// Contenido ampliado (dentro del modal) para un KPI o un gráfico.
+function DetalleExpandido({ item }) {
+  if (item.kind === 'grafico') return <Chart g={item.grafico} height={460} />;
+
+  const kpi = item.kpi;
+  const tieneSerie = Array.isArray(kpi.serie) && kpi.serie.length > 0;
+  const actual = tieneSerie ? kpi.serie[kpi.serie.length - 1].valor : kpi.valor ?? null;
+  return (
+    <div className="detalle-kpi">
+      <div className="detalle-cifras">
+        <div><span className="detalle-lbl">Actual</span><span className="detalle-val">{fmt(actual, kpi.formato, kpi.unidad)}</span></div>
+        {kpi.meta != null && <div><span className="detalle-lbl">Meta</span><span className="detalle-val meta">{fmt(kpi.meta, kpi.formato, kpi.unidad)}</span></div>}
+        {kpi.desglose?.map((d) => (
+          <div key={d.nombre}><span className="detalle-lbl">{d.nombre}</span><span className="detalle-val">{fmt(d.valor, kpi.formato, kpi.unidad)}</span></div>
+        ))}
+      </div>
+      {kpi.info && <p className="detalle-info">{kpi.info}</p>}
+      {tieneSerie && (
+        <Chart height={420} g={{
+          tipo: 'line',
+          periodos: kpi.serie.map((p) => p.periodo),
+          series: [{ nombre: kpi.titulo, datos: kpi.serie.map((p) => p.valor) }],
+        }} />
+      )}
+    </div>
+  );
 }
 
 export default function App() {
@@ -17,6 +54,7 @@ export default function App() {
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
   const [error, setError] = useState(null);
+  const [expandido, setExpandido] = useState(null);
 
   async function cargar({ forzar = false } = {}) {
     try {
@@ -82,14 +120,20 @@ export default function App() {
         ) : (
           <section className="sector">
             <div className="kpi-grid">
-              {sector.kpis.map((k) => <KpiCard key={k.id} kpi={k} />)}
+              {sector.kpis.map((k) => <KpiCard key={k.id} kpi={k} onExpand={setExpandido} />)}
             </div>
-            <SectorCharts graficos={sector.graficos} />
+            <SectorCharts graficos={sector.graficos} onExpand={setExpandido} />
           </section>
         ))}
 
         <footer className="pie"><span>Offal · Tablero de indicadores</span></footer>
       </main>
+
+      {expandido && (
+        <Modal titulo={expandido.kind === 'kpi' ? expandido.kpi.titulo : expandido.grafico.titulo} onClose={() => setExpandido(null)}>
+          <DetalleExpandido item={expandido} />
+        </Modal>
+      )}
     </>
   );
 }
