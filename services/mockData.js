@@ -106,8 +106,31 @@ const HIELO = {
   ],
 };
 
+// SISTEMAS: foto de la última semana (misma mecánica que Compras). Semana 31.
+const SISTEMAS = {
+  key: 'sistemas', nombre: 'Sistemas', estado: 'ok', periodo: 'Semana 31',
+  kpis: [
+    { id: 'tickets_semana', titulo: 'Tickets de la Semana', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 77,
+      info: 'Tickets ingresados en la semana. (SISTEMAS, columna N)' },
+    { id: 'tratados', titulo: 'Tickets Tratados', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 60,
+      info: 'Tickets resueltos o gestionados en la semana. (SISTEMAS, columna O)' },
+    { id: 'pendientes', titulo: 'Tickets Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
+      info: 'Tickets que quedaron pendientes en la semana. (SISTEMAS, columna R)' },
+    { id: 'abiertos', titulo: 'Total de Abiertos', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 60,
+      info: 'Total de tickets abiertos. (SISTEMAS, columna S)' },
+    { id: 'vencidas', titulo: 'Total Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
+      info: 'Tickets vencidos (pasaron su plazo de atención). (SISTEMAS, columna U)' },
+    { id: 'por_vencer', titulo: 'En término por vencer', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 21,
+      info: 'Tickets en término, próximos a vencer. (SISTEMAS, columna X)' },
+  ],
+  graficos: [
+    { tipo: 'bar', titulo: 'Gestión de la semana', info: 'Flujo de tickets de la última semana: ingresados, tratados y pendientes.',
+      datos: [{ nombre: 'Ingresados', valor: 77 }, { nombre: 'Tratados', valor: 60 }, { nombre: 'Pendientes', valor: 17 }] },
+  ],
+};
+
 // Sectores todavía sin integrar (se muestran como "en preparación").
-const PENDIENTES = ['Logística', 'Sistemas'].map((nombre) => ({
+const PENDIENTES = ['Logística'].map((nombre) => ({
   key: nombre.toLowerCase().replace(/\s+/g, '-'), nombre, estado: 'pendiente', kpis: [], graficos: [],
 }));
 
@@ -115,7 +138,7 @@ function construirMock() {
   return {
     origen: 'mock',
     actualizado: new Date().toISOString(),
-    sectores: [INSUMOS, COMPRAS, HIELO, ...PENDIENTES],
+    sectores: [INSUMOS, COMPRAS, HIELO, ...PENDIENTES, SISTEMAS],
   };
 }
 

@@ -72,6 +72,13 @@ function etiqueta(v) {
   return s;
 }
 
+// Letra de columna Excel → índice 0-based ("A"→0, "R"→17, "L"→11, "AA"→26).
+function colIdx(s) {
+  let n = 0;
+  for (const ch of String(s).toUpperCase()) n = n * 26 + (ch.charCodeAt(0) - 64);
+  return n - 1;
+}
+
 // Aplana la matriz de un rango a un array 1D (fila o columna).
 function aplanar(values) {
   if (!Array.isArray(values)) return [];
@@ -174,8 +181,11 @@ async function leerUltimaSemana(hoja, base, token) {
   if (idx < 0) throw new Error(`${hoja.sheet}: no encontré semanas en la columna ${col}.`);
 
   const fila = hoja.filas.desde + idx;
-  const valores = await rango(`A${fila}:R${fila}`);
-  const valCol = (letra) => valores[letra.charCodeAt(0) - 65]; // A=0 … R=17
+  const desde = hoja.columnas?.desde || 'A';
+  const hasta = hoja.columnas?.hasta || 'R';
+  const valores = await rango(`${desde}${fila}:${hasta}${fila}`);
+  const baseIdx = colIdx(desde);
+  const valCol = (letra) => valores[colIdx(letra) - baseIdx]; // relativo a la 1ª columna
 
   const kpis = hoja.kpis.map((k) => {
     const base_ = { id: k.id, titulo: k.titulo, unidad: k.unidad || '', formato: k.formato, sentido: k.sentido, meta: k.meta ?? null, info: k.info };

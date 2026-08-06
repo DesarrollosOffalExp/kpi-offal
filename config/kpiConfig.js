@@ -128,9 +128,37 @@ const HOJAS = [
     ],
   },
 
-  // Pendientes: se completan cuando lleguen las pestañas correspondientes.
+  // Pendiente: se completa cuando llegue la pestaña de Logística.
   { sheet: 'LOGISTICA', sector: 'Logística', pendiente: true },
-  { sheet: 'SISTEMAS', sector: 'Sistemas', pendiente: true },
+
+  {
+    // SISTEMAS: misma mecánica que COMPRAS (una fila = la última semana), pero en
+    // columnas L→AA y con el número de semana en la columna T. Son tickets.
+    sheet: 'SISTEMAS',
+    sector: 'Sistemas',
+    modo: 'ultimaSemana',
+    columnaSemana: 'T',
+    filas: { desde: 8, hasta: 60 },
+    columnas: { desde: 'L', hasta: 'AA' },
+    kpis: [
+      { id: 'tickets_semana', titulo: 'Tickets de la Semana', col: 'N', formato: 'numero', sentido: 'up',
+        info: 'Tickets ingresados en la semana. (SISTEMAS, columna N)' },
+      { id: 'tratados', titulo: 'Tickets Tratados', col: 'O', formato: 'numero', sentido: 'up',
+        info: 'Tickets resueltos o gestionados en la semana. (SISTEMAS, columna O)' },
+      { id: 'pendientes', titulo: 'Tickets Pendientes', col: 'R', formato: 'numero', sentido: 'down',
+        info: 'Tickets que quedaron pendientes en la semana. (SISTEMAS, columna R)' },
+      { id: 'abiertos', titulo: 'Total de Abiertos', col: 'S', formato: 'numero', sentido: 'down',
+        info: 'Total de tickets abiertos. (SISTEMAS, columna S)' },
+      { id: 'vencidas', titulo: 'Total Vencidas', col: 'U', formato: 'numero', sentido: 'down',
+        info: 'Tickets vencidos (pasaron su plazo de atención). (SISTEMAS, columna U)' },
+      { id: 'por_vencer', titulo: 'En término por vencer', col: 'X', formato: 'numero', sentido: 'down',
+        info: 'Tickets en término, próximos a vencer. (SISTEMAS, columna X)' },
+    ],
+    graficos: [
+      { tipo: 'bar', titulo: 'Gestión de la semana', info: 'Flujo de tickets de la última semana: ingresados, tratados y pendientes.',
+        columnas: [{ nombre: 'Ingresados', col: 'N' }, { nombre: 'Tratados', col: 'O' }, { nombre: 'Pendientes', col: 'R' }] },
+    ],
+  },
 ];
 
 // Orden de los sectores en el tablero.
