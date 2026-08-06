@@ -31,6 +31,21 @@ export default function Chart({ g, height = 260 }) {
       </ResponsiveContainer>
     );
   }
+  if (g.horizontal) {
+    return (
+      <ResponsiveContainer width="100%" height={height}>
+        <BarChart data={g.datos} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 4 }}>
+          <CartesianGrid stroke="#233149" strokeDasharray="3 3" horizontal={false} />
+          <XAxis type="number" {...ejeStyle} />
+          <YAxis type="category" dataKey="nombre" width={100} {...ejeStyle} />
+          <Tooltip {...tooltipStyle} />
+          <Bar dataKey="valor" radius={[0, 5, 5, 0]}>
+            {g.datos.map((_, i) => <Cell key={i} fill={CHART_COLORS[0]} />)}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    );
+  }
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={g.datos} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>

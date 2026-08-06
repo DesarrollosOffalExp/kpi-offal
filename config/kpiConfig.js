@@ -106,12 +106,18 @@ const HOJAS = [
         info: 'Consumo total de la semana. (FABRICA DE HIELO, resumen col. H)' },
       { id: 'horas', titulo: 'Horas trabajadas', unidad: '', formato: 'numero', sentido: 'up', tipo: 'valor', valor: { cell: 'F106' },
         info: 'Horas de máquina trabajadas en la semana (total). (resumen col. F)' },
+      // Stock de pallets (segundo bloque de la hoja; corresponde a la semana anterior).
+      { id: 'pallets_nd', titulo: 'Pallets no devueltos', unidad: '', formato: 'numero', sentido: 'down', tipo: 'valor', valor: { cell: 'E84' },
+        desglose: [{ nombre: 'Enviados sem', cell: 'C84' }, { nombre: 'Recibidos sem', cell: 'D84' }],
+        info: 'Pallets entregados a frigoríficos que aún no fueron devueltos (deuda de pallets). Corresponde a la semana anterior (sem. 30). (FABRICA DE HIELO, STOCK FINAL col. E; Enviados col. C, Recibidos col. D)' },
     ],
     graficos: [
       { tipo: 'bar', titulo: 'Barras por día', info: 'Producción diaria de barras de hielo en la semana.',
         categorias: { range: 'A93:A105' }, valores: { range: 'D93:D105' } },
       { tipo: 'bar', titulo: 'Consumo por día', info: 'Consumo diario en la semana.',
         categorias: { range: 'A93:A105' }, valores: { range: 'H93:H105' } },
+      { tipo: 'bar', horizontal: true, titulo: 'Pallets no devueltos por frigorífico', info: 'Frigoríficos con más pallets sin devolver (top 10, semana anterior).',
+        categorias: { range: 'A56:A83' }, valores: { range: 'E56:E83' }, top: 10 },
     ],
   },
 

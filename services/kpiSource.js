@@ -140,9 +140,10 @@ async function leerHoja(hoja, base, token) {
     }
     const cats = (await rango(g.categorias.range)).map(etiqueta);
     const vals = (await rango(g.valores.range)).map((v) => normalizarValor(v, 'numero'));
-    const datos = [];
+    let datos = [];
     cats.forEach((c, i) => { if (c !== '') datos.push({ nombre: c, valor: vals[i] }); });
-    return { tipo: 'bar', titulo: g.titulo, info: g.info, datos };
+    if (g.top) datos = datos.filter((d) => d.valor != null).sort((a, b) => b.valor - a.valor).slice(0, g.top);
+    return { tipo: 'bar', titulo: g.titulo, info: g.info, datos, ...(g.horizontal ? { horizontal: true } : {}) };
   }
   const graficos = [];
   for (const g of hoja.graficos || []) graficos.push(await construirGrafico(g));
