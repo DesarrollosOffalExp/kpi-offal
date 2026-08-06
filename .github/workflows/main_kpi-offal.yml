@@ -1,12 +1,12 @@
-# Build y deploy del Tablero KPI al App Service "kpi-offal" (Node).
+# Build y deploy del Tablero KPI al App Service "gerencia" (Node).
 # Un solo job (sin artifacts), mismo criterio que las otras apps para no
 # consumir almacenamiento de Actions.
 #
-# ⚠️ Antes de que funcione: crear el App Service "kpi-offal" (Node 20, Linux),
-# prender Basic authentication y cargar el secret con el publish profile en
-# GitHub → Settings → Secrets → AZUREAPPSERVICE_PUBLISHPROFILE_KPIOFFAL.
+# ⚠️ Requiere: App Service "gerencia" (Node 20, Linux) con Basic authentication
+# prendido, y el secret con el publish profile en
+# GitHub → Settings → Secrets → AZUREAPPSERVICE_PUBLISHPROFILE_GERENCIA.
 
-name: Build and deploy Node.js app to Azure Web App - kpi-offal
+name: Build and deploy Node.js app to Azure Web App - gerencia
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
     # mientras no exista el secret (App Service todavía no creado), el build corre
     # igual y el deploy se SALTEA — así el workflow queda en verde en vez de fallar.
     env:
-      PUBLISH_PROFILE: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_KPIOFFAL }}
+      PUBLISH_PROFILE: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_GERENCIA }}
 
     steps:
       - uses: actions/checkout@v4
@@ -51,11 +51,11 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'kpi-offal'
+          app-name: 'gerencia'
           slot-name: 'Production'
           package: .
           publish-profile: ${{ env.PUBLISH_PROFILE }}
 
       - name: Deploy omitido (sin publish profile)
         if: ${{ env.PUBLISH_PROFILE == '' }}
-        run: echo "::notice::Deploy omitido — falta el secret AZUREAPPSERVICE_PUBLISHPROFILE_KPIOFFAL (App Service aún no creado). El build pasó OK."
+        run: echo "::notice::Deploy omitido — falta el secret AZUREAPPSERVICE_PUBLISHPROFILE_GERENCIA. El build pasó OK."
