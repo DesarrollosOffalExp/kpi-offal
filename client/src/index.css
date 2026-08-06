@@ -354,6 +354,15 @@ body {
 }
 .sector-periodo b { color: var(--primary-bright); font-weight: 700; }
 
+/* ---------- Secciones dentro de un sector (grupos) ---------- */
+.grupo { margin-bottom: 8px; }
+.grupo + .grupo { margin-top: 22px; }
+.grupo-titulo {
+  margin: 0 0 14px; font-size: 14px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase;
+  color: var(--muted); display: flex; align-items: center; gap: 12px;
+}
+.grupo-titulo::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
 /* ---------- Sector en preparación ---------- */
 .tab-dot { color: var(--warn, #fbbf24); margin-left: 6px; }
 .vacio-sector {

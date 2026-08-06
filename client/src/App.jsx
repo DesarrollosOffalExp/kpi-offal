@@ -82,6 +82,17 @@ export default function App() {
 
   const sector = data?.sectores?.find((s) => s.key === sectorActivo) || data?.sectores?.[0];
 
+  // Orden de secciones dentro del sector (por `grupo`; null = sin sección).
+  const grupos = [];
+  if (sector && sector.estado !== 'pendiente') {
+    const vistos = new Set();
+    [...(sector.kpis || []), ...(sector.graficos || [])].forEach((it) => {
+      const g = it.grupo || null;
+      const key = g ?? '__';
+      if (!vistos.has(key)) { vistos.add(key); grupos.push(g); }
+    });
+  }
+
   return (
     <>
       <Navbar usuario={usuario} />
@@ -120,10 +131,19 @@ export default function App() {
         ) : (
           <section className="sector">
             {sector.periodo && <div className="sector-periodo">Datos de la <b>{sector.periodo}</b></div>}
-            <div className="kpi-grid">
-              {sector.kpis.map((k) => <KpiCard key={k.id} kpi={k} onExpand={setExpandido} />)}
-            </div>
-            <SectorCharts graficos={sector.graficos} onExpand={setExpandido} />
+            {grupos.map((g, gi) => {
+              const kpisG = sector.kpis.filter((k) => (k.grupo || null) === g);
+              const grafG = (sector.graficos || []).filter((x) => (x.grupo || null) === g);
+              return (
+                <div className="grupo" key={gi}>
+                  {g && <h2 className="grupo-titulo">{g}</h2>}
+                  {kpisG.length > 0 && (
+                    <div className="kpi-grid">{kpisG.map((k) => <KpiCard key={k.id} kpi={k} onExpand={setExpandido} />)}</div>
+                  )}
+                  <SectorCharts graficos={grafG} onExpand={setExpandido} />
+                </div>
+              );
+            })}
           </section>
         ))}
 

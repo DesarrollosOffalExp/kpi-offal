@@ -95,28 +95,35 @@ const HOJAS = [
     sheet: 'FABRICA DE HIELO',
     sector: 'Fábrica de Hielo',
     periodoCell: 'A89',                 // "SEMANA 31"
+    // La hoja tiene 3 bloques → se agrupan con `grupo` para mostrarlos separados.
     kpis: [
-      { id: 'barras', titulo: 'Barras producidas', unidad: '', formato: 'numero', sentido: 'up', tipo: 'valor', valor: { cell: 'D106' },
+      // --- Productividad (RESUMEN, fila 106) ---
+      { id: 'barras', grupo: 'Productividad', titulo: 'Barras producidas', unidad: '', formato: 'numero', sentido: 'up', tipo: 'valor', valor: { cell: 'D106' },
         info: 'Barras de hielo producidas en la semana (total). (FABRICA DE HIELO, resumen col. D)' },
-      { id: 'prod_dia', titulo: 'Productividad Hombre/Barra Día', unidad: '', formato: 'numero', sentido: 'up', tipo: 'valor', valor: { cell: 'E106' },
+      { id: 'prod_dia', grupo: 'Productividad', titulo: 'Productividad Hombre/Barra Día', unidad: '', formato: 'numero', sentido: 'up', tipo: 'valor', valor: { cell: 'E106' },
         info: 'Productividad: barras por persona en la semana (barras / personal). (resumen col. E)' },
-      { id: 'prod_hs', titulo: 'Productividad Hom/Barra Hs', unidad: '', formato: 'numero', sentido: 'up', tipo: 'valor', valor: { cell: 'G106' },
+      { id: 'prod_hs', grupo: 'Productividad', titulo: 'Productividad Hom/Barra Hs', unidad: '', formato: 'numero', sentido: 'up', tipo: 'valor', valor: { cell: 'G106' },
         info: 'Productividad: barras por hora de máquina (barras / horas). (resumen col. G)' },
-      { id: 'consumo', titulo: 'Consumo', unidad: '', formato: 'numero', sentido: 'down', tipo: 'valor', valor: { cell: 'H106' },
+      { id: 'consumo', grupo: 'Productividad', titulo: 'Consumo', unidad: '', formato: 'numero', sentido: 'down', tipo: 'valor', valor: { cell: 'H106' },
         info: 'Consumo total de la semana. (FABRICA DE HIELO, resumen col. H)' },
-      { id: 'horas', titulo: 'Horas trabajadas', unidad: '', formato: 'numero', sentido: 'up', tipo: 'valor', valor: { cell: 'F106' },
+      { id: 'horas', grupo: 'Productividad', titulo: 'Horas trabajadas', unidad: '', formato: 'numero', sentido: 'up', tipo: 'valor', valor: { cell: 'F106' },
         info: 'Horas de máquina trabajadas en la semana (total). (resumen col. F)' },
-      // Stock de pallets (segundo bloque de la hoja; corresponde a la semana anterior).
-      { id: 'pallets_nd', titulo: 'Pallets no devueltos', unidad: '', formato: 'numero', sentido: 'down', tipo: 'valor', valor: { cell: 'E84' },
+      // --- Stock de pallets (STOCK FINAL, fila 84; semana anterior) ---
+      { id: 'pallets_nd', grupo: 'Stock de pallets', titulo: 'Pallets no devueltos', unidad: '', formato: 'numero', sentido: 'down', tipo: 'valor', valor: { cell: 'E84' },
         desglose: [{ nombre: 'Enviados sem', cell: 'C84' }, { nombre: 'Recibidos sem', cell: 'D84' }],
         info: 'Pallets entregados a frigoríficos que aún no fueron devueltos (deuda de pallets). Corresponde a la semana anterior (sem. 30). (FABRICA DE HIELO, STOCK FINAL col. E; Enviados col. C, Recibidos col. D)' },
+      // --- Monitoreo de barras (TOTALES) ---
+      // ⚠️ FILAS A CONFIRMAR: falta el screenshot con números de fila de este bloque
+      // para fijar los rangos exactos (fila TOTALES y filas de proveedores). Columnas
+      // mapeadas: A=Proveedor, B=kilos, H=Barras Enviadas, K=Barras Usadas, L=Prom.Estimado,
+      // M=Prom.Enviados. Hoy vive en mock; se cablea al confirmar filas.
     ],
     graficos: [
-      { tipo: 'bar', titulo: 'Barras por día', info: 'Producción diaria de barras de hielo en la semana.',
+      { tipo: 'bar', grupo: 'Productividad', titulo: 'Barras por día', info: 'Producción diaria de barras de hielo en la semana.',
         categorias: { range: 'A93:A105' }, valores: { range: 'D93:D105' } },
-      { tipo: 'bar', titulo: 'Consumo por día', info: 'Consumo diario en la semana.',
+      { tipo: 'bar', grupo: 'Productividad', titulo: 'Consumo por día', info: 'Consumo diario en la semana.',
         categorias: { range: 'A93:A105' }, valores: { range: 'H93:H105' } },
-      { tipo: 'bar', horizontal: true, titulo: 'Pallets no devueltos por frigorífico', info: 'Frigoríficos con más pallets sin devolver (top 10, semana anterior).',
+      { tipo: 'bar', grupo: 'Stock de pallets', horizontal: true, titulo: 'Pallets no devueltos por frigorífico', info: 'Frigoríficos con más pallets sin devolver (top 10, semana anterior).',
         categorias: { range: 'A56:A83' }, valores: { range: 'E56:E83' }, top: 10 },
     ],
   },

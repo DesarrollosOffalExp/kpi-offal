@@ -104,7 +104,7 @@ async function leerHoja(hoja, base, token) {
       const valor = normalizarValor(await celda(k.valor.cell), k.formato);
       const desglose = [];
       for (const d of k.desglose || []) desglose.push({ nombre: d.nombre, valor: normalizarValor(await celda(d.cell), k.formato) });
-      kpis.push({ id: k.id, titulo: k.titulo, unidad: k.unidad, formato: k.formato, sentido: k.sentido, meta: k.meta, valor, desglose, info: k.info });
+      kpis.push({ id: k.id, titulo: k.titulo, unidad: k.unidad, formato: k.formato, sentido: k.sentido, meta: k.meta, valor, desglose, info: k.info, ...(k.grupo ? { grupo: k.grupo } : {}) });
       continue;
     }
     const periodos = (await rango(k.periodos.range)).map(etiqueta);
@@ -112,7 +112,7 @@ async function leerHoja(hoja, base, token) {
     const serie = periodos
       .map((p, i) => ({ periodo: p, valor: valores[i] }))
       .filter((pt) => pt.periodo !== '' && pt.valor != null);
-    kpis.push({ id: k.id, titulo: k.titulo, unidad: k.unidad, formato: k.formato, sentido: k.sentido, meta: k.meta, serie, info: k.info });
+    kpis.push({ id: k.id, titulo: k.titulo, unidad: k.unidad, formato: k.formato, sentido: k.sentido, meta: k.meta, serie, info: k.info, ...(k.grupo ? { grupo: k.grupo } : {}) });
   }
 
   // Gráficos: pueden derivar de los KPIs (por id, ej. INSUMOS) o leer sus propios
@@ -146,7 +146,7 @@ async function leerHoja(hoja, base, token) {
     return { tipo: 'bar', titulo: g.titulo, info: g.info, datos, ...(g.horizontal ? { horizontal: true } : {}) };
   }
   const graficos = [];
-  for (const g of hoja.graficos || []) graficos.push(await construirGrafico(g));
+  for (const g of hoja.graficos || []) { const gr = await construirGrafico(g); if (g.grupo) gr.grupo = g.grupo; graficos.push(gr); }
 
   let periodo;
   if (hoja.periodoCell) {
