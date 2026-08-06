@@ -67,8 +67,8 @@ ajusta ahí** (idealmente sin tocar código).
 
 Mismo patrón que el resto del ecosistema:
 
-1. Crear **App Service `kpi-offal`** (Node 20, Linux). Prender **Basic authentication**.
-2. Cargar el secret `AZUREAPPSERVICE_PUBLISHPROFILE_KPIOFFAL` (publish profile) en GitHub.
+1. App Service **`gerencia`** (Node 20, Linux). Prender **Basic authentication**.
+2. Cargar el secret `AZUREAPPSERVICE_PUBLISHPROFILE_GERENCIA` (publish profile) en GitHub.
 3. Habilitar **Easy Auth** contra el mismo registro de Entra (SSO con las otras apps).
 4. Cargar la app **`kpi`** en el padrón (`acceso.Permisos`) y poner
    `KPI_REQUIRE_PERMISSION=true` para exigir permiso.
@@ -79,7 +79,7 @@ Push a `main` dispara el workflow y deploya.
 ## Pendientes de infraestructura (lo resuelve infra)
 
 - [ ] App registration + permiso Graph + consentimiento + client secret.
-- [ ] Crear el App Service `kpi-offal` + Basic auth + publish profile.
+- [x] App Service `gerencia` creado (Node 20, Linux). Falta Basic auth + publish profile (secret).
 - [ ] Easy Auth (SSO Entra).
 - [ ] Alta de la app `kpi` en `acceso.Permisos` + permisos por usuario.
 - [ ] Confirmar la estructura real del `KPI.xlsx` para el mapeo.
