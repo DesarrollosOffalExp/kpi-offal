@@ -55,6 +55,7 @@ export default function App() {
   const [refrescando, setRefrescando] = useState(false);
   const [error, setError] = useState(null);
   const [expandido, setExpandido] = useState(null);
+  const [subActivo, setSubActivo] = useState(null);
 
   async function cargar({ forzar = false } = {}) {
     try {
@@ -92,6 +93,10 @@ export default function App() {
       if (!vistos.has(key)) { vistos.add(key); grupos.push(g); }
     });
   }
+  // Con más de una sección, se navegan como sub-pestañas (una a la vez) en vez de
+  // apilarse. `subActual` cae a la primera si la activa no pertenece a este sector.
+  const conSub = grupos.length > 1;
+  const subActual = grupos.includes(subActivo) ? subActivo : grupos[0];
 
   return (
     <>
@@ -131,12 +136,19 @@ export default function App() {
         ) : (
           <section className="sector">
             {sector.periodo && <div className="sector-periodo">Datos de la <b>{sector.periodo}</b></div>}
-            {grupos.map((g, gi) => {
+            {conSub && (
+              <nav className="subtabs">
+                {grupos.map((g) => (
+                  <button key={g} className={`subtab ${g === subActual ? 'on' : ''}`} onClick={() => setSubActivo(g)}>{g}</button>
+                ))}
+              </nav>
+            )}
+            {(conSub ? [subActual] : grupos).map((g) => {
               const kpisG = sector.kpis.filter((k) => (k.grupo || null) === g);
               const grafG = (sector.graficos || []).filter((x) => (x.grupo || null) === g);
               return (
-                <div className="grupo" key={gi}>
-                  {g && <h2 className="grupo-titulo">{g}</h2>}
+                <div className="grupo" key={g ?? '__'}>
+                  {!conSub && g && <h2 className="grupo-titulo">{g}</h2>}
                   {kpisG.length > 0 && (
                     <div className="kpi-grid">{kpisG.map((k) => <KpiCard key={k.id} kpi={k} onExpand={setExpandido} />)}</div>
                   )}

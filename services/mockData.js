@@ -131,7 +131,7 @@ const SISTEMAS = {
 
 // LOGÍSTICA: hoja con 6 bloques distintos (períodos mixtos) → se agrupan en
 // secciones. Valores de la última carga (Matriz de Costo mensual = Junio; resto semanal).
-const G = { costo: 'Matriz de Costo · mensual (Junio)', flota: 'Disponibilidad de Flota · Sem 30',
+const G = { costo: 'Matriz de Costo · Junio', flota: 'Disponibilidad de Flota · Sem 30',
   lavado: 'Lavado de Camiones · Sem 30', tambores: 'Cuenta de Tambores · Sem 31',
   gasoil: 'Consumo de Gasoil · Sem 31', frig: 'Costo por Frigorífico · Sem 31' };
 const LOGISTICA = {
