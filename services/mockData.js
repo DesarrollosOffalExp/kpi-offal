@@ -13,7 +13,7 @@ const ENTREGA = [99.74, 99.63, 97.82, 97.91, 99.47, 99.57];
 const FORMADORAS = [65, 70, 73, 78, 66, 73, 64, 67, 41];
 
 const INSUMOS = {
-  key: 'insumos', nombre: 'Insumos', estado: 'ok',
+  key: 'insumos', nombre: 'Insumos', estado: 'ok', layout: 'stacked', objetivoPendiente: true,
   kpis: [
     { id: 'recepcion', titulo: 'Eficiencia en Recepción', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100,
       serie: serie(MESES, RECEPCION),
@@ -39,34 +39,43 @@ const INSUMOS = {
 // COMPRAS: foto de la última semana cargada (Semana 31). Valores tomados de la
 // fila de la semana 31, columnas A→R de la hoja COMPRAS.
 const COMPRAS = {
-  key: 'compras', nombre: 'Compras', estado: 'ok', periodo: 'Semana 31',
+  key: 'compras', nombre: 'Compras', estado: 'ok', periodo: 'Semana 31', layout: 'stacked', objetivoPendiente: true,
   kpis: [
-    { id: 'requis_semana', titulo: 'Requis de la Semana', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 137,
-      info: 'Requisiciones de compra ingresadas en la semana. (COMPRAS, columna C)' },
-    { id: 'tratadas', titulo: 'Requis Tratadas', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 97,
-      info: 'Requisiciones gestionadas / resueltas en la semana. (COMPRAS, columna D)' },
-    { id: 'sin_tratar', titulo: 'Requis sin Tratar', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 32,
-      info: 'Requisiciones de la semana que quedaron sin gestionar. (COMPRAS, columna G)' },
-    { id: 'pendientes', titulo: 'Total Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 51,
+    // 1er conjunto: entender de dónde nace el total de pendientes.
+    { id: 'pendientes', grupo: 'Pendientes y vencidos', titulo: 'Total Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 51,
       info: 'Total de requisiciones pendientes al cierre de la semana. (COMPRAS, columna O)' },
-    { id: 'vencidas', titulo: 'Total Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
+    { id: 'sin_tratar', grupo: 'Pendientes y vencidos', titulo: 'Requis sin Tratar', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 32,
+      info: 'Requisiciones de la semana que quedaron sin gestionar. (COMPRAS, columna G)' },
+    { id: 'vencidas', grupo: 'Pendientes y vencidos', titulo: 'Total Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
       desglose: [{ nombre: 'Nuevas', valor: 6 }, { nombre: 'Viejas', valor: 11 }],
       info: 'Requisiciones vencidas (pasaron su plazo), con desglose entre nuevas y viejas. (COMPRAS, columna J; K nuevas / L viejas)' },
-    { id: 'urgentes', titulo: 'Urgentes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 3,
-      info: 'Requisiciones urgentes pendientes. (COMPRAS, columna P)' },
+    { id: 'ant_vencidas', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
+      info: 'Requisiciones vencidas que vienen de semanas anteriores. (COMPRAS, columna A)' },
+    { id: 'ant_sin_vencer', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Sin Vencer', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 2,
+      info: 'Requisiciones de semanas anteriores que aún no vencieron. (COMPRAS, columna B)' },
+    // 2do conjunto: actividad de la semana.
+    { id: 'requis_semana', grupo: 'Actividad de la semana', titulo: 'Requis de la Semana', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 137,
+      info: 'Requisiciones de compra ingresadas en la semana. (COMPRAS, columna C)' },
+    { id: 'tratadas', grupo: 'Actividad de la semana', titulo: 'Requis Tratadas', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 97,
+      info: 'Requisiciones gestionadas / resueltas en la semana. (COMPRAS, columna D)' },
   ],
   graficos: [
-    { tipo: 'bar', titulo: 'Gestión de la semana', info: 'Flujo de requisiciones de la última semana: ingresadas, tratadas y las que quedaron.',
-      datos: [{ nombre: 'Ingresadas', valor: 137 }, { nombre: 'Tratadas', valor: 97 }, { nombre: 'Sin tratar', valor: 32 }, { nombre: 'Rechazadas', valor: 1 }, { nombre: 'Anuladas', valor: 7 }] },
-    { tipo: 'bar', titulo: 'Composición de pendientes', info: 'De qué se componen los pendientes de la última semana.',
+    { tipo: 'bar', grupo: 'Pendientes y vencidos', titulo: 'Composición de pendientes', info: 'De qué se componen los pendientes de la última semana.',
       datos: [{ nombre: 'Por vencer', valor: 19 }, { nombre: 'En plazo', valor: 15 }, { nombre: 'Vencidas', valor: 17 }] },
+    { tipo: 'bar', grupo: 'Actividad de la semana', titulo: 'Gestión de la semana', info: 'Flujo de requisiciones de la última semana: ingresadas, tratadas y las que quedaron.',
+      datos: [{ nombre: 'Ingresadas', valor: 137 }, { nombre: 'Tratadas', valor: 97 }, { nombre: 'Sin tratar', valor: 32 }, { nombre: 'Rechazadas', valor: 1 }, { nombre: 'Anuladas', valor: 7 }] },
+    // 3er conjunto: vencidas por semana (tendencia). El "desglose por antigüedad"
+    // exacto que pidió gerencia necesita un dato adicional (ver notas).
+    { tipo: 'line', grupo: 'Vencidas por semana', titulo: 'Vencidas por semana', info: 'Requisiciones vencidas registradas cada semana (tendencia).',
+      periodos: ['S22', 'S23', 'S24', 'S25', 'S26', 'S27', 'S28', 'S29', 'S30', 'S31'],
+      series: [{ nombre: 'Vencidas', datos: [34, 43, 106, 102, 95, 26, 35, 15, 17, 17] }] },
   ],
 };
 
 // FÁBRICA DE HIELO: productividad de la semana (tabla semanal que se sobrescribe).
 // KPIs de la fila RESUMEN; gráficos de las filas diarias. Datos de la Semana 31.
 const HIELO = {
-  key: 'fábrica-de-hielo', nombre: 'Fábrica de Hielo', estado: 'ok', periodo: 'Semana 31',
+  key: 'fábrica-de-hielo', nombre: 'Fábrica de Hielo', estado: 'ok', periodo: 'Semana 31', objetivoPendiente: true,
   kpis: [
     // --- Productividad ---
     { id: 'barras', grupo: 'Productividad', titulo: 'Barras producidas', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 30680,
@@ -108,24 +117,31 @@ const HIELO = {
 
 // SISTEMAS: foto de la última semana (misma mecánica que Compras). Semana 31.
 const SISTEMAS = {
-  key: 'sistemas', nombre: 'Sistemas', estado: 'ok', periodo: 'Semana 31',
+  key: 'sistemas', nombre: 'Sistemas', estado: 'ok', periodo: 'Semana 31', layout: 'stacked', objetivoPendiente: true,
   kpis: [
-    { id: 'tickets_semana', titulo: 'Tickets de la Semana', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 77,
-      info: 'Tickets ingresados en la semana. (SISTEMAS, columna N)' },
-    { id: 'tratados', titulo: 'Tickets Tratados', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 60,
-      info: 'Tickets resueltos o gestionados en la semana. (SISTEMAS, columna O)' },
-    { id: 'pendientes', titulo: 'Tickets Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
-      info: 'Tickets que quedaron pendientes en la semana. (SISTEMAS, columna R)' },
-    { id: 'abiertos', titulo: 'Total de Abiertos', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 60,
+    // 1er conjunto: pendientes y vencidos (igual criterio que Compras).
+    { id: 'abiertos', grupo: 'Pendientes y vencidos', titulo: 'Total de Abiertos', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 60,
       info: 'Total de tickets abiertos. (SISTEMAS, columna S)' },
-    { id: 'vencidas', titulo: 'Total Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
+    { id: 'pendientes', grupo: 'Pendientes y vencidos', titulo: 'Tickets Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
+      info: 'Tickets que quedaron pendientes en la semana. (SISTEMAS, columna R)' },
+    { id: 'vencidas', grupo: 'Pendientes y vencidos', titulo: 'Total Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
       info: 'Tickets vencidos (pasaron su plazo de atención). (SISTEMAS, columna U)' },
-    { id: 'por_vencer', titulo: 'En término por vencer', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 21,
-      info: 'Tickets en término, próximos a vencer. (SISTEMAS, columna X)' },
+    { id: 'ant_vencidas', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
+      info: 'Tickets vencidos que vienen de semanas anteriores. (SISTEMAS, columna L)' },
+    { id: 'ant_sin_vencer', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Sin Vencer', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 27,
+      info: 'Tickets de semanas anteriores que aún no vencieron. (SISTEMAS, columna M)' },
+    // 2do conjunto: actividad de la semana.
+    { id: 'tickets_semana', grupo: 'Actividad de la semana', titulo: 'Tickets de la Semana', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 77,
+      info: 'Tickets ingresados en la semana. (SISTEMAS, columna N)' },
+    { id: 'tratados', grupo: 'Actividad de la semana', titulo: 'Tickets Tratados', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 60,
+      info: 'Tickets resueltos o gestionados en la semana. (SISTEMAS, columna O)' },
   ],
   graficos: [
-    { tipo: 'bar', titulo: 'Gestión de la semana', info: 'Flujo de tickets de la última semana: ingresados, tratados y pendientes.',
+    { tipo: 'bar', grupo: 'Actividad de la semana', titulo: 'Gestión de la semana', info: 'Flujo de tickets de la última semana: ingresados, tratados y pendientes.',
       datos: [{ nombre: 'Ingresados', valor: 77 }, { nombre: 'Tratados', valor: 60 }, { nombre: 'Pendientes', valor: 17 }] },
+    { tipo: 'line', grupo: 'Vencidas por semana', titulo: 'Vencidas por semana', info: 'Tickets vencidos registrados cada semana (tendencia).',
+      periodos: ['S24', 'S25', 'S26', 'S27', 'S28', 'S29', 'S30', 'S31'],
+      series: [{ nombre: 'Vencidas', datos: [2, 1, 10, 6, 23, 10, 7, 17] }] },
   ],
 };
 
@@ -135,7 +151,7 @@ const G = { costo: 'Matriz de Costo · Junio', flota: 'Disponibilidad de Flota �
   lavado: 'Lavado de Camiones · Sem 30', tambores: 'Cuenta de Tambores · Sem 31',
   gasoil: 'Consumo de Gasoil · Sem 31', frig: 'Costo por Frigorífico · Sem 31' };
 const LOGISTICA = {
-  key: 'logística', nombre: 'Logística', estado: 'ok',
+  key: 'logística', nombre: 'Logística', estado: 'ok', objetivoPendiente: true,
   kpis: [
     // Matriz de Costo (mensual, Junio)
     { id: 'costo_log', grupo: G.costo, titulo: 'Costo total de Logística', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 1051942271,
