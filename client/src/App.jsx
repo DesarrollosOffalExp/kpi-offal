@@ -92,10 +92,13 @@ export default function App() {
       const key = g ?? '__';
       if (!vistos.has(key)) { vistos.add(key); grupos.push(g); }
     });
+    // "Objetivo de la semana": sección presente en todos los sectores; sin dato aún.
+    if (sector.objetivoPendiente) grupos.push('Objetivo');
   }
-  // Con más de una sección, se navegan como sub-pestañas (una a la vez) en vez de
-  // apilarse. `subActual` cae a la primera si la activa no pertenece a este sector.
-  const conSub = grupos.length > 1;
+  // Con varias secciones se navegan como sub-pestañas (una a la vez), salvo que el
+  // sector pida layout 'stacked' (apiladas, ej. Compras/Sistemas). `subActual` cae
+  // a la primera si la activa no pertenece a este sector.
+  const conSub = grupos.length > 1 && sector?.layout !== 'stacked';
   const subActual = grupos.includes(subActivo) ? subActivo : grupos[0];
 
   return (
@@ -146,13 +149,23 @@ export default function App() {
             {(conSub ? [subActual] : grupos).map((g) => {
               const kpisG = sector.kpis.filter((k) => (k.grupo || null) === g);
               const grafG = (sector.graficos || []).filter((x) => (x.grupo || null) === g);
+              const vacio = kpisG.length === 0 && grafG.length === 0;
               return (
                 <div className="grupo" key={g ?? '__'}>
                   {!conSub && g && <h2 className="grupo-titulo">{g}</h2>}
-                  {kpisG.length > 0 && (
-                    <div className="kpi-grid">{kpisG.map((k) => <KpiCard key={k.id} kpi={k} onExpand={setExpandido} />)}</div>
+                  {vacio ? (
+                    <div className="vacio-sector">
+                      <b>{g}</b>
+                      <p>Todavía no cargamos este dato. Se agrega cuando el área lo defina.</p>
+                    </div>
+                  ) : (
+                    <>
+                      {kpisG.length > 0 && (
+                        <div className="kpi-grid">{kpisG.map((k) => <KpiCard key={k.id} kpi={k} onExpand={setExpandido} />)}</div>
+                      )}
+                      <SectorCharts graficos={grafG} onExpand={setExpandido} />
+                    </>
                   )}
-                  <SectorCharts graficos={grafG} onExpand={setExpandido} />
                 </div>
               );
             })}
