@@ -380,6 +380,8 @@ body {
 .tabla-kpi tbody td { padding: 8px 12px; border-bottom: 1px solid var(--line); }
 .tabla-kpi tbody tr:hover { background: rgba(99, 102, 241, .06); }
 .tabla-kpi tbody tr.tot td { font-weight: 800; color: var(--text); border-top: 2px solid var(--line); background: var(--panel-2); }
+.tabla-kpi.wrap, .tabla-kpi.wrap td, .tabla-kpi.wrap th { white-space: normal; }
+.tabla-kpi.wrap td:last-child { min-width: 320px; line-height: 1.4; }
 
 /* ---------- Secciones dentro de un sector (grupos) ---------- */
 .grupo { margin-bottom: 8px; }

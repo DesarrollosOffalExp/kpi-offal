@@ -13,7 +13,7 @@ export default function Chart({ g, height = 260 }) {
   if (g.tipo === 'tabla') {
     return (
       <div className="tabla-kpi-wrap">
-        <table className="tabla-kpi">
+        <table className={`tabla-kpi ${g.wrap ? 'wrap' : ''}`}>
           <thead>
             <tr>{g.columnas.map((c, i) => <th key={i} className={i === 0 ? '' : 'num'}>{c}</th>)}</tr>
           </thead>

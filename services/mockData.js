@@ -90,15 +90,15 @@ const COMPRAS = {
 const HIELO = {
   key: 'fábrica-de-hielo', nombre: 'Fábrica de Hielo', estado: 'ok', periodo: 'Semana 31', objetivoPendiente: true,
   kpis: [
-    // --- Productividad ---
+    // --- Productividad (principal: Hombre/Barra Día) ---
+    { id: 'prod_dia', grupo: 'Productividad', titulo: 'Hombre / Barra Día', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 1278,
+      info: 'Productividad principal: barras por persona en la semana (barras / personal). (FABRICA DE HIELO, resumen col. E)' },
     { id: 'barras', grupo: 'Productividad', titulo: 'Barras producidas', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 30680,
-      info: 'Barras de hielo producidas en la semana (total). (FABRICA DE HIELO, resumen col. D)' },
-    { id: 'prod_dia', grupo: 'Productividad', titulo: 'Productividad Hombre/Barra Día', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 1278,
-      info: 'Productividad: barras por persona en la semana (barras / personal). (resumen col. E)' },
-    { id: 'prod_hs', grupo: 'Productividad', titulo: 'Productividad Hom/Barra Hs', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 34,
-      info: 'Productividad: barras por hora de máquina (barras / horas). (resumen col. G)' },
+      info: 'Barras de hielo producidas en la semana (total). (resumen col. D)' },
+    { id: 'prod_hs', grupo: 'Productividad', titulo: 'Hom / Barra Hs', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 34,
+      info: 'Barras por hora de máquina (barras / horas). (resumen col. G)' },
     { id: 'consumo', grupo: 'Productividad', titulo: 'Consumo', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 35085,
-      info: 'Consumo total de la semana. (FABRICA DE HIELO, resumen col. H)' },
+      info: 'Consumo total de la semana. (resumen col. H)' },
     { id: 'horas', grupo: 'Productividad', titulo: 'Horas trabajadas', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 899,
       info: 'Horas de máquina trabajadas en la semana (total). (resumen col. F)' },
     // --- Stock de pallets ---
@@ -117,10 +117,15 @@ const HIELO = {
       info: 'Promedio de barras por tambor. Se compara el estimado vs. el enviado. (TOTALES, promedios)' },
   ],
   graficos: [
+    { tipo: 'bar', grupo: 'Productividad', titulo: 'Hombre / Barra Día por día', info: 'Productividad (barras por persona) día a día de la semana. Dato principal.',
+      datos: [{ nombre: 'Lun', valor: 247 }, { nombre: 'Mar', valor: 247 }, { nombre: 'Mié', valor: 168 }, { nombre: 'Jue', valor: 247 }, { nombre: 'Vie', valor: 247 }, { nombre: 'Sáb', valor: 247 }] },
     { tipo: 'bar', grupo: 'Productividad', titulo: 'Barras por día', info: 'Producción diaria de barras de hielo en la semana.',
       datos: [{ nombre: 'Lun', valor: 5920 }, { nombre: 'Mar', valor: 5920 }, { nombre: 'Mié', valor: 4040 }, { nombre: 'Jue', valor: 5920 }, { nombre: 'Vie', valor: 5920 }, { nombre: 'Sáb', valor: 2960 }] },
     { tipo: 'bar', grupo: 'Productividad', titulo: 'Consumo por día', info: 'Consumo diario en la semana.',
       datos: [{ nombre: 'Lun', valor: 7205 }, { nombre: 'Mar', valor: 7335 }, { nombre: 'Mié', valor: 6725 }, { nombre: 'Jue', valor: 6520 }, { nombre: 'Vie', valor: 1530 }, { nombre: 'Sáb', valor: 5770 }] },
+    { tipo: 'tabla', wrap: true, grupo: 'Productividad', titulo: 'Observaciones de la semana', info: 'Novedades cargadas día a día en la planilla (columna Observaciones).',
+      columnas: ['Día', 'Fecha', 'Observación'],
+      filas: [['Miércoles', '29/07', 'Quedaron sin sacar 20 perchas (400 barras) por problemas con la noria.']] },
     { tipo: 'bar', grupo: 'Stock de pallets', horizontal: true, titulo: 'Pallets no devueltos por frigorífico', info: 'Frigoríficos con más pallets sin devolver (top 10, semana anterior).',
       datos: [{ nombre: 'Congelados', valor: 363 }, { nombre: 'Supermercado', valor: 285 }, { nombre: 'Runfo', valor: 273 }, { nombre: 'Gorina', valor: 172 }, { nombre: 'Rioplat.', valor: 171 }, { nombre: 'Cordoba', valor: 111 }, { nombre: 'Frigolar', valor: 99 }, { nombre: 'Federal', valor: 90 }, { nombre: 'Cocarsa', valor: 88 }, { nombre: 'Faraon', valor: 86 }] },
     { tipo: 'bar', grupo: 'Monitoreo de barras', horizontal: true, titulo: 'Barras enviadas por proveedor', info: 'Proveedores con más barras enviadas (top 10).',
