@@ -62,6 +62,8 @@ const COMPRAS = {
     { id: 'vencidas', grupo: 'Pendientes y vencidos', titulo: 'Total Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
       desglose: [{ nombre: 'Nuevas', valor: 6 }, { nombre: 'Viejas', valor: 11 }],
       info: 'Requisiciones vencidas (pasaron su plazo), con desglose entre nuevas y viejas. (COMPRAS, columna J; K nuevas / L viejas)' },
+    { id: 'total_sin_tratar', grupo: 'Pendientes y vencidos', titulo: 'Total de Requis Sin Tratar', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 51,
+      info: 'Total de requisiciones sin tratar (acumulado: anteriores + de la semana). (COMPRAS, columna H)' },
     { id: 'ant_vencidas', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
       info: 'Requisiciones vencidas que vienen de semanas anteriores. (COMPRAS, columna A)' },
     { id: 'ant_sin_vencer', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Sin Vencer', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 2,
@@ -82,6 +84,14 @@ const COMPRAS = {
     { tipo: 'line', grupo: 'Vencidas por semana', titulo: 'Vencidas por semana', info: 'Requisiciones vencidas registradas cada semana (tendencia).',
       periodos: ['S22', 'S23', 'S24', 'S25', 'S26', 'S27', 'S28', 'S29', 'S30', 'S31'],
       series: [{ nombre: 'Vencidas', datos: [34, 43, 106, 102, 95, 26, 35, 15, 17, 17] }] },
+    { tipo: 'tabla', wrap: true, grupo: 'Vencidas por semana', titulo: 'Observaciones', info: 'Novedades significativas que carga Compras por semana (columna Observaciones).',
+      columnas: ['Semana', 'Observación'],
+      filas: [
+        ['S30', 'De las 3 nuevas que se vencieron, una es una reparación in situ; otra está a la espera de firma de Dirección por el importe. La restante es un repuesto que no se comercializa en el mercado local.'],
+        ['S29', 'Quedaron 173 REQ sin aprobar de la semana 29 (Req 33227 a 33473). Se redujo bien las Req de semanas anteriores sin procesar.'],
+        ['S28', 'De las REQ de Marel restan cotizar 12 ítems (81 ya vinculados a una OC). De las 13 vencidas nuevas, 8 ya están para hacer OC.'],
+        ['S27', 'Excluyendo las de Marel, solo hay 2 vencidas (rueda y disco para servidor, validando Jair). La semana entrante se emite la OC de Marel.'],
+      ] },
   ],
 };
 
