@@ -37,11 +37,11 @@ export default function Chart({ g, height = 260 }) {
     return (
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
-          <CartesianGrid stroke="#233149" strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid stroke="#23353f" strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="periodo" {...ejeStyle} />
           <YAxis {...ejeStyle} domain={['auto', 'auto']} />
           <Tooltip {...tooltipStyle} />
-          <Legend wrapperStyle={{ fontSize: 12, color: '#8a97ad' }} />
+          <Legend wrapperStyle={{ fontSize: 12, color: '#8ba0ab' }} />
           {g.series.map((s, i) => (
             <Line key={s.nombre} type="monotone" dataKey={s.nombre} stroke={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
           ))}
@@ -53,7 +53,7 @@ export default function Chart({ g, height = 260 }) {
     return (
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={g.datos} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 4 }}>
-          <CartesianGrid stroke="#233149" strokeDasharray="3 3" horizontal={false} />
+          <CartesianGrid stroke="#23353f" strokeDasharray="3 3" horizontal={false} />
           <XAxis type="number" {...ejeStyle} />
           <YAxis type="category" dataKey="nombre" width={100} {...ejeStyle} />
           <Tooltip {...tooltipStyle} />
@@ -67,7 +67,7 @@ export default function Chart({ g, height = 260 }) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={g.datos} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
-        <CartesianGrid stroke="#233149" strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid stroke="#23353f" strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="nombre" {...ejeStyle} />
         <YAxis {...ejeStyle} />
         <Tooltip {...tooltipStyle} />
