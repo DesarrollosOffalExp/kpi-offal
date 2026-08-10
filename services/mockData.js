@@ -194,8 +194,6 @@ const SISTEMAS = {
       info: 'Tickets que quedaron pendientes en la semana. (SISTEMAS, columna R)' },
     { id: 'vencidas', grupo: 'Pendientes y vencidos', titulo: 'Total Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
       info: 'Tickets vencidos (pasaron su plazo de atención). (SISTEMAS, columna U)' },
-    { id: 'ant_vencidas', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
-      info: 'Tickets vencidos que vienen de semanas anteriores. (SISTEMAS, columna L)' },
     { id: 'ant_sin_vencer', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Sin Vencer', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 27,
       info: 'Tickets de semanas anteriores que aún no vencieron. (SISTEMAS, columna M)' },
     // 2do conjunto: actividad de la semana.
@@ -207,9 +205,6 @@ const SISTEMAS = {
   graficos: [
     { tipo: 'bar', grupo: 'Actividad de la semana', titulo: 'Gestión de la semana', info: 'Flujo de tickets de la última semana: ingresados, tratados y pendientes.',
       datos: [{ nombre: 'Ingresados', valor: 77 }, { nombre: 'Tratados', valor: 60 }, { nombre: 'Pendientes', valor: 17 }] },
-    { tipo: 'line', grupo: 'Vencidas por semana', titulo: 'Vencidas por semana', info: 'Tickets vencidos registrados cada semana (tendencia).',
-      periodos: ['S24', 'S25', 'S26', 'S27', 'S28', 'S29', 'S30', 'S31'],
-      series: [{ nombre: 'Vencidas', datos: [2, 1, 10, 6, 23, 10, 7, 17] }] },
   ],
 };
 
