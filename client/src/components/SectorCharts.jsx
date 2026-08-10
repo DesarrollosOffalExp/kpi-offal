@@ -9,7 +9,7 @@ export default function SectorCharts({ graficos, onExpand }) {
   return (
     <div className="charts-grid">
       {graficos.map((g, i) => (
-        <div className="panel" key={i}>
+        <div className={`panel ${g.tipo === 'tabla' ? 'panel-full' : ''}`} key={i}>
           <div className="panel-head">
             <h3>{g.titulo}{g.info && <InfoTip text={g.info} />}</h3>
             <ExpandButton onClick={() => onExpand({ kind: 'grafico', grafico: g })} />

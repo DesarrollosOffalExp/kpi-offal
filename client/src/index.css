@@ -367,6 +367,20 @@ body {
 .subtab:hover { color: var(--text); border-color: var(--primary); }
 .subtab.on { color: var(--primary-bright); background: rgba(99, 102, 241, .12); border-color: var(--primary); }
 
+/* ---------- Tabla tipo KPI (Matriz de Costo, Costos x Frigorífico, etc.) ---------- */
+.panel-full { grid-column: 1 / -1; }
+.tabla-kpi-wrap { overflow-x: auto; }
+.tabla-kpi { width: 100%; border-collapse: collapse; font-size: 12.5px; white-space: nowrap; }
+.tabla-kpi thead th {
+  text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
+  color: var(--muted); padding: 9px 12px; border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; background: var(--panel);
+}
+.tabla-kpi th.num, .tabla-kpi td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.tabla-kpi tbody td { padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.tabla-kpi tbody tr:hover { background: rgba(99, 102, 241, .06); }
+.tabla-kpi tbody tr.tot td { font-weight: 800; color: var(--text); border-top: 2px solid var(--line); background: var(--panel-2); }
+
 /* ---------- Secciones dentro de un sector (grupos) ---------- */
 .grupo { margin-bottom: 8px; }
 .grupo + .grupo { margin-top: 22px; }

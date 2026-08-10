@@ -10,6 +10,24 @@ import { CHART_COLORS, ejeStyle, tooltipStyle } from './charts/theme';
  *   g.tipo 'bar'  → { datos:[{nombre, valor}] }
  */
 export default function Chart({ g, height = 260 }) {
+  if (g.tipo === 'tabla') {
+    return (
+      <div className="tabla-kpi-wrap">
+        <table className="tabla-kpi">
+          <thead>
+            <tr>{g.columnas.map((c, i) => <th key={i} className={i === 0 ? '' : 'num'}>{c}</th>)}</tr>
+          </thead>
+          <tbody>
+            {g.filas.map((f, ri) => (
+              <tr key={ri} className={/^total/i.test(String(f[0])) ? 'tot' : ''}>
+                {f.map((c, ci) => <td key={ci} className={ci === 0 ? '' : 'num'}>{c}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
   if (g.tipo === 'line') {
     const data = g.periodos.map((p, i) => {
       const row = { periodo: p };
