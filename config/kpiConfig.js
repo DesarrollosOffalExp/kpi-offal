@@ -59,12 +59,13 @@ const HOJAS = [
   {
     // COMPRAS se lee distinto: NO es una serie. Cada fila es una semana; se toma
     // SOLO la fila de la ÚLTIMA semana cargada (máximo de la columna I) y se leen
-    // las columnas A→R de esa fila. Es la foto de la semana en curso.
+    // las columnas A→O de esa fila. El cuadro va de A a O, hasta la fila 34.
     sheet: 'COMPRAS',
     sector: 'Compras',
     modo: 'ultimaSemana',
     columnaSemana: 'I',                 // número de semana
-    filas: { desde: 5, hasta: 120 },    // rango donde viven las filas semanales
+    columnas: { desde: 'A', hasta: 'O' },
+    filas: { desde: 5, hasta: 34 },     // el cuadro llega hasta la fila 34
     kpis: [
       { id: 'requis_semana', titulo: 'Requis de la Semana', col: 'C', formato: 'numero', sentido: 'up',
         info: 'Requisiciones de compra ingresadas en la semana. (COMPRAS, columna C)' },
