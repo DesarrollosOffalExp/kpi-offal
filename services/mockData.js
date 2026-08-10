@@ -125,6 +125,15 @@ const HIELO = {
     { id: 'promedio', grupo: 'Monitoreo de barras', titulo: 'Promedio barras/tambor', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 1.63,
       desglose: [{ nombre: 'Estimado', valor: 1.67 }, { nombre: 'Enviado', valor: 1.63 }],
       info: 'Promedio de barras por tambor. Se compara el estimado vs. el enviado. (TOTALES, promedios)' },
+    // --- Presupuesto y Gastos (Gerencia de Operaciones; mensual, último mes = Junio) ---
+    { id: 'gasto_total', grupo: 'Presupuesto y Gastos', titulo: 'Gasto total del mes', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 108028584,
+      info: 'Gasto total del mes (Junio): material + servicios públicos + MO eventual + MO propia. (FABRICA DE HIELO, Presupuesto/Gastos, Total por Mes)' },
+    { id: 'costo_barra', grupo: 'Presupuesto y Gastos', titulo: 'Costo por barra', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 716,
+      info: 'Costo por barra de hielo del mes (Junio). Es el dato de tendencia. (Presupuesto/Gastos, Costo X Barra)' },
+    { id: 'prod_barras_mes', grupo: 'Presupuesto y Gastos', titulo: 'Producción de barras (mes)', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 150816,
+      info: 'Barras de hielo producidas en el mes (Junio). (Presupuesto/Gastos, Producción de barras)' },
+    { id: 'consumo_sal', grupo: 'Presupuesto y Gastos', titulo: 'Consumo de sal (mes)', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 111,
+      info: 'Consumo de sal del mes (Junio). (Presupuesto/Gastos, Consumo de Sal)' },
   ],
   graficos: [
     { tipo: 'bar', grupo: 'Productividad', titulo: 'Hombre / Barra Día por día', info: 'Productividad (barras por persona) día a día de la semana. Dato principal.',
@@ -140,6 +149,25 @@ const HIELO = {
       datos: [{ nombre: 'Congelados', valor: 363 }, { nombre: 'Supermercado', valor: 285 }, { nombre: 'Runfo', valor: 273 }, { nombre: 'Gorina', valor: 172 }, { nombre: 'Rioplat.', valor: 171 }, { nombre: 'Cordoba', valor: 111 }, { nombre: 'Frigolar', valor: 99 }, { nombre: 'Federal', valor: 90 }, { nombre: 'Cocarsa', valor: 88 }, { nombre: 'Faraon', valor: 86 }] },
     { tipo: 'bar', grupo: 'Monitoreo de barras', horizontal: true, titulo: 'Barras enviadas por proveedor', info: 'Proveedores con más barras enviadas (top 10).',
       datos: [{ nombre: 'Rioplatense', valor: 2904 }, { nombre: 'Cía. Bernal', valor: 2635 }, { nombre: 'Gorina', valor: 2397 }, { nombre: 'Bermejo', valor: 2210 }, { nombre: 'Runfo', valor: 1820 }, { nombre: 'Arre Beef', valor: 1620 }, { nombre: 'FRIAR 1970', valor: 1575 }, { nombre: 'Ecocarnes', valor: 1530 }, { nombre: 'Frigolar', valor: 1407 }, { nombre: 'Black Bamboo', valor: 1190 }] },
+    // Presupuesto y Gastos: tabla completa (todos los grupos, mes a mes — sin descartar nada).
+    { tipo: 'tabla', grupo: 'Presupuesto y Gastos', titulo: 'Presupuesto / Gastos (mes a mes)', info: 'Gastos por grupo, producción y costo por barra, mes a mes. (Gerencia de Operaciones — Fábrica de Hielo)',
+      columnas: ['Grupo', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+      filas: [
+        ['Material', '$ -', '$ 263.339', '$ 5.389.999', '$ 8.675.932', '$ 8.004.591', '$ 3.647.721'],
+        ['Servicios', '$ -', '$ -', '$ -', '$ -', '$ -', '$ -'],
+        ['Fletes', '$ -', '$ -', '$ -', '$ -', '$ -', '$ -'],
+        ['Servicios Públicos', '$ -', '$ 82.027.141', '$ 66.546.261', '$ 60.097.560', '$ 38.475.218', '$ 38.475.218'],
+        ['MO Eventual', '$ 34.814.039', '$ 26.267.112', '$ 26.399.507', '$ 23.606.886', '$ 24.284.809', '$ 26.857.927'],
+        ['MO Propia', '$ -', '$ 27.171.616', '$ 26.417.910', '$ 33.325.655', '$ 34.722.263', '$ 39.047.718'],
+        ['TOTAL POR MES', '$ 34.814.039', '$ 135.729.208', '$ 124.753.677', '$ 125.706.034', '$ 105.486.881', '$ 108.028.584'],
+        ['Producción de barras', '165.680', '146.795', '146.500', '130.740', '143.785', '150.816'],
+        ['Costo x Barra', '$ 210', '$ 925', '$ 852', '$ 961', '$ 734', '$ 716'],
+        ['Consumo de Sal', '208', '143', '212', '169', '104', '111'],
+      ] },
+    { tipo: 'line', grupo: 'Presupuesto y Gastos', titulo: 'Costo por barra mensual', info: 'Tendencia del costo por barra de hielo, mes a mes ($).',
+      periodos: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'], series: [{ nombre: 'Costo x barra', datos: [210, 925, 852, 961, 734, 716] }] },
+    { tipo: 'bar', grupo: 'Presupuesto y Gastos', titulo: 'Gastos por grupo (Junio)', info: 'Composición del gasto del mes por grupo.',
+      datos: [{ nombre: 'MO Propia', valor: 39047718 }, { nombre: 'Serv. Púb.', valor: 38475218 }, { nombre: 'MO Eventual', valor: 26857927 }, { nombre: 'Material', valor: 3647721 }] },
   ],
 };
 
