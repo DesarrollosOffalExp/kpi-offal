@@ -177,9 +177,9 @@ const LOGISTICA = {
     { id: 'disp_general', grupo: G.flota, titulo: 'Disponibilidad de flota', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: null, valor: 84,
       desglose: [{ nombre: 'Disponibles', valor: 67 }, { nombre: 'Total', valor: 80 }],
       info: '67 de 80 unidades disponibles en la semana. (DISPONIBILIDAD DE FLOTA)' },
-    { id: 'fuera_serv', grupo: G.flota, titulo: 'Unidades fuera de servicio', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 13,
-      desglose: [{ nombre: 'Tractor', valor: 3 }, { nombre: 'Semi', valor: 9 }, { nombre: 'Bateas', valor: 1 }],
-      info: 'Unidades fuera de servicio, por tipo. El detalle por dominio y motivo está en la planilla (falta captura nítida de ese bloque). (DISPONIBILIDAD DE FLOTA)' },
+    { id: 'fuera_serv', grupo: G.flota, titulo: 'Unidades fuera de servicio', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 15,
+      desglose: [{ nombre: 'Tractor', valor: 3 }, { nombre: 'Semi', valor: 11 }, { nombre: 'Bateas', valor: 1 }],
+      info: 'Unidades con parada temporal (FS) en la semana. Las de baja permanente (FSP) NO se cuentan. Detalle en la tabla. (DISPONIBILIDAD DE FLOTA)' },
     // Lavado de Camiones (Sem 30)
     { id: 'camiones_lav', grupo: G.lavado, titulo: 'Camiones lavados', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 215,
       info: 'Total de camiones lavados en la semana. (LAVADO DE CAMIONES)' },
@@ -225,6 +225,15 @@ const LOGISTICA = {
       ] },
     { tipo: 'bar', grupo: G.flota, titulo: 'Disponibilidad por flota (%)', info: 'Disponibilidad por tipo de unidad (semana).',
       datos: [{ nombre: 'Tractor', valor: 94 }, { nombre: 'Torito', valor: 100 }, { nombre: 'Chasis', valor: 97 }, { nombre: 'Balancín', valor: 100 }, { nombre: 'Semi', valor: 80 }, { nombre: 'Bateas', valor: 92 }] },
+    { tipo: 'tabla', grupo: G.flota, titulo: 'Patentes fuera de servicio (FS)', info: 'Unidades con parada temporal en la semana. No incluye las de baja permanente (FSP).',
+      columnas: ['Dominio', 'Tipo', 'Marca', 'Días parado'],
+      filas: [
+        ['AC581KP', 'Tractor', 'Mercedes Benz', '6'], ['JNA841', 'Tractor', 'Mercedes Benz', '4'], ['AG252VK', 'Tractor', 'Mercedes Benz', '6'],
+        ['FKP 957', 'Semi', 'Lambert', '6'], ['HRV 058', 'Semi', 'Astpra', '6'], ['IHZ 227', 'Semi', 'Astpra', '6'],
+        ['IHZ 228', 'Semi', 'Astpra', '6'], ['IKO 415', 'Semi', 'Astpra', '6'], ['IMO 536', 'Semi', 'Astpra', '2'],
+        ['JAP 922', 'Semi', 'Astpra', '6'], ['JNS 094', 'Semi', 'Astpra', '6'], ['LMD 345', 'Semi', 'Astpra', '6'],
+        ['LMD 346', 'Semi', 'Astpra', '6'], ['MXC 712', 'Semi', 'Lambert', '6'], ['AC 427 IU', 'Batea', 'Gomatro', '4'],
+      ] },
     { tipo: 'tabla', grupo: G.tambores, titulo: 'Cuenta de tambores por frigorífico', info: 'Stock de tambores por matadero (negativo = a favor).',
       columnas: ['Matadero', 'Anterior', 'Enviados', 'Recibidos', 'Stock Final'],
       filas: [
