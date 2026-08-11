@@ -21,30 +21,31 @@ const PROD_HIST_SEM = ['S23', 'S24', 'S25', 'S26', 'S27', 'S28', 'S29'];
 const PROD_HIST = [131151, 104523, 108596, 124286, 125108, 105281, 100126];
 
 const INSUMOS = {
-  key: 'insumos', nombre: 'Insumos', estado: 'ok', layout: 'stacked', objetivoPendiente: true,
+  key: 'insumos', nombre: 'Insumos', estado: 'ok', objetivoPendiente: true,
   kpis: [
-    // Principal (lo pidió gerencia): productividad de armado de cajas, con turno.
-    { id: 'productividad', titulo: 'Productividad de armado de cajas', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100,
+    // Sección Productividad (principal: armado de cajas + cerramiento por Bestpack).
+    { id: 'productividad', grupo: 'Productividad', titulo: 'Productividad de armado de cajas', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100,
       valor: 89, desglose: [{ nombre: 'Día', valor: 89 }, { nombre: 'Noche', valor: 89 }],
       info: 'Índice de armado: cajas por hora reales vs. ideal por formadora, semana en curso. Es el dato PRINCIPAL. (Hoja INSUMOS)' },
-    { id: 'cerramiento', titulo: 'Cerramiento por Bestpack', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100,
+    { id: 'cerramiento', grupo: 'Productividad', titulo: 'Cerramiento por Bestpack', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100,
       serie: serie(SEMANAS, CERRAMIENTO),
       info: 'Cierre de cajas de las cerradoras (Bestpack) vs. estándar (72), por semana. Antes figuraba como "formadoras". (Hoja INSUMOS, fila 111)' },
-    { id: 'recepcion', titulo: 'Eficiencia en Recepción', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100,
+    // Sección Eficiencia de materiales.
+    { id: 'recepcion', grupo: 'Eficiencia de materiales', titulo: 'Eficiencia en Recepción', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100,
       serie: serie(MESES, RECEPCION),
       info: 'Recepciones de materiales sin error sobre el total del mes. (Hoja INSUMOS, columna P — mensual)' },
-    { id: 'entrega', titulo: 'Eficiencia en Entrega', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 99,
+    { id: 'entrega', grupo: 'Eficiencia de materiales', titulo: 'Eficiencia en Entrega', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 99,
       serie: serie(MESES, ENTREGA),
       info: 'Egresos sin diferencias sobre el total de egresos del mes. (Hoja INSUMOS, columna U — mensual)' },
   ],
   graficos: [
-    { tipo: 'bar', titulo: 'Cerrado por Bestpack — última semana', info: 'Máximo de producción de la última semana (S31) por máquina.',
+    { tipo: 'bar', grupo: 'Productividad', titulo: 'Cerrado por Bestpack — última semana', info: 'Máximo de producción de la última semana (S31) por máquina.',
       datos: [{ nombre: 'Bestpack 1', valor: 190 }, { nombre: 'Bestpack 2', valor: 195 }, { nombre: 'Bestpack 3', valor: 161 }] },
-    { tipo: 'line', titulo: 'Máximos por Bestpack por semana', info: 'Comparativo semana a semana de la producción máxima de cada Bestpack.',
+    { tipo: 'line', grupo: 'Productividad', titulo: 'Máximos por Bestpack por semana', info: 'Comparativo semana a semana de la producción máxima de cada Bestpack.',
       periodos: SEMANAS, series: [{ nombre: 'Bestpack 1', datos: BP1 }, { nombre: 'Bestpack 2', datos: BP2 }, { nombre: 'Bestpack 3', datos: BP3 }] },
-    { tipo: 'line', titulo: 'Producción por semana (histórico)', info: 'Producción total de armado de cajas, semana a semana. (Comparativo semanal por máquina — total.)',
+    { tipo: 'line', grupo: 'Productividad', titulo: 'Producción por semana (histórico)', info: 'Producción total de armado de cajas, semana a semana.',
       periodos: PROD_HIST_SEM, series: [{ nombre: 'Producción', datos: PROD_HIST }] },
-    { tipo: 'line', titulo: 'Eficiencia mensual', info: 'Recepción vs. entrega de materiales, mes a mes.',
+    { tipo: 'line', grupo: 'Eficiencia de materiales', titulo: 'Eficiencia mensual', info: 'Recepción vs. entrega de materiales, mes a mes.',
       periodos: MESES, series: [{ nombre: 'Recepción', datos: RECEPCION }, { nombre: 'Entrega', datos: ENTREGA }] },
   ],
 };
@@ -52,7 +53,7 @@ const INSUMOS = {
 // COMPRAS: foto de la última semana cargada (Semana 31). Valores tomados de la
 // fila de la semana 31, columnas A→R de la hoja COMPRAS.
 const COMPRAS = {
-  key: 'compras', nombre: 'Compras', estado: 'ok', periodo: 'Semana 31', layout: 'stacked', objetivoPendiente: true,
+  key: 'compras', nombre: 'Compras', estado: 'ok', periodo: 'Semana 31', objetivoPendiente: true,
   kpis: [
     // 1er conjunto: entender de dónde nace el total de pendientes.
     { id: 'pendientes', grupo: 'Pendientes y vencidos', titulo: 'Total Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 51,
@@ -185,7 +186,7 @@ const HIELO = {
 
 // SISTEMAS: foto de la última semana (misma mecánica que Compras). Semana 31.
 const SISTEMAS = {
-  key: 'sistemas', nombre: 'Sistemas', estado: 'ok', periodo: 'Semana 31', layout: 'stacked', objetivoPendiente: true,
+  key: 'sistemas', nombre: 'Sistemas', estado: 'ok', periodo: 'Semana 31', objetivoPendiente: true,
   kpis: [
     // 1er conjunto: pendientes y vencidos (igual criterio que Compras).
     { id: 'abiertos', grupo: 'Pendientes y vencidos', titulo: 'Total de Abiertos', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 60,
