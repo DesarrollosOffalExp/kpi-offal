@@ -197,7 +197,7 @@ body {
   margin-bottom: 18px;
 }
 .kpi {
-  background: var(--panel);
+  background: linear-gradient(160deg, var(--panel) 0%, var(--bg) 140%);
   border: 1px solid var(--line);
   border-top: 3px solid var(--primary);
   border-radius: 12px;
@@ -205,7 +205,18 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 8px 20px -12px rgba(0, 0, 0, .5);
+  transition: transform .12s ease, box-shadow .12s ease;
 }
+.kpi:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(0, 0, 0, .3), 0 14px 28px -14px rgba(0, 0, 0, .6); }
+/* Dato-héroe: tarjeta protagonista de un sector (ej. Costo General del mes) */
+.kpi.destacada {
+  border-top-width: 3px;
+  background: linear-gradient(160deg, rgba(199, 22, 58, .14) 0%, var(--panel) 60%, var(--bg) 150%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 10px 26px -12px rgba(199, 22, 58, .45);
+}
+.kpi.destacada .kpi-valor { font-size: 38px; color: #ffffff; }
+.kpi.destacada .kpi-titulo { color: var(--text); font-weight: 700; }
 .kpi-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .kpi-titulo { font-size: 13px; font-weight: 600; color: var(--muted); line-height: 1.3; }
 .kpi-meta-badge {
@@ -381,6 +392,41 @@ body {
 .tabla-kpi tbody tr.tot td { font-weight: 800; color: var(--text); border-top: 2px solid var(--line); background: var(--panel-2); }
 .tabla-kpi.wrap, .tabla-kpi.wrap td, .tabla-kpi.wrap th { white-space: normal; }
 .tabla-kpi.wrap td:last-child { min-width: 320px; line-height: 1.4; }
+
+/* Cabecera de sección dentro de una tabla (ej. PROPIOS, FLETES en Matriz de Costo) */
+.tabla-kpi tbody tr.sec-head td {
+  font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  padding: 14px 12px 5px; border-bottom: none; background: transparent; color: var(--muted);
+}
+.tabla-kpi tbody tr.sec-head:hover td { background: transparent; }
+/* Identificadores de color por grupo (tenues) — borde izquierdo + tinte suave.
+   Reflejan la codificación del Excel sin quedar "colorinche". */
+.tabla-kpi tbody tr[class*="cat-"] td:first-child { border-left: 3px solid transparent; }
+.cat-dolar        td:first-child { border-left-color: #f5a623; }
+.cat-dolar        { background: rgba(245,166,35,.05); }
+.cat-dolar.sec-head td        { color: #f0b24d; }
+.cat-descarga     td:first-child { border-left-color: #8ba0ab; }
+.cat-descarga     { background: rgba(139,160,171,.05); }
+.cat-descarga.sec-head td     { color: #a9bcc6; }
+.cat-propios      td:first-child { border-left-color: #2f9e6e; }
+.cat-propios      { background: rgba(47,158,110,.06); }
+.cat-propios.sec-head td      { color: #3fbe86; }
+.cat-fletes       td:first-child { border-left-color: #d99a2b; }
+.cat-fletes       { background: rgba(217,154,43,.06); }
+.cat-fletes.sec-head td       { color: #e2ad4d; }
+.cat-totalcosto   td:first-child { border-left-color: #26b6d9; }
+.cat-totalcosto   { background: rgba(38,182,217,.07); }
+.cat-totalcosto.sec-head td   { color: #5fcbe6; }
+.cat-lavatachos   td:first-child { border-left-color: #6b7f8a; }
+.cat-lavatachos   { background: rgba(107,127,138,.06); }
+.cat-lavatachos.sec-head td   { color: #9db0ba; }
+.cat-taller       td:first-child { border-left-color: #e08a6a; }
+.cat-taller       { background: rgba(224,138,106,.06); }
+.cat-taller.sec-head td       { color: #eaa284; }
+.cat-totalgeneral td:first-child { border-left-color: #c7163a; }
+.cat-totalgeneral { background: rgba(199,22,58,.09); }
+.cat-totalgeneral.sec-head td { color: #e85d78; }
+.tabla-kpi tbody tr.cat-totalgeneral.tot td { background: rgba(199,22,58,.13); border-top-color: rgba(199,22,58,.4); }
 
 /* ---------- Secciones dentro de un sector (grupos) ---------- */
 .grupo { margin-bottom: 8px; }

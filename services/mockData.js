@@ -188,15 +188,11 @@ const HIELO = {
 const SISTEMAS = {
   key: 'sistemas', nombre: 'Sistemas', estado: 'ok', periodo: 'Semana 31', objetivoPendiente: true,
   kpis: [
-    // 1er conjunto: pendientes y vencidos (igual criterio que Compras).
-    { id: 'abiertos', grupo: 'Pendientes y vencidos', titulo: 'Total de Abiertos', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 60,
+    // 1er conjunto: pendientes (gerencia pidió dejar solo esto, sin "vencidas").
+    { id: 'abiertos', grupo: 'Pendientes', titulo: 'Total de Abiertos', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 60,
       info: 'Total de tickets abiertos. (SISTEMAS, columna S)' },
-    { id: 'pendientes', grupo: 'Pendientes y vencidos', titulo: 'Tickets Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
+    { id: 'pendientes', grupo: 'Pendientes', titulo: 'Tickets Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
       info: 'Tickets que quedaron pendientes en la semana. (SISTEMAS, columna R)' },
-    { id: 'vencidas', grupo: 'Pendientes y vencidos', titulo: 'Total Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
-      info: 'Tickets vencidos (pasaron su plazo de atención). (SISTEMAS, columna U)' },
-    { id: 'ant_sin_vencer', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Sin Vencer', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 27,
-      info: 'Tickets de semanas anteriores que aún no vencieron. (SISTEMAS, columna M)' },
     // 2do conjunto: actividad de la semana.
     { id: 'tickets_semana', grupo: 'Actividad de la semana', titulo: 'Tickets de la Semana', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 77,
       info: 'Tickets ingresados en la semana. (SISTEMAS, columna N)' },
@@ -219,11 +215,17 @@ const SALDO_HIEL = [1369, 1369, 3592, 3592, 3592, 6138, 3325, 4080, 4080, 4080, 
 const LOGISTICA = {
   key: 'logística', nombre: 'Logística', estado: 'ok', objetivoPendiente: true,
   kpis: [
-    // Matriz de Costo (mensual, Junio)
-    { id: 'costo_log', grupo: G.costo, titulo: 'Costo total de Logística', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 1051842271,
-      info: 'Costo total del mes de Logística (Junio). (MATRIZ DE COSTO)' },
-    { id: 'costo_general', grupo: G.costo, titulo: 'Costo General del mes', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 1176272936,
-      info: 'Costo general del mes: descarga propios + fletes + lavado + taller. (MATRIZ DE COSTO)' },
+    // Matriz de Costo (mensual, Junio) — datos-héroe del mes en curso.
+    { id: 'costo_general', grupo: G.costo, titulo: 'Costo General del mes', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 1176272936, destacado: true,
+      info: 'Costo general de Junio: propios + fletes + lavado + taller. Es el TOTALIZADO del mes. (MATRIZ DE COSTO)' },
+    { id: 'costo_ton_prod', grupo: G.costo, titulo: 'Costo por tonelada producida', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 193767, destacado: true,
+      info: 'Costo total por tonelada producida en Junio. (MATRIZ DE COSTO — Total $/Tons Prod.)' },
+    { id: 'kilos_prod', grupo: G.costo, titulo: 'Kilos producidos', unidad: 'KG', formato: 'numero', sentido: 'up', meta: null, valor: 6070550,
+      info: 'Descarga de producción en Junio. (MATRIZ DE COSTO — Descarga Producción)' },
+    { id: 'kilos_desc', grupo: G.costo, titulo: 'Kilos descargados (neto)', unidad: 'KG', formato: 'numero', sentido: 'up', meta: null, valor: 10917908,
+      info: 'Descarga kg neta en Junio. (MATRIZ DE COSTO — Descarga KG Neta)' },
+    { id: 'dolar_ref', grupo: G.costo, titulo: 'Dólar de referencia', unidad: '', formato: 'moneda', sentido: 'up', meta: null, valor: 1500,
+      info: 'Valorización del dólar oficial usada en Junio (Banco Nación). (MATRIZ DE COSTO)' },
     // Disponibilidad de Flota (Sem 30)
     { id: 'disp_general', grupo: G.flota, titulo: 'Disponibilidad de flota', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: null, valor: 84,
       desglose: [{ nombre: 'Disponibles', valor: 67 }, { nombre: 'Total', valor: 80 }],
@@ -261,18 +263,53 @@ const LOGISTICA = {
       info: 'Saldo de hiel al último día del mes (31/07). (STOCK DE HIEL)' },
   ],
   graficos: [
-    { tipo: 'tabla', grupo: G.costo, titulo: 'Matriz de Costo (mes a mes)', info: 'Costos de logística por ítem, mes a mes (identificados por sector). (MATRIZ DE COSTO)',
+    { tipo: 'tabla', grupo: G.costo, titulo: 'Matriz de Costo · 2026 (mes a mes)',
+      info: 'Costos de logística por ítem y por mes, con los mismos identificadores de color del Excel: Propios, Fletes, Total Costo, Lavatachos, Taller y Total General. (MATRIZ DE COSTO — Logística, A1:N55)',
       columnas: ['Ítem', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-      filas: [
-        ['Total mes Propios', '$ 170.311.650', '$ 135.284.531', '$ 225.726.369', '$ 147.618.376', '$ 174.169.228', '$ 251.927.671'],
-        ['Total mes Fletes', '$ 556.192.701', '$ 604.028.315', '$ 701.667.920', '$ 516.434.800', '$ 637.802.650', '$ 799.914.600'],
-        ['Total mes Logística', '$ 726.504.350', '$ 739.312.846', '$ 927.394.289', '$ 664.053.176', '$ 811.971.878', '$ 1.051.842.271'],
-        ['Costo Logística $/kg', '$ 69,65', '$ 86,50', '$ 91,90', '$ 81,94', '$ 80,20', '$ 96,34'],
-        ['Total mes Lavado', '$ 65.894.989', '$ 61.665.571', '$ 69.857.126', '$ 70.342.932', '$ 73.344.283', '$ 78.540.383'],
-        ['Total mes Taller', '$ 41.309.801', '$ 64.853.812', '$ 46.625.124', '$ 74.493.537', '$ 112.892.410', '$ 45.890.383'],
-        ['TOTAL GENERAL', '$ 833.709.140', '$ 865.832.229', '$ 1.043.876.539', '$ 808.889.645', '$ 998.208.572', '$ 1.176.272.936'],
-        ['Total $/Tons Desc.', '$ 79.931', '$ 101.308', '$ 103.448', '$ 99.808', '$ 98.598', '$ 107.738'],
-        ['Total $/Tons Prod.', '$ 130.778', '$ 160.683', '$ 197.041', '$ 166.918', '$ 166.831', '$ 193.767'],
+      secciones: [
+        { label: 'Dólar de referencia (Banco Nación)', cat: 'dolar', filas: [
+          ['Dólar oficial $', '$ 1.465', '$ 1.420', '$ 1.405', '$ 1.415', '$ 1.430', '$ 1.500'],
+        ] },
+        { label: 'Descarga (kg)', cat: 'descarga', filas: [
+          ['Descarga producción', '6.374.977', '5.388.443', '5.297.767', '4.846.034', '5.983.368', '6.070.550'],
+          ['Descarga kg neta', '10.430.399', '8.546.571', '10.090.865', '8.104.433', '10.124.075', '10.917.908'],
+        ] },
+        { label: 'Propios', cat: 'propios', filas: [
+          ['Descarga propios (kg)', '4.615.842', '4.474.926', '5.058.980', '4.660.439', '5.841.572', '6.269.946'],
+          ['Total del mes Propios', '$ 170.311.650', '$ 135.284.531', '$ 225.726.369', '$ 147.618.376', '$ 174.169.228', '$ 251.927.671'],
+          ['Costo $/kg', '$ 37', '$ 30', '$ 45', '$ 32', '$ 30', '$ 40'],
+          ['Costo USD/ton', 'USD 25', 'USD 21', 'USD 32', 'USD 22', 'USD 21', 'USD 27'],
+        ] },
+        { label: 'Fletes', cat: 'fletes', filas: [
+          ['Descarga fletes (kg)', '5.814.556', '4.071.645', '5.031.885', '3.443.994', '4.282.503', '4.647.962'],
+          ['Total del mes Fletes', '$ 556.192.701', '$ 604.028.315', '$ 701.667.920', '$ 516.434.800', '$ 637.802.650', '$ 799.914.600'],
+          ['Costo $/kg', '$ 96', '$ 148', '$ 139', '$ 150', '$ 149', '$ 172'],
+          ['Costo USD/ton', 'USD 65', 'USD 104', 'USD 99', 'USD 106', 'USD 104', 'USD 115'],
+        ] },
+        { label: 'Total Costo Logística', cat: 'totalcosto', filas: [
+          ['Total del mes Logística', '$ 726.504.350', '$ 739.312.846', '$ 927.394.289', '$ 664.053.176', '$ 811.971.878', '$ 1.051.842.271'],
+          ['Costo Logística $/kg', '$ 69,65', '$ 86,50', '$ 91,90', '$ 81,94', '$ 80,20', '$ 96,34'],
+          ['Logística USD/ton', 'USD 48', 'USD 61', 'USD 65', 'USD 58', 'USD 56', 'USD 64'],
+        ] },
+        { label: 'Lavatachos', cat: 'lavatachos', filas: [
+          ['Total del mes Lavado', '$ 65.894.989', '$ 61.665.571', '$ 69.857.126', '$ 70.342.932', '$ 73.344.283', '$ 78.540.283'],
+          ['Costo $/lavado', '$ 79.487', '$ 81.568', '$ 82.185', '$ 82.756', '$ 86.287', '$ 92.400'],
+          ['Costo USD/lavado', 'USD 54', 'USD 57', 'USD 58', 'USD 58', 'USD 60', 'USD 62'],
+          ['Cantidad de lavados', '829', '756', '850', '850', '850', '850'],
+          ['USD/ton', 'USD 4', 'USD 5', 'USD 5', 'USD 6', 'USD 5', 'USD 5'],
+        ] },
+        { label: 'Taller', cat: 'taller', filas: [
+          ['Total del mes Taller', '$ 41.309.801', '$ 64.853.812', '$ 46.625.124', '$ 74.493.537', '$ 112.892.410', '$ 45.890.383'],
+          ['Costo USD/ton', 'USD 3', 'USD 5', 'USD 3', 'USD 6', 'USD 8', 'USD 3'],
+        ] },
+        { label: 'Total General', cat: 'totalgeneral', filas: [
+          ['TOTAL del mes · Costo General', '$ 833.709.140', '$ 865.832.229', '$ 1.043.876.539', '$ 808.889.645', '$ 998.208.572', '$ 1.176.272.936'],
+          ['Total USD/ton desc.', 'USD 55', 'USD 69', 'USD 71', 'USD 68', 'USD 67', 'USD 74'],
+          ['Total $/ton descargada', '$ 79.931', '$ 101.308', '$ 103.448', '$ 99.808', '$ 98.598', '$ 107.738'],
+          ['Total $/ton producida', '$ 130.778', '$ 160.683', '$ 197.041', '$ 166.918', '$ 166.831', '$ 193.767'],
+          ['% Kg Propios', '44%', '52%', '50%', '58%', '58%', '57%'],
+          ['% Kg Fletes', '56%', '48%', '50%', '42%', '42%', '43%'],
+        ] },
       ] },
     { tipo: 'bar', grupo: G.flota, titulo: 'Disponibilidad por flota (%)', info: 'Disponibilidad por tipo de unidad (semana).',
       datos: [{ nombre: 'Tractor', valor: 94 }, { nombre: 'Torito', valor: 100 }, { nombre: 'Chasis', valor: 97 }, { nombre: 'Balancín', valor: 100 }, { nombre: 'Semi', valor: 80 }, { nombre: 'Bateas', valor: 92 }] },
@@ -284,6 +321,7 @@ const LOGISTICA = {
         ['IHZ 228', 'Semi', 'Astpra', '6'], ['IKO 415', 'Semi', 'Astpra', '6'], ['IMO 536', 'Semi', 'Astpra', '2'],
         ['JAP 922', 'Semi', 'Astpra', '6'], ['JNS 094', 'Semi', 'Astpra', '6'], ['LMD 345', 'Semi', 'Astpra', '6'],
         ['LMD 346', 'Semi', 'Astpra', '6'], ['MXC 712', 'Semi', 'Lambert', '6'], ['AC 427 IU', 'Batea', 'Gomatro', '4'],
+        ['TOTAL', '15 unidades', '—', '82'],
       ] },
     { tipo: 'tabla', grupo: G.tambores, titulo: 'Cuenta de tambores por frigorífico', info: 'Stock de tambores por matadero (negativo = a favor).',
       columnas: ['Matadero', 'Anterior', 'Enviados', 'Recibidos', 'Stock Final'],

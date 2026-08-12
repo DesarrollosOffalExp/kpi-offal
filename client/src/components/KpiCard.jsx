@@ -46,7 +46,7 @@ export default function KpiCard({ kpi, onExpand }) {
     ? (kpi.sentido === 'down' ? actual <= kpi.meta : actual >= kpi.meta) : null;
 
   return (
-    <div className="kpi">
+    <div className={`kpi${kpi.destacado ? ' destacada' : ''}`}>
       <div className="kpi-top">
         <span className="kpi-titulo">{kpi.titulo}{kpi.info && <InfoTip text={kpi.info} />}</span>
         <div className="kpi-acciones">
