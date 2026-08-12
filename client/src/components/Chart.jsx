@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell,
 } from 'recharts';
@@ -11,6 +12,13 @@ import { CHART_COLORS, ejeStyle, tooltipStyle } from './charts/theme';
  */
 export default function Chart({ g, height = 260 }) {
   if (g.tipo === 'tabla') {
+    // La tabla admite dos formas:
+    //   · plana:      g.filas = [[celda,...], ...]
+    //   · por grupos: g.secciones = [{ label, cat, filas:[[...]] }, ...]
+    // Los grupos pintan un identificador de color tenue por sección (estilo
+    // Matriz de Costo del Excel, pero sobrio) vía la clase cat-<cat>.
+    const secciones = g.secciones || [{ filas: g.filas || [] }];
+    const cols = g.columnas.length;
     return (
       <div className="tabla-kpi-wrap">
         <table className={`tabla-kpi ${g.wrap ? 'wrap' : ''}`}>
@@ -18,10 +26,23 @@ export default function Chart({ g, height = 260 }) {
             <tr>{g.columnas.map((c, i) => <th key={i} className={i === 0 ? '' : 'num'}>{c}</th>)}</tr>
           </thead>
           <tbody>
-            {g.filas.map((f, ri) => (
-              <tr key={ri} className={/^total/i.test(String(f[0])) ? 'tot' : ''}>
-                {f.map((c, ci) => <td key={ci} className={ci === 0 ? '' : 'num'}>{c}</td>)}
-              </tr>
+            {secciones.map((sec, si) => (
+              <Fragment key={si}>
+                {sec.label && (
+                  <tr className={`sec-head cat-${sec.cat || 'neutral'}`}>
+                    <td colSpan={cols}>{sec.label}</td>
+                  </tr>
+                )}
+                {sec.filas.map((f, ri) => {
+                  const esTotal = /^total/i.test(String(f[0]));
+                  const cls = [sec.cat ? `cat-${sec.cat}` : '', esTotal ? 'tot' : ''].filter(Boolean).join(' ');
+                  return (
+                    <tr key={ri} className={cls}>
+                      {f.map((c, ci) => <td key={ci} className={ci === 0 ? '' : 'num'}>{c}</td>)}
+                    </tr>
+                  );
+                })}
+              </Fragment>
             ))}
           </tbody>
         </table>
