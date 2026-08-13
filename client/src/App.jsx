@@ -5,6 +5,7 @@ import KpiCard from './components/KpiCard';
 import SectorCharts from './components/SectorCharts';
 import Chart from './components/Chart';
 import Modal from './components/Modal';
+import MatrizCostoLogistica from './components/MatrizCostoLogistica';
 
 function formatearFecha(iso) {
   if (!iso) return '';
@@ -147,6 +148,16 @@ export default function App() {
               </nav>
             )}
             {(conSub ? [subActual] : grupos).map((g) => {
+              // La Matriz de Costo de Logística se reemplaza por el dashboard embebido.
+              const esMatrizLog = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Matriz de Costo');
+              if (esMatrizLog) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <MatrizCostoLogistica />
+                  </div>
+                );
+              }
               const kpisG = sector.kpis.filter((k) => (k.grupo || null) === g);
               const grafG = (sector.graficos || []).filter((x) => (x.grupo || null) === g);
               const vacio = kpisG.length === 0 && grafG.length === 0;
