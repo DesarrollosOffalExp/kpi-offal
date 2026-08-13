@@ -128,6 +128,7 @@
     pendientes:[13,20,26,26,6,3,4,22,29,12,10,7,9,24,7,15,17,24],
   };
   D.resol = D.tickets.map((t,i)=> t? D.tratados[i]/t*100 : null);
+  D.sinVencerAb = D.abiertos.map((a,i)=> a - D.vencidas[i]); // abiertos que aún no vencieron (67 = vencidas + sin vencer)
 
   const nf=new Intl.NumberFormat('es-AR');
   function fmt(v,f){
@@ -155,6 +156,7 @@
       +'<span class="ptitle">Estado de tickets</span></div><div class="pstats">'
       +'<div class="pstat"><span class="pv">'+fmt(D.abiertos[CUR],'num')+'</span><span class="pl">Total de abiertos</span></div><div class="pdiv"></div>'
       +'<div class="pstat"><span class="pv">'+fmt(D.vencidas[CUR],'num')+'</span><span class="pl">Total de vencidas</span></div><div class="pdiv"></div>'
+      +'<div class="pstat"><span class="pv">'+fmt(D.sinVencerAb[CUR],'num')+'</span><span class="pl">Sin vencer</span></div><div class="pdiv"></div>'
       +'<div class="pstat"><span class="pv">'+fmt(D.pendientes[CUR],'num')+'</span><span class="pl">Pendientes de la semana</span></div>'
       +'</div></div>';
   }
@@ -241,7 +243,7 @@
       ])
       +donutPanel('Composición de abiertos','Semana 32 · vencidas vs. resto',[
         {name:'Vencidas',v:D.vencidas[CUR],c:'#ff4d67'},
-        {name:'No vencidas',v:Math.max(0,D.abiertos[CUR]-D.vencidas[CUR]),c:'#26b6d9'},
+        {name:'Sin vencer',v:Math.max(0,D.sinVencerAb[CUR]),c:'#26b6d9'},
       ]);
   }
 
