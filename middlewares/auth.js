@@ -4,6 +4,12 @@ require('dotenv').config();
 // Clave de la app en el padrón central (acceso.Permisos.App).
 const APP_KEY = 'kpi';
 
+// Login de desarrollo: simula una identidad cuando NO hay Easy Auth delante.
+// SOLO se activa con el flag explícito ALLOW_DEV_LOGIN=true — nunca por el hecho
+// de "no estar en producción". Así, si en Azure falta una variable, la app NO
+// suplanta a nadie: devuelve 401. En producción esta variable no debe existir.
+const ALLOW_DEV_LOGIN = process.env.ALLOW_DEV_LOGIN === 'true';
+
 /**
  * Identidad vía Azure Easy Auth (Entra ID) + rol en el padrón central.
  *
@@ -33,9 +39,7 @@ function correoDeInvitado(email) {
 module.exports = async function auth(req, res, next) {
   const email =
     req.headers['x-ms-client-principal-name'] ||
-    (process.env.NODE_ENV !== 'production'
-      ? process.env.DEV_EMAIL || 'roberto.sanabria@offal.com.ar'
-      : null);
+    (ALLOW_DEV_LOGIN ? process.env.DEV_EMAIL : null);
 
   if (!email) {
     return res.status(401).json({ mensaje: 'No autenticado por Azure Easy Auth.' });
