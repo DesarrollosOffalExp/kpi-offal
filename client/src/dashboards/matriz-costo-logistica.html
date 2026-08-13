@@ -307,9 +307,10 @@
 
   /* ---------- Acordeones con heat-map ---------- */
   const BLOCKS=[
-    { id:'descarga', name:'Descarga (kg)', color:'var(--c-lava)', rows:[
+    { id:'descarga', name:'Descarga (kg)', color:'var(--c-lava)', open:true, extraOrigen:true, rows:[
       {l:'Descarga producción', d:D.descProd, f:'num'},{l:'Descarga kg neta', d:D.descNeta, f:'num'},
-      {l:'Descarga propios', d:D.descProp, f:'num'},{l:'Descarga fletes', d:D.descFlet, f:'num'}]},
+      {l:'Descarga propios', d:D.descProp, f:'num'},{l:'Descarga fletes', d:D.descFlet, f:'num'},
+      {l:'% Kg propios', d:D.pctPropios, f:'pct'},{l:'% Kg fletes', d:D.pctFletes, f:'pct'}]},
     { id:'propios', name:'Propios', color:'var(--c-propios)', open:true, rows:[
       {l:'Total del mes', d:D.propTotal, f:'money', strong:true, heat:true},{l:'Costo $ / kg', d:D.propKg, f:'dec', heat:true},{l:'Costo USD / ton', d:D.propUsd, f:'dec', led:true, heat:true}]},
     { id:'fletes', name:'Fletes', color:'var(--c-fletes)', open:true, rows:[
@@ -325,8 +326,7 @@
     { id:'general', name:'Total General (Costo General)', color:'var(--brand)', open:true, rows:[
       {l:'TOTAL del mes · Costo General', d:D.genTotal, f:'money', strong:true, heat:true},{l:'Total del mes sin fletes', d:D.genSinFlet, f:'money', heat:true},
       {l:'USD / ton sin fletes', d:D.usdSinFlet, f:'dec', led:true, heat:true},{l:'Total USD / ton descargada', d:D.usdTonDesc, f:'dec', led:true, heat:true},
-      {l:'Total $ / ton descargada', d:D.pesoTonDesc, f:'money', heat:true},{l:'Total $ / ton producida', d:D.pesoTonProd, f:'money', heat:true},
-      {l:'% Kg propios', d:D.pctPropios, f:'pct'},{l:'% Kg fletes', d:D.pctFletes, f:'pct'}]},
+      {l:'Total $ / ton descargada', d:D.pesoTonDesc, f:'money', heat:true},{l:'Total $ / ton producida', d:D.pesoTonProd, f:'money', heat:true}]},
     { id:'indec', name:'Ajustado por INDEC (costo real)', color:'#f5a623', open:true, rows:[
       {l:'Índice INDEC del mes', d:D.indec, f:'pct'},{l:'Ajustado por INDEC ($/ton)', d:D.ajusteIndec, f:'money', strong:true},{l:'Variación real (%)', d:D.pctIndec, f:'signpct'}]},
   ];
@@ -369,6 +369,34 @@
       s+='<text x="'+cx+'" y="'+(padT+ih+17)+'" font-size="11" font-weight="'+(cur?'700':'400')+'" fill="'+(cur?'#eef2f5':'#8ba0ab')+'" text-anchor="middle">'+ABBR[idx]+'</text>'; });
     return s+'</svg>';
   }
+  function numShort(v){ if(v==null) return ''; if(Math.abs(v)>=1e6) return (Math.round(v/1e5)/10).toLocaleString('es-AR')+' M'; if(Math.abs(v)>=1e3) return (Math.round(v/100)/10).toLocaleString('es-AR')+' k'; return nf.format(Math.round(v)); }
+  // Barras apiladas: kg descargados por origen (propios + fletes) mes a mes.
+  function stackedBarSVG(cols, series){
+    const W=680,H=220,padT=26,padB=26,padX=8, iw=W-padX*2, ih=H-padT-padB;
+    const totals=cols.map(i=>series.reduce((t,se)=>t+(se.d[i]||0),0));
+    const max=Math.max(...totals,1)*1.16, gap=iw/cols.length, bw=Math.min(52,gap*0.5);
+    let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
+    s+='<line x1="'+padX+'" y1="'+(padT+ih)+'" x2="'+(W-padX)+'" y2="'+(padT+ih)+'" stroke="#213540"/>';
+    cols.forEach((idx,k)=>{ const cx=padX+gap*k+gap/2, cur=idx===CUR, tot=totals[k];
+      if(tot===0){ s+='<text x="'+cx+'" y="'+(padT+ih+17)+'" font-size="11" fill="#667d89" text-anchor="middle">'+ABBR[idx]+'</text>'; return; }
+      let yb=padT+ih;
+      series.forEach(se=>{ const v=se.d[idx]||0; if(!v) return; const h=v/max*ih, y=yb-h;
+        const tt=ABBR[idx]+'\n'+se.name+': '+fmtT(v,'num')+' KG\nTotal neto: '+fmtT(tot,'num')+' KG';
+        s+='<rect class="hot" data-tip="'+tt+'" x="'+(cx-bw/2).toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" fill="'+se.hex+'" opacity="'+(cur?'1':'.72')+'"/>';
+        yb=y; });
+      s+='<text x="'+cx+'" y="'+(yb-6).toFixed(1)+'" font-size="10" font-weight="700" fill="#eef2f5" text-anchor="middle">'+numShort(tot)+'</text>';
+      s+='<text x="'+cx+'" y="'+(padT+ih+17)+'" font-size="11" font-weight="'+(cur?'700':'400')+'" fill="'+(cur?'#eef2f5':'#8ba0ab')+'" text-anchor="middle">'+ABBR[idx]+'</text>'; });
+    return s+'</svg>';
+  }
+  function origenChartHTML(){
+    const [a,z]=range(); const cols=[]; for(let i=a;i<z;i++) cols.push(i);
+    const series=[{name:'Propios',d:D.descProp,hex:'#2f9e6e'},{name:'Fletes',d:D.descFlet,hex:'#d99a2b'}];
+    if(cols.every(i=>series.every(se=>se.d[i]==null))) return '';
+    const leg=series.map(se=>'<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:11px;height:11px;border-radius:3px;background:'+se.hex+'"></span>'+se.name+'</span>').join('');
+    return '<div style="padding:16px 16px 18px;border-top:1px solid var(--line)">'
+      +'<div class="chart-t">Kg descargados por origen · mes a mes</div>'
+      +'<div class="leyenda" style="margin-bottom:6px">'+leg+'</div>'+stackedBarSVG(cols,series)+'</div>';
+  }
   function chartBody(b){
     const [a,z]=range(); const cols=[]; for(let i=a;i<z;i++) cols.push(i);
     if(cols.every(i=>b.chartRow.d[i]==null)) return '<div class="empty">Sin datos cargados aún para este período.</div>';
@@ -381,7 +409,7 @@
     document.getElementById('blocks').innerHTML=BLOCKS.map(b=>
       '<div class="block'+(b.open?' open':'')+'" data-id="'+b.id+'"><button class="block-head" aria-expanded="'+(b.open?'true':'false')+'">'
       +'<span class="dot" style="background:'+b.color+'"></span><span class="name">'+b.name+'</span><span class="meta">'+metaBlock(b)+'</span>'+chev+'</button>'
-      +'<div class="block-body">'+(b.chart?chartBody(b):tabla(b))+'</div></div>').join('');
+      +'<div class="block-body">'+(b.chart?chartBody(b):(tabla(b)+(b.extraOrigen?origenChartHTML():'')))+'</div></div>').join('');
     document.querySelectorAll('.block-head').forEach(btn=>btn.onclick=()=>{ const blk=btn.closest('.block'); const o=blk.classList.toggle('open'); btn.setAttribute('aria-expanded',o?'true':'false'); });
   }
 
