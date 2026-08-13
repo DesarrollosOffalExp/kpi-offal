@@ -6,6 +6,7 @@ import SectorCharts from './components/SectorCharts';
 import Chart from './components/Chart';
 import Modal from './components/Modal';
 import MatrizCostoLogistica from './components/MatrizCostoLogistica';
+import KpiSistemas from './components/KpiSistemas';
 
 function formatearFecha(iso) {
   if (!iso) return '';
@@ -139,6 +140,10 @@ export default function App() {
           </div>
         ) : (
           <section className="sector">
+            {sector.key === 'sistemas' ? (
+              <KpiSistemas />
+            ) : (
+            <>
             {sector.periodo && <div className="sector-periodo">Datos de la <b>{sector.periodo}</b></div>}
             {conSub && (
               <nav className="subtabs">
@@ -180,6 +185,8 @@ export default function App() {
                 </div>
               );
             })}
+            </>
+            )}
           </section>
         ))}
 
