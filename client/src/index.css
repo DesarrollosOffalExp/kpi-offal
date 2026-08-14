@@ -380,6 +380,16 @@ body {
 /* ---------- Tabla tipo KPI (Matriz de Costo, Costos x Frigorífico, etc.) ---------- */
 .panel-full { grid-column: 1 / -1; }
 .tabla-kpi-wrap { overflow-x: auto; }
+/* Tooltip de detalle por fila (ej. destino/motivo de una patente FS) */
+.tabla-kpi tbody tr.con-tip { cursor: help; }
+.tabla-kpi tbody tr.con-tip:hover td { background: rgba(38, 182, 217, .07); }
+.tabla-tip {
+  position: fixed; z-index: 60; pointer-events: none;
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 8px 11px; font-size: 12.5px; line-height: 1.5;
+  color: var(--text); white-space: pre-line; max-width: 300px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+}
 .tabla-kpi { width: 100%; border-collapse: collapse; font-size: 12.5px; white-space: nowrap; }
 .tabla-kpi thead th {
   text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
