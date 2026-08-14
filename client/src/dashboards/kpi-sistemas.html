@@ -84,7 +84,7 @@
   .pie{margin-top:22px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
   .hot{cursor:pointer;transition:opacity .12s,filter .12s;}
   rect.hot:hover,path.hot:hover,circle.hot:hover{opacity:1;filter:brightness(1.22);}
-  .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:9px 12px;font-size:12.5px;line-height:1.5;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:260px;}
+  .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:9px 12px;font-size:12.5px;line-height:1.5;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:340px;}
   .tip.show{opacity:1;transform:none;}
   @media(max-width:860px){ .sections{grid-template-columns:1fr;} .section{border-left:none;border-top:1px solid var(--line);} .section:first-child{border-top:none;} .donuts{grid-template-columns:1fr;} }
   @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
@@ -222,7 +222,7 @@
   }
 
   function donutSVG(segs,size){
-    const total=segs.reduce((s,x)=>s+x.v,0)||1, r=size/2-10, cx=size/2, cy=size/2, C=2*Math.PI*r, sw=size*0.17;
+    const total=segs.reduce((s,x)=>s+x.v,0)||1, sw=size*0.16, r=size/2-sw/2-5, cx=size/2, cy=size/2, C=2*Math.PI*r;
     let off=0, s='<svg viewBox="0 0 '+size+' '+size+'" width="'+size+'" height="'+size+'" role="img">';
     s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#0e1e28" stroke-width="'+sw+'"/>';
     segs.forEach(seg=>{ const frac=seg.v/total, len=frac*C;
@@ -250,16 +250,25 @@
 
   // Tickets abiertos asignados por agente (hoja Resumen) — suman el Total de Abiertos.
   const OPERADORES=[
-    {n:'Matias Juarez',v:19},{n:'Andrea Cardozo',v:15},{n:'Roberto Sanabria',v:12},
-    {n:'Tobias Santillan',v:5},{n:'Miguel Flores',v:3},{n:'Norberto Haunau',v:3},
-    {n:'Luis Arancibia',v:3},{n:'Ezequiel Manco',v:3},{n:'Juan Penalba',v:2},{n:'Jair Hnatiuk',v:2},
+    {n:"Matias Juarez",v:19,tickets:["Estado Proyecto E80 + Twins + Miniload", "Modificación Alto impacto EEUU", "ELIMINAR LEYENDA DUPLICADA: Librillo 24.21", "SOLICITUD DE ETIQUETAS: TENDÓN RUSIA 28.22", "Ingreso de Cajas al Cartofreezer", "MODIFICACIÓN Y ALTA DE CÓDIGOS Multivac", "Reiterados problemas en los descuentos", "UNIFICAR tickets RUSIA", "MOVIMIENTOS EN TWINS", "Genericos Molleja", "SOLICITUD DE MODIFICACIÓN DE ETIQUETA", "SOLICITUD DE MODIFICACIÓN DE ETIQUETA info nutricio…", "SOLICITUD DE MODIFICACIÓN DE ETIQUETA CON PRIORIDAD", "Modificación de existente urgente: HIGADO FETEADO V…", "Error ventana PWR-150 Stock disponible - Deposito", "Análisis de causa - Completar campos", "SOLICITUD PRE ETIQUETA: cantidad de paquetes", "SOLICITUD HIGADO Y LENGUA (RUSIA)", "Bloqueo de cajas - Membrana"]},
+    {n:"Andrea Cardozo",v:15,tickets:["Noax", "USUARIOS SIFAB", "Bandeja rackeable", "Compra - Switches", "Solicitud de ticketera", "Solicitud de parlante para pc n42", "Solcitud de impresora", "Pedido de equipo y usuarios - Sergio Vega", "Creación de usuarios en Sifab", "Celular flota pantalla con fallas", "IMPRESORAS CONGELADO", "Solicitud de equipos: Administración productiva", "Pedido de celulares", "Celular de la guardia", "usuario bloqueado"]},
+    {n:"Roberto Sanabria",v:12,tickets:["Control de Fajas", "Interfaz Humand - Drewolf", "Integración Tango Capataz y Twins", "prueba de PI4", "ERROR EN VENTANA 00057 PROGRAMA SALIDA", "Intergración TPM - Drewolf", "RE: RE: REDONDEOS Y XML [#756899] Open [#204670] Cl…", "Modificacion en Alta de Proveedores SIFAB", "Armado de tablero de KPI´S con IA", "RE: ALICUOTAS PHYSIS MES DE AGOSTO [#780681] Resolv…", "Cambio de gestión de información- Registro de carga", "sin acceso al forms"]},
+    {n:"Tobias Santillan",v:5,tickets:["Solicitud de monitor", "colectores supermercados - NO PRENDEN", "PC 47", "NO HABLE MAIL EN OT", "Programas necesarios para usar en Insumos."]},
+    {n:"Ezequiel Manco",v:3,tickets:["Office", "PI4", "PERMISO PARA ELIMINAR ETIQUETAS PIR Y PI4"]},
+    {n:"Miguel Flores",v:3,tickets:["Cable utp Facial Insumos.", "Balanza de ingreso cámara despostada", "FALLA TPM LINEA 2"]},
+    {n:"Norberto Haunau",v:3,tickets:["CAMARA Y FACIAL", "BLOQUEO CAJAS DE SESO VP 5.9", "aplicaciones"]},
+    {n:"Luis Arancibia",v:3,tickets:["Noax 10 no funciona pistola", "IMPRESORAS", "IMPRESORA NO ENCIENDE"]},
+    {n:"Juan Penalba",v:2,tickets:["Interno", "RE: Solicitud de colocación de bandeja porta cables…"]},
+    {n:"Jair Hnatiuk",v:2,tickets:["Web app para Gerencia", "Web app para logistica"]},
   ];
   function hbarSVG(items){
     const W=680,rowH=30,padL=150,padR=48,padT=6,padB=6, iw=W-padL-padR;
     const H=padT+padB+items.length*rowH, max=Math.max(...items.map(i=>i.v),1)*1.05;
     let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
     items.forEach((it,i)=>{ const y=padT+i*rowH+rowH/2, bw=Math.max(2,it.v/max*iw);
-      const tt=it.n+'\n'+it.v+' tickets abiertos';
+      const lista=(it.tickets||[]).slice(0,14).map(t=>'· '+t).join('\n');
+      const mas=(it.tickets||[]).length>14?'\n… +'+(it.tickets.length-14)+' más':'';
+      const tt=it.n+' — '+it.v+' abiertos\n'+lista+mas;
       s+='<text x="'+(padL-10)+'" y="'+(y+4)+'" font-size="12" fill="#8ba0ab" text-anchor="end">'+it.n+'</text>';
       s+='<rect class="hot" data-tip="'+tt+'" x="'+padL+'" y="'+(y-9)+'" width="'+bw.toFixed(1)+'" height="18" rx="4" fill="#26b6d9"/>';
       s+='<text x="'+(padL+bw+7).toFixed(1)+'" y="'+(y+4)+'" font-size="12" font-weight="700" fill="#eef2f5">'+it.v+'</text>';

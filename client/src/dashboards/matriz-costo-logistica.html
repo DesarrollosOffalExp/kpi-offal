@@ -266,7 +266,10 @@
         if(c.isDelta){ const up=(v||0)>=0; sub='<span class="delta '+(up?'bad':'good')+'">'+(up?'▲':'▼')+' real vs. mes ant.</span>'; }
         else if(c.neutral){ sub=deltaHTML(v,c.d[pi],false); }
         else { sub=deltaHTML(v,c.d[pi],true); }
-        const val = c.isDelta ? fmt(v,'signpct') : (c.f==='dec'? fmt(v,'dec')+(c.led?led(v):'') : fmt(v,c.f));
+        const val = c.isDelta ? fmt(v,'signpct')
+          : c.f==='dec' ? fmt(v,'dec')+(c.led?led(v):'')
+          : (c.f==='money' && Math.abs(v)>=1e7) ? moneyShort(v)
+          : fmt(v,c.f);
         return '<div class="card"><span class="ck">'+c.k+'</span><span class="cv">'+val+'</span>'+sub+'</div>';
       }).join('');
       const leg=sec.series.length>1?'<div class="leyenda">'+sec.series.map(s=>'<span class="li"><span class="sw" style="background:'+s.c+'"></span>'+s.name+'</span>').join('')+'</div>':'';
@@ -277,7 +280,7 @@
 
   /* ---------- Donas ---------- */
   function donutSVG(segs,size){
-    const total=segs.reduce((s,x)=>s+x.v,0)||1, r=size/2-10, cx=size/2, cy=size/2, C=2*Math.PI*r, sw=size*0.17;
+    const total=segs.reduce((s,x)=>s+x.v,0)||1, sw=size*0.16, r=size/2-sw/2-5, cx=size/2, cy=size/2, C=2*Math.PI*r;
     let off=0, s='<svg viewBox="0 0 '+size+' '+size+'" width="'+size+'" height="'+size+'" role="img">';
     s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#0e1e28" stroke-width="'+sw+'"/>';
     segs.forEach(seg=>{ const frac=seg.v/total, len=frac*C;
