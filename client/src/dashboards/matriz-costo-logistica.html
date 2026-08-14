@@ -382,18 +382,20 @@
   function numShort(v){ if(v==null) return ''; if(Math.abs(v)>=1e6) return (Math.round(v/1e5)/10).toLocaleString('es-AR')+' M'; if(Math.abs(v)>=1e3) return (Math.round(v/100)/10).toLocaleString('es-AR')+' k'; return nf.format(Math.round(v)); }
   // Composición de kg descargados por origen (%), barras horizontales 100% por mes.
   function origenPctSVG(cols){
-    const W=680, rowH=32, padL=44, padR=50, padT=8, padB=8, iw=W-padL-padR;
-    const H=padT+padB+cols.length*rowH;
+    const W=680, barH=15, barGap=4, groupGap=16, padL=48, padR=54, padT=10, padB=6, iw=W-padL-padR;
+    const groupH=2*barH+barGap;
+    const H=padT+padB+Math.max(0,cols.length*(groupH+groupGap)-groupGap);
     let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
-    cols.forEach((idx,k)=>{ const y=padT+k*rowH+rowH/2, cur=idx===CUR;
+    cols.forEach((idx,k)=>{ const gy=padT+k*(groupH+groupGap), cur=idx===CUR;
       const pp=D.pctPropios[idx], pf=D.pctFletes[idx];
-      s+='<text x="'+(padL-8)+'" y="'+(y+4)+'" font-size="11" font-weight="'+(cur?'700':'400')+'" fill="'+(cur?'#eef2f5':'#8ba0ab')+'" text-anchor="end">'+ABBR[idx]+'</text>';
+      s+='<text x="'+(padL-8)+'" y="'+(gy+groupH/2+4)+'" font-size="11" font-weight="'+(cur?'700':'400')+'" fill="'+(cur?'#eef2f5':'#8ba0ab')+'" text-anchor="end">'+ABBR[idx]+'</text>';
       if(pp==null) return;
-      const wp=pp*iw, wf=pf*iw;
-      s+='<rect class="hot" data-tip="'+ABBR[idx]+'\nPropios: '+(Math.round(pp*1000)/10).toLocaleString("es-AR")+'%" x="'+padL+'" y="'+(y-9)+'" width="'+wp.toFixed(1)+'" height="18" rx="3" fill="#2f9e6e" opacity="'+(cur?'1':'.85')+'"/>';
-      s+='<rect class="hot" data-tip="'+ABBR[idx]+'\nFletes: '+(Math.round(pf*1000)/10).toLocaleString("es-AR")+'%" x="'+(padL+wp).toFixed(1)+'" y="'+(y-9)+'" width="'+wf.toFixed(1)+'" height="18" rx="3" fill="#d99a2b" opacity="'+(cur?'1':'.85')+'"/>';
-      if(wp>32) s+='<text x="'+(padL+wp/2).toFixed(1)+'" y="'+(y+4)+'" font-size="10.5" font-weight="800" fill="#0c1c26" text-anchor="middle">'+Math.round(pp*100)+'%</text>';
-      if(wf>32) s+='<text x="'+(padL+wp+wf/2).toFixed(1)+'" y="'+(y+4)+'" font-size="10.5" font-weight="800" fill="#0c1c26" text-anchor="middle">'+Math.round(pf*100)+'%</text>';
+      [['Propios',pp,'#2f9e6e'],['Fletes',pf,'#d99a2b']].forEach((r,ri)=>{
+        const y=gy+ri*(barH+barGap), w=r[1]*iw;
+        s+='<rect x="'+padL+'" y="'+y+'" width="'+iw+'" height="'+barH+'" rx="3" fill="#162b37"/>';
+        s+='<rect class="hot" data-tip="'+ABBR[idx]+'\n'+r[0]+': '+(Math.round(r[1]*1000)/10).toLocaleString("es-AR")+'%" x="'+padL+'" y="'+y+'" width="'+w.toFixed(1)+'" height="'+barH+'" rx="3" fill="'+r[2]+'" opacity="'+(cur?'1':'.85')+'"/>';
+        s+='<text x="'+(padL+w+6).toFixed(1)+'" y="'+(y+barH-3)+'" font-size="10" font-weight="700" fill="#eef2f5">'+Math.round(r[1]*100)+'%</text>';
+      });
     });
     return s+'</svg>';
   }
