@@ -14,7 +14,7 @@ function formatearFecha(iso) {
   return d.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 function fmt(v, formato, unidad) {
-  if (v == null || Number.isNaN(v)) return '—';
+  if (v == null || Number.isNaN(v)) return '-';
   if (formato === 'porcentaje') return `${Math.round(v * 10) / 10}%`;
   if (formato === 'moneda') return `$ ${v.toLocaleString('es-AR')}`;
   const n = v.toLocaleString('es-AR');

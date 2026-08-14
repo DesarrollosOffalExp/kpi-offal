@@ -2,7 +2,7 @@ import InfoTip from './InfoTip';
 import ExpandButton from './ExpandButton';
 
 function fmt(valor, formato, unidad) {
-  if (valor == null || Number.isNaN(valor)) return '—';
+  if (valor == null || Number.isNaN(valor)) return '-';
   if (formato === 'porcentaje') return `${redondear(valor)}%`;
   if (formato === 'moneda') return `$ ${valor.toLocaleString('es-AR')}`;
   const n = valor.toLocaleString('es-AR');

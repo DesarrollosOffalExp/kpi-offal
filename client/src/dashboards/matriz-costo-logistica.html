@@ -126,7 +126,7 @@
     <div>
       <p class="overline">Offal · Logística</p>
       <h1>Matriz de Costo 2026</h1>
-      <p class="sub">Costo logístico mes a mes — hoja <b>Gastos</b>. Variaciones vs. mes anterior.</p>
+      <p class="sub">Costo logístico mes a mes · hoja <b>Gastos</b>. Variaciones vs. mes anterior.</p>
     </div>
     <div class="head-right">
       <span class="fuente">Datos reales · Enero a Junio</span>
@@ -144,7 +144,7 @@
 
   <div class="blocks" id="blocks"></div>
   <div class="tip" id="tip" role="status" aria-live="polite"></div>
-  <p class="pie">Fuente: <b>2026 Consumo de combustible.xlsx</b> · hoja <b>Gastos</b> (filas 7–47). Julio a Diciembre aún sin datos en el original — se muestran vacíos (—). LED en USD/ton: verde &lt;70 · ámbar 70–100 · rojo &gt;100. Celdas coloreadas por intensidad de costo dentro de cada fila (verde=menor, rojo=mayor).</p>
+  <p class="pie">Fuente: <b>2026 Consumo de combustible.xlsx</b> · hoja <b>Gastos</b> (filas 7–47). Julio a Diciembre aún sin datos en el original · se muestran vacíos (-). LED en USD/ton: verde &lt;70 · ámbar 70–100 · rojo &gt;100. Celdas coloreadas por intensidad de costo dentro de cada fila (verde=menor, rojo=mayor).</p>
 </div>
 
 <script>
@@ -170,7 +170,7 @@
 
   const nf=new Intl.NumberFormat('es-AR');
   function fmt(v,f){
-    if(v==null||v==='') return '<span class="dash">—</span>';
+    if(v==null||v==='') return '<span class="dash">-</span>';
     if(f==='money') return '$ '+nf.format(Math.round(v));
     if(f==='num') return nf.format(Math.round(v));
     if(f==='dec') return nf.format(Math.round(v*100)/100);
@@ -188,7 +188,7 @@
   function led(v){ if(v==null) return ''; if(v>100) return '<span class="led red"></span>'; if(v<70) return '<span class="led green"></span>'; return '<span class="led amber"></span>'; }
   const prevIdx=()=>{ for(let i=CUR-1;i>=0;i--) if(D.logTotal[i]!=null) return i; return null; };
   function deltaHTML(cur,prev,sentidoDown){
-    if(cur==null||prev==null||prev===0) return '<span class="delta neutral">—</span>';
+    if(cur==null||prev==null||prev===0) return '<span class="delta neutral">-</span>';
     const pct=(cur-prev)/Math.abs(prev)*100, up=pct>=0;
     const bad = sentidoDown ? up : !up;
     return '<span class="delta '+(bad?'bad':'good')+'">'+(up?'▲':'▼')+' '+Math.abs(Math.round(pct*10)/10).toLocaleString('es-AR')+'%</span>';
@@ -251,7 +251,7 @@
     });
     const bandW=cols.length<2?iw:iw/(cols.length-1);
     cols.forEach((idx,k)=>{
-      const tt=ABBR[idx]+'\n'+series.map(se=>se.name+': '+(se.d[idx]==null?'—':fmtT(se.d[idx],'money'))).join('\n');
+      const tt=ABBR[idx]+'\n'+series.map(se=>se.name+': '+(se.d[idx]==null?'-':fmtT(se.d[idx],'money'))).join('\n');
       const bx=Math.max(0,x(k)-bandW/2);
       s+='<rect class="hot" data-tip="'+tt+'" x="'+bx.toFixed(1)+'" y="'+padT+'" width="'+bandW.toFixed(1)+'" height="'+ih+'" fill="transparent"/>';
     });
@@ -437,7 +437,7 @@
   renderPrimary(); renderSections(); renderDonuts(); renderBlocks();
 
   // Cuando se embebe en un iframe (dentro del tablero), avisar el alto real
-  // para que el contenedor lo ajuste — así no hay scroll interno ni recortes.
+  // para que el contenedor lo ajuste · así no hay scroll interno ni recortes.
   function postAlto(){ try{ parent.postMessage({ tipo:'matriz-alto', alto:document.body.scrollHeight }, '*'); }catch(e){} }
   if(window.parent!==window){
     postAlto(); window.addEventListener('resize', postAlto);
