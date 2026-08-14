@@ -86,6 +86,23 @@
   rect.hot:hover,path.hot:hover,circle.hot:hover{opacity:1;filter:brightness(1.22);}
   .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:9px 12px;font-size:12.5px;line-height:1.5;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:340px;}
   .tip.show{opacity:1;transform:none;}
+  .delta-lbl{font-size:9px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.03em;}
+  .ico-i{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--muted-2);color:var(--muted);font-size:9px;font-weight:800;font-style:normal;line-height:1;cursor:help;vertical-align:middle;}
+  .ico-i:hover{border-color:var(--info);color:var(--info);}
+  /* Modal de detalle por agente */
+  #modal-op{position:absolute;left:0;top:0;width:100%;z-index:80;display:none;}
+  #modal-op.show{display:block;}
+  .mop-bg{position:absolute;inset:0;background:rgba(4,10,15,.62);}
+  .mop-box{position:absolute;left:50%;transform:translateX(-50%);width:min(560px,92%);background:var(--panel);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.6);max-height:440px;display:flex;flex-direction:column;overflow:hidden;}
+  .mop-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);}
+  .mop-t{font-size:16px;font-weight:800;}
+  .mop-s{font-size:12px;color:var(--muted);margin-top:2px;}
+  .mop-x{appearance:none;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:14px;flex-shrink:0;}
+  .mop-x:hover{color:var(--text);border-color:var(--brand);}
+  .mop-list{list-style:none;margin:0;padding:8px;overflow-y:auto;}
+  .mop-list li{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:8px;font-size:13px;color:var(--text);line-height:1.4;}
+  .mop-list li:hover{background:var(--panel-3);}
+  .mop-list li .n{flex-shrink:0;min-width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;background:var(--panel-2);color:var(--muted);font-size:11px;font-weight:700;}
   @media(max-width:860px){ .sections{grid-template-columns:1fr;} .section{border-left:none;border-top:1px solid var(--line);} .section:first-child{border-top:none;} .donuts{grid-template-columns:1fr;} }
   @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
 </style>
@@ -112,6 +129,7 @@
   <section id="operadores"></section>
   <div class="blocks" id="blocks"></div>
   <div class="tip" id="tip" role="status" aria-live="polite"></div>
+  <div id="modal-op"></div>
   <p class="pie">Fuente: <b>KPI sistemas.xlsx</b> · hoja <b>KPI</b> (semanas 15–32). Semana actual: <b>32</b>. Rechazados, Anulados y Urgentes no tienen datos cargados en el original. Celdas coloreadas por intensidad (verde=menor, rojo=mayor) en las métricas donde más alto es peor.</p>
 </div>
 
@@ -162,25 +180,26 @@
       +'</div></div>';
   }
 
+  const VS = ' La flecha y el % son la variación respecto a la semana anterior (S31 a S32).';
   const SECTIONS=[
     { title:'Estado de tickets', sub:'abiertos · vencidas · pendientes',
       cards:[
-        {k:'Total abiertos', d:D.abiertos, f:'num', down:true},
-        {k:'Total vencidas', d:D.vencidas, f:'num', down:true},
-        {k:'Pendientes sem.', d:D.pendientes, f:'num', down:true},
+        {k:'Total abiertos', d:D.abiertos, f:'num', down:true, i:'Tickets abiertos (sin cerrar) al cierre de la semana.'+VS},
+        {k:'Total vencidas', d:D.vencidas, f:'num', down:true, i:'Tickets que pasaron su plazo de atención.'+VS},
+        {k:'Pendientes sem.', d:D.pendientes, f:'num', down:true, i:'Tickets que quedaron pendientes en la semana.'+VS},
       ],
       series:[{name:'Abiertos',d:D.abiertos,c:'#26b6d9'},{name:'Vencidas',d:D.vencidas,c:'#ff4d67'}] },
     { title:'Actividad semanal', sub:'ingreso y resolución',
       cards:[
-        {k:'Tickets semana', d:D.tickets, f:'num', neutral:true},
-        {k:'Tratados', d:D.tratados, f:'num', down:false},
-        {k:'% Resolución', d:D.resol, f:'pct', down:false},
+        {k:'Tickets semana', d:D.tickets, f:'num', neutral:true, i:'Tickets ingresados en la semana.'+VS},
+        {k:'Tratados', d:D.tratados, f:'num', down:false, i:'Tickets resueltos o gestionados en la semana.'+VS},
+        {k:'% Resolución', d:D.resol, f:'pct', down:false, i:'Porcentaje de tickets de la semana que se trataron (Tratados sobre Ingresados).'+VS},
       ],
       series:[{name:'Ingresados',d:D.tickets,c:'#26b6d9'},{name:'Tratados',d:D.tratados,c:'#22e39b'}] },
     { title:'Backlog anterior', sub:'arrastre de semanas previas',
       cards:[
-        {k:'Ant. vencidas', d:D.vencidas, f:'num', down:true},
-        {k:'Ant. sin vencer', d:D.sinVencer, f:'num', neutral:true},
+        {k:'Ant. vencidas', d:D.vencidas, f:'num', down:true, i:'Tickets vencidos que arrastran de semanas anteriores.'+VS},
+        {k:'Ant. sin vencer', d:D.sinVencer, f:'num', neutral:true, i:'Tickets de semanas anteriores que todavía no vencieron.'+VS},
       ],
       series:[{name:'Ant. sin vencer',d:D.sinVencer,c:'#8ba0ab'},{name:'Ant. vencidas',d:D.vencidas,c:'#ff4d67'}] },
   ];
@@ -208,13 +227,14 @@
     });
     return s+'</svg>';
   }
+  function infoIcon(txt){ return txt ? ' <span class="ico-i hot" data-tip="'+txt+'">i</span>' : ''; }
   function renderSections(){
     document.getElementById('sections').innerHTML=SECTIONS.map(sec=>{
       const pi=CUR-1;
       const cards=sec.cards.map(c=>{
         const v=c.d[CUR];
         const sub = c.neutral ? deltaHTML(v,c.d[pi],false) : deltaHTML(v,c.d[pi],c.down);
-        return '<div class="card"><span class="ck">'+c.k+'</span><span class="cv">'+fmt(v,c.f)+'</span>'+sub+'</div>';
+        return '<div class="card"><span class="ck">'+c.k+infoIcon(c.i)+'</span><span class="cv">'+fmt(v,c.f)+'</span>'+sub+'<span class="delta-lbl">vs. sem. ant.</span></div>';
       }).join('');
       const leg='<div class="leyenda">'+sec.series.map(s=>'<span class="li"><span style="width:12px;height:3px;border-radius:2px;background:'+s.c+'"></span>'+s.name+'</span>').join('')+'</div>';
       return '<div class="section"><h2 class="sec-title">'+sec.title+'</h2><p class="sec-sub">'+sec.sub+'</p><div class="cards">'+cards+'</div>'+leg+lineSVG(sec.series)+'</div>';
@@ -266,12 +286,13 @@
     const H=padT+padB+items.length*rowH, max=Math.max(...items.map(i=>i.v),1)*1.05;
     let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
     items.forEach((it,i)=>{ const y=padT+i*rowH+rowH/2, bw=Math.max(2,it.v/max*iw);
-      const lista=(it.tickets||[]).slice(0,14).map(t=>'· '+t).join('\n');
-      const mas=(it.tickets||[]).length>14?'\n… +'+(it.tickets.length-14)+' más':'';
-      const tt=it.n+' · '+it.v+' abiertos\n'+lista+mas;
+      const lista=(it.tickets||[]).slice(0,10).map(t=>'· '+t).join('\n');
+      const mas=(it.tickets||[]).length>10?'\n… +'+(it.tickets.length-10)+' más':'';
+      const tt=it.n+' · '+it.v+' abiertos\n'+lista+mas+'\n(clic para ver el detalle)';
       s+='<text x="'+(padL-10)+'" y="'+(y+4)+'" font-size="12" fill="#8ba0ab" text-anchor="end">'+it.n+'</text>';
-      s+='<rect class="hot" data-tip="'+tt+'" x="'+padL+'" y="'+(y-9)+'" width="'+bw.toFixed(1)+'" height="18" rx="4" fill="#26b6d9"/>';
+      s+='<rect x="'+padL+'" y="'+(y-9)+'" width="'+bw.toFixed(1)+'" height="18" rx="4" fill="#26b6d9"/>';
       s+='<text x="'+(padL+bw+7).toFixed(1)+'" y="'+(y+4)+'" font-size="12" font-weight="700" fill="#eef2f5">'+it.v+'</text>';
+      s+='<rect class="hot" data-tip="'+tt+'" data-op="'+i+'" x="0" y="'+(y-rowH/2)+'" width="'+W+'" height="'+rowH+'" fill="transparent"/>';
     });
     return s+'</svg>';
   }
@@ -327,6 +348,27 @@
     b.classList.add('on'); b.setAttribute('aria-selected','true');
     renderSections(); renderBlocks(); if(window.parent!==window)setTimeout(postAlto,30);
   });
+
+  // Modal de detalle de tickets por agente (clic en una barra del gráfico).
+  function openModalOp(op, atY){
+    const o=OPERADORES[op]; if(!o) return;
+    const items=o.tickets.map((t,i)=>'<li><span class="n">'+(i+1)+'</span><span>'+t+'</span></li>').join('');
+    const box=document.getElementById('modal-op');
+    box.innerHTML='<div class="mop-bg"></div><div class="mop-box"><div class="mop-head">'
+      +'<div><div class="mop-t">'+o.n+'</div><div class="mop-s">'+o.v+' tickets abiertos asignados</div></div>'
+      +'<button class="mop-x" aria-label="Cerrar">✕</button></div><ol class="mop-list">'+items+'</ol></div>';
+    box.classList.add('show');
+    const inner=box.querySelector('.mop-box');
+    const top=Math.max(16,(atY||160)-120);
+    inner.style.top=top+'px';
+    box.style.height=Math.max(document.body.scrollHeight, top+inner.offsetHeight+24)+'px';
+    box.querySelector('.mop-bg').onclick=closeModalOp;
+    box.querySelector('.mop-x').onclick=closeModalOp;
+    if(window.parent!==window) setTimeout(postAlto,30);
+  }
+  function closeModalOp(){ const box=document.getElementById('modal-op'); box.classList.remove('show'); box.innerHTML=''; box.style.height=''; if(window.parent!==window) setTimeout(postAlto,30); }
+  document.addEventListener('click',e=>{ const el=e.target.closest&&e.target.closest('[data-op]'); if(el) openModalOp(+el.getAttribute('data-op'), e.pageY); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModalOp(); });
 
   renderPrimary(); renderSections(); renderDonuts(); renderOperadores(); renderBlocks();
 
