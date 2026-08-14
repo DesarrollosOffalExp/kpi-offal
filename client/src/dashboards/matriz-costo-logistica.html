@@ -58,6 +58,9 @@
   .card .cv{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.05;color:#fff;width:100%;}
   .delta{font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:3px;}
   .delta.bad{color:var(--bad);} .delta.good{color:var(--good);} .delta.neutral{color:var(--muted);}
+  .delta-lbl{font-size:9px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.03em;}
+  .ico-i{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--muted-2);color:var(--muted);font-size:9px;font-weight:800;font-style:normal;line-height:1;cursor:help;vertical-align:middle;}
+  .ico-i:hover{border-color:var(--info);color:var(--info);}
   .leyenda{display:flex;gap:14px;font-size:11px;color:var(--muted);margin:0 0 4px 2px;}
   .leyenda .li{display:inline-flex;align-items:center;gap:5px;}
   .leyenda .sw{width:12px;height:3px;border-radius:2px;}
@@ -209,26 +212,28 @@
   }
 
   /* ---------- Secciones (scorecards + línea) ---------- */
+  const VS = ' La flecha y el % son la variación respecto al mes anterior (Mayo a Junio).';
+  const SEMAF = ' El punto es un semáforo: verde por debajo de 70, ámbar entre 70 y 100, rojo por encima de 100.';
   const SECTIONS=[
     { title:'Costo por Tonelada', sub:'descargada vs. producida',
       cards:[
-        {k:'$/ton desc.', d:D.pesoTonDesc, f:'money'},
-        {k:'USD/ton desc.', d:D.usdTonDesc, f:'dec', led:true},
-        {k:'$/ton prod.', d:D.pesoTonProd, f:'money'},
+        {k:'$/ton desc.', d:D.pesoTonDesc, f:'money', i:'Costo total de logística por cada tonelada descargada (en pesos).'+VS},
+        {k:'USD/ton desc.', d:D.usdTonDesc, f:'dec', led:true, i:'Costo por tonelada descargada, en dólares.'+SEMAF+VS},
+        {k:'$/ton prod.', d:D.pesoTonProd, f:'money', i:'Costo total por cada tonelada producida (en pesos).'+VS},
       ],
       series:[{name:'Descargada',d:D.pesoTonDesc,c:'#26b6d9'},{name:'Producida',d:D.pesoTonProd,c:'#22e39b'}] },
     { title:'Costo del Mes', sub:'Logística y General',
       cards:[
-        {k:'Costo Logística', d:D.logTotal, f:'money'},
-        {k:'Total General', d:D.genTotal, f:'money'},
-        {k:'Log. $/kg', d:D.logKg, f:'dec'},
+        {k:'Costo Logística', d:D.logTotal, f:'money', i:'Total del mes de logística = Propios + Fletes.'+VS},
+        {k:'Total General', d:D.genTotal, f:'money', i:'Costo General del mes = Logística + Lavado + Taller.'+VS},
+        {k:'Log. $/kg', d:D.logKg, f:'dec', i:'Costo de logística por kilo descargado.'+VS},
       ],
       series:[{name:'Logística',d:D.logTotal,c:'#26b6d9'},{name:'General',d:D.genTotal,c:'#e11f46'}] },
     { title:'Contexto', sub:'dólar e inflación (INDEC)',
       cards:[
-        {k:'Dólar ref.', d:D.dolar, f:'money', neutral:true},
-        {k:'Var. real', d:D.pctIndec, f:'signpct', isDelta:true},
-        {k:'Log. USD/ton', d:D.logUsd, f:'dec', led:true},
+        {k:'Dólar ref.', d:D.dolar, f:'money', neutral:true, i:'Cotización del dólar oficial usada en el mes (Banco Nación).'+VS},
+        {k:'Var. real', d:D.pctIndec, f:'signpct', isDelta:true, i:'Costo por tonelada ajustado por inflación (INDEC): cuánto subió o bajó el costo REAL respecto al mes anterior, descontando la inflación. Si es negativo, el costo bajó en términos reales.'},
+        {k:'Log. USD/ton', d:D.logUsd, f:'dec', led:true, i:'Costo de logística por tonelada, en dólares.'+SEMAF+VS},
       ],
       series:[{name:'Dólar $',d:D.dolar,c:'#f5a623'}] },
   ];
@@ -257,6 +262,7 @@
     });
     return s+'</svg>';
   }
+  function infoIcon(txt){ return txt ? ' <span class="ico-i hot" data-tip="'+txt+'">i</span>' : ''; }
   function renderSections(){
     document.getElementById('sections').innerHTML=SECTIONS.map(sec=>{
       const pi=prevIdx();
@@ -270,7 +276,8 @@
           : c.f==='dec' ? fmt(v,'dec')+(c.led?led(v):'')
           : (c.f==='money' && Math.abs(v)>=1e7) ? moneyShort(v)
           : fmt(v,c.f);
-        return '<div class="card"><span class="ck">'+c.k+'</span><span class="cv">'+val+'</span>'+sub+'</div>';
+        const vsLbl = c.isDelta ? '' : '<span class="delta-lbl">vs. mes ant.</span>';
+        return '<div class="card"><span class="ck">'+c.k+infoIcon(c.i)+'</span><span class="cv">'+val+'</span>'+sub+vsLbl+'</div>';
       }).join('');
       const leg=sec.series.length>1?'<div class="leyenda">'+sec.series.map(s=>'<span class="li"><span class="sw" style="background:'+s.c+'"></span>'+s.name+'</span>').join('')+'</div>':'';
       return '<div class="section"><h2 class="sec-title">'+sec.title+'</h2><p class="sec-sub">'+sec.sub+'</p>'
@@ -373,32 +380,30 @@
     return s+'</svg>';
   }
   function numShort(v){ if(v==null) return ''; if(Math.abs(v)>=1e6) return (Math.round(v/1e5)/10).toLocaleString('es-AR')+' M'; if(Math.abs(v)>=1e3) return (Math.round(v/100)/10).toLocaleString('es-AR')+' k'; return nf.format(Math.round(v)); }
-  // Barras apiladas: kg descargados por origen (propios + fletes) mes a mes.
-  function stackedBarSVG(cols, series){
-    const W=680,H=220,padT=26,padB=26,padX=8, iw=W-padX*2, ih=H-padT-padB;
-    const totals=cols.map(i=>series.reduce((t,se)=>t+(se.d[i]||0),0));
-    const max=Math.max(...totals,1)*1.16, gap=iw/cols.length, bw=Math.min(52,gap*0.5);
+  // Composición de kg descargados por origen (%), barras horizontales 100% por mes.
+  function origenPctSVG(cols){
+    const W=680, rowH=32, padL=44, padR=50, padT=8, padB=8, iw=W-padL-padR;
+    const H=padT+padB+cols.length*rowH;
     let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
-    s+='<line x1="'+padX+'" y1="'+(padT+ih)+'" x2="'+(W-padX)+'" y2="'+(padT+ih)+'" stroke="#23353f"/>';
-    cols.forEach((idx,k)=>{ const cx=padX+gap*k+gap/2, cur=idx===CUR, tot=totals[k];
-      if(tot===0){ s+='<text x="'+cx+'" y="'+(padT+ih+17)+'" font-size="11" fill="#667d89" text-anchor="middle">'+ABBR[idx]+'</text>'; return; }
-      let yb=padT+ih;
-      series.forEach(se=>{ const v=se.d[idx]||0; if(!v) return; const h=v/max*ih, y=yb-h;
-        const tt=ABBR[idx]+'\n'+se.name+': '+fmtT(v,'num')+' KG\nTotal neto: '+fmtT(tot,'num')+' KG';
-        s+='<rect class="hot" data-tip="'+tt+'" x="'+(cx-bw/2).toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" fill="'+se.hex+'" opacity="'+(cur?'1':'.72')+'"/>';
-        yb=y; });
-      s+='<text x="'+cx+'" y="'+(yb-6).toFixed(1)+'" font-size="10" font-weight="700" fill="#eef2f5" text-anchor="middle">'+numShort(tot)+'</text>';
-      s+='<text x="'+cx+'" y="'+(padT+ih+17)+'" font-size="11" font-weight="'+(cur?'700':'400')+'" fill="'+(cur?'#eef2f5':'#8ba0ab')+'" text-anchor="middle">'+ABBR[idx]+'</text>'; });
+    cols.forEach((idx,k)=>{ const y=padT+k*rowH+rowH/2, cur=idx===CUR;
+      const pp=D.pctPropios[idx], pf=D.pctFletes[idx];
+      s+='<text x="'+(padL-8)+'" y="'+(y+4)+'" font-size="11" font-weight="'+(cur?'700':'400')+'" fill="'+(cur?'#eef2f5':'#8ba0ab')+'" text-anchor="end">'+ABBR[idx]+'</text>';
+      if(pp==null) return;
+      const wp=pp*iw, wf=pf*iw;
+      s+='<rect class="hot" data-tip="'+ABBR[idx]+'\nPropios: '+(Math.round(pp*1000)/10).toLocaleString("es-AR")+'%" x="'+padL+'" y="'+(y-9)+'" width="'+wp.toFixed(1)+'" height="18" rx="3" fill="#2f9e6e" opacity="'+(cur?'1':'.85')+'"/>';
+      s+='<rect class="hot" data-tip="'+ABBR[idx]+'\nFletes: '+(Math.round(pf*1000)/10).toLocaleString("es-AR")+'%" x="'+(padL+wp).toFixed(1)+'" y="'+(y-9)+'" width="'+wf.toFixed(1)+'" height="18" rx="3" fill="#d99a2b" opacity="'+(cur?'1':'.85')+'"/>';
+      if(wp>32) s+='<text x="'+(padL+wp/2).toFixed(1)+'" y="'+(y+4)+'" font-size="10.5" font-weight="800" fill="#0c1c26" text-anchor="middle">'+Math.round(pp*100)+'%</text>';
+      if(wf>32) s+='<text x="'+(padL+wp+wf/2).toFixed(1)+'" y="'+(y+4)+'" font-size="10.5" font-weight="800" fill="#0c1c26" text-anchor="middle">'+Math.round(pf*100)+'%</text>';
+    });
     return s+'</svg>';
   }
   function origenChartHTML(){
     const [a,z]=range(); const cols=[]; for(let i=a;i<z;i++) cols.push(i);
-    const series=[{name:'Propios',d:D.descProp,hex:'#2f9e6e'},{name:'Fletes',d:D.descFlet,hex:'#d99a2b'}];
-    if(cols.every(i=>series.every(se=>se.d[i]==null))) return '';
-    const leg=series.map(se=>'<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:11px;height:11px;border-radius:3px;background:'+se.hex+'"></span>'+se.name+'</span>').join('');
+    if(cols.every(i=>D.pctPropios[i]==null)) return '';
+    const leg=[['Propios','#2f9e6e'],['Fletes','#d99a2b']].map(x=>'<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:11px;height:11px;border-radius:3px;background:'+x[1]+'"></span>'+x[0]+'</span>').join('');
     return '<div style="padding:16px 16px 18px;border-top:1px solid var(--line)">'
-      +'<div class="chart-t">Kg descargados por origen · mes a mes</div>'
-      +'<div class="leyenda" style="margin-bottom:6px">'+leg+'</div>'+stackedBarSVG(cols,series)+'</div>';
+      +'<div class="chart-t">Composición de kg descargados por origen (%) · mes a mes</div>'
+      +'<div class="leyenda" style="margin-bottom:8px">'+leg+'</div>'+origenPctSVG(cols)+'</div>';
   }
   function chartBody(b){
     const [a,z]=range(); const cols=[]; for(let i=a;i<z;i++) cols.push(i);
