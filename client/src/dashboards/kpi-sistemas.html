@@ -40,9 +40,12 @@
   .sec-title{font-size:16px;font-weight:800;letter-spacing:-.01em;margin:0;}
   .sec-sub{font-size:11.5px;color:var(--muted);margin:3px 0 14px;}
   .cards{display:flex;gap:10px;margin-bottom:16px;align-items:stretch;}
-  .card{flex:1 1 0;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;min-width:0;min-height:104px;}
+  .card{flex:1 1 0;background:linear-gradient(160deg,var(--panel) 0%,var(--panel-2) 135%);border:1px solid var(--line);border-radius:10px;padding:13px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:5px;min-width:0;min-height:126px;box-shadow:0 1px 2px rgba(0,0,0,.25),0 10px 22px -14px rgba(0,0,0,.55);transition:transform .12s ease,box-shadow .12s ease;}
+  .card:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgba(0,0,0,.3),0 16px 30px -16px rgba(0,0,0,.6);}
   .card .ck{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.02em;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .card .cv{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.05;color:#fff;width:100%;}
+  .card .cv{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.05;color:#fff;width:100%;}
+  .spark-wrap{width:100%;margin-top:6px;}
+  .spark{width:100%;height:22px;display:block;opacity:.9;}
   .delta{font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:3px;}
   .delta.bad{color:var(--bad);} .delta.good{color:var(--good);} .delta.neutral{color:var(--muted);}
   .leyenda{display:flex;gap:14px;font-size:11px;color:var(--muted);margin:0 0 4px 2px;flex-wrap:wrap;}
@@ -117,6 +120,19 @@
   .tabla-open td.wrap{white-space:normal;min-width:200px;}
   .tabla-open tbody tr:hover td{background:rgba(255,255,255,.02);}
   .tabla-open td.sm-alto{color:var(--bad);font-weight:700;}
+  .tabla-open tr.ag-head td{background:var(--panel-3);color:var(--info);font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:9px 10px;}
+  .tabla-obj tr.obj-row{cursor:pointer;}
+  .tabla-obj tr.obj-row:hover td{background:var(--panel-3);}
+  .mop-scroll{overflow-y:auto;}
+  .mop-chart{padding:16px 18px 4px;}
+  .mop-obj-txt{padding:2px 18px 16px;margin:0;font-size:12.5px;color:var(--muted);line-height:1.45;}
+  .mop-desg{padding:8px 18px 4px;}
+  .mop-desg-t{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-bottom:6px;}
+  .mop-desg-n{font-size:11px;color:var(--muted-2);margin:6px 0 0;}
+  .tabla-desg{width:100%;border-collapse:collapse;font-size:12px;}
+  .tabla-desg th{text-align:left;font-size:10px;text-transform:uppercase;color:var(--muted);padding:5px 8px;border-bottom:1px solid var(--line);}
+  .tabla-desg th.num,.tabla-desg td.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .tabla-desg td{padding:5px 8px;border-bottom:1px solid var(--line);color:var(--text);}
   .tabla-obj{width:100%;border-collapse:collapse;font-size:12px;}
   .tabla-obj th{text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:1px solid var(--line);}
   .tabla-obj th.izq{text-align:left;}
@@ -209,7 +225,7 @@
       +'<span class="ptitle">Estado de tickets</span></div><div class="pstats">'
       +'<div class="pstat"><span class="pv">'+fmt(D.abiertos[CUR],'num')+'</span><span class="pl">Total de abiertos</span></div><div class="pdiv"></div>'
       +'<div class="pstat"><span class="pv">'+fmt(D.vencidas[CUR],'num')+'</span><span class="pl">Total de vencidas</span></div><div class="pdiv"></div>'
-      +'<div class="pstat"><span class="pv">'+fmt(D.sinVencerAb[CUR],'num')+'</span><span class="pl">Sin vencer</span></div><div class="pdiv"></div>'
+      +'<div class="pstat"><span class="pv">'+fmt(D.sinVencer[CUR],'num')+'</span><span class="pl">Anteriores sin vencer</span></div><div class="pdiv"></div>'
       +'<div class="pstat"><span class="pv">'+fmt(D.pendientes[CUR],'num')+'</span><span class="pl">Pendientes de la semana</span></div>'
       +'</div></div>';
   }
@@ -262,16 +278,27 @@
     return s+'</svg>';
   }
   function infoIcon(txt){ return txt ? ' <span class="ico-i hot" data-tip="'+txt+'">i</span>' : ''; }
+  // Micro-tendencia dentro de la tarjeta (últimas semanas visibles).
+  function sparkSVG(d, cols, color){
+    const vals=cols.map(i=>d[i]).filter(v=>v!=null);
+    if(vals.length<2) return '';
+    const W=100,H=24, min=Math.min(...vals), max=Math.max(...vals), span=(max-min)||1;
+    const pts=cols.map((i,k)=>d[i]==null?null:[(cols.length<2?W/2:k/(cols.length-1)*W), H-2-((d[i]-min)/span)*(H-4)]).filter(Boolean);
+    const last=pts[pts.length-1];
+    return '<svg class="spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><polyline points="'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="none" stroke="'+color+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="2.3" fill="'+color+'"/></svg>';
+  }
   function renderSections(){
-    document.getElementById('sections').innerHTML=SECTIONS.map(sec=>{
-      const pi=CUR-1;
+    const [a,z]=range(); const cols=[]; for(let i=a;i<z;i++) cols.push(i);
+    const ACC=['#e85d78','#26b6d9','#f5a623'];
+    document.getElementById('sections').innerHTML=SECTIONS.map((sec,si)=>{
+      const acc=ACC[si%ACC.length], pi=CUR-1;
       const cards=sec.cards.map(c=>{
         const v=c.d[CUR];
         const sub = c.neutral ? deltaHTML(v,c.d[pi],false) : deltaHTML(v,c.d[pi],c.down);
-        return '<div class="card"><span class="ck">'+c.k+infoIcon(c.i)+'</span><span class="cv">'+fmt(v,c.f)+'</span>'+sub+'<span class="delta-lbl">vs. sem. ant.</span></div>';
+        return '<div class="card"><span class="ck">'+c.k+infoIcon(c.i)+'</span><span class="cv">'+fmt(v,c.f)+'</span>'+sub+'<span class="delta-lbl">vs. sem. ant.</span><div class="spark-wrap">'+sparkSVG(c.d,cols,acc)+'</div></div>';
       }).join('');
       const leg='<div class="leyenda">'+sec.series.map(s=>'<span class="li"><span style="width:12px;height:3px;border-radius:2px;background:'+s.c+'"></span>'+s.name+'</span>').join('')+'</div>';
-      return '<div class="section"><h2 class="sec-title">'+sec.title+'</h2><p class="sec-sub">'+sec.sub+'</p><div class="cards">'+cards+'</div>'+leg+lineSVG(sec.series)+'</div>';
+      return '<div class="section" style="border-top:3px solid '+acc+'"><h2 class="sec-title">'+sec.title+'</h2><p class="sec-sub">'+sec.sub+'</p><div class="cards">'+cards+'</div>'+leg+lineSVG(sec.series)+'</div>';
     }).join('');
   }
 
@@ -298,7 +325,7 @@
       ])
       +donutPanel('Composición de abiertos','Semana 32 · vencidas vs. resto',[
         {name:'Vencidas',v:D.vencidas[CUR],c:'#ff4d67'},
-        {name:'Sin vencer',v:Math.max(0,D.sinVencerAb[CUR]),c:'#26b6d9'},
+        {name:'No vencidas',v:Math.max(0,D.sinVencerAb[CUR]),c:'#26b6d9'},
       ]);
   }
 
@@ -384,13 +411,11 @@
   });
 
   // Modal de detalle de tickets por agente (clic en una barra del gráfico).
-  function openModalOp(op, atY){
-    const o=OPERADORES[op]; if(!o) return;
-    const items=o.tickets.map((t,i)=>'<li><span class="n">'+(i+1)+'</span><span>'+t+'</span></li>').join('');
+  function openModal(title, sub, body, atY){
     const box=document.getElementById('modal-op');
     box.innerHTML='<div class="mop-bg"></div><div class="mop-box"><div class="mop-head">'
-      +'<div><div class="mop-t">'+o.n+'</div><div class="mop-s">'+o.v+' tickets abiertos asignados</div></div>'
-      +'<button class="mop-x" aria-label="Cerrar">✕</button></div><ol class="mop-list">'+items+'</ol></div>';
+      +'<div><div class="mop-t">'+title+'</div><div class="mop-s">'+sub+'</div></div>'
+      +'<button class="mop-x" aria-label="Cerrar">✕</button></div>'+body+'</div>';
     box.classList.add('show');
     const inner=box.querySelector('.mop-box');
     const top=Math.max(16,(atY||160)-120);
@@ -400,97 +425,139 @@
     box.querySelector('.mop-x').onclick=closeModalOp;
     if(window.parent!==window) setTimeout(postAlto,30);
   }
+  function openModalOp(op, atY){
+    const o=OPERADORES[op]; if(!o) return;
+    const items=o.tickets.map((t,i)=>'<li><span class="n">'+(i+1)+'</span><span>'+t+'</span></li>').join('');
+    openModal(o.n, o.v+' tickets abiertos asignados', '<ol class="mop-list">'+items+'</ol>', atY);
+  }
+  // Línea de tendencia mensual de un objetivo (% por mes + línea de meta).
+  function objLineSVG(f){
+    const vals=f.vals, meta=f.meta, meses=OBJ.meses;
+    const W=520,H=210,padT=18,padB=26,padL=36,padR=16, iw=W-padL-padR, ih=H-padT-padB;
+    const datos=vals.filter(v=>v!=null);
+    const min=Math.max(0, Math.min(meta, ...datos)-4), max=101;
+    const xs=k=>padL+(vals.length<2?iw/2:iw*k/(vals.length-1));
+    const ys=v=>padT+ih-((v-min)/((max-min)||1))*ih;
+    let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img">';
+    [min,meta,100].forEach(g=>{ const y=ys(g); s+='<line x1="'+padL+'" y1="'+y.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+y.toFixed(1)+'" stroke="#23353f" stroke-dasharray="3 3"/><text x="'+(padL-6)+'" y="'+(y+3).toFixed(1)+'" font-size="9" fill="#667d89" text-anchor="end">'+Math.round(g)+'%</text>'; });
+    const my=ys(meta);
+    s+='<line x1="'+padL+'" y1="'+my.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+my.toFixed(1)+'" stroke="#f5a623" stroke-width="1.5" stroke-dasharray="5 3"/><text x="'+(W-padR)+'" y="'+(my-5).toFixed(1)+'" font-size="10" font-weight="700" fill="#f5a623" text-anchor="end">Meta '+meta+'%</text>';
+    const pts=vals.map((v,k)=>v==null?null:[xs(k),ys(v)]).filter(Boolean);
+    if(pts.length>1) s+='<polyline points="'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="none" stroke="#26b6d9" stroke-width="2.4"/>';
+    vals.forEach((v,k)=>{ if(v==null) return; const c=v>=meta?'#22e39b':'#ff4d67'; s+='<circle cx="'+xs(k).toFixed(1)+'" cy="'+ys(v).toFixed(1)+'" r="4" fill="'+c+'"/><text x="'+xs(k).toFixed(1)+'" y="'+(ys(v)-9).toFixed(1)+'" font-size="9.5" font-weight="700" fill="#eef2f5" text-anchor="middle">'+v+'%</text>'; });
+    meses.forEach((m,k)=>{ s+='<text x="'+xs(k).toFixed(1)+'" y="'+(H-8)+'" font-size="10" fill="#8ba0ab" text-anchor="middle">'+m+'</text>'; });
+    return s+'</svg>';
+  }
+  function openModalObj(k, atY){
+    const f=OBJ.filas[k]; if(!f||f.meta==null) return;
+    let body='<div class="mop-scroll"><div class="mop-chart">'+objLineSVG(f)+'</div>';
+    if(f.desglose){
+      const rows=f.desglose.map((x,i)=>'<tr><td>'+OBJ.meses[i]+'</td><td class="num">'+x.ok+'</td><td class="num">'+x.e+'</td><td class="num">'+x.t+'</td><td class="num">'+(x.t?Math.round(x.ok/x.t*1000)/10:0)+'%</td></tr>').join('');
+      body+='<div class="mop-desg"><div class="mop-desg-t">Cómo se forma el % (hoja Informe Resp OK-Excedido)</div>'
+        +'<table class="tabla-desg"><thead><tr><th>Mes</th><th class="num">OK</th><th class="num">Excedido</th><th class="num">Total</th><th class="num">% OK</th></tr></thead><tbody>'+rows+'</tbody></table>'
+        +'<p class="mop-desg-n">% OK = OK / Total. Ej. enero: 1.023 / 1.109 = 92,2%.</p></div>';
+    }
+    body+='<p class="mop-obj-txt">'+f.obj+'</p></div>';
+    openModal('Objetivo '+f.n+' · tendencia 2026', 'Meta '+f.meta+'% · promedio '+f.prom+'% · '+f.estado, body, atY);
+  }
   function closeModalOp(){ const box=document.getElementById('modal-op'); box.classList.remove('show'); box.innerHTML=''; box.style.height=''; if(window.parent!==window) setTimeout(postAlto,30); }
-  document.addEventListener('click',e=>{ const el=e.target.closest&&e.target.closest('[data-op]'); if(el) openModalOp(+el.getAttribute('data-op'), e.pageY); });
+  document.addEventListener('click',e=>{
+    const op=e.target.closest&&e.target.closest('[data-op]'); if(op){ openModalOp(+op.getAttribute('data-op'), e.pageY); return; }
+    const obj=e.target.closest&&e.target.closest('[data-obj]'); if(obj){ openModalObj(+obj.getAttribute('data-obj'), e.pageY); return; }
+  });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModalOp(); });
 
   // ---- Tickets abiertos (hoja Open) ----
   const OPEN=[
-  {"t": "587506", "sol": "alexis", "a": "IMPRESORA NO ENCIENDE", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
-  {"t": "300546", "sol": "Alexis Gerez", "a": "Solicitud de monitor", "fc": "11/06/2026", "vm": "07/08/2026", "vd": "16/06/2026", "sm": 6},
-  {"t": "536362", "sol": "Andrea Litwin", "a": "SOLICITUD PRE ETIQUETA: cantidad de paquetes", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
-  {"t": "948906", "sol": "Andrea Litwin", "a": "SOLICITUD HIGADO Y LENGUA (RUSIA)", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 0},
-  {"t": "649829", "sol": "Andrea Litwin", "a": "BLOQUEO CAJAS DE SESO VP 5.9", "fc": "03/08/2026", "vm": "-", "vd": "06/08/2026", "sm": 7},
-  {"t": "628825", "sol": "Andrea Litwin", "a": "Modificación de existente urgente: HIGADO FETEA…", "fc": "22/07/2026", "vm": "-", "vd": "27/07/2026", "sm": 0},
-  {"t": "823712", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA", "fc": "13/07/2026", "vm": "19/08/2026", "vd": "16/07/2026", "sm": 0},
-  {"t": "779355", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA info nutr…", "fc": "13/07/2026", "vm": "21/08/2026", "vd": "16/07/2026", "sm": 0},
-  {"t": "653951", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA CON PRIOR…", "fc": "13/07/2026", "vm": "13/08/2026", "vd": "16/07/2026", "sm": 0},
-  {"t": "749140", "sol": "Andrea Litwin", "a": "UNIFICAR tickets RUSIA", "fc": "08/07/2026", "vm": "11/08/2026", "vd": "13/07/2026", "sm": 0},
-  {"t": "180982", "sol": "Andrea Litwin", "a": "MODIFICACIÓN Y ALTA DE CÓDIGOS Multivac", "fc": "29/06/2026", "vm": "21/07/2026", "vd": "02/07/2026", "sm": 0},
-  {"t": "558903", "sol": "Andrea Litwin", "a": "SOLICITUD DE ETIQUETAS: TENDÓN RUSIA 28.22", "fc": "12/06/2026", "vm": "28/07/2026", "vd": "17/06/2026", "sm": 0},
-  {"t": "627465", "sol": "Andrea Litwin", "a": "ELIMINAR LEYENDA DUPLICADA: Librillo 24.21", "fc": "15/05/2026", "vm": "17/07/2026", "vd": "20/05/2026", "sm": 0},
-  {"t": "548365", "sol": "Martin Dominguez", "a": "PERMISO PARA ELIMINAR ETIQUETAS PIR Y PI4", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
-  {"t": "707539", "sol": "Daiana Saporiti", "a": "IMPRESORAS CONGELADO", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
-  {"t": "583377", "sol": "Daiana Saporiti", "a": "prueba de PI4", "fc": "03/06/2026", "vm": "05/08/2026", "vd": "08/06/2026", "sm": 4},
-  {"t": "686624", "sol": "guido lazarte", "a": "NO HABLE MAIL EN OT", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
-  {"t": "557294", "sol": "guido lazarte", "a": "PC 47", "fc": "29/07/2026", "vm": "15/08/2026", "vd": "03/08/2026", "sm": 12},
-  {"t": "830788", "sol": "Elisa Mendoza", "a": "RE: Solicitud de colocación de bandeja porta ca…", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
-  {"t": "468448", "sol": "Luana Martinez", "a": "RE: ALICUOTAS PHYSIS MES DE AGOSTO [#780681] Re…", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
-  {"t": "284795", "sol": "Marcelo Alejandro Rodao", "a": "USUARIOS SIFAB", "fc": "05/08/2026", "vm": "12/08/2026", "vd": "10/08/2026", "sm": 3},
-  {"t": "370681", "sol": "Marcelo Alejandro Rodao", "a": "CAMARA Y FACIAL", "fc": "02/06/2026", "vm": "31/07/2026", "vd": "05/06/2026", "sm": 38},
-  {"t": "625820", "sol": "Dario Escobar", "a": "Celular flota pantalla con fallas", "fc": "28/07/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
-  {"t": "451743", "sol": "Isaias Toledo", "a": "IMPRESORAS", "fc": "04/08/2026", "vm": "-", "vd": "07/08/2026", "sm": 5},
-  {"t": "830389", "sol": "Isaias Toledo", "a": "MOVIMIENTOS EN TWINS", "fc": "08/07/2026", "vm": "14/08/2026", "vd": "10/07/2026", "sm": 3},
-  {"t": "995465", "sol": "Isaias Toledo", "a": "RE: RE: REDONDEOS Y XML [#756899] Open [#204670…", "fc": "30/06/2026", "vm": "15/08/2026", "vd": "03/07/2026", "sm": 3},
-  {"t": "984072", "sol": "Leonardo Ramos", "a": "Office", "fc": "04/08/2026", "vm": "-", "vd": "06/08/2026", "sm": 6},
-  {"t": "287073", "sol": "Leonardo Ramos", "a": "Genericos Molleja", "fc": "07/07/2026", "vm": "07/08/2026", "vd": "13/07/2026", "sm": 3},
-  {"t": "739134", "sol": "Emily Rojas", "a": "Modificación Alto impacto EEUU", "fc": "25/04/2026", "vm": "10/08/2026", "vd": "29/04/2026", "sm": 7},
-  {"t": "908645", "sol": "Javier Fernandez", "a": "Error ventana PWR-150 Stock disponible - Deposi…", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 5},
-  {"t": "595435", "sol": "Javier Fernandez", "a": "Noax 10 no funciona pistola", "fc": "24/07/2026", "vm": "-", "vd": "28/07/2026", "sm": 6},
-  {"t": "306736", "sol": "Javier Fernandez", "a": "ERROR EN VENTANA 00057 PROGRAMA SALIDA", "fc": "05/06/2026", "vm": "12/08/2026", "vd": "12/06/2026", "sm": 4},
-  {"t": "901653", "sol": "Facundo Tejada", "a": "colectores supermercados - NO PRENDEN", "fc": "31/07/2026", "vm": "-", "vd": "04/08/2026", "sm": 3},
-  {"t": "406800", "sol": "Fernanda Villazante", "a": "Creación de usuarios en Sifab", "fc": "29/07/2026", "vm": "-", "vd": "31/07/2026", "sm": 3},
-  {"t": "143300", "sol": "Juan Retamero", "a": "Modificacion en Alta de Proveedores SIFAB", "fc": "28/07/2026", "vm": "-", "vd": "31/07/2026", "sm": 4},
-  {"t": "243411", "sol": "Luis Ramos", "a": "Interno", "fc": "03/07/2026", "vm": "21/08/2026", "vd": "08/07/2026", "sm": 10},
-  {"t": "822622", "sol": "Luis Ramos", "a": "Reiterados problemas en los descuentos", "fc": "27/06/2026", "vm": "-", "vd": "10/08/2026", "sm": 3},
-  {"t": "741375", "sol": "juan.penalba", "a": "Compra - Switches", "fc": "23/06/2026", "vm": "30/09/2026", "vd": "25/06/2026", "sm": 3},
-  {"t": "809939", "sol": "juan.penalba", "a": "Bandeja rackeable", "fc": "08/05/2026", "vm": "26/08/2026", "vd": "29/06/2026", "sm": 3},
-  {"t": "579146", "sol": "Matias Juarez", "a": "Ingreso de Cajas al Cartofreezer", "fc": "17/06/2026", "vm": "-", "vd": "29/07/2026", "sm": 0},
-  {"t": "576991", "sol": "Matias Juarez", "a": "Estado Proyecto E80 + Twins + Miniload", "fc": "22/04/2026", "vm": "31/07/2026", "vd": "27/04/2026", "sm": 0},
-  {"t": "485139", "sol": "Micaela Cardullo", "a": "PI4", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
-  {"t": "369624", "sol": "Miguel Angel Flores", "a": "sin acceso al forms", "fc": "08/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
-  {"t": "222341", "sol": "Nestor Russo", "a": "FALLA TPM LINEA 2", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 0},
-  {"t": "663277", "sol": "Nicolas Barrios", "a": "Solicitud de parlante para pc n42", "fc": "17/07/2026", "vm": "04/08/2026", "vd": "22/07/2026", "sm": 3},
-  {"t": "849919", "sol": "Nicolas Barrios", "a": "Solcitud de impresora", "fc": "17/07/2026", "vm": "04/08/2026", "vd": "22/07/2026", "sm": 3},
-  {"t": "725249", "sol": "Norberto Haunau", "a": "Cable utp Facial Insumos.", "fc": "24/09/2025", "vm": "05/08/2026", "vd": "26/09/2025", "sm": 0},
-  {"t": "240129", "sol": "Pamela Gimenez", "a": "Solicitud de equipos: Administración productiva", "fc": "07/08/2026", "vm": "31/08/2026", "vd": "11/08/2026", "sm": 3},
-  {"t": "300180", "sol": "Pamela Gimenez", "a": "Pedido de celulares", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
-  {"t": "907200", "sol": "Pamela Gimenez", "a": "Pedido de equipo y usuarios - Sergio Vega", "fc": "22/07/2026", "vm": "31/08/2026", "vd": "27/07/2026", "sm": 3},
-  {"t": "911360", "sol": "Roberto Sanabria", "a": "Web app para Gerencia", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
-  {"t": "428798", "sol": "Roberto Sanabria", "a": "Web app para logistica", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
-  {"t": "197395", "sol": "Roberto Sanabria", "a": "Intergración TPM - Drewolf", "fc": "18/06/2026", "vm": "01/08/2026", "vd": "30/07/2026", "sm": 6},
-  {"t": "242246", "sol": "Roberto Sanabria", "a": "Integración Tango Capataz y Twins", "fc": "27/04/2026", "vm": "17/07/2026", "vd": "29/04/2026", "sm": 3},
-  {"t": "203766", "sol": "Roberto Sanabria", "a": "Interfaz Humand - Drewolf", "fc": "14/04/2026", "vm": "04/08/2026", "vd": "26/05/2026", "sm": 11},
-  {"t": "962076", "sol": "Villalba Belen", "a": "Control de Fajas", "fc": "27/11/2025", "vm": "31/08/2026", "vd": "02/12/2025", "sm": 6},
-  {"t": "106846", "sol": "Villalba Belen", "a": "Bloqueo de cajas - Membrana", "fc": "08/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 0},
-  {"t": "723746", "sol": "Villalba Belen", "a": "Cambio de gestión de información- Registro de c…", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
-  {"t": "704513", "sol": "Villalba Belen", "a": "Análisis de causa - Completar campos", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 3},
-  {"t": "799799", "sol": "Villalba Belen", "a": "Solicitud de ticketera", "fc": "01/07/2026", "vm": "28/08/2026", "vd": "06/07/2026", "sm": 0},
-  {"t": "862650", "sol": "Walter Tissera", "a": "Balanza de ingreso cámara despostada", "fc": "02/04/2026", "vm": "19/08/2026", "vd": "07/04/2026", "sm": 3},
-  {"t": "231010", "sol": "Eduardo Pintado", "a": "Noax", "fc": "11/12/2025", "vm": "17/08/2026", "vd": "12/08/2026", "sm": 3},
-  {"t": "233713", "sol": "Vigilancia", "a": "Celular de la guardia", "fc": "07/08/2026", "vm": "21/08/2026", "vd": "12/08/2026", "sm": 3},
-  {"t": "397368", "sol": "Sergio Vega", "a": "Programas necesarios para usar en Insumos.", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
-  {"t": "431521", "sol": "sala de maquinas", "a": "aplicaciones", "fc": "04/08/2026", "vm": "-", "vd": "07/08/2026", "sm": 4},
-  {"t": "139729", "sol": "Fernando Daniel Albornoz", "a": "Armado de tablero de KPI´S con IA", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 4},
-  {"t": "2", "sol": "", "a": "", "fc": "", "vm": "-", "vd": "", "sm": 0},
+  {"t": "587506", "ag": "Luis Arancibia", "sol": "alexis", "a": "IMPRESORA NO ENCIENDE", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
+  {"t": "300546", "ag": "Tobias Santillan", "sol": "Alexis Gerez", "a": "Solicitud de monitor", "fc": "11/06/2026", "vm": "07/08/2026", "vd": "16/06/2026", "sm": 6},
+  {"t": "536362", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD PRE ETIQUETA: cantidad de paquetes", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
+  {"t": "948906", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD HIGADO Y LENGUA (RUSIA)", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 0},
+  {"t": "649829", "ag": "Norberto Haunau", "sol": "Andrea Litwin", "a": "BLOQUEO CAJAS DE SESO VP 5.9", "fc": "03/08/2026", "vm": "-", "vd": "06/08/2026", "sm": 7},
+  {"t": "628825", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "Modificación de existente urgente: HIGADO FETEA…", "fc": "22/07/2026", "vm": "-", "vd": "27/07/2026", "sm": 0},
+  {"t": "823712", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA", "fc": "13/07/2026", "vm": "19/08/2026", "vd": "16/07/2026", "sm": 0},
+  {"t": "779355", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA info nutr…", "fc": "13/07/2026", "vm": "21/08/2026", "vd": "16/07/2026", "sm": 0},
+  {"t": "653951", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA CON PRIOR…", "fc": "13/07/2026", "vm": "13/08/2026", "vd": "16/07/2026", "sm": 0},
+  {"t": "749140", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "UNIFICAR tickets RUSIA", "fc": "08/07/2026", "vm": "11/08/2026", "vd": "13/07/2026", "sm": 0},
+  {"t": "180982", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "MODIFICACIÓN Y ALTA DE CÓDIGOS Multivac", "fc": "29/06/2026", "vm": "21/07/2026", "vd": "02/07/2026", "sm": 0},
+  {"t": "558903", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD DE ETIQUETAS: TENDÓN RUSIA 28.22", "fc": "12/06/2026", "vm": "28/07/2026", "vd": "17/06/2026", "sm": 0},
+  {"t": "627465", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "ELIMINAR LEYENDA DUPLICADA: Librillo 24.21", "fc": "15/05/2026", "vm": "17/07/2026", "vd": "20/05/2026", "sm": 0},
+  {"t": "548365", "ag": "Ezequiel Manco", "sol": "Martin Dominguez", "a": "PERMISO PARA ELIMINAR ETIQUETAS PIR Y PI4", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
+  {"t": "707539", "ag": "Andrea Cardozo", "sol": "Daiana Saporiti", "a": "IMPRESORAS CONGELADO", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
+  {"t": "583377", "ag": "Roberto Sanabria", "sol": "Daiana Saporiti", "a": "prueba de PI4", "fc": "03/06/2026", "vm": "05/08/2026", "vd": "08/06/2026", "sm": 4},
+  {"t": "686624", "ag": "Tobias Santillan", "sol": "guido lazarte", "a": "NO HABLE MAIL EN OT", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
+  {"t": "557294", "ag": "Tobias Santillan", "sol": "guido lazarte", "a": "PC 47", "fc": "29/07/2026", "vm": "15/08/2026", "vd": "03/08/2026", "sm": 12},
+  {"t": "830788", "ag": "Juan Penalba", "sol": "Elisa Mendoza", "a": "RE: Solicitud de colocación de bandeja porta ca…", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
+  {"t": "468448", "ag": "Roberto Sanabria", "sol": "Luana Martinez", "a": "RE: ALICUOTAS PHYSIS MES DE AGOSTO [#780681] Re…", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
+  {"t": "284795", "ag": "Andrea Cardozo", "sol": "Marcelo Alejandro Rodao", "a": "USUARIOS SIFAB", "fc": "05/08/2026", "vm": "12/08/2026", "vd": "10/08/2026", "sm": 3},
+  {"t": "370681", "ag": "Norberto Haunau", "sol": "Marcelo Alejandro Rodao", "a": "CAMARA Y FACIAL", "fc": "02/06/2026", "vm": "31/07/2026", "vd": "05/06/2026", "sm": 38},
+  {"t": "625820", "ag": "Andrea Cardozo", "sol": "Dario Escobar", "a": "Celular flota pantalla con fallas", "fc": "28/07/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
+  {"t": "451743", "ag": "Luis Arancibia", "sol": "Isaias Toledo", "a": "IMPRESORAS", "fc": "04/08/2026", "vm": "-", "vd": "07/08/2026", "sm": 5},
+  {"t": "830389", "ag": "Matias Juarez", "sol": "Isaias Toledo", "a": "MOVIMIENTOS EN TWINS", "fc": "08/07/2026", "vm": "14/08/2026", "vd": "10/07/2026", "sm": 3},
+  {"t": "995465", "ag": "Roberto Sanabria", "sol": "Isaias Toledo", "a": "RE: RE: REDONDEOS Y XML [#756899] Open [#204670…", "fc": "30/06/2026", "vm": "15/08/2026", "vd": "03/07/2026", "sm": 3},
+  {"t": "984072", "ag": "Ezequiel Manco", "sol": "Leonardo Ramos", "a": "Office", "fc": "04/08/2026", "vm": "-", "vd": "06/08/2026", "sm": 6},
+  {"t": "287073", "ag": "Matias Juarez", "sol": "Leonardo Ramos", "a": "Genericos Molleja", "fc": "07/07/2026", "vm": "07/08/2026", "vd": "13/07/2026", "sm": 3},
+  {"t": "739134", "ag": "Matias Juarez", "sol": "Emily Rojas", "a": "Modificación Alto impacto EEUU", "fc": "25/04/2026", "vm": "10/08/2026", "vd": "29/04/2026", "sm": 7},
+  {"t": "908645", "ag": "Matias Juarez", "sol": "Javier Fernandez", "a": "Error ventana PWR-150 Stock disponible - Deposi…", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 5},
+  {"t": "595435", "ag": "Luis Arancibia", "sol": "Javier Fernandez", "a": "Noax 10 no funciona pistola", "fc": "24/07/2026", "vm": "-", "vd": "28/07/2026", "sm": 6},
+  {"t": "306736", "ag": "Roberto Sanabria", "sol": "Javier Fernandez", "a": "ERROR EN VENTANA 00057 PROGRAMA SALIDA", "fc": "05/06/2026", "vm": "12/08/2026", "vd": "12/06/2026", "sm": 4},
+  {"t": "901653", "ag": "Tobias Santillan", "sol": "Facundo Tejada", "a": "colectores supermercados - NO PRENDEN", "fc": "31/07/2026", "vm": "-", "vd": "04/08/2026", "sm": 3},
+  {"t": "406800", "ag": "Andrea Cardozo", "sol": "Fernanda Villazante", "a": "Creación de usuarios en Sifab", "fc": "29/07/2026", "vm": "-", "vd": "31/07/2026", "sm": 3},
+  {"t": "143300", "ag": "Roberto Sanabria", "sol": "Juan Retamero", "a": "Modificacion en Alta de Proveedores SIFAB", "fc": "28/07/2026", "vm": "-", "vd": "31/07/2026", "sm": 4},
+  {"t": "243411", "ag": "Juan Penalba", "sol": "Luis Ramos", "a": "Interno", "fc": "03/07/2026", "vm": "21/08/2026", "vd": "08/07/2026", "sm": 10},
+  {"t": "822622", "ag": "Matias Juarez", "sol": "Luis Ramos", "a": "Reiterados problemas en los descuentos", "fc": "27/06/2026", "vm": "-", "vd": "10/08/2026", "sm": 3},
+  {"t": "741375", "ag": "Andrea Cardozo", "sol": "juan.penalba", "a": "Compra - Switches", "fc": "23/06/2026", "vm": "30/09/2026", "vd": "25/06/2026", "sm": 3},
+  {"t": "809939", "ag": "Andrea Cardozo", "sol": "juan.penalba", "a": "Bandeja rackeable", "fc": "08/05/2026", "vm": "26/08/2026", "vd": "29/06/2026", "sm": 3},
+  {"t": "579146", "ag": "Matias Juarez", "sol": "Matias Juarez", "a": "Ingreso de Cajas al Cartofreezer", "fc": "17/06/2026", "vm": "-", "vd": "29/07/2026", "sm": 0},
+  {"t": "576991", "ag": "Matias Juarez", "sol": "Matias Juarez", "a": "Estado Proyecto E80 + Twins + Miniload", "fc": "22/04/2026", "vm": "31/07/2026", "vd": "27/04/2026", "sm": 0},
+  {"t": "485139", "ag": "Ezequiel Manco", "sol": "Micaela Cardullo", "a": "PI4", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
+  {"t": "369624", "ag": "Roberto Sanabria", "sol": "Miguel Angel Flores", "a": "sin acceso al forms", "fc": "08/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
+  {"t": "222341", "ag": "Miguel Flores", "sol": "Nestor Russo", "a": "FALLA TPM LINEA 2", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 0},
+  {"t": "663277", "ag": "Andrea Cardozo", "sol": "Nicolas Barrios", "a": "Solicitud de parlante para pc n42", "fc": "17/07/2026", "vm": "04/08/2026", "vd": "22/07/2026", "sm": 3},
+  {"t": "849919", "ag": "Andrea Cardozo", "sol": "Nicolas Barrios", "a": "Solcitud de impresora", "fc": "17/07/2026", "vm": "04/08/2026", "vd": "22/07/2026", "sm": 3},
+  {"t": "725249", "ag": "Miguel Flores", "sol": "Norberto Haunau", "a": "Cable utp Facial Insumos.", "fc": "24/09/2025", "vm": "05/08/2026", "vd": "26/09/2025", "sm": 0},
+  {"t": "240129", "ag": "Andrea Cardozo", "sol": "Pamela Gimenez", "a": "Solicitud de equipos: Administración productiva", "fc": "07/08/2026", "vm": "31/08/2026", "vd": "11/08/2026", "sm": 3},
+  {"t": "300180", "ag": "Andrea Cardozo", "sol": "Pamela Gimenez", "a": "Pedido de celulares", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
+  {"t": "907200", "ag": "Andrea Cardozo", "sol": "Pamela Gimenez", "a": "Pedido de equipo y usuarios - Sergio Vega", "fc": "22/07/2026", "vm": "31/08/2026", "vd": "27/07/2026", "sm": 3},
+  {"t": "911360", "ag": "Jair Hnatiuk", "sol": "Roberto Sanabria", "a": "Web app para Gerencia", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
+  {"t": "428798", "ag": "Jair Hnatiuk", "sol": "Roberto Sanabria", "a": "Web app para logistica", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
+  {"t": "197395", "ag": "Roberto Sanabria", "sol": "Roberto Sanabria", "a": "Intergración TPM - Drewolf", "fc": "18/06/2026", "vm": "01/08/2026", "vd": "30/07/2026", "sm": 6},
+  {"t": "242246", "ag": "Roberto Sanabria", "sol": "Roberto Sanabria", "a": "Integración Tango Capataz y Twins", "fc": "27/04/2026", "vm": "17/07/2026", "vd": "29/04/2026", "sm": 3},
+  {"t": "203766", "ag": "Roberto Sanabria", "sol": "Roberto Sanabria", "a": "Interfaz Humand - Drewolf", "fc": "14/04/2026", "vm": "04/08/2026", "vd": "26/05/2026", "sm": 11},
+  {"t": "962076", "ag": "Roberto Sanabria", "sol": "Villalba Belen", "a": "Control de Fajas", "fc": "27/11/2025", "vm": "31/08/2026", "vd": "02/12/2025", "sm": 6},
+  {"t": "106846", "ag": "Matias Juarez", "sol": "Villalba Belen", "a": "Bloqueo de cajas - Membrana", "fc": "08/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 0},
+  {"t": "723746", "ag": "Roberto Sanabria", "sol": "Villalba Belen", "a": "Cambio de gestión de información- Registro de c…", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
+  {"t": "704513", "ag": "Matias Juarez", "sol": "Villalba Belen", "a": "Análisis de causa - Completar campos", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 3},
+  {"t": "799799", "ag": "Andrea Cardozo", "sol": "Villalba Belen", "a": "Solicitud de ticketera", "fc": "01/07/2026", "vm": "28/08/2026", "vd": "06/07/2026", "sm": 0},
+  {"t": "862650", "ag": "Miguel Flores", "sol": "Walter Tissera", "a": "Balanza de ingreso cámara despostada", "fc": "02/04/2026", "vm": "19/08/2026", "vd": "07/04/2026", "sm": 3},
+  {"t": "231010", "ag": "Andrea Cardozo", "sol": "Eduardo Pintado", "a": "Noax", "fc": "11/12/2025", "vm": "17/08/2026", "vd": "12/08/2026", "sm": 3},
+  {"t": "233713", "ag": "Andrea Cardozo", "sol": "Vigilancia", "a": "Celular de la guardia", "fc": "07/08/2026", "vm": "21/08/2026", "vd": "12/08/2026", "sm": 3},
+  {"t": "397368", "ag": "Tobias Santillan", "sol": "Sergio Vega", "a": "Programas necesarios para usar en Insumos.", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
+  {"t": "431521", "ag": "Norberto Haunau", "sol": "sala de maquinas", "a": "aplicaciones", "fc": "04/08/2026", "vm": "-", "vd": "07/08/2026", "sm": 4},
+  {"t": "139729", "ag": "Roberto Sanabria", "sol": "Fernando Daniel Albornoz", "a": "Armado de tablero de KPI´S con IA", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 4},
+  {"t": "2", "ag": "Sin asignar", "sol": "", "a": "", "fc": "", "vm": "-", "vd": "", "sm": 0},
 ];
   function renderOpen(){
-    const rows=OPEN.map(o=>{
-      const alto=(+o.sm)>=7?' class="num sm-alto"':' class="num"';
-      return '<tr><td>'+o.t+'</td><td>'+o.sol+'</td><td class="wrap">'+o.a+'</td><td>'+o.fc+'</td><td>'+o.vm+'</td><td>'+o.vd+'</td><td'+alto+'>'+o.sm+'</td></tr>';
+    const byAg={}; OPEN.forEach(o=>{ (byAg[o.ag]=byAg[o.ag]||[]).push(o); });
+    const agentes=Object.keys(byAg).sort((a,b)=>byAg[b].length-byAg[a].length);
+    const body=agentes.map(ag=>{
+      const head='<tr class="ag-head"><td colspan="7">'+ag+' · '+byAg[ag].length+' abiertos</td></tr>';
+      const rows=byAg[ag].map(o=>{ const alto=(+o.sm)>=7?' class="num sm-alto"':' class="num"'; return '<tr><td>'+o.t+'</td><td>'+o.sol+'</td><td class="wrap">'+o.a+'</td><td>'+o.fc+'</td><td>'+o.vm+'</td><td>'+o.vd+'</td><td'+alto+'>'+o.sm+'</td></tr>'; }).join('');
+      return head+rows;
     }).join('');
     document.getElementById('openTable').innerHTML=
-      '<div class="panel"><h3>Tickets abiertos · detalle</h3><p class="psub">'+OPEN.length+' tickets sin cerrar (hoja Open). Días s/mov. en rojo = 7 o más sin movimiento.</p>'
+      '<div class="panel"><h3>Tickets abiertos · por agente</h3><p class="psub">'+OPEN.length+' tickets sin cerrar (hoja Open), segmentados por agente. Días s/mov. en rojo = 7 o más sin movimiento.</p>'
       +'<div class="tscroll" style="max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:10px"><table class="tabla-open"><thead><tr>'
       +'<th>Ticket</th><th>Solicitante</th><th>Asunto</th><th>Creación</th><th>Venc. modif.</th><th>Venc. defecto</th><th class="num">Días s/mov.</th>'
-      +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+      +'</tr></thead><tbody>'+body+'</tbody></table></div></div>';
   }
 
   // ---- Objetivos (KPI Gerencia de Operaciones 2026) ----
   const OBJ={
     agente:'Nicolás Gutiérrez', total:2, meses:['Ene','Feb','Mar','Abr','May','Jun','Jul'],
     filas:[
-      {n:1, obj:'Respuesta de tickets en 24hs y 5 días hábiles para informar tratamiento; resolución en 90 días. (Informe que muestre la respuesta de cada pedido en 24hs y la finalización dentro de los 90 días.)', meta:94, vals:[92,96,98,97,100,97,98], prom:97, estado:'Logrado'},
+      {n:1, obj:'Respuesta de tickets en 24hs y 5 días hábiles para informar tratamiento; resolución en 90 días. (Informe que muestre la respuesta de cada pedido en 24hs y la finalización dentro de los 90 días.)', meta:94, vals:[92,96,98,97,100,97,98], prom:97, estado:'Logrado',
+       desglose:[{ok:1023,e:86,t:1109},{ok:836,e:36,t:872},{ok:1100,e:22,t:1122},{ok:1052,e:38,t:1090},{ok:606,e:0,t:606},{ok:329,e:9,t:338},{ok:314,e:10,t:324}]},
       {n:2, obj:'Informe del jefe del sector con datos de la semana y estadísticos del área.', meta:94, vals:[99,100,100,100,100,100,100], prom:100, estado:'Logrado'},
       {n:3, obj:'5 días hábiles para notificar estado.', meta:null, vals:[null,null,null,null,null,null,null], prom:null, estado:null},
     ],
@@ -499,15 +566,16 @@
   function celPct(v,meta){ if(v==null) return '<td class="cel-na">N/A</td>'; const cls=meta==null?'':(v>=meta?'cel-ok':'cel-bajo'); return '<td class="'+cls+'">'+v+'%</td>'; }
   function renderObjetivos(){
     const th='<th>#</th><th class="izq">Objetivo / métrica</th><th>Meta</th>'+OBJ.meses.map(m=>'<th>'+m+'</th>').join('')+'<th>Prom.</th><th>Estado</th>';
-    const rows=OBJ.filas.map(f=>{
+    const rows=OBJ.filas.map((f,k)=>{
       const meta=f.meta==null?'N/A':f.meta+'%';
       const prom=f.prom==null?'<td class="cel-na">-</td>':'<td class="meta">'+f.prom+'%</td>';
       const est=f.estado?'<td class="ok">✅ '+f.estado+'</td>':'<td class="cel-na">-</td>';
-      return '<tr><td>'+f.n+'</td><td class="obj">'+f.obj+'</td><td class="meta">'+meta+'</td>'+f.vals.map(v=>celPct(v,f.meta)).join('')+prom+est+'</tr>';
+      const clickable=f.meta!=null?' class="obj-row" data-obj="'+k+'"':'';
+      return '<tr'+clickable+'><td>'+f.n+'</td><td class="obj">'+f.obj+'</td><td class="meta">'+meta+'</td>'+f.vals.map(v=>celPct(v,f.meta)).join('')+prom+est+'</tr>';
     }).join('');
     const promRow='<tr class="prom"><td></td><td class="obj">Promedio general del área</td><td></td>'+OBJ.promedio.map(v=>'<td>'+v+'%</td>').join('')+'<td></td><td></td></tr>';
     document.getElementById('objetivos').innerHTML=
-      '<div class="panel"><h3>KPIs asignados · '+OBJ.agente+'</h3><p class="psub">Seguimiento mensual 2026 · total objetivos asignados: '+OBJ.total+'. Verde = cumple la meta, rojo = por debajo.</p>'
+      '<div class="panel"><h3>KPIs asignados · '+OBJ.agente+'</h3><p class="psub">Seguimiento mensual 2026 · total objetivos asignados: '+OBJ.total+'. Verde = cumple la meta, rojo = por debajo. <b>Clic en un objetivo</b> para ver su tendencia mensual.</p>'
       +'<div class="tscroll"><table class="tabla-obj"><thead><tr>'+th+'</tr></thead><tbody>'+rows+promRow+'</tbody></table></div></div>';
   }
 
