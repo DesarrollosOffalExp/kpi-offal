@@ -140,6 +140,9 @@
   .tabla-desg th{text-align:left;font-size:10px;text-transform:uppercase;color:var(--muted);padding:5px 8px;border-bottom:1px solid var(--line);}
   .tabla-desg th.num,.tabla-desg td.num{text-align:right;font-variant-numeric:tabular-nums;}
   .tabla-desg td{padding:5px 8px;border-bottom:1px solid var(--line);color:var(--text);}
+  .tabla-desg tr.foco td{background:rgba(38,182,217,.16);font-weight:700;}
+  .tabla-obj td.mes-cel{cursor:pointer;}
+  .tabla-obj td.mes-cel:hover{filter:brightness(1.25);}
   .tabla-obj{width:100%;border-collapse:collapse;font-size:12px;}
   .tabla-obj th{text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:1px solid var(--line);}
   .tabla-obj th.izq{text-align:left;}
@@ -455,14 +458,15 @@
     meses.forEach((m,k)=>{ s+='<text x="'+xs(k).toFixed(1)+'" y="'+(H-8)+'" font-size="10" fill="#8ba0ab" text-anchor="middle">'+m+'</text>'; });
     return s+'</svg>';
   }
-  function openModalObj(k, atY){
+  function openModalObj(k, atY, mi){
     const f=OBJ.filas[k]; if(!f||f.meta==null) return;
     let body='<div class="mop-scroll"><div class="mop-chart">'+objLineSVG(f)+'</div>';
     if(f.desglose){
-      const rows=f.desglose.map((x,i)=>'<tr><td>'+OBJ.meses[i]+'</td><td class="num">'+x.ok+'</td><td class="num">'+x.e+'</td><td class="num">'+x.t+'</td><td class="num">'+(x.t?Math.round(x.ok/x.t*1000)/10:0)+'%</td></tr>').join('');
-      body+='<div class="mop-desg"><div class="mop-desg-t">Cómo se forma el % (hoja Informe Resp OK-Excedido)</div>'
-        +'<table class="tabla-desg"><thead><tr><th>Mes</th><th class="num">OK</th><th class="num">Excedido</th><th class="num">Total</th><th class="num">% OK</th></tr></thead><tbody>'+rows+'</tbody></table>'
-        +'<p class="mop-desg-n">% OK = OK / Total. Ej. enero: 1.023 / 1.109 = 92,2%.</p></div>';
+      const rows=f.desglose.map((x,i)=>{ const pct=x.t?Math.round(x.ok/x.t*1000)/10:0; return '<tr'+(i===mi?' class="foco"':'')+'><td>'+OBJ.meses[i]+'</td><td class="num">'+x.ok.toLocaleString("es-AR")+'</td><td class="num">'+x.e+'</td><td class="num">'+x.t.toLocaleString("es-AR")+'</td><td class="num">'+pct+'%</td></tr>'; }).join('');
+      const d0=f.desglose[0], p0=d0.t?Math.round(d0.ok/d0.t*1000)/10:0;
+      body+='<div class="mop-desg"><div class="mop-desg-t">Cómo se forma el % (hoja '+(f.fuente||'Informe')+')</div>'
+        +'<table class="tabla-desg"><thead><tr><th>Mes</th><th class="num">OK</th><th class="num">Excedido</th><th class="num">Total</th><th class="num">%</th></tr></thead><tbody>'+rows+'</tbody></table>'
+        +'<p class="mop-desg-n">% = OK / Total. Ej. '+OBJ.meses[0]+': '+d0.ok.toLocaleString("es-AR")+' / '+d0.t.toLocaleString("es-AR")+' = '+p0.toLocaleString("es-AR")+'%.</p></div>';
     }
     body+='<p class="mop-obj-txt">'+f.obj+'</p></div>';
     openModal('Objetivo '+f.n+' · tendencia 2026', 'Meta '+f.meta+'% · promedio '+f.prom+'% · '+f.estado, body, atY);
@@ -470,7 +474,7 @@
   function closeModalOp(){ const box=document.getElementById('modal-op'); box.classList.remove('show'); box.innerHTML=''; box.style.height=''; if(window.parent!==window) setTimeout(postAlto,30); }
   document.addEventListener('click',e=>{
     const op=e.target.closest&&e.target.closest('[data-op]'); if(op){ openModalOp(+op.getAttribute('data-op'), e.pageY); return; }
-    const obj=e.target.closest&&e.target.closest('[data-obj]'); if(obj){ openModalObj(+obj.getAttribute('data-obj'), e.pageY); return; }
+    const obj=e.target.closest&&e.target.closest('[data-obj]'); if(obj){ const td=e.target.closest&&e.target.closest('[data-mes]'); openModalObj(+obj.getAttribute('data-obj'), e.pageY, td?+td.getAttribute('data-mes'):null); return; }
   });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModalOp(); });
 
@@ -582,13 +586,14 @@
     agente:'Nicolás Gutiérrez', total:2, meses:['Ene','Feb','Mar','Abr','May','Jun','Jul'],
     filas:[
       {n:1, obj:'Respuesta de tickets en 24hs y 5 días hábiles para informar tratamiento; resolución en 90 días. (Informe que muestre la respuesta de cada pedido en 24hs y la finalización dentro de los 90 días.)', meta:94, vals:[92,96,98,97,100,97,98], prom:97, estado:'Logrado',
-       desglose:[{ok:1023,e:86,t:1109},{ok:836,e:36,t:872},{ok:1100,e:22,t:1122},{ok:1052,e:38,t:1090},{ok:606,e:0,t:606},{ok:329,e:9,t:338},{ok:314,e:10,t:324}]},
-      {n:2, obj:'Informe del jefe del sector con datos de la semana y estadísticos del área.', meta:94, vals:[99,100,100,100,100,100,100], prom:100, estado:'Logrado'},
+       fuente:'Informe Resp OK-Excedido', desglose:[{ok:1023,e:86,t:1109},{ok:836,e:36,t:872},{ok:1100,e:22,t:1122},{ok:1052,e:38,t:1090},{ok:606,e:0,t:606},{ok:329,e:9,t:338},{ok:314,e:10,t:324}]},
+      {n:2, obj:'Informe del jefe del sector con datos de la semana y estadísticos del área.', meta:94, vals:[99,100,100,100,100,100,100], prom:100, estado:'Logrado',
+       fuente:'Informe OK vs Excedido', desglose:[{ok:1098,e:11,t:1109},{ok:870,e:2,t:872},{ok:1121,e:1,t:1122},{ok:1084,e:1,t:1085},{ok:604,e:0,t:604},{ok:327,e:0,t:327},{ok:303,e:0,t:303}]},
       {n:3, obj:'5 días hábiles para notificar estado.', meta:null, vals:[null,null,null,null,null,null,null], prom:null, estado:null},
     ],
     promedio:[96,98,99,99,100,99,99],
   };
-  function celPct(v,meta){ if(v==null) return '<td class="cel-na">N/A</td>'; const cls=meta==null?'':(v>=meta?'cel-ok':'cel-bajo'); return '<td class="'+cls+'">'+v+'%</td>'; }
+  function celPct(v,meta,mi){ const dm=mi==null?'':' data-mes="'+mi+'"'; if(v==null) return '<td class="cel-na mes-cel"'+dm+'>N/A</td>'; const cls=meta==null?'':(v>=meta?'cel-ok':'cel-bajo'); return '<td class="mes-cel '+cls+'"'+dm+'>'+v+'%</td>'; }
   function renderObjetivos(){
     const th='<th>#</th><th class="izq">Objetivo / métrica</th><th>Meta</th>'+OBJ.meses.map(m=>'<th>'+m+'</th>').join('')+'<th>Prom.</th><th>Estado</th>';
     const rows=OBJ.filas.map((f,k)=>{
@@ -596,7 +601,7 @@
       const prom=f.prom==null?'<td class="cel-na">-</td>':'<td class="meta">'+f.prom+'%</td>';
       const est=f.estado?'<td class="ok">✅ '+f.estado+'</td>':'<td class="cel-na">-</td>';
       const clickable=f.meta!=null?' class="obj-row" data-obj="'+k+'"':'';
-      return '<tr'+clickable+'><td>'+f.n+'</td><td class="obj">'+f.obj+'</td><td class="meta">'+meta+'</td>'+f.vals.map(v=>celPct(v,f.meta)).join('')+prom+est+'</tr>';
+      return '<tr'+clickable+'><td>'+f.n+'</td><td class="obj">'+f.obj+'</td><td class="meta">'+meta+'</td>'+f.vals.map((v,mi)=>celPct(v,f.meta,mi)).join('')+prom+est+'</tr>';
     }).join('');
     const promRow='<tr class="prom"><td></td><td class="obj">Promedio general del área</td><td></td>'+OBJ.promedio.map(v=>'<td>'+v+'%</td>').join('')+'<td></td><td></td></tr>';
     document.getElementById('objetivos').innerHTML=
