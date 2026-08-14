@@ -399,7 +399,7 @@ body {
   padding: 14px 12px 5px; border-bottom: none; background: transparent; color: var(--muted);
 }
 .tabla-kpi tbody tr.sec-head:hover td { background: transparent; }
-/* Identificadores de color por grupo (tenues) — borde izquierdo + tinte suave.
+/* Identificadores de color por grupo (tenues) · borde izquierdo + tinte suave.
    Reflejan la codificación del Excel sin quedar "colorinche". */
 .tabla-kpi tbody tr[class*="cat-"] td:first-child { border-left: 3px solid transparent; }
 .cat-dolar        td:first-child { border-left-color: #f5a623; }

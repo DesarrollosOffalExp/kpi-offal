@@ -4,11 +4,11 @@
  * Si están las credenciales de Microsoft Graph + la URL del archivo, lee el
  * KPI.xlsx del SharePoint POR RANGOS EXPLÍCITOS (los declarados en kpiConfig.HOJAS)
  * y lo mapea al modelo del tablero. Si falta cualquier cosa (o Graph falla), cae a
- * datos MOCK — así el tablero siempre responde.
+ * datos MOCK · así el tablero siempre responde.
  *
  * No usa librerías de Graph: pide el token por client-credentials y llama a la API
  * REST de Excel de Graph con fetch (Node 18+). Cada rango se lee con
- * .../worksheets('HOJA')/range(address='P7:P18')?$select=values — devuelve los
+ * .../worksheets('HOJA')/range(address='P7:P18')?$select=values · devuelve los
  * valores como matriz JSON, sin parsear el .xlsx.
  */
 const { construirMock } = require('./mockData');

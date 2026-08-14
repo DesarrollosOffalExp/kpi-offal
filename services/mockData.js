@@ -10,7 +10,7 @@ const serie = (periodos, vals) => periodos.map((p, i) => ({ periodo: p, valor: v
 // Series base (reutilizadas por KPIs y gráficos).
 const RECEPCION = [100, 100, 100, 100, 100, 100];
 const ENTREGA = [99.74, 99.63, 97.82, 97.91, 99.47, 99.57];
-// Cerramiento por Bestpack (Cerradoras): KPI semanal vs. estándar (72) — fila 111.
+// Cerramiento por Bestpack (Cerradoras): KPI semanal vs. estándar (72) · fila 111.
 const CERRAMIENTO = [65, 70, 73, 78, 66, 73, 64, 67, 76];
 // Máximos de producción por semana, por máquina (Bestpack 1/2/3).
 const BP1 = [165, 184, 182, 199, 146, 198, 161, 187, 190];
@@ -33,13 +33,13 @@ const INSUMOS = {
     // Sección Eficiencia de materiales.
     { id: 'recepcion', grupo: 'Eficiencia de materiales', titulo: 'Eficiencia en Recepción', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100,
       serie: serie(MESES, RECEPCION),
-      info: 'Recepciones de materiales sin error sobre el total del mes. (Hoja INSUMOS, columna P — mensual)' },
+      info: 'Recepciones de materiales sin error sobre el total del mes. (Hoja INSUMOS, columna P · mensual)' },
     { id: 'entrega', grupo: 'Eficiencia de materiales', titulo: 'Eficiencia en Entrega', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 99,
       serie: serie(MESES, ENTREGA),
-      info: 'Egresos sin diferencias sobre el total de egresos del mes. (Hoja INSUMOS, columna U — mensual)' },
+      info: 'Egresos sin diferencias sobre el total de egresos del mes. (Hoja INSUMOS, columna U · mensual)' },
   ],
   graficos: [
-    { tipo: 'bar', grupo: 'Productividad', titulo: 'Cerrado por Bestpack — última semana', info: 'Máximo de producción de la última semana (S31) por máquina.',
+    { tipo: 'bar', grupo: 'Productividad', titulo: 'Cerrado por Bestpack · última semana', info: 'Máximo de producción de la última semana (S31) por máquina.',
       datos: [{ nombre: 'Bestpack 1', valor: 190 }, { nombre: 'Bestpack 2', valor: 195 }, { nombre: 'Bestpack 3', valor: 161 }] },
     { tipo: 'line', grupo: 'Productividad', titulo: 'Máximos por Bestpack por semana', info: 'Comparativo semana a semana de la producción máxima de cada Bestpack.',
       periodos: SEMANAS, series: [{ nombre: 'Bestpack 1', datos: BP1 }, { nombre: 'Bestpack 2', datos: BP2 }, { nombre: 'Bestpack 3', datos: BP3 }] },
@@ -157,13 +157,13 @@ const HIELO = {
         ['Mattievich', '337', '-215', '552', '552', '2,45', '1,84'], ['Proc. Entrerriana', '813', '63', '750', '750', '1,88', '1,88'],
         ['Runfo', '1.644', '-176', '1.820', '1.605', '1,61', '1,52'], ['Tresnal', '558', '-37', '595', '565', '1,52', '1,25'],
         ['Velsud', '690', '-269', '959', '847', '1,84', '1,49'],
-        ['TOTALES', '—', '—', '29.358', '28.649', '1,67', '1,63'],
+        ['TOTALES', '-', '-', '29.358', '28.649', '1,67', '1,63'],
       ] },
     { tipo: 'line', grupo: 'Monitoreo de barras', titulo: 'Promedio barras/tambor por semana', info: 'Evolutivo del promedio (barras por tambor), semana a semana. (Promedios históricos)',
       periodos: Array.from({ length: 29 }, (_, i) => 'S' + (i + 1)),
       series: [{ nombre: 'Promedio', datos: [2.12, 1.94, 1.94, 1.87, 1.9, 1.87, 1.86, 1.91, 1.76, 1.81, 1.78, 1.84, 1.81, 1.86, 1.86, 1.78, 1.72, 1.67, 1.59, 1.7, 1.68, 1.7, 1.7, 1.66, 1.69, 2.01, 1.83, 1.97, 2.12] }] },
-    // Presupuesto y Gastos: tabla completa (todos los grupos, mes a mes — sin descartar nada).
-    { tipo: 'tabla', grupo: 'Presupuesto y Gastos', titulo: 'Presupuesto / Gastos (mes a mes)', info: 'Gastos por grupo, producción y costo por barra, mes a mes. (Gerencia de Operaciones — Fábrica de Hielo)',
+    // Presupuesto y Gastos: tabla completa (todos los grupos, mes a mes · sin descartar nada).
+    { tipo: 'tabla', grupo: 'Presupuesto y Gastos', titulo: 'Presupuesto / Gastos (mes a mes)', info: 'Gastos por grupo, producción y costo por barra, mes a mes. (Gerencia de Operaciones · Fábrica de Hielo)',
       columnas: ['Grupo', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
       filas: [
         ['Material', '$ -', '$ 263.339', '$ 5.389.999', '$ 8.675.932', '$ 8.004.591', '$ 3.647.721'],
@@ -215,15 +215,15 @@ const SALDO_HIEL = [1369, 1369, 3592, 3592, 3592, 6138, 3325, 4080, 4080, 4080, 
 const LOGISTICA = {
   key: 'logística', nombre: 'Logística', estado: 'ok', objetivoPendiente: true,
   kpis: [
-    // Matriz de Costo (mensual, Junio) — datos-héroe del mes en curso.
+    // Matriz de Costo (mensual, Junio) · datos-héroe del mes en curso.
     { id: 'costo_general', grupo: G.costo, titulo: 'Costo General del mes', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 1176272936, destacado: true,
       info: 'Costo general de Junio: propios + fletes + lavado + taller. Es el TOTALIZADO del mes. (MATRIZ DE COSTO)' },
     { id: 'costo_ton_prod', grupo: G.costo, titulo: 'Costo por tonelada producida', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 193767, destacado: true,
-      info: 'Costo total por tonelada producida en Junio. (MATRIZ DE COSTO — Total $/Tons Prod.)' },
+      info: 'Costo total por tonelada producida en Junio. (MATRIZ DE COSTO · Total $/Tons Prod.)' },
     { id: 'kilos_prod', grupo: G.costo, titulo: 'Kilos producidos', unidad: 'KG', formato: 'numero', sentido: 'up', meta: null, valor: 6070550,
-      info: 'Descarga de producción en Junio. (MATRIZ DE COSTO — Descarga Producción)' },
+      info: 'Descarga de producción en Junio. (MATRIZ DE COSTO · Descarga Producción)' },
     { id: 'kilos_desc', grupo: G.costo, titulo: 'Kilos descargados (neto)', unidad: 'KG', formato: 'numero', sentido: 'up', meta: null, valor: 10917908,
-      info: 'Descarga kg neta en Junio. (MATRIZ DE COSTO — Descarga KG Neta)' },
+      info: 'Descarga kg neta en Junio. (MATRIZ DE COSTO · Descarga KG Neta)' },
     { id: 'dolar_ref', grupo: G.costo, titulo: 'Dólar de referencia', unidad: '', formato: 'moneda', sentido: 'up', meta: null, valor: 1500,
       info: 'Valorización del dólar oficial usada en Junio (Banco Nación). (MATRIZ DE COSTO)' },
     // Disponibilidad de Flota (Sem 30)
@@ -248,10 +248,10 @@ const LOGISTICA = {
     { id: 'kg_lt', grupo: G.gasoil, titulo: 'Rendimiento KG/LT', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 6.21,
       info: 'Kilos transportados por litro de gasoil. Más alto es mejor. Es el dato principal. (CONSUMO DE GASOIL)' },
     { id: 'total_lt', grupo: G.gasoil, titulo: 'Total litros (sem)', unidad: 'Lt', formato: 'numero', sentido: 'down', meta: null, valor: 8446,
-      info: 'Litros de gasoil consumidos en la semana. (Total de Km recorridos: pendiente — no ubiqué la columna en la planilla.)' },
+      info: 'Litros de gasoil consumidos en la semana. (Total de Km recorridos: pendiente · no ubiqué la columna en la planilla.)' },
     { id: 'total_kg_gas', grupo: G.gasoil, titulo: 'Total Kg transportados', unidad: 'Kg', formato: 'numero', sentido: 'up', meta: null, valor: 2011585,
       info: 'Kilos transportados en la semana. (CONSUMO DE GASOIL)' },
-    // Costo por Frigorífico (Sem 31) — el detalle completo va en la tabla.
+    // Costo por Frigorífico (Sem 31) · el detalle completo va en la tabla.
     { id: 'valor_viajes', grupo: G.frig, titulo: 'Valor de los viajes', unidad: '', formato: 'moneda', sentido: 'up', meta: null, valor: 49033031,
       info: 'Valor total de los viajes de la semana. Detalle por frigorífico en la tabla. (COSTO POR FRIGORÍFICO)' },
     { id: 'kgs_transp', grupo: G.frig, titulo: 'Kgs transportados', unidad: 'Kg', formato: 'numero', sentido: 'up', meta: null, valor: 1294641,
@@ -264,7 +264,7 @@ const LOGISTICA = {
   ],
   graficos: [
     { tipo: 'tabla', grupo: G.costo, titulo: 'Matriz de Costo · 2026 (mes a mes)',
-      info: 'Costos de logística por ítem y por mes, con los mismos identificadores de color del Excel: Propios, Fletes, Total Costo, Lavatachos, Taller y Total General. (MATRIZ DE COSTO — Logística, A1:N55)',
+      info: 'Costos de logística por ítem y por mes, con los mismos identificadores de color del Excel: Propios, Fletes, Total Costo, Lavatachos, Taller y Total General. (MATRIZ DE COSTO · Logística, A1:N55)',
       columnas: ['Ítem', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
       secciones: [
         { label: 'Dólar de referencia (Banco Nación)', cat: 'dolar', filas: [
@@ -321,7 +321,7 @@ const LOGISTICA = {
         ['IHZ 228', 'Semi', 'Astpra', '6'], ['IKO 415', 'Semi', 'Astpra', '6'], ['IMO 536', 'Semi', 'Astpra', '2'],
         ['JAP 922', 'Semi', 'Astpra', '6'], ['JNS 094', 'Semi', 'Astpra', '6'], ['LMD 345', 'Semi', 'Astpra', '6'],
         ['LMD 346', 'Semi', 'Astpra', '6'], ['MXC 712', 'Semi', 'Lambert', '6'], ['AC 427 IU', 'Batea', 'Gomatro', '4'],
-        ['TOTAL', '15 unidades', '—', '82'],
+        ['TOTAL', '15 unidades', '-', '82'],
       ] },
     { tipo: 'tabla', grupo: G.tambores, titulo: 'Cuenta de tambores por frigorífico', info: 'Stock de tambores por matadero (negativo = a favor).',
       columnas: ['Matadero', 'Anterior', 'Enviados', 'Recibidos', 'Stock Final'],
@@ -346,16 +346,16 @@ const LOGISTICA = {
     { tipo: 'tabla', grupo: G.frig, titulo: 'Costos por frigorífico', info: 'Detalle por frigorífico: km, viajes, kilos, valor de viajes y excedente. Es el dato principal del bloque.',
       columnas: ['Proveedor', 'Km', 'Viajes', 'Kgs', 'Valor Viajes', 'Excedente'],
       filas: [
-        ['Agroindustrias', '34,8', '6', '43.056', '$ 218.276', '—'], ['Arre Beef', '550', '10', '105.780', '$ 700.409', '$ 744.033'],
+        ['Agroindustrias', '34,8', '6', '43.056', '$ 218.276', '-'], ['Arre Beef', '550', '10', '105.780', '$ 700.409', '$ 744.033'],
         ['Black Bamboo', '740', '3', '38.808', '$ 912.539', '$ 409.500'], ['Compañía Bernal', '37,8', '13', '92.510', '$ 267.364', '$ 1.529.667'],
-        ['Ecocarnes', '142', '9', '81.941', '$ 298.165', '—'], ['El Chillén', '119', '5', '33.026', '$ 278.709', '—'],
+        ['Ecocarnes', '142', '9', '81.941', '$ 298.165', '-'], ['El Chillén', '119', '5', '33.026', '$ 278.709', '-'],
         ['Frigolar', '108', '10', '103.499', '$ 267.364', '$ 218.617'], ['Gorina', '128', '23', '224.844', '$ 267.364', '$ 294.450'],
-        ['Rioplatense', '159', '13', '119.955', '$ 331.825', '$ 144.083'], ['Gan. Las Pampas', '38,9', '3', '15.546', '$ 227.086', '—'],
-        ['San Roque', '62,5', '6', '36.119', '$ 253.380', '—'], ['Tolosa', '168', '7', '65.068', '$ 340.483', '$ 102.700'],
-        ['Menucar Lobos', '177', '3', '14.858', '$ 337.382', '—'], ['Mat. Federal', '32,1', '11', '83.878', '$ 217.523', '$ 8.450'],
-        ['Runfo', '69,7', '12', '117.412', '$ 384.674', '$ 1.682.850'], ['Swift', '92,2', '—', '0', '$ 263.611', '$ 736.233'],
-        ['Tresnal', '216', '8', '41.218', '$ 356.914', '$ 32.500'], ['Velsud', '20', '9', '49.337', '$ 203.439', '—'],
-        ['TOTALES', '—', '156', '1.294.641', '$ 49.033.031', '$ 534.057'],
+        ['Rioplatense', '159', '13', '119.955', '$ 331.825', '$ 144.083'], ['Gan. Las Pampas', '38,9', '3', '15.546', '$ 227.086', '-'],
+        ['San Roque', '62,5', '6', '36.119', '$ 253.380', '-'], ['Tolosa', '168', '7', '65.068', '$ 340.483', '$ 102.700'],
+        ['Menucar Lobos', '177', '3', '14.858', '$ 337.382', '-'], ['Mat. Federal', '32,1', '11', '83.878', '$ 217.523', '$ 8.450'],
+        ['Runfo', '69,7', '12', '117.412', '$ 384.674', '$ 1.682.850'], ['Swift', '92,2', '-', '0', '$ 263.611', '$ 736.233'],
+        ['Tresnal', '216', '8', '41.218', '$ 356.914', '$ 32.500'], ['Velsud', '20', '9', '49.337', '$ 203.439', '-'],
+        ['TOTALES', '-', '156', '1.294.641', '$ 49.033.031', '$ 534.057'],
       ] },
     { tipo: 'line', grupo: G.hiel, titulo: 'Saldo de hiel diario (Julio)', info: 'Evolución del saldo de hiel día a día en el mes.',
       periodos: SALDO_HIEL.map((_, i) => String(i + 1)), series: [{ nombre: 'Saldo', datos: SALDO_HIEL }] },
