@@ -109,6 +109,7 @@
   <section id="primary"></section>
   <section class="sections" id="sections"></section>
   <section class="donuts" id="donuts"></section>
+  <section id="operadores"></section>
   <div class="blocks" id="blocks"></div>
   <div class="tip" id="tip" role="status" aria-live="polite"></div>
   <p class="pie">Fuente: <b>KPI sistemas.xlsx</b> · hoja <b>KPI</b> (semanas 15–32). Semana actual: <b>32</b>. Rechazados, Anulados y Urgentes no tienen datos cargados en el original. Celdas coloreadas por intensidad (verde=menor, rojo=mayor) en las métricas donde más alto es peor.</p>
@@ -247,6 +248,31 @@
       ]);
   }
 
+  // Consultas por operador (Hoja1) — barras horizontales ordenadas.
+  const OPERADORES=[
+    {n:'Luis Arancibia',v:33},{n:'Andrea Cardozo',v:27},{n:'Miguel Flores',v:16},
+    {n:'Ezequiel Manco',v:7},{n:'Norberto Haunau',v:7},{n:'Roberto Sanabria',v:6},
+    {n:'Juan Penalba',v:3},{n:'Tobias Santillan',v:3},{n:'Matias Juarez',v:2},
+  ];
+  function hbarSVG(items){
+    const W=680,rowH=30,padL=150,padR=48,padT=6,padB=6, iw=W-padL-padR;
+    const H=padT+padB+items.length*rowH, max=Math.max(...items.map(i=>i.v),1)*1.05;
+    let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
+    items.forEach((it,i)=>{ const y=padT+i*rowH+rowH/2, bw=Math.max(2,it.v/max*iw);
+      const tt=it.n+'\n'+it.v+' consultas';
+      s+='<text x="'+(padL-10)+'" y="'+(y+4)+'" font-size="12" fill="#8ba0ab" text-anchor="end">'+it.n+'</text>';
+      s+='<rect class="hot" data-tip="'+tt+'" x="'+padL+'" y="'+(y-9)+'" width="'+bw.toFixed(1)+'" height="18" rx="4" fill="#26b6d9"/>';
+      s+='<text x="'+(padL+bw+7).toFixed(1)+'" y="'+(y+4)+'" font-size="12" font-weight="700" fill="#eef2f5">'+it.v+'</text>';
+    });
+    return s+'</svg>';
+  }
+  function renderOperadores(){
+    const total=OPERADORES.reduce((a,o)=>a+o.v,0);
+    document.getElementById('operadores').innerHTML=
+      '<div class="panel" style="margin-top:14px"><h3>Consultas por operador</h3>'
+      +'<p class="psub">Tickets atendidos por agente · total '+total+' — fuente: Hoja1</p>'+hbarSVG(OPERADORES)+'</div>';
+  }
+
   const BLOCKS=[
     { id:'detalle', name:'Detalle semanal', color:'#26b6d9', open:true, rows:[
       {l:'Total de abiertos', d:D.abiertos, heat:true, strong:true},
@@ -293,7 +319,7 @@
     renderSections(); renderBlocks(); if(window.parent!==window)setTimeout(postAlto,30);
   });
 
-  renderPrimary(); renderSections(); renderDonuts(); renderBlocks();
+  renderPrimary(); renderSections(); renderDonuts(); renderOperadores(); renderBlocks();
 
   function postAlto(){ try{ parent.postMessage({tipo:'matriz-alto',alto:document.body.scrollHeight},'*'); }catch(e){} }
   if(window.parent!==window){ postAlto(); window.addEventListener('resize',postAlto); new MutationObserver(postAlto).observe(document.body,{subtree:true,childList:true}); }

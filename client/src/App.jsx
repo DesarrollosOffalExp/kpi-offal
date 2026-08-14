@@ -140,9 +140,30 @@ export default function App() {
           </div>
         ) : (
           <section className="sector">
-            {sector.key === 'sistemas' ? (
-              <KpiSistemas />
-            ) : (
+            {sector.key === 'sistemas' ? (() => {
+              // Sistemas: dashboard de KPI + sub-pestaña Objetivo (como los demás sectores).
+              const gruposSis = ['KPI de tickets', 'Objetivo'];
+              const subSis = gruposSis.includes(subActivo) ? subActivo : gruposSis[0];
+              return (
+                <>
+                  <nav className="subtabs">
+                    {gruposSis.map((g) => (
+                      <button key={g} className={`subtab ${g === subSis ? 'on' : ''}`} onClick={() => setSubActivo(g)}>{g}</button>
+                    ))}
+                  </nav>
+                  {subSis === 'Objetivo' ? (
+                    <div className="grupo">
+                      <div className="vacio-sector">
+                        <b>Objetivo</b>
+                        <p>Todavía no cargamos este dato. Se agrega cuando el área lo defina.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <KpiSistemas />
+                  )}
+                </>
+              );
+            })() : (
             <>
             {sector.periodo && <div className="sector-periodo">Datos de la <b>{sector.periodo}</b></div>}
             {conSub && (
