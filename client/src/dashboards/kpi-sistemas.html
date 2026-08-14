@@ -86,6 +86,46 @@
   rect.hot:hover,path.hot:hover,circle.hot:hover{opacity:1;filter:brightness(1.22);}
   .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:9px 12px;font-size:12.5px;line-height:1.5;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:340px;}
   .tip.show{opacity:1;transform:none;}
+  .delta-lbl{font-size:9px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.03em;}
+  .ico-i{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--muted-2);color:var(--muted);font-size:9px;font-weight:800;font-style:normal;line-height:1;cursor:help;vertical-align:middle;}
+  .ico-i:hover{border-color:var(--info);color:var(--info);}
+  /* Modal de detalle por agente */
+  #modal-op{position:absolute;left:0;top:0;width:100%;z-index:80;display:none;}
+  #modal-op.show{display:block;}
+  .mop-bg{position:absolute;inset:0;background:rgba(4,10,15,.62);}
+  .mop-box{position:absolute;left:50%;transform:translateX(-50%);width:min(560px,92%);background:var(--panel);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.6);max-height:440px;display:flex;flex-direction:column;overflow:hidden;}
+  .mop-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);}
+  .mop-t{font-size:16px;font-weight:800;}
+  .mop-s{font-size:12px;color:var(--muted);margin-top:2px;}
+  .mop-x{appearance:none;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:14px;flex-shrink:0;}
+  .mop-x:hover{color:var(--text);border-color:var(--brand);}
+  .mop-list{list-style:none;margin:0;padding:8px;overflow-y:auto;}
+  .mop-list li{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:8px;font-size:13px;color:var(--text);line-height:1.4;}
+  .mop-list li:hover{background:var(--panel-3);}
+  .mop-list li .n{flex-shrink:0;min-width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;background:var(--panel-2);color:var(--muted);font-size:11px;font-weight:700;}
+  /* Sub-navegación interna */
+  .subnav{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0;}
+  .subnav button{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--muted);font:inherit;font-size:12.5px;font-weight:700;padding:8px 15px;border-radius:999px;cursor:pointer;transition:.15s;}
+  .subnav button:hover{color:var(--text);border-color:var(--brand);}
+  .subnav button.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .view{display:none;} .view.on{display:block;}
+  /* Tablas Open y Objetivos */
+  .tabla-open{width:100%;border-collapse:collapse;font-size:12px;}
+  .tabla-open thead th{position:sticky;top:0;background:var(--panel-2);text-align:left;font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .tabla-open thead th.num,.tabla-open td.num{text-align:right;}
+  .tabla-open td{padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .tabla-open td.wrap{white-space:normal;min-width:200px;}
+  .tabla-open tbody tr:hover td{background:rgba(255,255,255,.02);}
+  .tabla-open td.sm-alto{color:var(--bad);font-weight:700;}
+  .tabla-obj{width:100%;border-collapse:collapse;font-size:12px;}
+  .tabla-obj th{text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:1px solid var(--line);}
+  .tabla-obj th.izq{text-align:left;}
+  .tabla-obj td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:center;font-variant-numeric:tabular-nums;}
+  .tabla-obj td.obj{text-align:left;color:var(--text);max-width:360px;white-space:normal;line-height:1.35;}
+  .tabla-obj td.meta{font-weight:700;color:var(--text);}
+  .tabla-obj tr.prom td{font-weight:800;color:var(--text);border-top:2px solid var(--line);background:var(--panel-2);}
+  .tabla-obj .ok{color:var(--good);font-weight:700;}
+  .cel-ok{background:rgba(34,227,155,.14);} .cel-bajo{background:rgba(255,77,103,.14);} .cel-na{color:var(--muted-2);}
   @media(max-width:860px){ .sections{grid-template-columns:1fr;} .section{border-left:none;border-top:1px solid var(--line);} .section:first-child{border-top:none;} .donuts{grid-template-columns:1fr;} }
   @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
 </style>
@@ -107,12 +147,24 @@
   </header>
 
   <section id="primary"></section>
-  <section class="sections" id="sections"></section>
-  <section class="donuts" id="donuts"></section>
-  <section id="operadores"></section>
-  <div class="blocks" id="blocks"></div>
+  <nav class="subnav" id="subnav">
+    <button data-v="resumen" class="on">Resumen</button>
+    <button data-v="agente">Por agente</button>
+    <button data-v="abiertos">Tickets abiertos</button>
+    <button data-v="semanal">Evolución semanal</button>
+    <button data-v="objetivos">Objetivos</button>
+  </nav>
+  <div class="view on" data-view="resumen">
+    <section class="sections" id="sections"></section>
+    <section class="donuts" id="donuts"></section>
+  </div>
+  <div class="view" data-view="agente"><section id="operadores"></section></div>
+  <div class="view" data-view="abiertos"><section id="openTable"></section></div>
+  <div class="view" data-view="semanal"><div class="blocks" id="blocks"></div></div>
+  <div class="view" data-view="objetivos"><section id="objetivos"></section></div>
   <div class="tip" id="tip" role="status" aria-live="polite"></div>
-  <p class="pie">Fuente: <b>KPI sistemas.xlsx</b> · hoja <b>KPI</b> (semanas 15–32). Semana actual: <b>32</b>. Rechazados, Anulados y Urgentes no tienen datos cargados en el original. Celdas coloreadas por intensidad (verde=menor, rojo=mayor) en las métricas donde más alto es peor.</p>
+  <div id="modal-op"></div>
+  <p class="pie">Fuente: <b>KPI sistemas.xlsx</b> (hojas KPI, Resumen y Open) y <b>KPI Gerencia de Operaciones 2026</b> (objetivos). Semana actual: <b>32</b>.</p>
 </div>
 
 <script>
@@ -162,25 +214,26 @@
       +'</div></div>';
   }
 
+  const VS = ' La flecha y el % son la variación respecto a la semana anterior (S31 a S32).';
   const SECTIONS=[
     { title:'Estado de tickets', sub:'abiertos · vencidas · pendientes',
       cards:[
-        {k:'Total abiertos', d:D.abiertos, f:'num', down:true},
-        {k:'Total vencidas', d:D.vencidas, f:'num', down:true},
-        {k:'Pendientes sem.', d:D.pendientes, f:'num', down:true},
+        {k:'Total abiertos', d:D.abiertos, f:'num', down:true, i:'Tickets abiertos (sin cerrar) al cierre de la semana.'+VS},
+        {k:'Total vencidas', d:D.vencidas, f:'num', down:true, i:'Tickets que pasaron su plazo de atención.'+VS},
+        {k:'Pendientes sem.', d:D.pendientes, f:'num', down:true, i:'Tickets que quedaron pendientes en la semana.'+VS},
       ],
       series:[{name:'Abiertos',d:D.abiertos,c:'#26b6d9'},{name:'Vencidas',d:D.vencidas,c:'#ff4d67'}] },
     { title:'Actividad semanal', sub:'ingreso y resolución',
       cards:[
-        {k:'Tickets semana', d:D.tickets, f:'num', neutral:true},
-        {k:'Tratados', d:D.tratados, f:'num', down:false},
-        {k:'% Resolución', d:D.resol, f:'pct', down:false},
+        {k:'Tickets semana', d:D.tickets, f:'num', neutral:true, i:'Tickets ingresados en la semana.'+VS},
+        {k:'Tratados', d:D.tratados, f:'num', down:false, i:'Tickets resueltos o gestionados en la semana.'+VS},
+        {k:'% Resolución', d:D.resol, f:'pct', down:false, i:'Porcentaje de tickets de la semana que se trataron (Tratados sobre Ingresados).'+VS},
       ],
       series:[{name:'Ingresados',d:D.tickets,c:'#26b6d9'},{name:'Tratados',d:D.tratados,c:'#22e39b'}] },
     { title:'Backlog anterior', sub:'arrastre de semanas previas',
       cards:[
-        {k:'Ant. vencidas', d:D.vencidas, f:'num', down:true},
-        {k:'Ant. sin vencer', d:D.sinVencer, f:'num', neutral:true},
+        {k:'Ant. vencidas', d:D.vencidas, f:'num', down:true, i:'Tickets vencidos que arrastran de semanas anteriores.'+VS},
+        {k:'Ant. sin vencer', d:D.sinVencer, f:'num', neutral:true, i:'Tickets de semanas anteriores que todavía no vencieron.'+VS},
       ],
       series:[{name:'Ant. sin vencer',d:D.sinVencer,c:'#8ba0ab'},{name:'Ant. vencidas',d:D.vencidas,c:'#ff4d67'}] },
   ];
@@ -208,13 +261,14 @@
     });
     return s+'</svg>';
   }
+  function infoIcon(txt){ return txt ? ' <span class="ico-i hot" data-tip="'+txt+'">i</span>' : ''; }
   function renderSections(){
     document.getElementById('sections').innerHTML=SECTIONS.map(sec=>{
       const pi=CUR-1;
       const cards=sec.cards.map(c=>{
         const v=c.d[CUR];
         const sub = c.neutral ? deltaHTML(v,c.d[pi],false) : deltaHTML(v,c.d[pi],c.down);
-        return '<div class="card"><span class="ck">'+c.k+'</span><span class="cv">'+fmt(v,c.f)+'</span>'+sub+'</div>';
+        return '<div class="card"><span class="ck">'+c.k+infoIcon(c.i)+'</span><span class="cv">'+fmt(v,c.f)+'</span>'+sub+'<span class="delta-lbl">vs. sem. ant.</span></div>';
       }).join('');
       const leg='<div class="leyenda">'+sec.series.map(s=>'<span class="li"><span style="width:12px;height:3px;border-radius:2px;background:'+s.c+'"></span>'+s.name+'</span>').join('')+'</div>';
       return '<div class="section"><h2 class="sec-title">'+sec.title+'</h2><p class="sec-sub">'+sec.sub+'</p><div class="cards">'+cards+'</div>'+leg+lineSVG(sec.series)+'</div>';
@@ -266,12 +320,13 @@
     const H=padT+padB+items.length*rowH, max=Math.max(...items.map(i=>i.v),1)*1.05;
     let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
     items.forEach((it,i)=>{ const y=padT+i*rowH+rowH/2, bw=Math.max(2,it.v/max*iw);
-      const lista=(it.tickets||[]).slice(0,14).map(t=>'· '+t).join('\n');
-      const mas=(it.tickets||[]).length>14?'\n… +'+(it.tickets.length-14)+' más':'';
-      const tt=it.n+' · '+it.v+' abiertos\n'+lista+mas;
+      const lista=(it.tickets||[]).slice(0,10).map(t=>'· '+t).join('\n');
+      const mas=(it.tickets||[]).length>10?'\n… +'+(it.tickets.length-10)+' más':'';
+      const tt=it.n+' · '+it.v+' abiertos\n'+lista+mas+'\n(clic para ver el detalle)';
       s+='<text x="'+(padL-10)+'" y="'+(y+4)+'" font-size="12" fill="#8ba0ab" text-anchor="end">'+it.n+'</text>';
-      s+='<rect class="hot" data-tip="'+tt+'" x="'+padL+'" y="'+(y-9)+'" width="'+bw.toFixed(1)+'" height="18" rx="4" fill="#26b6d9"/>';
+      s+='<rect x="'+padL+'" y="'+(y-9)+'" width="'+bw.toFixed(1)+'" height="18" rx="4" fill="#26b6d9"/>';
       s+='<text x="'+(padL+bw+7).toFixed(1)+'" y="'+(y+4)+'" font-size="12" font-weight="700" fill="#eef2f5">'+it.v+'</text>';
+      s+='<rect class="hot" data-tip="'+tt+'" data-op="'+i+'" x="0" y="'+(y-rowH/2)+'" width="'+W+'" height="'+rowH+'" fill="transparent"/>';
     });
     return s+'</svg>';
   }
@@ -328,7 +383,143 @@
     renderSections(); renderBlocks(); if(window.parent!==window)setTimeout(postAlto,30);
   });
 
-  renderPrimary(); renderSections(); renderDonuts(); renderOperadores(); renderBlocks();
+  // Modal de detalle de tickets por agente (clic en una barra del gráfico).
+  function openModalOp(op, atY){
+    const o=OPERADORES[op]; if(!o) return;
+    const items=o.tickets.map((t,i)=>'<li><span class="n">'+(i+1)+'</span><span>'+t+'</span></li>').join('');
+    const box=document.getElementById('modal-op');
+    box.innerHTML='<div class="mop-bg"></div><div class="mop-box"><div class="mop-head">'
+      +'<div><div class="mop-t">'+o.n+'</div><div class="mop-s">'+o.v+' tickets abiertos asignados</div></div>'
+      +'<button class="mop-x" aria-label="Cerrar">✕</button></div><ol class="mop-list">'+items+'</ol></div>';
+    box.classList.add('show');
+    const inner=box.querySelector('.mop-box');
+    const top=Math.max(16,(atY||160)-120);
+    inner.style.top=top+'px';
+    box.style.height=Math.max(document.body.scrollHeight, top+inner.offsetHeight+24)+'px';
+    box.querySelector('.mop-bg').onclick=closeModalOp;
+    box.querySelector('.mop-x').onclick=closeModalOp;
+    if(window.parent!==window) setTimeout(postAlto,30);
+  }
+  function closeModalOp(){ const box=document.getElementById('modal-op'); box.classList.remove('show'); box.innerHTML=''; box.style.height=''; if(window.parent!==window) setTimeout(postAlto,30); }
+  document.addEventListener('click',e=>{ const el=e.target.closest&&e.target.closest('[data-op]'); if(el) openModalOp(+el.getAttribute('data-op'), e.pageY); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModalOp(); });
+
+  // ---- Tickets abiertos (hoja Open) ----
+  const OPEN=[
+  {"t": "587506", "sol": "alexis", "a": "IMPRESORA NO ENCIENDE", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
+  {"t": "300546", "sol": "Alexis Gerez", "a": "Solicitud de monitor", "fc": "11/06/2026", "vm": "07/08/2026", "vd": "16/06/2026", "sm": 6},
+  {"t": "536362", "sol": "Andrea Litwin", "a": "SOLICITUD PRE ETIQUETA: cantidad de paquetes", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
+  {"t": "948906", "sol": "Andrea Litwin", "a": "SOLICITUD HIGADO Y LENGUA (RUSIA)", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 0},
+  {"t": "649829", "sol": "Andrea Litwin", "a": "BLOQUEO CAJAS DE SESO VP 5.9", "fc": "03/08/2026", "vm": "-", "vd": "06/08/2026", "sm": 7},
+  {"t": "628825", "sol": "Andrea Litwin", "a": "Modificación de existente urgente: HIGADO FETEA…", "fc": "22/07/2026", "vm": "-", "vd": "27/07/2026", "sm": 0},
+  {"t": "823712", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA", "fc": "13/07/2026", "vm": "19/08/2026", "vd": "16/07/2026", "sm": 0},
+  {"t": "779355", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA info nutr…", "fc": "13/07/2026", "vm": "21/08/2026", "vd": "16/07/2026", "sm": 0},
+  {"t": "653951", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA CON PRIOR…", "fc": "13/07/2026", "vm": "13/08/2026", "vd": "16/07/2026", "sm": 0},
+  {"t": "749140", "sol": "Andrea Litwin", "a": "UNIFICAR tickets RUSIA", "fc": "08/07/2026", "vm": "11/08/2026", "vd": "13/07/2026", "sm": 0},
+  {"t": "180982", "sol": "Andrea Litwin", "a": "MODIFICACIÓN Y ALTA DE CÓDIGOS Multivac", "fc": "29/06/2026", "vm": "21/07/2026", "vd": "02/07/2026", "sm": 0},
+  {"t": "558903", "sol": "Andrea Litwin", "a": "SOLICITUD DE ETIQUETAS: TENDÓN RUSIA 28.22", "fc": "12/06/2026", "vm": "28/07/2026", "vd": "17/06/2026", "sm": 0},
+  {"t": "627465", "sol": "Andrea Litwin", "a": "ELIMINAR LEYENDA DUPLICADA: Librillo 24.21", "fc": "15/05/2026", "vm": "17/07/2026", "vd": "20/05/2026", "sm": 0},
+  {"t": "548365", "sol": "Martin Dominguez", "a": "PERMISO PARA ELIMINAR ETIQUETAS PIR Y PI4", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
+  {"t": "707539", "sol": "Daiana Saporiti", "a": "IMPRESORAS CONGELADO", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
+  {"t": "583377", "sol": "Daiana Saporiti", "a": "prueba de PI4", "fc": "03/06/2026", "vm": "05/08/2026", "vd": "08/06/2026", "sm": 4},
+  {"t": "686624", "sol": "guido lazarte", "a": "NO HABLE MAIL EN OT", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
+  {"t": "557294", "sol": "guido lazarte", "a": "PC 47", "fc": "29/07/2026", "vm": "15/08/2026", "vd": "03/08/2026", "sm": 12},
+  {"t": "830788", "sol": "Elisa Mendoza", "a": "RE: Solicitud de colocación de bandeja porta ca…", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
+  {"t": "468448", "sol": "Luana Martinez", "a": "RE: ALICUOTAS PHYSIS MES DE AGOSTO [#780681] Re…", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
+  {"t": "284795", "sol": "Marcelo Alejandro Rodao", "a": "USUARIOS SIFAB", "fc": "05/08/2026", "vm": "12/08/2026", "vd": "10/08/2026", "sm": 3},
+  {"t": "370681", "sol": "Marcelo Alejandro Rodao", "a": "CAMARA Y FACIAL", "fc": "02/06/2026", "vm": "31/07/2026", "vd": "05/06/2026", "sm": 38},
+  {"t": "625820", "sol": "Dario Escobar", "a": "Celular flota pantalla con fallas", "fc": "28/07/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
+  {"t": "451743", "sol": "Isaias Toledo", "a": "IMPRESORAS", "fc": "04/08/2026", "vm": "-", "vd": "07/08/2026", "sm": 5},
+  {"t": "830389", "sol": "Isaias Toledo", "a": "MOVIMIENTOS EN TWINS", "fc": "08/07/2026", "vm": "14/08/2026", "vd": "10/07/2026", "sm": 3},
+  {"t": "995465", "sol": "Isaias Toledo", "a": "RE: RE: REDONDEOS Y XML [#756899] Open [#204670…", "fc": "30/06/2026", "vm": "15/08/2026", "vd": "03/07/2026", "sm": 3},
+  {"t": "984072", "sol": "Leonardo Ramos", "a": "Office", "fc": "04/08/2026", "vm": "-", "vd": "06/08/2026", "sm": 6},
+  {"t": "287073", "sol": "Leonardo Ramos", "a": "Genericos Molleja", "fc": "07/07/2026", "vm": "07/08/2026", "vd": "13/07/2026", "sm": 3},
+  {"t": "739134", "sol": "Emily Rojas", "a": "Modificación Alto impacto EEUU", "fc": "25/04/2026", "vm": "10/08/2026", "vd": "29/04/2026", "sm": 7},
+  {"t": "908645", "sol": "Javier Fernandez", "a": "Error ventana PWR-150 Stock disponible - Deposi…", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 5},
+  {"t": "595435", "sol": "Javier Fernandez", "a": "Noax 10 no funciona pistola", "fc": "24/07/2026", "vm": "-", "vd": "28/07/2026", "sm": 6},
+  {"t": "306736", "sol": "Javier Fernandez", "a": "ERROR EN VENTANA 00057 PROGRAMA SALIDA", "fc": "05/06/2026", "vm": "12/08/2026", "vd": "12/06/2026", "sm": 4},
+  {"t": "901653", "sol": "Facundo Tejada", "a": "colectores supermercados - NO PRENDEN", "fc": "31/07/2026", "vm": "-", "vd": "04/08/2026", "sm": 3},
+  {"t": "406800", "sol": "Fernanda Villazante", "a": "Creación de usuarios en Sifab", "fc": "29/07/2026", "vm": "-", "vd": "31/07/2026", "sm": 3},
+  {"t": "143300", "sol": "Juan Retamero", "a": "Modificacion en Alta de Proveedores SIFAB", "fc": "28/07/2026", "vm": "-", "vd": "31/07/2026", "sm": 4},
+  {"t": "243411", "sol": "Luis Ramos", "a": "Interno", "fc": "03/07/2026", "vm": "21/08/2026", "vd": "08/07/2026", "sm": 10},
+  {"t": "822622", "sol": "Luis Ramos", "a": "Reiterados problemas en los descuentos", "fc": "27/06/2026", "vm": "-", "vd": "10/08/2026", "sm": 3},
+  {"t": "741375", "sol": "juan.penalba", "a": "Compra - Switches", "fc": "23/06/2026", "vm": "30/09/2026", "vd": "25/06/2026", "sm": 3},
+  {"t": "809939", "sol": "juan.penalba", "a": "Bandeja rackeable", "fc": "08/05/2026", "vm": "26/08/2026", "vd": "29/06/2026", "sm": 3},
+  {"t": "579146", "sol": "Matias Juarez", "a": "Ingreso de Cajas al Cartofreezer", "fc": "17/06/2026", "vm": "-", "vd": "29/07/2026", "sm": 0},
+  {"t": "576991", "sol": "Matias Juarez", "a": "Estado Proyecto E80 + Twins + Miniload", "fc": "22/04/2026", "vm": "31/07/2026", "vd": "27/04/2026", "sm": 0},
+  {"t": "485139", "sol": "Micaela Cardullo", "a": "PI4", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
+  {"t": "369624", "sol": "Miguel Angel Flores", "a": "sin acceso al forms", "fc": "08/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
+  {"t": "222341", "sol": "Nestor Russo", "a": "FALLA TPM LINEA 2", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 0},
+  {"t": "663277", "sol": "Nicolas Barrios", "a": "Solicitud de parlante para pc n42", "fc": "17/07/2026", "vm": "04/08/2026", "vd": "22/07/2026", "sm": 3},
+  {"t": "849919", "sol": "Nicolas Barrios", "a": "Solcitud de impresora", "fc": "17/07/2026", "vm": "04/08/2026", "vd": "22/07/2026", "sm": 3},
+  {"t": "725249", "sol": "Norberto Haunau", "a": "Cable utp Facial Insumos.", "fc": "24/09/2025", "vm": "05/08/2026", "vd": "26/09/2025", "sm": 0},
+  {"t": "240129", "sol": "Pamela Gimenez", "a": "Solicitud de equipos: Administración productiva", "fc": "07/08/2026", "vm": "31/08/2026", "vd": "11/08/2026", "sm": 3},
+  {"t": "300180", "sol": "Pamela Gimenez", "a": "Pedido de celulares", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
+  {"t": "907200", "sol": "Pamela Gimenez", "a": "Pedido de equipo y usuarios - Sergio Vega", "fc": "22/07/2026", "vm": "31/08/2026", "vd": "27/07/2026", "sm": 3},
+  {"t": "911360", "sol": "Roberto Sanabria", "a": "Web app para Gerencia", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
+  {"t": "428798", "sol": "Roberto Sanabria", "a": "Web app para logistica", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
+  {"t": "197395", "sol": "Roberto Sanabria", "a": "Intergración TPM - Drewolf", "fc": "18/06/2026", "vm": "01/08/2026", "vd": "30/07/2026", "sm": 6},
+  {"t": "242246", "sol": "Roberto Sanabria", "a": "Integración Tango Capataz y Twins", "fc": "27/04/2026", "vm": "17/07/2026", "vd": "29/04/2026", "sm": 3},
+  {"t": "203766", "sol": "Roberto Sanabria", "a": "Interfaz Humand - Drewolf", "fc": "14/04/2026", "vm": "04/08/2026", "vd": "26/05/2026", "sm": 11},
+  {"t": "962076", "sol": "Villalba Belen", "a": "Control de Fajas", "fc": "27/11/2025", "vm": "31/08/2026", "vd": "02/12/2025", "sm": 6},
+  {"t": "106846", "sol": "Villalba Belen", "a": "Bloqueo de cajas - Membrana", "fc": "08/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 0},
+  {"t": "723746", "sol": "Villalba Belen", "a": "Cambio de gestión de información- Registro de c…", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
+  {"t": "704513", "sol": "Villalba Belen", "a": "Análisis de causa - Completar campos", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 3},
+  {"t": "799799", "sol": "Villalba Belen", "a": "Solicitud de ticketera", "fc": "01/07/2026", "vm": "28/08/2026", "vd": "06/07/2026", "sm": 0},
+  {"t": "862650", "sol": "Walter Tissera", "a": "Balanza de ingreso cámara despostada", "fc": "02/04/2026", "vm": "19/08/2026", "vd": "07/04/2026", "sm": 3},
+  {"t": "231010", "sol": "Eduardo Pintado", "a": "Noax", "fc": "11/12/2025", "vm": "17/08/2026", "vd": "12/08/2026", "sm": 3},
+  {"t": "233713", "sol": "Vigilancia", "a": "Celular de la guardia", "fc": "07/08/2026", "vm": "21/08/2026", "vd": "12/08/2026", "sm": 3},
+  {"t": "397368", "sol": "Sergio Vega", "a": "Programas necesarios para usar en Insumos.", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
+  {"t": "431521", "sol": "sala de maquinas", "a": "aplicaciones", "fc": "04/08/2026", "vm": "-", "vd": "07/08/2026", "sm": 4},
+  {"t": "139729", "sol": "Fernando Daniel Albornoz", "a": "Armado de tablero de KPI´S con IA", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 4},
+  {"t": "2", "sol": "", "a": "", "fc": "", "vm": "-", "vd": "", "sm": 0},
+];
+  function renderOpen(){
+    const rows=OPEN.map(o=>{
+      const alto=(+o.sm)>=7?' class="num sm-alto"':' class="num"';
+      return '<tr><td>'+o.t+'</td><td>'+o.sol+'</td><td class="wrap">'+o.a+'</td><td>'+o.fc+'</td><td>'+o.vm+'</td><td>'+o.vd+'</td><td'+alto+'>'+o.sm+'</td></tr>';
+    }).join('');
+    document.getElementById('openTable').innerHTML=
+      '<div class="panel"><h3>Tickets abiertos · detalle</h3><p class="psub">'+OPEN.length+' tickets sin cerrar (hoja Open). Días s/mov. en rojo = 7 o más sin movimiento.</p>'
+      +'<div class="tscroll" style="max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:10px"><table class="tabla-open"><thead><tr>'
+      +'<th>Ticket</th><th>Solicitante</th><th>Asunto</th><th>Creación</th><th>Venc. modif.</th><th>Venc. defecto</th><th class="num">Días s/mov.</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  }
+
+  // ---- Objetivos (KPI Gerencia de Operaciones 2026) ----
+  const OBJ={
+    agente:'Nicolás Gutiérrez', total:2, meses:['Ene','Feb','Mar','Abr','May','Jun','Jul'],
+    filas:[
+      {n:1, obj:'Respuesta de tickets en 24hs y 5 días hábiles para informar tratamiento; resolución en 90 días. (Informe que muestre la respuesta de cada pedido en 24hs y la finalización dentro de los 90 días.)', meta:94, vals:[92,96,98,97,100,97,98], prom:97, estado:'Logrado'},
+      {n:2, obj:'Informe del jefe del sector con datos de la semana y estadísticos del área.', meta:94, vals:[99,100,100,100,100,100,100], prom:100, estado:'Logrado'},
+      {n:3, obj:'5 días hábiles para notificar estado.', meta:null, vals:[null,null,null,null,null,null,null], prom:null, estado:null},
+    ],
+    promedio:[96,98,99,99,100,99,99],
+  };
+  function celPct(v,meta){ if(v==null) return '<td class="cel-na">N/A</td>'; const cls=meta==null?'':(v>=meta?'cel-ok':'cel-bajo'); return '<td class="'+cls+'">'+v+'%</td>'; }
+  function renderObjetivos(){
+    const th='<th>#</th><th class="izq">Objetivo / métrica</th><th>Meta</th>'+OBJ.meses.map(m=>'<th>'+m+'</th>').join('')+'<th>Prom.</th><th>Estado</th>';
+    const rows=OBJ.filas.map(f=>{
+      const meta=f.meta==null?'N/A':f.meta+'%';
+      const prom=f.prom==null?'<td class="cel-na">-</td>':'<td class="meta">'+f.prom+'%</td>';
+      const est=f.estado?'<td class="ok">✅ '+f.estado+'</td>':'<td class="cel-na">-</td>';
+      return '<tr><td>'+f.n+'</td><td class="obj">'+f.obj+'</td><td class="meta">'+meta+'</td>'+f.vals.map(v=>celPct(v,f.meta)).join('')+prom+est+'</tr>';
+    }).join('');
+    const promRow='<tr class="prom"><td></td><td class="obj">Promedio general del área</td><td></td>'+OBJ.promedio.map(v=>'<td>'+v+'%</td>').join('')+'<td></td><td></td></tr>';
+    document.getElementById('objetivos').innerHTML=
+      '<div class="panel"><h3>KPIs asignados · '+OBJ.agente+'</h3><p class="psub">Seguimiento mensual 2026 · total objetivos asignados: '+OBJ.total+'. Verde = cumple la meta, rojo = por debajo.</p>'
+      +'<div class="tscroll"><table class="tabla-obj"><thead><tr>'+th+'</tr></thead><tbody>'+rows+promRow+'</tbody></table></div></div>';
+  }
+
+  // Sub-navegación interna (para no scrollear todo junto)
+  document.querySelectorAll('#subnav button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('#subnav button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    document.querySelectorAll('.view').forEach(el=>el.classList.toggle('on', el.dataset.view===b.dataset.v));
+    if(window.parent!==window) setTimeout(postAlto,30);
+  });
+
+  renderPrimary(); renderSections(); renderDonuts(); renderOperadores(); renderBlocks(); renderOpen(); renderObjetivos();
 
   function postAlto(){ try{ parent.postMessage({tipo:'matriz-alto',alto:document.body.scrollHeight},'*'); }catch(e){} }
   if(window.parent!==window){ postAlto(); window.addEventListener('resize',postAlto); new MutationObserver(postAlto).observe(document.body,{subtree:true,childList:true}); }
