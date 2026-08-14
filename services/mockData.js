@@ -313,7 +313,7 @@ const LOGISTICA = {
       ] },
     { tipo: 'bar', grupo: G.flota, titulo: 'Disponibilidad por flota (%)', info: 'Disponibilidad por tipo de unidad (semana).',
       datos: [{ nombre: 'Tractor', valor: 94 }, { nombre: 'Torito', valor: 100 }, { nombre: 'Chasis', valor: 97 }, { nombre: 'Balancín', valor: 100 }, { nombre: 'Semi', valor: 80 }, { nombre: 'Bateas', valor: 92 }] },
-    { tipo: 'tabla', grupo: G.flota, titulo: 'Patentes fuera de servicio (FS)', info: 'Unidades con parada temporal en la semana. No incluye las de baja permanente (FSP).',
+    { tipo: 'tabla', grupo: G.flota, titulo: 'Patentes fuera de servicio (FS)', info: 'Unidades con parada temporal en la semana. No incluye las de baja permanente (FSP). Pasá el mouse por una patente para ver su destino y motivo (base de datos de flota).',
       columnas: ['Dominio', 'Tipo', 'Marca', 'Días parado'],
       filas: [
         ['AC581KP', 'Tractor', 'Mercedes Benz', '6'], ['JNA841', 'Tractor', 'Mercedes Benz', '4'], ['AG252VK', 'Tractor', 'Mercedes Benz', '6'],
@@ -322,6 +322,21 @@ const LOGISTICA = {
         ['JAP 922', 'Semi', 'Astpra', '6'], ['JNS 094', 'Semi', 'Astpra', '6'], ['LMD 345', 'Semi', 'Astpra', '6'],
         ['LMD 346', 'Semi', 'Astpra', '6'], ['MXC 712', 'Semi', 'Lambert', '6'], ['AC 427 IU', 'Batea', 'Gomatro', '4'],
         ['TOTAL', '15 unidades', '-', '82'],
+      ],
+      // Detalle por patente (base de datos de flota): destino + motivo del freno.
+      // Alineado a `filas`; null donde el archivo todavía no tiene el dato.
+      filaTips: [
+        'Destino: Taller\nMotivo: Motor roto', null, null,
+        'Destino: Bonano\nMotivo: Pecho, piso y puertas deteriorados.',
+        'Destino: Se usa para hielo\nMotivo: Piso y puertas rotas',
+        'Destino: Bonano\nMotivo: Piso y puertas rotas',
+        'Destino: Bonano\nMotivo: Pecho partido',
+        'Destino: Bonano\nMotivo: Pecho partido, piso y puertas deteriorados.',
+        null, null, null,
+        'Destino: Bonano\nMotivo: Pecho partido, piso y puertas deteriorados.',
+        'Destino: Bonano\nMotivo: Pecho partido, piso y puertas deteriorados.',
+        'Destino: Para Zucars\nMotivo: Piso roto y bisagras',
+        null, null,
       ] },
     { tipo: 'tabla', grupo: G.tambores, titulo: 'Cuenta de tambores por frigorífico', info: 'Stock de tambores por matadero (negativo = a favor).',
       columnas: ['Matadero', 'Anterior', 'Enviados', 'Recibidos', 'Stock Final'],
