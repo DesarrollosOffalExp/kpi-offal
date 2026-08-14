@@ -121,6 +121,13 @@
   .tabla-open tbody tr:hover td{background:rgba(255,255,255,.02);}
   .tabla-open td.sm-alto{color:var(--bad);font-weight:700;}
   .tabla-open tr.ag-head td{background:var(--panel-3);color:var(--info);font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:9px 10px;}
+  .tabla-open td.tk{color:var(--info);font-weight:700;font-variant-numeric:tabular-nums;}
+  .tabla-open td.tr{max-width:230px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tabla-open tbody tr:not(.ag-head):hover td{background:var(--panel-3);}
+  .open-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px;}
+  .open-input{flex:1;min-width:220px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--text);font:inherit;font-size:13px;padding:8px 12px;outline:none;}
+  .open-input:focus{border-color:var(--info);}
+  .open-chk{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none;}
   .tabla-obj tr.obj-row{cursor:pointer;}
   .tabla-obj tr.obj-row:hover td{background:var(--panel-3);}
   .mop-scroll{overflow-y:auto;}
@@ -469,87 +476,105 @@
 
   // ---- Tickets abiertos (hoja Open) ----
   const OPEN=[
-  {"t": "587506", "ag": "Luis Arancibia", "sol": "alexis", "a": "IMPRESORA NO ENCIENDE", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
-  {"t": "300546", "ag": "Tobias Santillan", "sol": "Alexis Gerez", "a": "Solicitud de monitor", "fc": "11/06/2026", "vm": "07/08/2026", "vd": "16/06/2026", "sm": 6},
-  {"t": "536362", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD PRE ETIQUETA: cantidad de paquetes", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
-  {"t": "948906", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD HIGADO Y LENGUA (RUSIA)", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 0},
-  {"t": "649829", "ag": "Norberto Haunau", "sol": "Andrea Litwin", "a": "BLOQUEO CAJAS DE SESO VP 5.9", "fc": "03/08/2026", "vm": "-", "vd": "06/08/2026", "sm": 7},
-  {"t": "628825", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "Modificación de existente urgente: HIGADO FETEA…", "fc": "22/07/2026", "vm": "-", "vd": "27/07/2026", "sm": 0},
-  {"t": "823712", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA", "fc": "13/07/2026", "vm": "19/08/2026", "vd": "16/07/2026", "sm": 0},
-  {"t": "779355", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA info nutr…", "fc": "13/07/2026", "vm": "21/08/2026", "vd": "16/07/2026", "sm": 0},
-  {"t": "653951", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA CON PRIOR…", "fc": "13/07/2026", "vm": "13/08/2026", "vd": "16/07/2026", "sm": 0},
-  {"t": "749140", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "UNIFICAR tickets RUSIA", "fc": "08/07/2026", "vm": "11/08/2026", "vd": "13/07/2026", "sm": 0},
-  {"t": "180982", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "MODIFICACIÓN Y ALTA DE CÓDIGOS Multivac", "fc": "29/06/2026", "vm": "21/07/2026", "vd": "02/07/2026", "sm": 0},
-  {"t": "558903", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD DE ETIQUETAS: TENDÓN RUSIA 28.22", "fc": "12/06/2026", "vm": "28/07/2026", "vd": "17/06/2026", "sm": 0},
-  {"t": "627465", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "ELIMINAR LEYENDA DUPLICADA: Librillo 24.21", "fc": "15/05/2026", "vm": "17/07/2026", "vd": "20/05/2026", "sm": 0},
-  {"t": "548365", "ag": "Ezequiel Manco", "sol": "Martin Dominguez", "a": "PERMISO PARA ELIMINAR ETIQUETAS PIR Y PI4", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
-  {"t": "707539", "ag": "Andrea Cardozo", "sol": "Daiana Saporiti", "a": "IMPRESORAS CONGELADO", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
-  {"t": "583377", "ag": "Roberto Sanabria", "sol": "Daiana Saporiti", "a": "prueba de PI4", "fc": "03/06/2026", "vm": "05/08/2026", "vd": "08/06/2026", "sm": 4},
-  {"t": "686624", "ag": "Tobias Santillan", "sol": "guido lazarte", "a": "NO HABLE MAIL EN OT", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
-  {"t": "557294", "ag": "Tobias Santillan", "sol": "guido lazarte", "a": "PC 47", "fc": "29/07/2026", "vm": "15/08/2026", "vd": "03/08/2026", "sm": 12},
-  {"t": "830788", "ag": "Juan Penalba", "sol": "Elisa Mendoza", "a": "RE: Solicitud de colocación de bandeja porta ca…", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
-  {"t": "468448", "ag": "Roberto Sanabria", "sol": "Luana Martinez", "a": "RE: ALICUOTAS PHYSIS MES DE AGOSTO [#780681] Re…", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
-  {"t": "284795", "ag": "Andrea Cardozo", "sol": "Marcelo Alejandro Rodao", "a": "USUARIOS SIFAB", "fc": "05/08/2026", "vm": "12/08/2026", "vd": "10/08/2026", "sm": 3},
-  {"t": "370681", "ag": "Norberto Haunau", "sol": "Marcelo Alejandro Rodao", "a": "CAMARA Y FACIAL", "fc": "02/06/2026", "vm": "31/07/2026", "vd": "05/06/2026", "sm": 38},
-  {"t": "625820", "ag": "Andrea Cardozo", "sol": "Dario Escobar", "a": "Celular flota pantalla con fallas", "fc": "28/07/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
-  {"t": "451743", "ag": "Luis Arancibia", "sol": "Isaias Toledo", "a": "IMPRESORAS", "fc": "04/08/2026", "vm": "-", "vd": "07/08/2026", "sm": 5},
-  {"t": "830389", "ag": "Matias Juarez", "sol": "Isaias Toledo", "a": "MOVIMIENTOS EN TWINS", "fc": "08/07/2026", "vm": "14/08/2026", "vd": "10/07/2026", "sm": 3},
-  {"t": "995465", "ag": "Roberto Sanabria", "sol": "Isaias Toledo", "a": "RE: RE: REDONDEOS Y XML [#756899] Open [#204670…", "fc": "30/06/2026", "vm": "15/08/2026", "vd": "03/07/2026", "sm": 3},
-  {"t": "984072", "ag": "Ezequiel Manco", "sol": "Leonardo Ramos", "a": "Office", "fc": "04/08/2026", "vm": "-", "vd": "06/08/2026", "sm": 6},
-  {"t": "287073", "ag": "Matias Juarez", "sol": "Leonardo Ramos", "a": "Genericos Molleja", "fc": "07/07/2026", "vm": "07/08/2026", "vd": "13/07/2026", "sm": 3},
-  {"t": "739134", "ag": "Matias Juarez", "sol": "Emily Rojas", "a": "Modificación Alto impacto EEUU", "fc": "25/04/2026", "vm": "10/08/2026", "vd": "29/04/2026", "sm": 7},
-  {"t": "908645", "ag": "Matias Juarez", "sol": "Javier Fernandez", "a": "Error ventana PWR-150 Stock disponible - Deposi…", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 5},
-  {"t": "595435", "ag": "Luis Arancibia", "sol": "Javier Fernandez", "a": "Noax 10 no funciona pistola", "fc": "24/07/2026", "vm": "-", "vd": "28/07/2026", "sm": 6},
-  {"t": "306736", "ag": "Roberto Sanabria", "sol": "Javier Fernandez", "a": "ERROR EN VENTANA 00057 PROGRAMA SALIDA", "fc": "05/06/2026", "vm": "12/08/2026", "vd": "12/06/2026", "sm": 4},
-  {"t": "901653", "ag": "Tobias Santillan", "sol": "Facundo Tejada", "a": "colectores supermercados - NO PRENDEN", "fc": "31/07/2026", "vm": "-", "vd": "04/08/2026", "sm": 3},
-  {"t": "406800", "ag": "Andrea Cardozo", "sol": "Fernanda Villazante", "a": "Creación de usuarios en Sifab", "fc": "29/07/2026", "vm": "-", "vd": "31/07/2026", "sm": 3},
-  {"t": "143300", "ag": "Roberto Sanabria", "sol": "Juan Retamero", "a": "Modificacion en Alta de Proveedores SIFAB", "fc": "28/07/2026", "vm": "-", "vd": "31/07/2026", "sm": 4},
-  {"t": "243411", "ag": "Juan Penalba", "sol": "Luis Ramos", "a": "Interno", "fc": "03/07/2026", "vm": "21/08/2026", "vd": "08/07/2026", "sm": 10},
-  {"t": "822622", "ag": "Matias Juarez", "sol": "Luis Ramos", "a": "Reiterados problemas en los descuentos", "fc": "27/06/2026", "vm": "-", "vd": "10/08/2026", "sm": 3},
-  {"t": "741375", "ag": "Andrea Cardozo", "sol": "juan.penalba", "a": "Compra - Switches", "fc": "23/06/2026", "vm": "30/09/2026", "vd": "25/06/2026", "sm": 3},
-  {"t": "809939", "ag": "Andrea Cardozo", "sol": "juan.penalba", "a": "Bandeja rackeable", "fc": "08/05/2026", "vm": "26/08/2026", "vd": "29/06/2026", "sm": 3},
-  {"t": "579146", "ag": "Matias Juarez", "sol": "Matias Juarez", "a": "Ingreso de Cajas al Cartofreezer", "fc": "17/06/2026", "vm": "-", "vd": "29/07/2026", "sm": 0},
-  {"t": "576991", "ag": "Matias Juarez", "sol": "Matias Juarez", "a": "Estado Proyecto E80 + Twins + Miniload", "fc": "22/04/2026", "vm": "31/07/2026", "vd": "27/04/2026", "sm": 0},
-  {"t": "485139", "ag": "Ezequiel Manco", "sol": "Micaela Cardullo", "a": "PI4", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
-  {"t": "369624", "ag": "Roberto Sanabria", "sol": "Miguel Angel Flores", "a": "sin acceso al forms", "fc": "08/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
-  {"t": "222341", "ag": "Miguel Flores", "sol": "Nestor Russo", "a": "FALLA TPM LINEA 2", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 0},
-  {"t": "663277", "ag": "Andrea Cardozo", "sol": "Nicolas Barrios", "a": "Solicitud de parlante para pc n42", "fc": "17/07/2026", "vm": "04/08/2026", "vd": "22/07/2026", "sm": 3},
-  {"t": "849919", "ag": "Andrea Cardozo", "sol": "Nicolas Barrios", "a": "Solcitud de impresora", "fc": "17/07/2026", "vm": "04/08/2026", "vd": "22/07/2026", "sm": 3},
-  {"t": "725249", "ag": "Miguel Flores", "sol": "Norberto Haunau", "a": "Cable utp Facial Insumos.", "fc": "24/09/2025", "vm": "05/08/2026", "vd": "26/09/2025", "sm": 0},
-  {"t": "240129", "ag": "Andrea Cardozo", "sol": "Pamela Gimenez", "a": "Solicitud de equipos: Administración productiva", "fc": "07/08/2026", "vm": "31/08/2026", "vd": "11/08/2026", "sm": 3},
-  {"t": "300180", "ag": "Andrea Cardozo", "sol": "Pamela Gimenez", "a": "Pedido de celulares", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
-  {"t": "907200", "ag": "Andrea Cardozo", "sol": "Pamela Gimenez", "a": "Pedido de equipo y usuarios - Sergio Vega", "fc": "22/07/2026", "vm": "31/08/2026", "vd": "27/07/2026", "sm": 3},
-  {"t": "911360", "ag": "Jair Hnatiuk", "sol": "Roberto Sanabria", "a": "Web app para Gerencia", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
-  {"t": "428798", "ag": "Jair Hnatiuk", "sol": "Roberto Sanabria", "a": "Web app para logistica", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
-  {"t": "197395", "ag": "Roberto Sanabria", "sol": "Roberto Sanabria", "a": "Intergración TPM - Drewolf", "fc": "18/06/2026", "vm": "01/08/2026", "vd": "30/07/2026", "sm": 6},
-  {"t": "242246", "ag": "Roberto Sanabria", "sol": "Roberto Sanabria", "a": "Integración Tango Capataz y Twins", "fc": "27/04/2026", "vm": "17/07/2026", "vd": "29/04/2026", "sm": 3},
-  {"t": "203766", "ag": "Roberto Sanabria", "sol": "Roberto Sanabria", "a": "Interfaz Humand - Drewolf", "fc": "14/04/2026", "vm": "04/08/2026", "vd": "26/05/2026", "sm": 11},
-  {"t": "962076", "ag": "Roberto Sanabria", "sol": "Villalba Belen", "a": "Control de Fajas", "fc": "27/11/2025", "vm": "31/08/2026", "vd": "02/12/2025", "sm": 6},
-  {"t": "106846", "ag": "Matias Juarez", "sol": "Villalba Belen", "a": "Bloqueo de cajas - Membrana", "fc": "08/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 0},
-  {"t": "723746", "ag": "Roberto Sanabria", "sol": "Villalba Belen", "a": "Cambio de gestión de información- Registro de c…", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
-  {"t": "704513", "ag": "Matias Juarez", "sol": "Villalba Belen", "a": "Análisis de causa - Completar campos", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 3},
-  {"t": "799799", "ag": "Andrea Cardozo", "sol": "Villalba Belen", "a": "Solicitud de ticketera", "fc": "01/07/2026", "vm": "28/08/2026", "vd": "06/07/2026", "sm": 0},
-  {"t": "862650", "ag": "Miguel Flores", "sol": "Walter Tissera", "a": "Balanza de ingreso cámara despostada", "fc": "02/04/2026", "vm": "19/08/2026", "vd": "07/04/2026", "sm": 3},
-  {"t": "231010", "ag": "Andrea Cardozo", "sol": "Eduardo Pintado", "a": "Noax", "fc": "11/12/2025", "vm": "17/08/2026", "vd": "12/08/2026", "sm": 3},
-  {"t": "233713", "ag": "Andrea Cardozo", "sol": "Vigilancia", "a": "Celular de la guardia", "fc": "07/08/2026", "vm": "21/08/2026", "vd": "12/08/2026", "sm": 3},
-  {"t": "397368", "ag": "Tobias Santillan", "sol": "Sergio Vega", "a": "Programas necesarios para usar en Insumos.", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
-  {"t": "431521", "ag": "Norberto Haunau", "sol": "sala de maquinas", "a": "aplicaciones", "fc": "04/08/2026", "vm": "-", "vd": "07/08/2026", "sm": 4},
-  {"t": "139729", "ag": "Roberto Sanabria", "sol": "Fernando Daniel Albornoz", "a": "Armado de tablero de KPI´S con IA", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 4},
-  {"t": "2", "ag": "Sin asignar", "sol": "", "a": "", "fc": "", "vm": "-", "vd": "", "sm": 0},
+  {"t": "587506", "ag": "Luis Arancibia", "sol": "alexis", "a": "IMPRESORA NO ENCIENDE", "uni": "08/08 cable de alimentación mal colocado.", "fur": "08/08/2026", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
+  {"t": "300546", "ag": "Tobias Santillan", "sol": "Alexis Gerez", "a": "Solicitud de monitor", "uni": "04/08 solicite info de estado del pedido a mantenimiento", "fur": "04/08/2026", "fc": "11/06/2026", "vm": "07/08/2026", "vd": "16/06/2026", "sm": 6},
+  {"t": "536362", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD PRE ETIQUETA: cantidad de paquetes", "uni": "07/08: En desarrollo", "fur": "07/08/2026", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
+  {"t": "948906", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD HIGADO Y LENGUA (RUSIA)", "uni": "10/08: Se ha trabajado la semana pasada con los codigos Higado 1.45 y Lengua 3.11", "fur": "10/08/2026", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 0},
+  {"t": "649829", "ag": "Norberto Haunau", "sol": "Andrea Litwin", "a": "BLOQUEO CAJAS DE SESO VP 5.9", "uni": "03/08 - Quedaron bloqueadas las cajas solicitadas, a la espera de que nos avisen cuando l…", "fur": "03/08/2026", "fc": "03/08/2026", "vm": "-", "vd": "06/08/2026", "sm": 7},
+  {"t": "628825", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "Modificación de existente urgente: HIGADO FETEA…", "uni": "10/08: Quedamos a la espera de la conformidad.", "fur": "10/08/2026", "fc": "22/07/2026", "vm": "-", "vd": "27/07/2026", "sm": 0},
+  {"t": "823712", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA", "uni": "10/08: Se ha trabajado y aprobado el codigo 1.45, y no se ha colocado el 1.442 con menor …", "fur": "10/08/2026", "fc": "13/07/2026", "vm": "19/08/2026", "vd": "16/07/2026", "sm": 0},
+  {"t": "779355", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA info nutr…", "uni": "10/08: Se estara trabajando esta semana", "fur": "10/08/2026", "fc": "13/07/2026", "vm": "21/08/2026", "vd": "16/07/2026", "sm": 0},
+  {"t": "653951", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD DE MODIFICACIÓN DE ETIQUETA CON PRIOR…", "uni": "10/08: Las semana pasada se ha aplicado y actualizado Lengua 3.11.", "fur": "10/08/2026", "fc": "13/07/2026", "vm": "13/08/2026", "vd": "16/07/2026", "sm": 0},
+  {"t": "749140", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "UNIFICAR tickets RUSIA", "uni": "10/08: La semana pasada se ha avanzado con los productos Higado y Pulmon.", "fur": "10/08/2026", "fc": "08/07/2026", "vm": "11/08/2026", "vd": "13/07/2026", "sm": 0},
+  {"t": "180982", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "MODIFICACIÓN Y ALTA DE CÓDIGOS Multivac", "uni": "10/08: Se han definido nuevas prioridades, luego de finalizar con los prioritario se term…", "fur": "10/08/2026", "fc": "29/06/2026", "vm": "21/07/2026", "vd": "02/07/2026", "sm": 0},
+  {"t": "558903", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "SOLICITUD DE ETIQUETAS: TENDÓN RUSIA 28.22", "uni": "10/08: Se han establecido otras prioriades y se atendera a la brevedad.", "fur": "10/08/2026", "fc": "12/06/2026", "vm": "28/07/2026", "vd": "17/06/2026", "sm": 0},
+  {"t": "627465", "ag": "Matias Juarez", "sol": "Andrea Litwin", "a": "ELIMINAR LEYENDA DUPLICADA: Librillo 24.21", "uni": "03/08: Trabajando con Etiquetas Rusas", "fur": "10/08/2026", "fc": "15/05/2026", "vm": "17/07/2026", "vd": "20/05/2026", "sm": 0},
+  {"t": "548365", "ag": "Ezequiel Manco", "sol": "Martin Dominguez", "a": "PERMISO PARA ELIMINAR ETIQUETAS PIR Y PI4", "uni": "", "fur": "08/08/2026", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
+  {"t": "707539", "ag": "Andrea Cardozo", "sol": "Daiana Saporiti", "a": "IMPRESORAS CONGELADO", "uni": "07/08Entiendo que ya realizaron la visita. Necesito saber en que estado quedaron las impr…", "fur": "07/08/2026", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
+  {"t": "583377", "ag": "Roberto Sanabria", "sol": "Daiana Saporiti", "a": "prueba de PI4", "uni": "06/08Twins:Petición 13374: Diferencia en el peso neto entre plantas (PIR y PI4). Estas pe…", "fur": "06/08/2026", "fc": "03/06/2026", "vm": "05/08/2026", "vd": "08/06/2026", "sm": 4},
+  {"t": "686624", "ag": "Tobias Santillan", "sol": "guido lazarte", "a": "NO HABLE MAIL EN OT", "uni": "06/08 cargue tarea a andrea para la compra de las licencias", "fur": "06/08/2026", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
+  {"t": "557294", "ag": "Tobias Santillan", "sol": "guido lazarte", "a": "PC 47", "uni": "Tarea cerrada", "fur": "29/07/2026", "fc": "29/07/2026", "vm": "15/08/2026", "vd": "03/08/2026", "sm": 12},
+  {"t": "830788", "ag": "Juan Penalba", "sol": "Elisa Mendoza", "a": "RE: Solicitud de colocación de bandeja porta ca…", "uni": "", "fur": "06/08/2026", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
+  {"t": "468448", "ag": "Roberto Sanabria", "sol": "Luana Martinez", "a": "RE: ALICUOTAS PHYSIS MES DE AGOSTO [#780681] Re…", "uni": "07/08 Aguardando ok del usuario", "fur": "06/08/2026", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 4},
+  {"t": "284795", "ag": "Andrea Cardozo", "sol": "Marcelo Alejandro Rodao", "a": "USUARIOS SIFAB", "uni": "07/08 Ya realizamos una consulta para que nos indiquen el estado de la creación de usuario", "fur": "07/08/2026", "fc": "05/08/2026", "vm": "12/08/2026", "vd": "10/08/2026", "sm": 3},
+  {"t": "370681", "ag": "Norberto Haunau", "sol": "Marcelo Alejandro Rodao", "a": "CAMARA Y FACIAL", "uni": "07/08 - Resta la instalación de FACIAL PARA PAÑOL de parte de mantenimiento ya lo tenemos…", "fur": "03/07/2026", "fc": "02/06/2026", "vm": "31/07/2026", "vd": "05/06/2026", "sm": 38},
+  {"t": "625820", "ag": "Andrea Cardozo", "sol": "Dario Escobar", "a": "Celular flota pantalla con fallas", "uni": "07/08 Ya se cargo una tarea para que se haga la entrega del celular. Cuando este configur…", "fur": "07/08/2026", "fc": "28/07/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
+  {"t": "451743", "ag": "Luis Arancibia", "sol": "Isaias Toledo", "a": "IMPRESORAS", "uni": "06/08 copiapel respondió al pedido de soporte para las dos impresoras de congelado. queda…", "fur": "05/08/2026", "fc": "04/08/2026", "vm": "-", "vd": "07/08/2026", "sm": 5},
+  {"t": "830389", "ag": "Matias Juarez", "sol": "Isaias Toledo", "a": "MOVIMIENTOS EN TWINS", "uni": "07/08: El dia martes Twins actualizo una version con la que se solucionaria el inconvenie…", "fur": "07/08/2026", "fc": "08/07/2026", "vm": "14/08/2026", "vd": "10/07/2026", "sm": 3},
+  {"t": "995465", "ag": "Roberto Sanabria", "sol": "Isaias Toledo", "a": "RE: RE: REDONDEOS Y XML [#756899] Open [#204670…", "uni": "06/08 Buenos días RobertoLa petición 13458 se encuentra en desarrollo. Pongo en copia a @…", "fur": "07/08/2026", "fc": "30/06/2026", "vm": "15/08/2026", "vd": "03/07/2026", "sm": 3},
+  {"t": "984072", "ag": "Ezequiel Manco", "sol": "Leonardo Ramos", "a": "Office", "uni": "7/08 esperando a leo ramos para ver su caso en la oficina", "fur": "04/08/2026", "fc": "04/08/2026", "vm": "-", "vd": "06/08/2026", "sm": 6},
+  {"t": "287073", "ag": "Matias Juarez", "sol": "Leonardo Ramos", "a": "Genericos Molleja", "uni": "07/08: De ser posible el proximo martes nos reuniremos junto a Walter, Gustavo y sistemas…", "fur": "07/08/2026", "fc": "07/07/2026", "vm": "07/08/2026", "vd": "13/07/2026", "sm": 3},
+  {"t": "739134", "ag": "Matias Juarez", "sol": "Emily Rojas", "a": "Modificación Alto impacto EEUU", "uni": "10/08: Se solicito dar de baja pero el usuario dijo que la dejemos como ultima prioridad …", "fur": "03/08/2026", "fc": "25/04/2026", "vm": "10/08/2026", "vd": "29/04/2026", "sm": 7},
+  {"t": "908645", "ag": "Matias Juarez", "sol": "Javier Fernandez", "a": "Error ventana PWR-150 Stock disponible - Deposi…", "uni": "05/08: Buenos Dias, gracias por compartirnos la informacion, estaremos analizando el caso…", "fur": "05/08/2026", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 5},
+  {"t": "595435", "ag": "Luis Arancibia", "sol": "Javier Fernandez", "a": "Noax 10 no funciona pistola", "uni": "06/08 Pedido 6797 aun no está aprobado, quedo a la espera de aprobación.", "fur": "04/08/2026", "fc": "24/07/2026", "vm": "-", "vd": "28/07/2026", "sm": 6},
+  {"t": "306736", "ag": "Roberto Sanabria", "sol": "Javier Fernandez", "a": "ERROR EN VENTANA 00057 PROGRAMA SALIDA", "uni": "06/08Twins:Petición 13411: Error de base de datos en Pantalla 57.Estas peticiones estarán…", "fur": "06/08/2026", "fc": "05/06/2026", "vm": "12/08/2026", "vd": "12/06/2026", "sm": 4},
+  {"t": "901653", "ag": "Tobias Santillan", "sol": "Facundo Tejada", "a": "colectores supermercados - NO PRENDEN", "uni": "07/08 aguardo ok para dar por cerrado el ticket", "fur": "07/08/2026", "fc": "31/07/2026", "vm": "-", "vd": "04/08/2026", "sm": 3},
+  {"t": "406800", "ag": "Andrea Cardozo", "sol": "Fernanda Villazante", "a": "Creación de usuarios en Sifab", "uni": "07/08Ya realizamos una consulta para que nos indiquen el estado de la creación de usuario…", "fur": "07/08/2026", "fc": "29/07/2026", "vm": "-", "vd": "31/07/2026", "sm": 3},
+  {"t": "143300", "ag": "Roberto Sanabria", "sol": "Juan Retamero", "a": "Modificacion en Alta de Proveedores SIFAB", "uni": "06/08 Esperando respuesta de Jeronimo y Sifab", "fur": "06/08/2026", "fc": "28/07/2026", "vm": "-", "vd": "31/07/2026", "sm": 4},
+  {"t": "243411", "ag": "Juan Penalba", "sol": "Luis Ramos", "a": "Interno", "uni": "07/08/2026 Se ha hablado con Luis. Gente de mantenimiento aun no ha avanzado con la solic…", "fur": "31/07/2026", "fc": "03/07/2026", "vm": "21/08/2026", "vd": "08/07/2026", "sm": 10},
+  {"t": "822622", "ag": "Matias Juarez", "sol": "Luis Ramos", "a": "Reiterados problemas en los descuentos", "uni": "07/08: Como primer medida, Twins se encuentra trabajando en generar un solucion para el f…", "fur": "07/08/2026", "fc": "27/06/2026", "vm": "-", "vd": "10/08/2026", "sm": 3},
+  {"t": "741375", "ag": "Andrea Cardozo", "sol": "juan.penalba", "a": "Compra - Switches", "uni": "07/08Quedamos a la espera de que se cumpla el plazo de entrega 31/09 Orden de Compra (OC)…", "fur": "07/08/2026", "fc": "23/06/2026", "vm": "30/09/2026", "vd": "25/06/2026", "sm": 3},
+  {"t": "809939", "ag": "Andrea Cardozo", "sol": "juan.penalba", "a": "Bandeja rackeable", "uni": "07/08 Se generó el pedido de la bandeja bajo el N.33547/33546,Quedamos a la espera de que…", "fur": "07/08/2026", "fc": "08/05/2026", "vm": "26/08/2026", "vd": "29/06/2026", "sm": 3},
+  {"t": "579146", "ag": "Matias Juarez", "sol": "Matias Juarez", "a": "Ingreso de Cajas al Cartofreezer", "uni": "04/08: Se ha conversado con gente de Crosseto para que pruebe nuevamente pero no se ha te…", "fur": "10/08/2026", "fc": "17/06/2026", "vm": "-", "vd": "29/07/2026", "sm": 0},
+  {"t": "576991", "ag": "Matias Juarez", "sol": "Matias Juarez", "a": "Estado Proyecto E80 + Twins + Miniload", "uni": "10/08: Ya hemos recibido la ET de Twins y se encuentra en analisisEsperando a Cassioli pa…", "fur": "10/08/2026", "fc": "22/04/2026", "vm": "31/07/2026", "vd": "27/04/2026", "sm": 0},
+  {"t": "485139", "ag": "Ezequiel Manco", "sol": "Micaela Cardullo", "a": "PI4", "uni": "", "fur": "07/08/2026", "fc": "07/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 3},
+  {"t": "369624", "ag": "Roberto Sanabria", "sol": "Miguel Angel Flores", "a": "sin acceso al forms", "uni": "08/08 ticket asignado a Roberto", "fur": "08/08/2026", "fc": "08/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 2},
+  {"t": "222341", "ag": "Miguel Flores", "sol": "Nestor Russo", "a": "FALLA TPM LINEA 2", "uni": "", "fur": "10/08/2026", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 0},
+  {"t": "663277", "ag": "Andrea Cardozo", "sol": "Nicolas Barrios", "a": "Solicitud de parlante para pc n42", "uni": "07/08 Ya se realizó el pedido. Actualmente se encuentra a la espera de la aprobación de l…", "fur": "07/08/2026", "fc": "17/07/2026", "vm": "04/08/2026", "vd": "22/07/2026", "sm": 3},
+  {"t": "849919", "ag": "Andrea Cardozo", "sol": "Nicolas Barrios", "a": "Solcitud de impresora", "uni": "07/08 Se cargó la requisición bajo el número 33853. Ahora resta aguardar el plazo de 10 d…", "fur": "07/08/2026", "fc": "17/07/2026", "vm": "04/08/2026", "vd": "22/07/2026", "sm": 3},
+  {"t": "725249", "ag": "Miguel Flores", "sol": "Norberto Haunau", "a": "Cable utp Facial Insumos.", "uni": "07/08 mantenimiento me aclaro que Nicolas debe aprobar la solicitud cargada en sifab, a l…", "fur": "10/08/2026", "fc": "24/09/2025", "vm": "05/08/2026", "vd": "26/09/2025", "sm": 0},
+  {"t": "240129", "ag": "Andrea Cardozo", "sol": "Pamela Gimenez", "a": "Solicitud de equipos: Administración productiva", "uni": "07/08 Ya se cargo el pedido se aguarda los 10 dias de espera para la generación de la oc", "fur": "07/08/2026", "fc": "07/08/2026", "vm": "31/08/2026", "vd": "11/08/2026", "sm": 3},
+  {"t": "300180", "ag": "Andrea Cardozo", "sol": "Pamela Gimenez", "a": "Pedido de celulares", "uni": "07/08 Ya se cargo el pedido se aguarda los 10 dias de espera para la generación de la oc", "fur": "07/08/2026", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
+  {"t": "907200", "ag": "Andrea Cardozo", "sol": "Pamela Gimenez", "a": "Pedido de equipo y usuarios - Sergio Vega", "uni": "31/07Los pedidos ya cuentan con la correspondiente Orden de Compra (OC) y tienen una fech…", "fur": "07/08/2026", "fc": "22/07/2026", "vm": "31/08/2026", "vd": "27/07/2026", "sm": 3},
+  {"t": "911360", "ag": "Jair Hnatiuk", "sol": "Roberto Sanabria", "a": "Web app para Gerencia", "uni": "", "fur": "06/08/2026", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
+  {"t": "428798", "ag": "Jair Hnatiuk", "sol": "Roberto Sanabria", "a": "Web app para logistica", "uni": "", "fur": "06/08/2026", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
+  {"t": "197395", "ag": "Roberto Sanabria", "sol": "Roberto Sanabria", "a": "Intergración TPM - Drewolf", "uni": "31/07 Se consulta Ricardo de TPM si vamos a continuar o no con esta integración", "fur": "04/08/2026", "fc": "18/06/2026", "vm": "01/08/2026", "vd": "30/07/2026", "sm": 6},
+  {"t": "242246", "ag": "Roberto Sanabria", "sol": "Roberto Sanabria", "a": "Integración Tango Capataz y Twins", "uni": "07/08 Entregaron la modificacion en ambiente de Test. Fue validado y pedi que lo pasen a …", "fur": "07/08/2026", "fc": "27/04/2026", "vm": "17/07/2026", "vd": "29/04/2026", "sm": 3},
+  {"t": "203766", "ag": "Roberto Sanabria", "sol": "Roberto Sanabria", "a": "Interfaz Humand - Drewolf", "uni": "30/07 Se comenzará a la brevedad con el proceso de simulación de interfaz utilizando para…", "fur": "30/07/2026", "fc": "14/04/2026", "vm": "04/08/2026", "vd": "26/05/2026", "sm": 11},
+  {"t": "962076", "ag": "Roberto Sanabria", "sol": "Villalba Belen", "a": "Control de Fajas", "uni": "04/08 Buen día, Quedó implementada la lógica de rechazo de fajas. Actualmente, el equipo …", "fur": "04/08/2026", "fc": "27/11/2025", "vm": "31/08/2026", "vd": "02/12/2025", "sm": 6},
+  {"t": "106846", "ag": "Matias Juarez", "sol": "Villalba Belen", "a": "Bloqueo de cajas - Membrana", "uni": "", "fur": "10/08/2026", "fc": "08/08/2026", "vm": "-", "vd": "12/08/2026", "sm": 0},
+  {"t": "723746", "ag": "Roberto Sanabria", "sol": "Villalba Belen", "a": "Cambio de gestión de información- Registro de c…", "uni": "06/08 Aguardando respuesta de usuario", "fur": "06/08/2026", "fc": "05/08/2026", "vm": "-", "vd": "10/08/2026", "sm": 4},
+  {"t": "704513", "ag": "Matias Juarez", "sol": "Villalba Belen", "a": "Análisis de causa - Completar campos", "uni": "07/08: Gracias por compartirnos la iformacion, estaremos trabajando con la misma.", "fur": "07/08/2026", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 3},
+  {"t": "799799", "ag": "Andrea Cardozo", "sol": "Villalba Belen", "a": "Solicitud de ticketera", "uni": "10/08: Solicitamos que se acerque para poder evaluar y definir cuál es la mejor opción pa…", "fur": "10/08/2026", "fc": "01/07/2026", "vm": "28/08/2026", "vd": "06/07/2026", "sm": 0},
+  {"t": "862650", "ag": "Miguel Flores", "sol": "Walter Tissera", "a": "Balanza de ingreso cámara despostada", "uni": "07/08 Pedí a Andrea que cargue en sifab una nueva orden para que fabriquen el nuevo gabin…", "fur": "07/08/2026", "fc": "02/04/2026", "vm": "19/08/2026", "vd": "07/04/2026", "sm": 3},
+  {"t": "231010", "ag": "Andrea Cardozo", "sol": "Eduardo Pintado", "a": "Noax", "uni": "07/08: Se informó que las NOAX ya se encuentran disponibles. Asimismo, se indicó que las …", "fur": "07/08/2026", "fc": "11/12/2025", "vm": "17/08/2026", "vd": "12/08/2026", "sm": 3},
+  {"t": "233713", "ag": "Andrea Cardozo", "sol": "Vigilancia", "a": "Celular de la guardia", "uni": "07/08 Estamos verificando el estado del celular", "fur": "07/08/2026", "fc": "07/08/2026", "vm": "21/08/2026", "vd": "12/08/2026", "sm": 3},
+  {"t": "397368", "ag": "Tobias Santillan", "sol": "Sergio Vega", "a": "Programas necesarios para usar en Insumos.", "uni": "07/08 aguardando que libere la pc para instalar todos los programas", "fur": "07/08/2026", "fc": "06/08/2026", "vm": "-", "vd": "11/08/2026", "sm": 3},
+  {"t": "431521", "ag": "Norberto Haunau", "sol": "sala de maquinas", "a": "aplicaciones", "uni": "07/08 - A la espera de ok del usuario para cerrar ticket", "fur": "06/08/2026", "fc": "04/08/2026", "vm": "-", "vd": "07/08/2026", "sm": 4},
+  {"t": "139729", "ag": "Roberto Sanabria", "sol": "Fernando Daniel Albornoz", "a": "Armado de tablero de KPI´S con IA", "uni": "06/08 Aguardando respuesta de usuario", "fur": "06/08/2026", "fc": "31/07/2026", "vm": "-", "vd": "05/08/2026", "sm": 4},
+  {"t": "2", "ag": "Sin asignar", "sol": "", "a": "", "uni": "", "fur": "-", "fc": "", "vm": "-", "vd": "", "sm": 0},
 ];
-  function renderOpen(){
-    const byAg={}; OPEN.forEach(o=>{ (byAg[o.ag]=byAg[o.ag]||[]).push(o); });
+  const esc=s=>String(s==null?'':s).replace(/"/g,'&quot;');
+  let openFiltro={q:'',estancados:false};
+  function openMatch(o){
+    if(openFiltro.estancados && (+o.sm)<7) return false;
+    if(!openFiltro.q) return true;
+    return (o.t+' '+o.ag+' '+o.sol+' '+o.a+' '+o.uni).toLowerCase().includes(openFiltro.q.toLowerCase());
+  }
+  function openBodyHTML(){
+    const byAg={}; OPEN.filter(openMatch).forEach(o=>{ (byAg[o.ag]=byAg[o.ag]||[]).push(o); });
     const agentes=Object.keys(byAg).sort((a,b)=>byAg[b].length-byAg[a].length);
-    const body=agentes.map(ag=>{
-      const head='<tr class="ag-head"><td colspan="7">'+ag+' · '+byAg[ag].length+' abiertos</td></tr>';
-      const rows=byAg[ag].map(o=>{ const alto=(+o.sm)>=7?' class="num sm-alto"':' class="num"'; return '<tr><td>'+o.t+'</td><td>'+o.sol+'</td><td class="wrap">'+o.a+'</td><td>'+o.fc+'</td><td>'+o.vm+'</td><td>'+o.vd+'</td><td'+alto+'>'+o.sm+'</td></tr>'; }).join('');
+    if(!agentes.length) return '<tr><td colspan="9" class="empty">Sin resultados para el filtro.</td></tr>';
+    return agentes.map(ag=>{
+      const head='<tr class="ag-head"><td colspan="9">'+ag+' · '+byAg[ag].length+' abiertos</td></tr>';
+      const rows=byAg[ag].map(o=>{ const alto=(+o.sm)>=7?' class="num sm-alto"':' class="num"';
+        return '<tr><td class="tk">'+o.t+'</td><td>'+o.sol+'</td><td class="tr" title="'+esc(o.a)+'">'+o.a+'</td>'
+          +'<td class="tr" title="'+esc(o.uni)+'">'+o.uni+'</td><td>'+o.fur+'</td><td>'+o.fc+'</td><td>'+o.vm+'</td><td>'+o.vd+'</td><td'+alto+'>'+o.sm+'</td></tr>';
+      }).join('');
       return head+rows;
     }).join('');
+  }
+  function actualizarOpen(){ const tb=document.querySelector('#openTable tbody'); if(tb) tb.innerHTML=openBodyHTML(); if(window.parent!==window) setTimeout(postAlto,30); }
+  function renderOpen(){
     document.getElementById('openTable').innerHTML=
-      '<div class="panel"><h3>Tickets abiertos · por agente</h3><p class="psub">'+OPEN.length+' tickets sin cerrar (hoja Open), segmentados por agente. Días s/mov. en rojo = 7 o más sin movimiento.</p>'
+      '<div class="panel"><h3>Tickets abiertos · por agente</h3><p class="psub">'+OPEN.length+' tickets sin cerrar (hoja Open). Días s/mov. en rojo = 7 o más sin movimiento. Pasá el mouse por Asunto o Nota para ver el texto completo.</p>'
+      +'<div class="open-bar"><input id="openQ" class="open-input" type="search" placeholder="Buscar ticket, agente, solicitante o asunto…" autocomplete="off"><label class="open-chk"><input id="openEst" type="checkbox"> Solo estancados (7+ días)</label></div>'
       +'<div class="tscroll" style="max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:10px"><table class="tabla-open"><thead><tr>'
-      +'<th>Ticket</th><th>Solicitante</th><th>Asunto</th><th>Creación</th><th>Venc. modif.</th><th>Venc. defecto</th><th class="num">Días s/mov.</th>'
-      +'</tr></thead><tbody>'+body+'</tbody></table></div></div>';
+      +'<th>Ticket</th><th>Solicitante</th><th>Asunto</th><th>Última nota interna</th><th>Últ. resp.</th><th>Creación</th><th>Venc. modif.</th><th>Venc. defecto</th><th class="num">Días s/mov.</th>'
+      +'</tr></thead><tbody>'+openBodyHTML()+'</tbody></table></div></div>';
+    const q=document.getElementById('openQ'), est=document.getElementById('openEst');
+    q.oninput=()=>{ openFiltro.q=q.value.trim(); actualizarOpen(); };
+    est.onchange=()=>{ openFiltro.estancados=est.checked; actualizarOpen(); };
   }
 
   // ---- Objetivos (KPI Gerencia de Operaciones 2026) ----
