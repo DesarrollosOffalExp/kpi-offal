@@ -1,0 +1,201 @@
+<title>Presupuesto Lavadero de Camiones</title>
+<style>
+  :root{
+    --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
+    --line:#23353f; --line-2:#2c414d;
+    --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
+    --brand:#e11f46; --brand-dim:rgba(225,31,70,.13); --brand-line:rgba(225,31,70,.45);
+    --info:#26b6d9; --good:#22e39b; --bad:#ff4d67; --amber:#f5a623;
+    --radius:12px;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.4;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 40px;}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:18px;}
+  .overline{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--info);margin:0 0 5px;}
+  h1{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .sub{font-size:12.5px;color:var(--muted);margin:5px 0 0;max-width:660px;}
+  .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:9px;}
+  .fuente{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;}
+  .fuente::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--info);box-shadow:0 0 7px 1px rgba(38,182,217,.7);}
+  .seg{display:inline-flex;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:3px;gap:2px;flex-wrap:wrap;}
+  .seg button{appearance:none;border:none;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:700;padding:6px 13px;border-radius:6px;cursor:pointer;transition:.15s;}
+  .seg button:hover{color:var(--text);}
+  .seg button.on{background:var(--brand);color:#fff;}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+  .kpi{background:linear-gradient(160deg,var(--panel) 0%,var(--panel-2) 135%);border:1px solid var(--line);border-radius:11px;padding:14px 15px;box-shadow:0 1px 2px rgba(0,0,0,.25),0 10px 22px -14px rgba(0,0,0,.55);}
+  .kpi.hero{border-color:var(--brand-line);background:linear-gradient(135deg,var(--brand-dim) 0%,var(--panel) 60%,var(--panel-2) 130%);border-top:3px solid var(--brand);}
+  .kpi .kl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .kpi .kv{font-size:22px;font-weight:800;letter-spacing:-.025em;line-height:1.05;color:#fff;margin-top:6px;}
+  .kpi .kv.good{color:var(--good);} .kpi .kv.bad{color:var(--bad);}
+  .kpi .kd{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:3px;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 18px;margin-bottom:16px;}
+  .panel-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:12px;}
+  .panel h3{font-size:15px;font-weight:800;margin:0;}
+  .panel .psub{font-size:11.5px;color:var(--muted);margin:0;}
+  .tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;white-space:nowrap;}
+  thead th{position:sticky;top:0;z-index:2;text-align:right;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding:10px 13px;background:var(--panel-2);border-bottom:1px solid var(--line);}
+  thead th:first-child{text-align:left;}
+  tbody td{padding:9px 13px;border-bottom:1px solid var(--line);text-align:right;}
+  tbody td:first-child{text-align:left;color:var(--text);font-weight:600;}
+  tbody tr:last-child td{border-bottom:none;}
+  #resumen thead th.mes{cursor:pointer;user-select:none;transition:.12s;}
+  #resumen thead th.mes:hover{color:var(--text);}
+  #resumen thead th.sel{color:#fff;border-bottom:2px solid var(--info);}
+  #resumen td.mcell{color:var(--text);font-weight:600;transition:background .15s;}
+  #resumen td.sel{box-shadow:inset 2px 0 0 var(--info),inset -2px 0 0 var(--info);color:#fff;font-weight:800;}
+  #resumen tr.tot td{font-weight:800;color:#fff;border-top:2px solid var(--line-2);}
+  #resumen td.spk-cell{padding:4px 12px;}
+  .spk{display:block;}
+  .zero{color:var(--muted-2);}
+  #detalle thead th{cursor:pointer;} #detalle thead th:hover{color:var(--text);}
+  #detalle thead th .ar{opacity:0;margin-left:4px;font-size:9px;} #detalle thead th.sorted{color:#fff;} #detalle thead th.sorted .ar{opacity:1;color:var(--info);}
+  #detalle tbody tr:hover td{background:rgba(255,255,255,.025);}
+  .dpos{color:var(--bad);font-weight:700;} .dneg{color:var(--good);font-weight:700;}
+  .chip{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:3px 9px;border-radius:999px;}
+  .chip.over{background:rgba(255,77,103,.15);color:var(--bad);} .chip.under{background:rgba(34,227,155,.15);color:var(--good);} .chip.na{background:var(--panel-3);color:var(--muted-2);}
+  .exec{display:flex;align-items:center;gap:8px;justify-content:flex-end;}
+  .exec .track{position:relative;width:82px;height:8px;background:var(--panel-3);border-radius:5px;overflow:hidden;flex-shrink:0;}
+  .exec .fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;}
+  .exec .num{min-width:44px;font-weight:700;}
+  #detalle tr.total td{border-top:2px solid var(--line-2);background:var(--panel-3);font-weight:800;color:#fff;font-size:13px;}
+  .pie{margin-top:14px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
+  .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:8px 11px;font-size:12px;line-height:1.5;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:280px;}
+  .tip.show{opacity:1;transform:none;}
+  @media(max-width:900px){ .kpis{grid-template-columns:repeat(2,1fr);} }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <p class="overline">Offal · Lavadero de Camiones</p>
+      <h1>Presupuesto</h1>
+      <p class="sub">Gastos mes a mes (hoja RESUMEN). Elegí un mes para ver el detalle presupuestado vs. real de esa hoja.</p>
+    </div>
+    <div class="head-right">
+      <span class="fuente">Datos reales · presupuesto mensual</span>
+      <div class="seg" id="seg" role="tablist" aria-label="Mes"></div>
+    </div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div><h3>Resumen mensual · gastos por grupo</h3></div>
+      <p class="psub">Montos en <b>millones de $</b> · color = intensidad · pasá el mouse por <b>Evolución</b> · clic en un mes para su detalle ↓</p>
+    </div>
+    <div class="tscroll"><table id="resumen"><thead id="res-head"></thead><tbody id="res-body"></tbody></table></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div><h3 id="det-title">Detalle del mes</h3></div>
+      <p class="psub" id="det-sub"></p>
+    </div>
+    <div class="tscroll"><table id="detalle"><thead id="det-head"></thead><tbody id="det-body"></tbody></table></div>
+    <p class="pie">Fuente: <b>PRESUPUESTO LAVADERO.xlsx</b> (SharePoint · Gerencia de Operaciones / Lavadero). Vista general de la hoja <b>RESUMEN</b>; el detalle sale de la hoja de cada mes (Presupuestado vs. Gasto Real). <b>Desvío</b> = Real − Presupuestado · <b>Ejecución</b> = Real / Presupuestado.</p>
+  </section>
+</div>
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  const RESUMEN={"meses":["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio"],"grupos":[{"g":"MATERIAL","vals":[0,0,0,51170,39982,1008910,1063278]},{"g":"SERVICIOS","vals":[0,0,0,0,0,0,0]},{"g":"FLETES","vals":[0,0,0,0,0,0,0]},{"g":"SERVICIOS PUBLICOS","vals":[0,0,0,0,0,0,0]},{"g":"MO EVENTUAL","vals":[35944917,30869851,37641483,39728530,40880435,46188329,38458822]},{"g":"MO PROPIA","vals":[0,30795721,32215643,30563232,32423866,31343044,29915461]}]};
+  const DETALLE={"Enero":{"grupos":[{"g":"MO EVENTUAL","presup":29053893,"real":35944917}]},"Febrero":{"grupos":[{"g":"MATERIAL","presup":44361,"real":0},{"g":"MO EVENTUAL","presup":29867402,"real":30869851},{"g":"MO PROPIA","presup":28961970,"real":30795721}]},"Marzo":{"grupos":[{"g":"MATERIAL","presup":45692,"real":0},{"g":"MO EVENTUAL","presup":30763424,"real":37641483},{"g":"MO PROPIA","presup":29830829,"real":32215643}]},"Abril":{"grupos":[{"g":"MATERIAL","presup":47016,"real":51170},{"g":"MO EVENTUAL","presup":31654966,"real":39728530},{"g":"MO PROPIA","presup":30695344,"real":30563232}]},"Mayo":{"grupos":[{"g":"MATERIAL","presup":47956,"real":39982},{"g":"MO EVENTUAL","presup":32288066,"real":40880435},{"g":"MO PROPIA","presup":31309251,"real":32423866}]},"Junio":{"grupos":[{"g":"MATERIAL","presup":53917,"real":1008910},{"g":"MO EVENTUAL","presup":36301192,"real":46188329},{"g":"MO PROPIA","presup":28921000,"real":31343044}]},"Julio":{"grupos":[{"g":"MATERIAL","presup":59721,"real":1063278},{"g":"MO EVENTUAL","presup":40209474,"real":38458822},{"g":"MO PROPIA","presup":29759709,"real":29915461}]}};
+
+  RESUMEN.grupos.forEach(g=>g.vals=g.vals.map(v=>v==null?null:Math.abs(v)));
+  RESUMEN.totales=RESUMEN.meses.map((_,i)=>{ const s=RESUMEN.grupos.reduce((a,g)=>a+(g.vals[i]||0),0); return s||null; });
+
+  const LBL={'MATERIAL':'Material','SERVICIOS':'Servicios','FLETES':'Fletes','SERVICIOS PUBLICOS':'Servicios Públicos','MO EVENTUAL':'MO Eventual','MO PROPIA':'MO Propia'};
+  const nf=new Intl.NumberFormat('es-AR');
+  const money=v=> v==null?'—':'$ '+nf.format(Math.round(v));
+  const moneyM=v=> v==null?'—':'$ '+(v/1e6).toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1})+' M';
+  const mill=v=> (v==null||v===0)?'<span class="zero">—</span>':(v/1e6).toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1});
+  const pctTxt=v=> v==null?'—':(v>0?'+':'')+(Math.round(v*10)/10).toLocaleString('es-AR')+'%';
+  const M3=m=>m.slice(0,3);
+
+  let mi=RESUMEN.meses.length-1, sortKey='real', sortDir=-1;
+  const resGrupos=RESUMEN.grupos.filter(g=>g.vals.some(v=>v));
+  const detGrupos=mes=>(DETALLE[mes]?.grupos||[]).filter(x=>x.presup>0||x.real>0).map(x=>({g:LBL[x.g]||x.g, presup:x.presup, real:x.real}));
+  const desvio=r=>r.real-r.presup, execPct=r=>r.presup>0?r.real/r.presup*100:null;
+
+  function spark(vals){
+    const nums=vals.filter(v=>v!=null); if(nums.length<2) return '';
+    const W=132,H=30,pad=4, min=Math.min(...nums), max=Math.max(...nums), span=(max-min)||1;
+    const x=i=>pad+(W-2*pad)*i/(vals.length-1), y=v=>H-pad-((v-min)/span)*(H-2*pad);
+    const line=vals.map((v,i)=>v==null?null:x(i).toFixed(1)+','+y(v).toFixed(1)).filter(Boolean);
+    let s='<svg class="spk" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'"><polyline points="'+line.join(' ')+'" fill="none" stroke="var(--info)" stroke-width="1.6" stroke-linejoin="round"/>';
+    vals.forEach((v,i)=>{ if(v==null) return; const sel=i===mi; s+='<circle cx="'+x(i).toFixed(1)+'" cy="'+y(v).toFixed(1)+'" r="'+(sel?3.4:1.7)+'" fill="'+(sel?'var(--brand)':'var(--info)')+'"/>'; });
+    const bw=(W-2*pad)/(vals.length-1);
+    vals.forEach((v,i)=>{ if(v==null) return; s+='<rect x="'+(x(i)-bw/2).toFixed(1)+'" y="0" width="'+bw.toFixed(1)+'" height="'+H+'" fill="transparent" data-tip="'+RESUMEN.meses[i]+': '+moneyM(v)+'"/>'; });
+    return s+'</svg>';
+  }
+  function heat(v,mn,mx){ if(v==null||v===0||mx===mn) return ''; const t=(v-mn)/(mx-mn); return 'background:rgba(245,166,35,'+(0.05+t*0.24).toFixed(3)+');'; }
+
+  function renderSeg(){
+    document.getElementById('seg').innerHTML=RESUMEN.meses.map((m,i)=>'<button data-m="'+i+'"'+(i===mi?' class="on"':'')+' role="tab">'+M3(m)+'</button>').join('');
+    document.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>selMes(+b.dataset.m));
+  }
+  function selMes(i){ mi=i; document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',+x.dataset.m===i)); render(); }
+
+  function renderKpis(){
+    const real=RESUMEN.totales[mi], presup=detGrupos(RESUMEN.meses[mi]).reduce((a,r)=>a+r.presup,0);
+    const d=real-presup, ej=presup>0?real/presup*100:null, over=d>0;
+    const cards=[
+      {hero:true,l:'Gasto real',v:moneyM(real),d:RESUMEN.meses[mi]+' · Lavadero de Camiones'},
+      {l:'Presupuestado',v:presup>0?moneyM(presup):'—',d:'Presupuesto del mes'},
+      {l:'Desvío $',v:presup>0?((d>0?'+':'')+moneyM(d)):'—',cls:presup>0?(over?'bad':'good'):'',d:presup>0?(over?'Sobre presupuesto':'Bajo presupuesto'):'sin presup.'},
+      {l:'Ejecución',v:ej==null?'—':Math.round(ej)+'%',cls:ej!=null&&ej>100?'bad':'good',d:'Real / presupuestado'},
+    ];
+    document.getElementById('kpis').innerHTML=cards.map(c=>'<div class="kpi'+(c.hero?' hero':'')+'"><div class="kl">'+c.l+'</div><div class="kv '+(c.cls||'')+'">'+c.v+'</div><div class="kd">'+c.d+'</div></div>').join('');
+  }
+
+  function resRow(label, vals, cls){
+    const nums=vals.filter(v=>v!=null&&v!==0);
+    const mn=nums.length?Math.min(...nums):0, mx=nums.length?Math.max(...nums):0;
+    const cells=vals.map((v,i)=>'<td class="mcell '+(i===mi?'sel':'')+'" style="'+heat(v,mn,mx)+'">'+mill(v)+'</td>').join('');
+    return '<tr class="'+(cls||'')+'"><td>'+label+'</td>'+cells+'<td class="spk-cell">'+spark(vals)+'</td></tr>';
+  }
+  function renderResumen(){
+    document.getElementById('res-head').innerHTML='<tr><th>Grupo</th>'+RESUMEN.meses.map((m,i)=>'<th class="mes'+(i===mi?' sel':'')+'" data-m="'+i+'">'+M3(m)+'</th>').join('')+'<th>Evolución</th></tr>';
+    let rows=resGrupos.map(g=>resRow(LBL[g.g]||g.g, g.vals)).join('');
+    rows+=resRow('Total del mes', RESUMEN.totales, 'tot');
+    document.getElementById('res-body').innerHTML=rows;
+    document.querySelectorAll('#res-head th.mes').forEach(th=>th.onclick=()=>selMes(+th.dataset.m));
+  }
+
+  const DCOLS=[{k:'g',lbl:'Grupo'},{k:'presup',lbl:'Presupuestado'},{k:'real',lbl:'Gasto real'},{k:'desvio',lbl:'Desvío $'},{k:'exec',lbl:'Ejecución'},{k:'estado',lbl:'Estado'}];
+  function renderDetalle(){
+    const mes=RESUMEN.meses[mi];
+    document.getElementById('det-title').textContent='Detalle de '+mes+' · presupuestado vs. real';
+    let rows=detGrupos(mes);
+    document.getElementById('det-sub').textContent=rows.length+' grupos · hoja '+M3(mes).toUpperCase()+'-26 · clic en una columna para ordenar.';
+    document.getElementById('det-head').innerHTML='<tr>'+DCOLS.map(c=>{const on=c.k===sortKey,ar=on?(sortDir<0?'▼':'▲'):'';return '<th data-k="'+c.k+'" class="'+(on?'sorted':'')+'">'+c.lbl+'<span class="ar">'+ar+'</span></th>';}).join('')+'</tr>';
+    rows.sort((a,b)=> sortKey==='g'?sortDir*a.g.localeCompare(b.g,'es'):sortKey==='desvio'?sortDir*(desvio(a)-desvio(b)):sortKey==='exec'?sortDir*((execPct(a)??-1)-(execPct(b)??-1)):sortDir*((a[sortKey]??0)-(b[sortKey]??0)));
+    const body=rows.map(r=>{
+      const d=desvio(r),dcls=d>0?'dpos':d<0?'dneg':'zero', e=execPct(r);
+      const desv='<span class="'+dcls+'">'+(d>0?'+':'')+money(d)+(r.presup>0?' <span class="zero">('+pctTxt(d/r.presup*100)+')</span>':'')+'</span>';
+      let exec='<span class="zero">—</span>';
+      if(e!=null){ const over=e>100; exec='<span class="exec"><span class="track"><span class="fill" style="width:'+Math.min(e,100).toFixed(0)+'%;background:'+(over?'var(--bad)':'var(--good)')+'"></span></span><span class="num '+(over?'dpos':'dneg')+'">'+Math.round(e)+'%</span></span>'; }
+      const chip=r.presup<=0?'<span class="chip na">s/ presup.</span>':d>0?'<span class="chip over">Sobre pres.</span>':d<0?'<span class="chip under">Bajo pres.</span>':'<span class="chip na">En línea</span>';
+      return '<tr><td>'+r.g+'</td><td>'+money(r.presup)+'</td><td>'+money(r.real)+'</td><td>'+desv+'</td><td>'+exec+'</td><td>'+chip+'</td></tr>';
+    }).join('');
+    const tp=rows.reduce((a,r)=>a+r.presup,0), tr=rows.reduce((a,r)=>a+r.real,0), td=tr-tp, te=tp>0?tr/tp*100:null;
+    const totRow='<tr class="total"><td>TOTAL</td><td>'+money(tp)+'</td><td>'+money(tr)+'</td><td class="'+(td>0?'dpos':'dneg')+'">'+(td>0?'+':'')+money(td)+'</td><td class="'+(te!=null&&te>100?'dpos':'dneg')+'">'+(te==null?'—':Math.round(te)+'%')+'</td><td>'+(td>0?'<span class="chip over">Sobre pres.</span>':'<span class="chip under">Bajo pres.</span>')+'</td></tr>';
+    document.getElementById('det-body').innerHTML=body+totRow;
+    document.querySelectorAll('#det-head th').forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(k==='estado') return; if(k===sortKey) sortDir=-sortDir; else { sortKey=k; sortDir=(k==='g')?1:-1; } renderDetalle(); if(window.parent!==window)setTimeout(postAlto,30); });
+  }
+
+  const tip=document.getElementById('tip');
+  document.addEventListener('mousemove',e=>{ const el=e.target.closest&&e.target.closest('[data-tip]'); if(el){ tip.textContent=el.getAttribute('data-tip'); tip.classList.add('show'); const r=tip.getBoundingClientRect(); let nx=e.clientX+14,ny=e.clientY+14; if(nx+r.width>innerWidth-8)nx=e.clientX-r.width-14; if(ny+r.height>innerHeight-8)ny=e.clientY-r.height-14; tip.style.left=nx+'px'; tip.style.top=ny+'px'; } else if(tip.classList.contains('show')) tip.classList.remove('show'); });
+
+  function render(){ renderKpis(); renderResumen(); renderDetalle(); if(window.parent!==window)setTimeout(postAlto,30); }
+  renderSeg(); render();
+
+  function postAlto(){ try{ parent.postMessage({tipo:'matriz-alto',alto:document.body.scrollHeight},'*'); }catch(e){} }
+  if(window.parent!==window){ postAlto(); window.addEventListener('resize',postAlto); new MutationObserver(postAlto).observe(document.body,{subtree:true,childList:true}); }
+})();
+</script>

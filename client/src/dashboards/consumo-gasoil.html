@@ -1,0 +1,155 @@
+<title>Consumo de Gasoil</title>
+<style>
+  :root{
+    --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
+    --line:#23353f; --line-2:#2c414d;
+    --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
+    --brand:#e11f46; --brand-dim:rgba(225,31,70,.13); --brand-line:rgba(225,31,70,.45);
+    --info:#26b6d9; --info-dim:rgba(38,182,217,.14); --good:#22e39b; --bad:#ff4d67; --amber:#f5a623;
+    --radius:12px;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.4;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 40px;}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:18px;}
+  .overline{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--info);margin:0 0 5px;}
+  h1{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .sub{font-size:12.5px;color:var(--muted);margin:5px 0 0;max-width:660px;}
+  .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:9px;}
+  .fuente{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;}
+  .fuente::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--info);box-shadow:0 0 7px 1px rgba(38,182,217,.7);}
+  .filtro{display:flex;align-items:center;gap:8px;}
+  .filtro label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  select{appearance:none;background:var(--panel-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238ba0ab' stroke-width='3' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>") no-repeat right 10px center;border:1px solid var(--line);border-radius:8px;color:var(--text);font:inherit;font-size:13px;font-weight:600;padding:8px 30px 8px 12px;cursor:pointer;}
+  select:focus{outline:none;border-color:var(--info);}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin-bottom:18px;}
+  .kpi{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--panel) 0%,var(--panel-2) 135%);border:1px solid var(--line);border-radius:13px;padding:15px 16px;box-shadow:0 1px 2px rgba(0,0,0,.25),0 12px 26px -16px rgba(0,0,0,.6);}
+  .kpi.hero{border-color:var(--brand-line);background:linear-gradient(135deg,var(--brand-dim) 0%,var(--panel) 60%,var(--panel-2) 130%);border-top:3px solid var(--brand);}
+  .kpi .kl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .kpi .kv{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.05;color:#fff;margin-top:7px;}
+  .kpi .kv .ku{font-size:12px;font-weight:700;color:var(--muted);margin-left:3px;}
+  .kpi .kd{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:4px;}
+  .kpi .kd .up{color:var(--bad);} .kpi .kd .down{color:var(--good);}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 18px;margin-bottom:16px;}
+  .panel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;}
+  .panel h3{font-size:15px;font-weight:800;margin:0;}
+  .panel .psub{font-size:11.5px;color:var(--muted);margin:2px 0 0;}
+  .ch-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin:2px 0 2px;}
+  .ch-big{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.02em;}
+  .ch-lbl{font-size:12px;color:var(--muted);font-weight:600;}
+  .tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;} .tscroll.vh{max-height:380px;overflow-y:auto;}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;white-space:nowrap;}
+  thead th{position:sticky;top:0;z-index:2;text-align:right;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding:10px 13px;background:var(--panel-2);border-bottom:1px solid var(--line);cursor:pointer;user-select:none;}
+  thead th:first-child{text-align:left;} thead th:hover{color:var(--text);}
+  thead th .ar{opacity:0;margin-left:4px;font-size:9px;} thead th.sorted{color:#fff;} thead th.sorted .ar{opacity:1;color:var(--info);}
+  tbody td{padding:8px 13px;border-bottom:1px solid var(--line);text-align:right;}
+  tbody td:first-child{text-align:left;color:var(--text);font-weight:600;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr{cursor:pointer;} tbody tr:hover td{background:rgba(255,255,255,.025);}
+  tbody tr.sel td{background:var(--info-dim);color:#fff;}
+  .lt{color:var(--amber);font-weight:800;}
+  .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:9px 12px;font-size:12.5px;line-height:1.55;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:280px;}
+  .tip.show{opacity:1;transform:none;}
+  .pie{margin-top:12px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
+  @media(max-width:900px){ .kpis{grid-template-columns:repeat(2,1fr);} }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <p class="overline">Offal · Logística</p>
+      <h1>Consumo de Gasoil</h1>
+      <p class="sub">Consumo semanal de gasoil de la flota (hoja 2026 Cálculo). Compará semana por semana; el dato principal es <b>litros / 100 km</b>.</p>
+    </div>
+    <div class="head-right"><span class="fuente">Datos reales · 2026 consumo de combustible</span>
+      <div class="filtro"><label>Semana</label><select id="selSem"></select></div></div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="panel">
+    <div class="panel-head"><div><h3>Litros / 100 km por semana</h3><p class="psub">Rendimiento de combustible · pasá el mouse por cada punto · clic para seleccionar.</p></div></div>
+    <div class="ch-head"><span class="ch-big" id="ch-big"></span><span class="ch-lbl" id="ch-lbl"></span></div>
+    <div id="chart"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><div><h3>Comparativo semana por semana</h3><p class="psub" id="tsub"></p></div></div>
+    <div class="tscroll vh"><table id="tab"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    <p class="pie">Fuente: <b>2026 Consumo de combustible.xlsx</b> (SharePoint · Logística), hoja <b>2026 Cálculo</b> (columnas A, B, E, G, H, Q, U). <b>Consumo</b> en litros · <b>Lt/100km</b> = litros cada 100 km recorridos.</p>
+  </section>
+</div>
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  const DATA = {"semanas":[{"sem":"SEM 1","semN":1,"desde":"1 ene","hasta":"4 ene","consCam":1574.2,"consMant":155.12,"consTot":1729.32,"km":0,"lt100":0},{"sem":"SEM 2","semN":2,"desde":"5 ene","hasta":"11 ene","consCam":7124.86,"consMant":101.63,"consTot":7226.49,"km":18824.6,"lt100":37.85},{"sem":"SEM 3","semN":3,"desde":"12 ene","hasta":"18 ene","consCam":7583.26,"consMant":115.18,"consTot":7698.44,"km":19635.8,"lt100":38.62},{"sem":"SEM 4","semN":4,"desde":"19 ene","hasta":"25 ene","consCam":6436.43,"consMant":122.34,"consTot":6558.77,"km":15296.7,"lt100":42.08},{"sem":"SEM 5","semN":5,"desde":"26 ene","hasta":"1 feb","consCam":6581,"consMant":136.1,"consTot":6717.1,"km":14340.6,"lt100":45.89},{"sem":"SEM 6","semN":6,"desde":"2 feb","hasta":"8 feb","consCam":5246.49,"consMant":199.18,"consTot":5445.67,"km":14646.9,"lt100":35.82},{"sem":"SEM 7","semN":7,"desde":"9 feb","hasta":"15 feb","consCam":5979.24,"consMant":50.02,"consTot":6029.26,"km":15994,"lt100":37.38},{"sem":"SEM 8","semN":8,"desde":"16 feb","hasta":"22 feb","consCam":3351.01,"consMant":60.22,"consTot":3411.23,"km":8125.7,"lt100":41.24},{"sem":"SEM 9","semN":9,"desde":"23 feb","hasta":"1 mar","consCam":6025.8,"consMant":110.31,"consTot":6136.11,"km":14994.9,"lt100":40.19},{"sem":"SEM 10","semN":10,"desde":"2 mar","hasta":"8 mar","consCam":6203.47,"consMant":109.26,"consTot":6312.73,"km":15306.5,"lt100":40.53},{"sem":"SEM 11","semN":11,"desde":"9 mar","hasta":"15 mar","consCam":7268.24,"consMant":263.56,"consTot":7531.8,"km":18345.1,"lt100":39.62},{"sem":"SEM 12","semN":12,"desde":"16 mar","hasta":"22 mar","consCam":6143.53,"consMant":107.31,"consTot":6250.84,"km":19041.7,"lt100":32.26},{"sem":"SEM 13","semN":13,"desde":"23 mar","hasta":"29 mar","consCam":5420.21,"consMant":63.64,"consTot":5483.85,"km":15505.4,"lt100":34.96},{"sem":"SEM 14","semN":14,"desde":"30 mar","hasta":"5 abr","consCam":6884.67,"consMant":220.87,"consTot":7105.54,"km":13831.7,"lt100":49.77},{"sem":"SEM 15","semN":15,"desde":"6 abr","hasta":"12 abr","consCam":5344.52,"consMant":128.59,"consTot":5473.11,"km":15058.6,"lt100":35.49},{"sem":"SEM 16","semN":16,"desde":"13 abr","hasta":"19 abr","consCam":7766.94,"consMant":128.79,"consTot":7895.73,"km":21034,"lt100":36.93},{"sem":"SEM 17","semN":17,"desde":"20 abr","hasta":"26 abr","consCam":7745.41,"consMant":537.44,"consTot":8282.85,"km":19300.5,"lt100":40.13},{"sem":"SEM 18","semN":18,"desde":"27 abr","hasta":"3 may","consCam":6236.72,"consMant":140.85,"consTot":6377.57,"km":18034.7,"lt100":34.58},{"sem":"SEM 19","semN":19,"desde":"4 may","hasta":"10 may","consCam":9319.97,"consMant":142.23,"consTot":9462.2,"km":23074.4,"lt100":40.39},{"sem":"SEM 20","semN":20,"desde":"11 may","hasta":"17 may","consCam":9034,"consMant":131.29,"consTot":9165.29,"km":22953,"lt100":39.36},{"sem":"SEM 21","semN":21,"desde":"18 may","hasta":"24 may","consCam":9515.28,"consMant":209.54,"consTot":9724.82,"km":23468.9,"lt100":40.54},{"sem":"SEM 22","semN":22,"desde":"25 may","hasta":"31 may","consCam":7400.78,"consMant":289.59,"consTot":7690.37,"km":18214.3,"lt100":40.63},{"sem":"SEM 23","semN":23,"desde":"1 jun","hasta":"7 jun","consCam":8288.15,"consMant":288.1,"consTot":8576.25,"km":24660.3,"lt100":33.61},{"sem":"SEM 24","semN":24,"desde":"8 jun","hasta":"14 jun","consCam":7696.97,"consMant":414.89,"consTot":8111.86,"km":19380.3,"lt100":39.72},{"sem":"SEM 25","semN":25,"desde":"15 jun","hasta":"21 jun","consCam":6192.75,"consMant":755.67,"consTot":6948.42,"km":19396.1,"lt100":31.93},{"sem":"SEM 26","semN":26,"desde":"22 jun","hasta":"28 jun","consCam":8691.36,"consMant":254.28,"consTot":8945.64,"km":24102.9,"lt100":36.06},{"sem":"SEM 27","semN":27,"desde":"29 jun","hasta":"5 jul","consCam":9226.54,"consMant":111.97,"consTot":9338.51,"km":23817.8,"lt100":38.74},{"sem":"SEM 28","semN":28,"desde":"6 jul","hasta":"12 jul","consCam":7095.94,"consMant":99.7,"consTot":7195.64,"km":23817.8,"lt100":29.79},{"sem":"SEM 29","semN":29,"desde":"13 jul","hasta":"19 jul","consCam":8192.61,"consMant":38.5,"consTot":8231.11,"km":22483.7,"lt100":36.44},{"sem":"SEM 30","semN":30,"desde":"20 jul","hasta":"26 jul","consCam":7604.63,"consMant":391.59,"consTot":7996.22,"km":17118.3,"lt100":44.42},{"sem":"SEM 31","semN":31,"desde":"27 jul","hasta":"2 ago","consCam":8407.79,"consMant":38.34,"consTot":8446.13,"km":23582.8,"lt100":35.65},{"sem":"SEM 32","semN":32,"desde":"3 ago","hasta":"9 ago","consCam":8306.01,"consMant":108.32,"consTot":8414.33,"km":22093.5,"lt100":37.59}],"ultima":{"sem":"SEM 32","semN":32,"desde":"3 ago","hasta":"9 ago","consCam":8306.01,"consMant":108.32,"consTot":8414.33,"km":22093.5,"lt100":37.59}};
+  const W = DATA.semanas;
+  const nf=new Intl.NumberFormat('es-AR',{maximumFractionDigits:0});
+  const d2=v=>v==null?'—':v.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  let wi = W.length-1, sortK='semN', sortD=1;
+
+  function renderKpis(){
+    const w=W[wi], prev=wi>0?W[wi-1]:null;
+    let dl=''; if(prev&&prev.lt100){ const d=Math.round((w.lt100-prev.lt100)*100)/100, up=d>0; dl='<span class="'+(up?'up':'down')+'">'+(up?'▲ +':'▼ ')+Math.abs(d)+' vs '+prev.sem+'</span>'; }
+    const cards=[
+      {hero:1,l:'Litros / 100 km',v:d2(w.lt100),d:dl||(w.sem+' · '+w.desde+'–'+w.hasta)},
+      {l:'Consumo total',v:nf.format(w.consTot),u:'Lt',d:'Camiones + mantenimiento'},
+      {l:'Consumo camiones',v:nf.format(w.consCam),u:'Lt',d:w.sem},
+      {l:'Mant. / taller',v:nf.format(w.consMant),u:'Lt',d:'Gasoil mantenimiento'},
+      {l:'Km recorridos',v:nf.format(w.km),u:'',d:'Flota propia'},
+    ];
+    document.getElementById('kpis').innerHTML=cards.map(c=>'<div class="kpi'+(c.hero?' hero':'')+'"><div class="kl">'+c.l+'</div><div class="kv">'+c.v+(c.u?'<span class="ku">'+c.u+'</span>':'')+'</div><div class="kd">'+(c.d||'')+'</div></div>').join('');
+  }
+
+  function renderChart(){
+    const vals=W.map(w=>w.lt100);
+    const Wd=980,H=250,padL=32,padR=16,padT=18,padB=30, iw=Wd-padL-padR, ih=H-padT-padB;
+    const nz=vals.filter(v=>v>0); const min=Math.floor(Math.min(...nz)-2), max=Math.ceil(Math.max(...nz)+2);
+    const x=i=>padL+iw*i/(W.length-1), y=v=>padT+ih-((v-min)/((max-min)||1))*ih;
+    const avg=nz.reduce((a,b)=>a+b,0)/nz.length;
+    let s='<svg viewBox="0 0 '+Wd+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
+    s+='<defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(245,166,35,.30)"/><stop offset="1" stop-color="rgba(245,166,35,0)"/></linearGradient></defs>';
+    for(let t=0;t<=4;t++){ const yy=padT+ih*t/4, val=Math.round((max-(max-min)*t/4)*10)/10; s+='<line x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(Wd-padR)+'" y2="'+yy.toFixed(1)+'" stroke="#23353f" stroke-dasharray="3 3"/><text x="'+(padL-6)+'" y="'+(yy+3).toFixed(1)+'" font-size="9" fill="#667d89" text-anchor="end">'+val+'</text>'; }
+    const ay=y(avg); s+='<line x1="'+padL+'" y1="'+ay.toFixed(1)+'" x2="'+(Wd-padR)+'" y2="'+ay.toFixed(1)+'" stroke="var(--amber)" stroke-width="1.2" stroke-dasharray="5 3" opacity=".7"/><text x="'+(Wd-padR)+'" y="'+(ay-5).toFixed(1)+'" font-size="9.5" font-weight="700" fill="var(--amber)" text-anchor="end">prom '+d2(Math.round(avg*100)/100)+'</text>';
+    const pts=vals.map((v,i)=>[x(i),y(v)]);
+    s+='<path d="M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L')+' L'+x(W.length-1).toFixed(1)+','+(padT+ih)+' L'+padL+','+(padT+ih)+' Z" fill="url(#gg)"/>';
+    s+='<polyline points="'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="none" stroke="var(--amber)" stroke-width="2.4" stroke-linejoin="round"/>';
+    const bw=iw/(W.length-1);
+    W.forEach((w,i)=>{ const sel=i===wi;
+      if(sel){ s+='<line x1="'+x(i).toFixed(1)+'" y1="'+padT+'" x2="'+x(i).toFixed(1)+'" y2="'+(padT+ih)+'" stroke="var(--brand)" stroke-width="1" stroke-dasharray="3 2"/><circle cx="'+x(i).toFixed(1)+'" cy="'+y(w.lt100).toFixed(1)+'" r="5" fill="var(--brand)" stroke="#0c1c26" stroke-width="1.5"/><text x="'+x(i).toFixed(1)+'" y="'+(y(w.lt100)-10).toFixed(1)+'" font-size="10.5" font-weight="800" fill="#fff" text-anchor="middle">'+d2(w.lt100)+'</text>'; }
+      else s+='<circle cx="'+x(i).toFixed(1)+'" cy="'+y(w.lt100).toFixed(1)+'" r="2.4" fill="var(--amber)"/>';
+      if(i%3===0||sel||i===W.length-1) s+='<text x="'+x(i).toFixed(1)+'" y="'+(H-10)+'" font-size="8.5" fill="'+(sel?'#eef2f5':'#8ba0ab')+'" text-anchor="middle">'+w.semN+'</text>';
+      s+='<rect x="'+(x(i)-bw/2).toFixed(1)+'" y="'+padT+'" width="'+bw.toFixed(1)+'" height="'+ih+'" fill="transparent" style="cursor:pointer" data-i="'+i+'" data-tip="'+w.sem+' · '+w.desde+'–'+w.hasta+'\nLt/100km: '+d2(w.lt100)+'\nConsumo '+nf.format(w.consTot)+' Lt · Km '+nf.format(w.km)+'"/>'; });
+    s+='</svg>';
+    document.getElementById('chart').innerHTML=s;
+    document.querySelectorAll('#chart [data-i]').forEach(r=>r.onclick=()=>sel(+r.dataset.i));
+    document.getElementById('ch-big').textContent=d2(W[wi].lt100);
+    document.getElementById('ch-lbl').textContent='Lt/100km · '+W[wi].sem+' · promedio del período '+d2(Math.round(avg*100)/100);
+  }
+
+  const COLS=[{k:'sem',l:'Semana'},{k:'per',l:'Período'},{k:'consCam',l:'Cons. camiones'},{k:'consMant',l:'Mant./taller'},{k:'consTot',l:'Total'},{k:'km',l:'Km'},{k:'lt100',l:'Lt/100km'}];
+  function renderTab(){
+    document.getElementById('tsub').textContent=W.length+' semanas · clic en una fila para seleccionarla.';
+    document.getElementById('thead').innerHTML='<tr>'+COLS.map(c=>{const on=c.k===sortK,ar=on?(sortD<0?'▼':'▲'):'';return '<th data-k="'+c.k+'" class="'+(on?'sorted':'')+'">'+c.l+'<span class="ar">'+ar+'</span></th>';}).join('')+'</tr>';
+    let rows=W.map((w,i)=>({w,i}));
+    rows.sort((a,b)=> sortK==='sem'||sortK==='per'?sortD*(a.w.semN-b.w.semN):sortD*((a.w[sortK]??0)-(b.w[sortK]??0)));
+    document.getElementById('tbody').innerHTML=rows.map(({w,i})=>'<tr class="'+(i===wi?'sel':'')+'" data-i="'+i+'"><td>'+w.sem+'</td><td style="text-align:left;color:var(--muted);font-weight:500">'+w.desde+'–'+w.hasta+'</td><td>'+nf.format(w.consCam)+'</td><td>'+nf.format(w.consMant)+'</td><td>'+nf.format(w.consTot)+'</td><td>'+nf.format(w.km)+'</td><td class="lt">'+d2(w.lt100)+'</td></tr>').join('');
+    document.querySelectorAll('#tbody tr').forEach(tr=>tr.onclick=()=>sel(+tr.dataset.i));
+    document.querySelectorAll('#thead th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(k===sortK)sortD=-sortD;else{sortK=k;sortD=(k==='sem'||k==='per')?1:-1;}renderTab();});
+  }
+
+  function sel(i){ wi=i; document.getElementById('selSem').value=i; renderKpis(); renderChart(); renderTab(); if(window.parent!==window)setTimeout(postAlto,30); }
+
+  document.getElementById('selSem').innerHTML=W.map((w,i)=>'<option value="'+i+'"'+(i===wi?' selected':'')+'>'+w.sem+' ('+w.desde+'–'+w.hasta+')</option>').join('');
+  document.getElementById('selSem').onchange=e=>sel(+e.target.value);
+
+  const tip=document.getElementById('tip');
+  document.addEventListener('mousemove',e=>{ const el=e.target.closest&&e.target.closest('[data-tip]'); if(el){ tip.textContent=el.getAttribute('data-tip'); tip.classList.add('show'); const r=tip.getBoundingClientRect(); let nx=e.clientX+14,ny=e.clientY+14; if(nx+r.width>innerWidth-8)nx=e.clientX-r.width-14; if(ny+r.height>innerHeight-8)ny=e.clientY-r.height-14; tip.style.left=nx+'px'; tip.style.top=ny+'px'; } else if(tip.classList.contains('show')) tip.classList.remove('show'); });
+
+  renderKpis(); renderChart(); renderTab();
+  function postAlto(){ try{ parent.postMessage({tipo:'matriz-alto',alto:document.body.scrollHeight},'*'); }catch(e){} }
+  if(window.parent!==window){ postAlto(); window.addEventListener('resize',postAlto); new MutationObserver(postAlto).observe(document.body,{subtree:true,childList:true}); }
+})();
+</script>
