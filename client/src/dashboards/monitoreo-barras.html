@@ -1,0 +1,184 @@
+<title>Monitoreo de Barras</title>
+<style>
+  :root{
+    --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
+    --line:#23353f; --line-2:#2c414d;
+    --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
+    --brand:#e11f46; --brand-dim:rgba(225,31,70,.13); --brand-line:rgba(225,31,70,.45);
+    --info:#26b6d9; --good:#22e39b; --bad:#ff4d67; --amber:#f5a623;
+    --radius:12px;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.4;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 60px;}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:18px;}
+  .overline{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--info);margin:0 0 5px;}
+  h1{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .sub{font-size:12.5px;color:var(--muted);margin:5px 0 0;max-width:640px;}
+  .fuente{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;}
+  .fuente::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--info);box-shadow:0 0 7px 1px rgba(38,182,217,.7);}
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px;}
+  .kpi{background:linear-gradient(160deg,var(--panel) 0%,var(--panel-2) 135%);border:1px solid var(--line);border-radius:11px;padding:14px 15px;box-shadow:0 1px 2px rgba(0,0,0,.25),0 10px 22px -14px rgba(0,0,0,.55);}
+  .kpi.hero{border-color:var(--brand-line);background:linear-gradient(135deg,var(--brand-dim) 0%,var(--panel) 60%,var(--panel-2) 130%);border-top:3px solid var(--brand);}
+  .kpi .kl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .kpi .kv{font-size:25px;font-weight:800;letter-spacing:-.025em;line-height:1.05;color:#fff;margin-top:6px;}
+  .kpi .kd{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:3px;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 18px;}
+  .panel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+  .panel h3{font-size:15px;font-weight:800;margin:0;}
+  .panel .psub{font-size:11.5px;color:var(--muted);margin:3px 0 0;}
+  .search{position:relative;}
+  .search input{appearance:none;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--text);font:inherit;font-size:12.5px;padding:8px 12px 8px 30px;width:220px;max-width:52vw;transition:.15s;}
+  .search input:focus{outline:none;border-color:var(--info);}
+  .search svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--muted-2);}
+  .tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap;}
+  thead th{position:sticky;top:0;z-index:2;text-align:right;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding:11px 13px;background:var(--panel-2);border-bottom:1px solid var(--line);cursor:pointer;user-select:none;transition:color .12s;}
+  thead th:first-child{text-align:left;}
+  thead th:hover{color:var(--text);}
+  thead th .ar{opacity:0;margin-left:4px;font-size:9px;}
+  thead th.sorted{color:#fff;} thead th.sorted .ar{opacity:1;color:var(--info);}
+  tbody td{padding:9px 13px;border-bottom:1px solid var(--line);text-align:right;}
+  tbody td:first-child{text-align:left;color:var(--text);font-weight:600;white-space:normal;min-width:180px;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover td{background:rgba(255,255,255,.025);}
+  .dpos{color:var(--good);font-weight:700;} .dneg{color:var(--bad);font-weight:700;} .zero{color:var(--muted-2);}
+  .remon{color:var(--amber);font-weight:700;font-size:11.5px;}
+  .barcell{position:relative;}
+  .barfill{position:absolute;left:0;top:3px;bottom:3px;background:linear-gradient(90deg,rgba(38,182,217,.28),rgba(38,182,217,.08));border-radius:4px;z-index:0;}
+  .barval{position:relative;z-index:1;font-weight:800;color:#fff;}
+  tr.total td{border-top:2px solid var(--line-2);background:var(--panel-3);font-weight:800;color:#fff;font-size:12.5px;position:sticky;bottom:0;}
+  tr.total .barfill{display:none;}
+  .empty-row td{text-align:center;color:var(--muted);padding:18px;}
+  .pie{margin-top:16px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
+  @media(max-width:1000px){ .kpis{grid-template-columns:repeat(3,1fr);} }
+  @media(max-width:640px){ .kpis{grid-template-columns:repeat(2,1fr);} }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <p class="overline">Offal · Fábrica de Hielo</p>
+      <h1>Monitoreo de Barras</h1>
+      <p class="sub">Barras de hielo por proveedor de tambores: estimadas vs. usadas, promedio por tambor y costo por kilo.</p>
+    </div>
+    <span class="fuente">Datos reales · última consulta</span>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h3>Detalle por proveedor</h3>
+        <p class="psub" id="tsub"></p>
+      </div>
+      <div class="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="q" type="search" placeholder="Buscar proveedor…" autocomplete="off">
+      </div>
+    </div>
+    <div class="tscroll"><table id="tabla"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    <p class="pie">Fuente: <b>NUEVO MONITOREO DE BARRAS.xlsx</b> (SharePoint · Gerencia de Operaciones / Fábrica de Hielo). <b>Dif. barras</b> = Barras estimadas − Barras usadas. <b>Prom.</b> = barras por tambor (estimado vs. enviado). Clic en una columna para ordenar.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  const DATA=[{"prov":"Agroindustrias S.A","kilos":58815,"viajes":7,"tachosEnv":521,"barrasEst":679,"barrasEnv":775,"barrasUsadas":725,"difBarras":-46,"promEst":1.6,"promEnv":1.39,"costoKg":50.07,"remont":false,"enfriar":50,"stockAnt":0,"stock":0},{"prov":"Arre Beef S.A","kilos":130156,"viajes":10,"tachosEnv":934,"barrasEst":1502,"barrasEnv":1640,"barrasUsadas":1402,"difBarras":100,"promEst":1.4,"promEnv":1.5,"costoKg":47.88,"remont":false,"enfriar":176,"stockAnt":0,"stock":0},{"prov":"Black Bamboo Enterprises S.A","kilos":70227,"viajes":5,"tachosEnv":506,"barrasEst":810,"barrasEnv":1110,"barrasUsadas":950,"difBarras":-140,"promEst":1.76,"promEnv":1.88,"costoKg":60.06,"remont":false,"enfriar":160,"stockAnt":0,"stock":0},{"prov":"Carnes Pampeanas S.A","kilos":83224,"viajes":4,"tachosEnv":502,"barrasEst":960,"barrasEnv":940,"barrasUsadas":840,"difBarras":120,"promEst":1.31,"promEnv":1.67,"costoKg":42.92,"remont":true,"enfriar":44,"stockAnt":144,"stock":200},{"prov":"Compañia Bernal S.A","kilos":129186,"viajes":15,"tachosEnv":1130,"barrasEst":1491,"barrasEnv":1850,"barrasUsadas":2005,"difBarras":-514,"promEst":2.02,"promEnv":1.77,"costoKg":54.42,"remont":false,"enfriar":60,"stockAnt":259,"stock":44},{"prov":"Ecocarnes S.A","kilos":95875,"viajes":8,"tachosEnv":900,"barrasEst":1106,"barrasEnv":1485,"barrasUsadas":1605,"difBarras":-499,"promEst":2.18,"promEnv":1.78,"costoKg":58.86,"remont":false,"enfriar":208,"stockAnt":328,"stock":null},{"prov":"EPC-CARCARAÑA","kilos":67475,"viajes":5,"tachosEnv":500,"barrasEst":779,"barrasEnv":810,"barrasUsadas":700,"difBarras":79,"promEst":1.35,"promEnv":1.4,"costoKg":45.62,"remont":false,"enfriar":45,"stockAnt":180,"stock":240},{"prov":"FRIAR S,A 1970","kilos":71331,"viajes":6,"tachosEnv":564,"barrasEst":823,"barrasEnv":1160,"barrasUsadas":829,"difBarras":-6,"promEst":1.51,"promEnv":1.47,"costoKg":61.8,"remont":false,"enfriar":0,"stockAnt":45,"stock":376},{"prov":"FRIAR S.A 249","kilos":67572,"viajes":4,"tachosEnv":467,"barrasEst":780,"barrasEnv":765,"barrasUsadas":541,"difBarras":239,"promEst":1.04,"promEnv":1.16,"costoKg":43.02,"remont":true,"enfriar":113,"stockAnt":336,"stock":383},{"prov":"Frigorifico Bermejo S.A","kilos":86170,"viajes":6,"tachosEnv":600,"barrasEst":994,"barrasEnv":1780,"barrasUsadas":1416,"difBarras":-422,"promEst":2.14,"promEnv":2.36,"costoKg":78.5,"remont":true,"enfriar":480,"stockAnt":176,"stock":60},{"prov":"Frigorifico Frigolar S.A","kilos":129255,"viajes":10,"tachosEnv":930,"barrasEst":1491,"barrasEnv":1325,"barrasUsadas":1219,"difBarras":272,"promEst":1.23,"promEnv":1.31,"costoKg":38.95,"remont":false,"enfriar":100,"stockAnt":0,"stock":0},{"prov":"Frigorifico Gorina S.A.I.C","kilos":210612,"viajes":20,"tachosEnv":1698,"barrasEst":2430,"barrasEnv":2430,"barrasUsadas":2368,"difBarras":62,"promEst":1.46,"promEnv":1.39,"costoKg":43.84,"remont":false,"enfriar":62,"stockAnt":0,"stock":0},{"prov":"FRIGORIFICO GRAL PICO S.A.","kilos":73867,"viajes":5,"tachosEnv":648,"barrasEst":852,"barrasEnv":1125,"barrasUsadas":998,"difBarras":-146,"promEst":1.76,"promEnv":1.54,"costoKg":57.87,"remont":false,"enfriar":127,"stockAnt":0,"stock":0},{"prov":"Frigorifico Gral. Deheza S.A","kilos":64658,"viajes":5,"tachosEnv":633,"barrasEst":746,"barrasEnv":1125,"barrasUsadas":762,"difBarras":-16,"promEst":1.53,"promEnv":1.2,"costoKg":66.12,"remont":false,"enfriar":205,"stockAnt":0,"stock":158},{"prov":"Frigorifico Rioplatense SAICIF","kilos":341929,"viajes":24,"tachosEnv":2395,"barrasEst":3945,"barrasEnv":3150,"barrasUsadas":2954,"difBarras":991,"promEst":1.12,"promEnv":1.23,"costoKg":35.01,"remont":false,"enfriar":80,"stockAnt":0,"stock":0},{"prov":"Ganadera San Roque S.A.","kilos":40894,"viajes":5,"tachosEnv":380,"barrasEst":472,"barrasEnv":460,"barrasUsadas":419,"difBarras":53,"promEst":1.33,"promEnv":1.1,"costoKg":42.74,"remont":false,"enfriar":20,"stockAnt":0,"stock":0},{"prov":"Jorge L. Tolosa S.A","kilos":46734,"viajes":5,"tachosEnv":483,"barrasEst":539,"barrasEnv":720,"barrasUsadas":620,"difBarras":-81,"promEst":1.72,"promEnv":1.28,"costoKg":58.54,"remont":false,"enfriar":100,"stockAnt":0,"stock":0},{"prov":"Mat. Y Frig. Federal S.A","kilos":89792,"viajes":10,"tachosEnv":668,"barrasEst":1036,"barrasEnv":1055,"barrasUsadas":838,"difBarras":198,"promEst":1.21,"promEnv":1.25,"costoKg":44.65,"remont":false,"enfriar":140,"stockAnt":0,"stock":0},{"prov":"MATTIEVICH S.A.-ARROYO SECO","kilos":38686,"viajes":3,"tachosEnv":300,"barrasEst":446,"barrasEnv":495,"barrasUsadas":375,"difBarras":71,"promEst":1.26,"promEnv":1.25,"costoKg":48.62,"remont":false,"enfriar":120,"stockAnt":0,"stock":0},{"prov":"Procesadora Ganadera Entrerriana S.A","kilos":90758,"viajes":5,"tachosEnv":500,"barrasEst":1047,"barrasEnv":850,"barrasUsadas":670,"difBarras":377,"promEst":0.96,"promEnv":1.34,"costoKg":35.59,"remont":true,"enfriar":100,"stockAnt":20,"stock":100},{"prov":"Runfo S.A","kilos":141925,"viajes":12,"tachosEnv":1018,"barrasEst":1638,"barrasEnv":1720,"barrasUsadas":1355,"difBarras":283,"promEst":1.24,"promEnv":1.33,"costoKg":46.05,"remont":false,"enfriar":125,"stockAnt":0,"stock":0},{"prov":"TRESNAL S.A.","kilos":44896,"viajes":7,"tachosEnv":470,"barrasEst":518,"barrasEnv":630,"barrasUsadas":571,"difBarras":-53,"promEst":1.65,"promEnv":1.21,"costoKg":48.33,"remont":false,"enfriar":0,"stockAnt":0,"stock":0},{"prov":"Velsud S.A","kilos":49293,"viajes":8,"tachosEnv":492,"barrasEst":569,"barrasEnv":850,"barrasUsadas":679,"difBarras":-110,"promEst":1.79,"promEnv":1.38,"costoKg":52.34,"remont":false,"enfriar":50,"stockAnt":0,"stock":0}];
+  const TOTAL={"kilos":2223330,"tachosEnv":17239,"barrasEst":25654,"barrasEnv":28250,"barrasUsadas":24841,"difBarras":813,"promEst":1.45,"promEnv":1.44,"enfriar":2565,"stockAnt":null,"stock":1561};
+
+  const nf=new Intl.NumberFormat('es-AR');
+  const dec=v=> v==null?'':v.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const COLS=[
+    {k:'prov',        lbl:'Proveedor', txt:true},
+    {k:'kilos',       lbl:'Kilos',       fmt:'num'},
+    {k:'barrasEst',   lbl:'Barras est.', fmt:'num'},
+    {k:'barrasEnv',   lbl:'Barras env.', fmt:'num', bar:true},
+    {k:'barrasUsadas',lbl:'Usadas',      fmt:'num'},
+    {k:'difBarras',   lbl:'Dif. barras', fmt:'delta'},
+    {k:'promEst',     lbl:'Prom. est.',  fmt:'dec'},
+    {k:'promEnv',     lbl:'Prom. env.',  fmt:'dec'},
+    {k:'costoKg',     lbl:'$/Kg',        fmt:'money'},
+    {k:'remont',      lbl:'Remontada',   fmt:'bool'},
+    {k:'enfriar',     lbl:'Enfriar',     fmt:'num'},
+    {k:'stockAnt',    lbl:'Stock ant.',  fmt:'num'},
+    {k:'stock',       lbl:'Stock',       fmt:'num'},
+  ];
+
+  let sortKey='barrasEnv', sortDir=-1, filtro='';
+
+  function renderKpis(){
+    const t=TOTAL;
+    const cards=[
+      {hero:true,l:'Barras enviadas',v:nf.format(t.barrasEnv),d:DATA.length+' proveedores'},
+      {l:'Barras usadas',v:nf.format(t.barrasUsadas),d:'Barras de hielo consumidas'},
+      {l:'Barras estimadas',v:nf.format(t.barrasEst),d:'Según kilos recibidos'},
+      {l:'Dif. barras',v:(t.difBarras>0?'+':'')+nf.format(t.difBarras),d:'Estimadas − usadas'},
+      {l:'Prom. enviado',v:dec(t.promEnv),d:'Barras por tambor'},
+      {l:'Kilos totales',v:nf.format(t.kilos),d:'Recibidos en la consulta'},
+    ];
+    document.getElementById('kpis').innerHTML=cards.map(c=>
+      '<div class="kpi'+(c.hero?' hero':'')+'"><div class="kl">'+c.l+'</div><div class="kv">'+c.v+'</div><div class="kd">'+c.d+'</div></div>').join('');
+  }
+
+  function renderHead(){
+    document.getElementById('thead').innerHTML='<tr>'+COLS.map(c=>{
+      const on=c.k===sortKey, ar=on?(sortDir<0?'▼':'▲'):'';
+      return '<th data-k="'+c.k+'" class="'+(on?'sorted':'')+'">'+c.lbl+'<span class="ar">'+ar+'</span></th>';
+    }).join('')+'</tr>';
+    document.querySelectorAll('#thead th').forEach(th=>th.onclick=()=>{
+      const k=th.dataset.k;
+      if(k===sortKey){ sortDir=-sortDir; } else { sortKey=k; sortDir=(k==='prov')?1:-1; }
+      render();
+    });
+  }
+
+  function fmtCell(c,row){
+    const v=row[c.k];
+    if(c.fmt==='num'){ if(v==null) return '<span class="zero">—</span>'; return v===0?'<span class="zero">0</span>':nf.format(v); }
+    if(c.fmt==='dec') return dec(v);
+    if(c.fmt==='money') return '$ '+dec(v);
+    if(c.fmt==='bool') return v?'<span class="remon">● Sí</span>':'<span class="zero">—</span>';
+    if(c.fmt==='delta'){ const cls=v>0?'dpos':v<0?'dneg':'zero'; const ar=v>0?'▲ +':v<0?'▼ ':''; return '<span class="'+cls+'">'+ar+nf.format(v)+'</span>'; }
+    return v;
+  }
+
+  function renderBody(){
+    let rows=DATA.slice();
+    if(filtro){ const q=filtro.toLowerCase(); rows=rows.filter(r=>r.prov.toLowerCase().includes(q)); }
+    rows.sort((a,b)=> sortKey==='prov' ? sortDir*a.prov.localeCompare(b.prov,'es') : sortDir*((a[sortKey]??0)-(b[sortKey]??0)));
+    const maxBar=Math.max(1,...DATA.map(r=>r.barrasEnv));
+    const body=rows.map(r=>{
+      return '<tr>'+COLS.map(c=>{
+        if(c.bar){ const bw=Math.max(0,r[c.k])/maxBar*100; return '<td class="barcell"><span class="barfill" style="width:'+bw.toFixed(1)+'%"></span><span class="barval">'+nf.format(r[c.k])+'</span></td>'; }
+        return '<td'+(c.txt?'':'')+'>'+fmtCell(c,r)+'</td>';
+      }).join('')+'</tr>';
+    }).join('') || '<tr class="empty-row"><td colspan="'+COLS.length+'">Sin resultados para "'+filtro+'".</td></tr>';
+    const t=TOTAL;
+    const totalRow='<tr class="total">'+COLS.map(c=>{
+      if(c.k==='prov') return '<td>TOTALES</td>';
+      if(c.k==='costoKg') return '<td>—</td>';
+      if(c.fmt==='bool') return '<td>—</td>';
+      if(c.fmt==='dec') return '<td>'+dec(t[c.k])+'</td>';
+      if(c.fmt==='delta'){ const v=t[c.k]; const cls=v>0?'dpos':v<0?'dneg':''; return '<td class="'+cls+'">'+(v>0?'+':'')+nf.format(v)+'</td>'; }
+      return '<td>'+(t[c.k]==null?'—':nf.format(t[c.k]))+'</td>';
+    }).join('')+'</tr>';
+    document.getElementById('tbody').innerHTML=body+totalRow;
+  }
+
+  function render(){
+    document.getElementById('tsub').textContent=DATA.length+' proveedores · clic en una columna para ordenar.';
+    renderKpis(); renderHead(); renderBody();
+    if(window.parent!==window) setTimeout(postAlto,30);
+  }
+
+  document.getElementById('q').addEventListener('input',e=>{ filtro=e.target.value.trim(); renderBody(); if(window.parent!==window)setTimeout(postAlto,30); });
+
+  render();
+
+  function postAlto(){ try{ parent.postMessage({tipo:'matriz-alto',alto:document.body.scrollHeight},'*'); }catch(e){} }
+  if(window.parent!==window){ postAlto(); window.addEventListener('resize',postAlto); new MutationObserver(postAlto).observe(document.body,{subtree:true,childList:true}); }
+})();
+</script>

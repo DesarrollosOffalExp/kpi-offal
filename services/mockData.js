@@ -22,6 +22,8 @@ const PROD_HIST = [131151, 104523, 108596, 124286, 125108, 105281, 100126];
 
 const INSUMOS = {
   key: 'insumos', nombre: 'Insumos', estado: 'ok', objetivoPendiente: true,
+  // Cuadro de KPIs asignados (hoja "Insumos" del archivo KPI Gerencia de Operaciones 2026).
+  objetivos: {"persona":"Luis Ramos","total":3,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"REDUCIR EL WORKING CAPITAL INMOVILIZADO UN 10 %","kpi":"CANTIDAD DE MATERIALES OBSOLETOS A ENERO 2026 VS DICIEMBRE 2026","area":"Insumos","meta":"3%","vals":["31%","","","","2%","1%",""]},{"n":"2","objetivo":"REDUCIR EL WORKING CAPITAL INMOVILIZADO UN 10 %","kpi":"CANTIDAD DE MATERIALES CON SOBRESTOCK ENERO 2026 VS DICIEMBRE 2026","area":"Insumos","meta":"20%","vals":["34%","","","","17%","18%",""]},{"n":"3","objetivo":"REDUCIR EL WORKING CAPITAL INMOVILIZADO UN 10 %","kpi":"DIAS DE STOCK DE INSUMOS PRODUCTIVOS ENERO 2025 VS DICIEMBRE 2026","area":"Insumos","meta":"20%","vals":["30%","","","","27%","27%",""]},{"n":"4","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Insumos","meta":"","vals":["","","","","","",""]}],"promedio":null},
   kpis: [
     // Sección Productividad (principal: armado de cajas + cerramiento por Bestpack).
     { id: 'productividad', grupo: 'Productividad', titulo: 'Productividad de armado de cajas', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100,
@@ -47,13 +49,18 @@ const INSUMOS = {
       periodos: PROD_HIST_SEM, series: [{ nombre: 'Producción', datos: PROD_HIST }] },
     { tipo: 'line', grupo: 'Eficiencia de materiales', titulo: 'Eficiencia mensual', info: 'Recepción vs. entrega de materiales, mes a mes.',
       periodos: MESES, series: [{ nombre: 'Recepción', datos: RECEPCION }, { nombre: 'Entrega', datos: ENTREGA }] },
+    // Presupuesto (embebido; PresupuestoInsumos.jsx). Solo registra el grupo/subtab, va
+    // último para que Presupuesto y Objetivo queden como los dos últimos de la ventana.
+    { tipo: 'tabla', grupo: 'Presupuesto', titulo: 'Presupuesto', info: 'Presupuestado vs. gasto real por grupo de costo, mes a mes (Insumos).', columnas: [], filas: [] },
   ],
 };
 
 // COMPRAS: foto de la última semana cargada (Semana 31). Valores tomados de la
 // fila de la semana 31, columnas A→R de la hoja COMPRAS.
 const COMPRAS = {
-  key: 'compras', nombre: 'Compras', estado: 'ok', periodo: 'Semana 31', objetivoPendiente: true,
+  key: 'compras', nombre: 'Compras', estado: 'ok', objetivoPendiente: true,
+  // Cuadro de KPIs asignados (hoja "Compras" del archivo KPI Gerencia de Operaciones 2026).
+  objetivos: {"persona":"Juan Retamero","total":5,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"Mejorar un 10% el costo por tonelada mediante la mejora de costos de compras","kpi":"SE DEBE SACAR EL INFORME \"IMFORME DE PRECIOS PROMEDIO PONDERADO\" (ES EL UNICO QUE ENCONTRAMOS QUE TIRABA LOS PRECIOS DE LOS MATERIALES) MES A MES Y SE LO DEBE CALCULAR CON LA INFLACION MENSUAL.","area":"Compras","meta":"4%","vals":["-6%","-5%","-4%","-6%","-2%","",""]},{"n":"2","objetivo":"","kpi":"INDICADOR DE NUEVOS PROVEEDORES EN EL PERIODO MEDIDO","area":"Compras","meta":"2%","vals":["","","","","3%","",""]},{"n":"3","objetivo":"","kpi":"LICITACIONES","area":"Compras","meta":"2%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"4","objetivo":"Asegurar el proyecto de transformación antes del fin del 1er semestre","kpi":"MATRIZ","area":"Compras","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"5","objetivo":"","kpi":"MATRIZ DE HABILIDADES","area":"Compras","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"6","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Compras","meta":"70%","vals":["","","","","","",""]}],"promedio":null},
   kpis: [
     // 1er conjunto: entender de dónde nace el total de pendientes.
     { id: 'pendientes', grupo: 'Pendientes y vencidos', titulo: 'Total Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 51,
@@ -80,19 +87,12 @@ const COMPRAS = {
       datos: [{ nombre: 'Por vencer', valor: 19 }, { nombre: 'En plazo', valor: 15 }, { nombre: 'Vencidas', valor: 17 }] },
     { tipo: 'bar', grupo: 'Actividad de la semana', titulo: 'Gestión de la semana', info: 'Flujo de requisiciones de la última semana: ingresadas, tratadas y las que quedaron.',
       datos: [{ nombre: 'Ingresadas', valor: 137 }, { nombre: 'Tratadas', valor: 97 }, { nombre: 'Sin tratar', valor: 32 }, { nombre: 'Rechazadas', valor: 1 }, { nombre: 'Anuladas', valor: 7 }] },
-    // 3er conjunto: vencidas por semana (tendencia). El "desglose por antigüedad"
-    // exacto que pidió gerencia necesita un dato adicional (ver notas).
-    { tipo: 'line', grupo: 'Vencidas por semana', titulo: 'Vencidas por semana', info: 'Requisiciones vencidas registradas cada semana (tendencia).',
-      periodos: ['S22', 'S23', 'S24', 'S25', 'S26', 'S27', 'S28', 'S29', 'S30', 'S31'],
-      series: [{ nombre: 'Vencidas', datos: [34, 43, 106, 102, 95, 26, 35, 15, 17, 17] }] },
-    { tipo: 'tabla', wrap: true, grupo: 'Vencidas por semana', titulo: 'Observaciones', info: 'Novedades significativas que carga Compras por semana (columna Observaciones).',
-      columnas: ['Semana', 'Observación'],
-      filas: [
-        ['S30', 'De las 3 nuevas que se vencieron, una es una reparación in situ; otra está a la espera de firma de Dirección por el importe. La restante es un repuesto que no se comercializa en el mercado local.'],
-        ['S29', 'Quedaron 173 REQ sin aprobar de la semana 29 (Req 33227 a 33473). Se redujo bien las Req de semanas anteriores sin procesar.'],
-        ['S28', 'De las REQ de Marel restan cotizar 12 ítems (81 ya vinculados a una OC). De las 13 vencidas nuevas, 8 ya están para hacer OC.'],
-        ['S27', 'Excluyendo las de Marel, solo hay 2 vencidas (rueda y disco para servidor, validando Jair). La semana entrante se emite la OC de Marel.'],
-      ] },
+    // Vencidas por semana: gráfico embebido (ComprasVencidas.jsx) con el desglose de la
+    // tabla A112 (composición de las vencidas por semana de origen). Solo registra el grupo/subtab.
+    { tipo: 'tabla', grupo: 'Vencidas por semana', titulo: 'Vencidas por semana', info: 'Desglose de cómo se componen las vencidas por semana de origen (hoja KPI · A112).', columnas: [], filas: [] },
+    // Presupuesto (embebido; PresupuestoCompras.jsx). Solo registra el grupo/subtab, va
+    // último para que Presupuesto y Objetivo queden como los dos últimos de la ventana.
+    { tipo: 'tabla', grupo: 'Presupuesto', titulo: 'Presupuesto', info: 'Presupuestado vs. gasto real por grupo de costo, mes a mes (Compras).', columnas: [], filas: [] },
   ],
 };
 
@@ -100,7 +100,14 @@ const COMPRAS = {
 // KPIs de la fila RESUMEN; gráficos de las filas diarias. Datos de la Semana 31.
 const HIELO = {
   key: 'fábrica-de-hielo', nombre: 'Fábrica de Hielo', estado: 'ok', periodo: 'Semana 31', objetivoPendiente: true,
+  // Cuadro de KPIs asignados (hoja "Fabrica de hielo" del archivo KPI Gerencia de Operaciones 2026).
+  objetivos: {"persona":"Juan Retamero","total":5,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"Capacidad de producción y consumo, junto y separado.","kpi":"HORAS TRABAJADAS VS PRODUCCION","area":"Fabrica de Hielo","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"2","objetivo":"Capacidad de producción y consumo, junto y separado.","kpi":"STOCK DE BARRAS, PALLETS DE MADERA Y PLASTICOS, SEGUIMIENTO POR FRIGORIFICO  DE DEUDA DE PALLETS.","area":"Fabrica de Hielo","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"3","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Fabrica de Hielo","meta":"70%","vals":["","","","","","",""]}],"promedio":null},
   kpis: [
+    // --- Movimiento de Pallets (tabla ejecutiva embebida; ver MovimientoPallets.jsx) ---
+    // Este KPI solo registra el grupo/subtab: App.jsx lo reemplaza por el dashboard
+    // embebido (MOVIMIENTO DE PALLETS.xlsx, una hoja por semana).
+    { id: 'mov_pallets', grupo: 'Movimiento de Pallets', titulo: 'Movimiento de Pallets', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 2102,
+      info: 'Deuda de pallets por frigorífico, semana a semana (enviados, recibidos y saldo sin devolver).' },
     // --- Productividad (principal: Hombre/Barra Día) ---
     { id: 'prod_dia', grupo: 'Productividad', titulo: 'Hombre / Barra Día', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 1278,
       info: 'Productividad principal: barras por persona en la semana (barras / personal). (FABRICA DE HIELO, resumen col. E)' },
@@ -112,23 +119,16 @@ const HIELO = {
       info: 'Consumo total de la semana. (resumen col. H)' },
     { id: 'horas', grupo: 'Productividad', titulo: 'Horas trabajadas', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 899,
       info: 'Horas de máquina trabajadas en la semana (total). (resumen col. F)' },
-    // --- Stock de pallets ---
-    { id: 'pallets_nd', grupo: 'Stock de pallets', titulo: 'Pallets no devueltos', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 2102,
-      desglose: [{ nombre: 'Enviados sem', valor: 313 }, { nombre: 'Recibidos sem', valor: 310 }],
-      info: 'Pallets entregados a frigoríficos que aún no fueron devueltos (deuda de pallets). Corresponde a la semana anterior (sem. 30). (FABRICA DE HIELO, STOCK FINAL col. E; Enviados col. C, Recibidos col. D)' },
-    // --- Monitoreo de barras (detalle por proveedor; sin totalizar) ---
-    { id: 'promedio', grupo: 'Monitoreo de barras', titulo: 'Promedio barras/tambor', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 1.63,
-      desglose: [{ nombre: 'Estimado', valor: 1.67 }, { nombre: 'Enviado', valor: 1.63 }],
-      info: 'Promedio de barras por tambor: estimado vs. enviado (los datos clave). El detalle por proveedor está en la tabla. (MONITOREO DE BARRAS, TOTALES)' },
-    // --- Presupuesto y Gastos (Gerencia de Operaciones; mensual, último mes = Junio) ---
-    { id: 'gasto_total', grupo: 'Presupuesto y Gastos', titulo: 'Gasto total del mes', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 108028584,
-      info: 'Gasto total del mes (Junio): material + servicios públicos + MO eventual + MO propia. (FABRICA DE HIELO, Presupuesto/Gastos, Total por Mes)' },
-    { id: 'costo_barra', grupo: 'Presupuesto y Gastos', titulo: 'Costo por barra', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 716,
-      info: 'Costo por barra de hielo del mes (Junio). Es el dato de tendencia. (Presupuesto/Gastos, Costo X Barra)' },
-    { id: 'prod_barras_mes', grupo: 'Presupuesto y Gastos', titulo: 'Producción de barras (mes)', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 150816,
-      info: 'Barras de hielo producidas en el mes (Junio). (Presupuesto/Gastos, Producción de barras)' },
-    { id: 'consumo_sal', grupo: 'Presupuesto y Gastos', titulo: 'Consumo de sal (mes)', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 111,
-      info: 'Consumo de sal del mes (Junio). (Presupuesto/Gastos, Consumo de Sal)' },
+    // --- Monitoreo de Barras (tabla ejecutiva embebida; ver MonitoreoBarras.jsx) ---
+    // Solo registra el grupo/subtab: App.jsx lo reemplaza por el dashboard embebido
+    // (NUEVO MONITOREO DE BARRAS.xlsx, detalle por proveedor de tambores).
+    { id: 'mon_barras', grupo: 'Monitoreo de Barras', titulo: 'Monitoreo de Barras', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 1.44,
+      info: 'Barras de hielo por proveedor: estimadas vs. usadas, promedio por tambor y costo por kilo.' },
+    // --- Presupuesto (tabla ejecutiva embebida; ver Presupuesto.jsx) ---
+    // Solo registra el grupo/subtab: App.jsx lo reemplaza por el dashboard embebido
+    // (PRESUPUESTO.xlsx: presupuestado vs. gasto real por grupo, mes a mes).
+    { id: 'presupuesto', grupo: 'Presupuesto', titulo: 'Presupuesto', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 112963549,
+      info: 'Presupuestado vs. gasto real por grupo de costo, mes a mes (Fábrica de Hielo).' },
   ],
   graficos: [
     { tipo: 'bar', grupo: 'Productividad', titulo: 'Hombre / Barra Día por día', info: 'Productividad (barras por persona) día a día de la semana. Dato principal.',
@@ -140,47 +140,6 @@ const HIELO = {
     { tipo: 'tabla', wrap: true, grupo: 'Productividad', titulo: 'Observaciones de la semana', info: 'Novedades cargadas día a día en la planilla (columna Observaciones).',
       columnas: ['Día', 'Fecha', 'Observación'],
       filas: [['Miércoles', '29/07', 'Quedaron sin sacar 20 perchas (400 barras) por problemas con la noria.']] },
-    { tipo: 'bar', grupo: 'Stock de pallets', horizontal: true, titulo: 'Pallets no devueltos por frigorífico', info: 'Frigoríficos con más pallets sin devolver (top 10, semana anterior).',
-      datos: [{ nombre: 'Congelados', valor: 363 }, { nombre: 'Supermercado', valor: 285 }, { nombre: 'Runfo', valor: 273 }, { nombre: 'Gorina', valor: 172 }, { nombre: 'Rioplat.', valor: 171 }, { nombre: 'Cordoba', valor: 111 }, { nombre: 'Frigolar', valor: 99 }, { nombre: 'Federal', valor: 90 }, { nombre: 'Cocarsa', valor: 88 }, { nombre: 'Faraon', valor: 86 }] },
-    { tipo: 'tabla', grupo: 'Monitoreo de barras', titulo: 'Monitoreo por proveedor', info: 'Detalle por proveedor (sin totalizar). Importante: promedio estimado vs. enviado y la diferencia de barras.',
-      columnas: ['Proveedor', 'Barras Est.', 'Dif. Barras', 'Enviadas', 'Usadas', 'Prom. Est.', 'Prom. Env.'],
-      filas: [
-        ['Agroindustrias', '597', '-127', '724', '655', '1,65', '1,45'], ['Arre Beef', '1.397', '-223', '1.620', '1.555', '1,23', '1,43'],
-        ['Black Bamboo', '860', '-330', '1.190', '1.190', '2,43', '2,43'], ['Carnes Pampeanas', '941', '46', '895', '895', '1,49', '1,63'],
-        ['Cía. Bernal', '1.633', '-1.002', '2.635', '2.635', '2,42', '2,07'], ['Ecocarnes', '1.317', '-213', '1.530', '1.528', '1,73', '1,70'],
-        ['EPC-Carcaraña', '630', '81', '549', '541', '1,38', '1,38'], ['FRIAR 1970', '5.553', '3.978', '1.575', '1.575', '3,58', '2,26'],
-        ['FRIAR 249', '787', '-113', '900', '832', '1,68', '1,68'], ['Bermejo', '1.060', '-1.150', '2.210', '2.210', '3,13', '3,12'],
-        ['Frigolar', '1.432', '25', '1.407', '1.407', '1,57', '1,50'], ['Gorina', '2.973', '576', '2.397', '2.397', '1,33', '1,30'],
-        ['Gral. Pico', '678', '-279', '957', '957', '3,19', '1,97'], ['Gral. Deheza', '537', '-240', '777', '777', '2,17', '1,34'],
-        ['Rioplatense', '3.194', '290', '2.904', '2.804', '1,06', '1,30'], ['San Roque', '502', '31', '471', '463', '1,38', '1,17'],
-        ['Tolosa', '912', '50', '862', '862', '0,99', '1,54'], ['Mat. Federal', '1.190', '111', '1.079', '1.047', '1,32', '1,27'],
-        ['Mattievich', '337', '-215', '552', '552', '2,45', '1,84'], ['Proc. Entrerriana', '813', '63', '750', '750', '1,88', '1,88'],
-        ['Runfo', '1.644', '-176', '1.820', '1.605', '1,61', '1,52'], ['Tresnal', '558', '-37', '595', '565', '1,52', '1,25'],
-        ['Velsud', '690', '-269', '959', '847', '1,84', '1,49'],
-        ['TOTALES', '-', '-', '29.358', '28.649', '1,67', '1,63'],
-      ] },
-    { tipo: 'line', grupo: 'Monitoreo de barras', titulo: 'Promedio barras/tambor por semana', info: 'Evolutivo del promedio (barras por tambor), semana a semana. (Promedios históricos)',
-      periodos: Array.from({ length: 29 }, (_, i) => 'S' + (i + 1)),
-      series: [{ nombre: 'Promedio', datos: [2.12, 1.94, 1.94, 1.87, 1.9, 1.87, 1.86, 1.91, 1.76, 1.81, 1.78, 1.84, 1.81, 1.86, 1.86, 1.78, 1.72, 1.67, 1.59, 1.7, 1.68, 1.7, 1.7, 1.66, 1.69, 2.01, 1.83, 1.97, 2.12] }] },
-    // Presupuesto y Gastos: tabla completa (todos los grupos, mes a mes · sin descartar nada).
-    { tipo: 'tabla', grupo: 'Presupuesto y Gastos', titulo: 'Presupuesto / Gastos (mes a mes)', info: 'Gastos por grupo, producción y costo por barra, mes a mes. (Gerencia de Operaciones · Fábrica de Hielo)',
-      columnas: ['Grupo', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-      filas: [
-        ['Material', '$ -', '$ 263.339', '$ 5.389.999', '$ 8.675.932', '$ 8.004.591', '$ 3.647.721'],
-        ['Servicios', '$ -', '$ -', '$ -', '$ -', '$ -', '$ -'],
-        ['Fletes', '$ -', '$ -', '$ -', '$ -', '$ -', '$ -'],
-        ['Servicios Públicos', '$ -', '$ 82.027.141', '$ 66.546.261', '$ 60.097.560', '$ 38.475.218', '$ 38.475.218'],
-        ['MO Eventual', '$ 34.814.039', '$ 26.267.112', '$ 26.399.507', '$ 23.606.886', '$ 24.284.809', '$ 26.857.927'],
-        ['MO Propia', '$ -', '$ 27.171.616', '$ 26.417.910', '$ 33.325.655', '$ 34.722.263', '$ 39.047.718'],
-        ['TOTAL POR MES', '$ 34.814.039', '$ 135.729.208', '$ 124.753.677', '$ 125.706.034', '$ 105.486.881', '$ 108.028.584'],
-        ['Producción de barras', '165.680', '146.795', '146.500', '130.740', '143.785', '150.816'],
-        ['Costo x Barra', '$ 210', '$ 925', '$ 852', '$ 961', '$ 734', '$ 716'],
-        ['Consumo de Sal', '208', '143', '212', '169', '104', '111'],
-      ] },
-    { tipo: 'line', grupo: 'Presupuesto y Gastos', titulo: 'Costo por barra mensual', info: 'Tendencia del costo por barra de hielo, mes a mes ($).',
-      periodos: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'], series: [{ nombre: 'Costo x barra', datos: [210, 925, 852, 961, 734, 716] }] },
-    { tipo: 'bar', grupo: 'Presupuesto y Gastos', titulo: 'Gastos por grupo (Junio)', info: 'Composición del gasto del mes por grupo.',
-      datos: [{ nombre: 'MO Propia', valor: 39047718 }, { nombre: 'Serv. Púb.', valor: 38475218 }, { nombre: 'MO Eventual', valor: 26857927 }, { nombre: 'Material', valor: 3647721 }] },
   ],
 };
 
@@ -206,14 +165,16 @@ const SISTEMAS = {
 };
 
 // LOGÍSTICA: hoja con muchos bloques distintos (períodos mixtos) → sub-pestañas.
-const G = { costo: 'Matriz de Costo · Junio', flota: 'Disponibilidad de Flota · Sem 30',
-  lavado: 'Lavado de Camiones · Sem 30', tambores: 'Cuenta de Tambores · Sem 31',
-  gasoil: 'Consumo de Gasoil · Sem 31', frig: 'Costo por Frigorífico · Sem 31', hiel: 'Stock de Hiel · Julio' };
+const G = { costo: 'Matriz de Costo · Junio', flota: 'Disponibilidad de Flota',
+  lavado: 'Lavado de Camiones · Sem 30', tambores: 'Necesidad de Tambores',
+  gasoil: 'Consumo de Gasoil', frig: 'Costo por Frigorífico', hiel: 'Stock de Hiel' };
 // Rendimiento KG/LT semana a semana (S1–S31) para el histórico de gasoil.
 const KGLT = [9.07, 6.19, 6.38, 6.79, 5.71, 3.75, 4.12, 5.15, 6.17, 6.30, 5.89, 6.31, 6.29, 7.90, 5.48, 6.11, 6.09, 5.16, 6.63, 6.11, 5.52, 5.66, 5.71, 6.16, 4.63, 5.32, 6.84, 6.61, 6.59, 6.67, 6.21];
 const SALDO_HIEL = [1369, 1369, 3592, 3592, 3592, 6138, 3325, 4080, 4080, 4080, 5633, 5633, 9106, 6428, 3123, 3123, 4717, 4717, 4717, 6696, 4003, 5084, 2842, 4428, 4428, 4428, 5794, 2526, 3212, 4523, 1142];
 const LOGISTICA = {
   key: 'logística', nombre: 'Logística', estado: 'ok', objetivoPendiente: true,
+  // Cuadro de KPIs asignados (hoja "Logistica" del archivo KPI Gerencia de Operaciones 2026).
+  objetivos: {"persona":"Dario Pisano","total":2,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"Mejorar un 15% el costo por tonelada transportado (interno y externo)","kpi":"REEMPLAZAR LOS VIAJES DE COLGADO PARA HACER CON FLOTA PROPIA UNA VEZ REPARADOS LOS EQUIPOS DE FRIO.","area":"Logistica","meta":"","vals":["0%","0%","0%","0%","0%","",""]},{"n":"2","objetivo":"Mejorar un 15% el costo por tonelada transportado (interno y externo)","kpi":"PRESENTAREMOS ALTERNATIVAS PARA REALIZAR VIAJES CON FLOTA PROPIA EN RUTAS QUE PODAMOS CUMPLIR Y ELIMINAREMOS EL FLETE DE ESA RUTA.","area":"Logistica","meta":"","vals":["","","","","","",""]},{"n":"3","objetivo":"Mejorar un 15% el costo por tonelada transportado (interno y externo)","kpi":"SE TOMARAN LOS GASTOS DEL AÑO ANTERIOR MAS LA INFLACION DEL AÑO Y SE LO VA A COMPRARAR POR LO PAGADO AL TRANSPORTISTA.","area":"Logistica","meta":"","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"4","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Logistica","meta":"70","vals":["","","","","","",""]}],"promedio":null},
   kpis: [
     // Matriz de Costo (mensual, Junio) · datos-héroe del mes en curso.
     { id: 'costo_general', grupo: G.costo, titulo: 'Costo General del mes', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 1176272936, destacado: true,
@@ -374,6 +335,37 @@ const LOGISTICA = {
       ] },
     { tipo: 'line', grupo: G.hiel, titulo: 'Saldo de hiel diario (Julio)', info: 'Evolución del saldo de hiel día a día en el mes.',
       periodos: SALDO_HIEL.map((_, i) => String(i + 1)), series: [{ nombre: 'Saldo', datos: SALDO_HIEL }] },
+    // Presupuesto (tabla ejecutiva embebida; ver PresupuestoLogistica.jsx). Solo registra
+    // el grupo/subtab: App.jsx lo reemplaza por el dashboard embebido. Va último para que
+    // el orden termine en Presupuesto y luego Objetivo (los dos últimos de la ventana).
+    { tipo: 'tabla', grupo: 'Presupuesto', titulo: 'Presupuesto', info: 'Presupuestado vs. gasto real por grupo de costo, mes a mes (Logística).', columnas: [], filas: [] },
+  ],
+};
+
+// CONGELADO: por ahora con Presupuesto (embebido) y la ventana Objetivo preparada.
+const CONGELADO = {
+  key: 'congelado', nombre: 'Congelado', estado: 'ok', objetivoPendiente: true,
+  kpis: [],
+  graficos: [
+    // Presupuesto (embebido; PresupuestoCongelado.jsx). Registra el grupo/subtab; va
+    // antes de Objetivo, que queda preparado (placeholder) como último botón.
+    { tipo: 'tabla', grupo: 'Presupuesto', titulo: 'Presupuesto', info: 'Presupuestado vs. gasto real por grupo de costo, mes a mes (Congelado).', columnas: [], filas: [] },
+  ],
+};
+
+// TALLER y LAVADERO DE CAMIONES: sectores propios con Presupuesto (embebido) + Objetivo.
+const TALLER = {
+  key: 'taller', nombre: 'Taller', estado: 'ok', objetivoPendiente: false,
+  kpis: [],
+  graficos: [
+    { tipo: 'tabla', grupo: 'Presupuesto', titulo: 'Presupuesto', info: 'Presupuestado vs. gasto real por grupo de costo, mes a mes (Taller).', columnas: [], filas: [] },
+  ],
+};
+const LAVADERO = {
+  key: 'lavadero', nombre: 'Lavadero de Camiones', estado: 'ok', objetivoPendiente: false,
+  kpis: [],
+  graficos: [
+    { tipo: 'tabla', grupo: 'Presupuesto', titulo: 'Presupuesto', info: 'Presupuestado vs. gasto real por grupo de costo, mes a mes (Lavadero de Camiones).', columnas: [], filas: [] },
   ],
 };
 
@@ -381,7 +373,7 @@ function construirMock() {
   return {
     origen: 'mock',
     actualizado: new Date().toISOString(),
-    sectores: [INSUMOS, COMPRAS, HIELO, LOGISTICA, SISTEMAS],
+    sectores: [INSUMOS, COMPRAS, HIELO, LOGISTICA, SISTEMAS, CONGELADO, TALLER, LAVADERO],
   };
 }
 

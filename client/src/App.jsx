@@ -6,6 +6,25 @@ import SectorCharts from './components/SectorCharts';
 import Chart from './components/Chart';
 import Modal from './components/Modal';
 import MatrizCostoLogistica from './components/MatrizCostoLogistica';
+import MovimientoPallets from './components/MovimientoPallets';
+import MonitoreoBarras from './components/MonitoreoBarras';
+import Presupuesto from './components/Presupuesto';
+import PresupuestoLogistica from './components/PresupuestoLogistica';
+import PresupuestoInsumos from './components/PresupuestoInsumos';
+import PresupuestoCompras from './components/PresupuestoCompras';
+import ComprasPendientes from './components/ComprasPendientes';
+import ComprasActividad from './components/ComprasActividad';
+import ComprasVencidas from './components/ComprasVencidas';
+import PresupuestoCongelado from './components/PresupuestoCongelado';
+import PresupuestoTaller from './components/PresupuestoTaller';
+import PresupuestoLavadero from './components/PresupuestoLavadero';
+import DisponibilidadFlota from './components/DisponibilidadFlota';
+import NecesidadTambores from './components/NecesidadTambores';
+import CuadroObjetivos from './components/CuadroObjetivos';
+import ProductividadBarras from './components/ProductividadBarras';
+import StockHiel from './components/StockHiel';
+import ConsumoGasoil from './components/ConsumoGasoil';
+import CostoFrigorifico from './components/CostoFrigorifico';
 import KpiSistemas from './components/KpiSistemas';
 
 function formatearFecha(iso) {
@@ -162,6 +181,192 @@ export default function App() {
                   <div className="grupo" key={g}>
                     {!conSub && <h2 className="grupo-titulo">{g}</h2>}
                     <MatrizCostoLogistica />
+                  </div>
+                );
+              }
+              // Productividad (Fábrica de Hielo): dashboard embebido (productividad de barras).
+              const esProd = sector.key === 'fábrica-de-hielo' && g === 'Productividad';
+              if (esProd) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <ProductividadBarras />
+                  </div>
+                );
+              }
+              // Movimiento de Pallets (Fábrica de Hielo): tabla ejecutiva embebida.
+              const esMovPallets = sector.key === 'fábrica-de-hielo' && typeof g === 'string' && g.startsWith('Movimiento de Pallets');
+              if (esMovPallets) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <MovimientoPallets />
+                  </div>
+                );
+              }
+              // Monitoreo de Barras (Fábrica de Hielo): tabla ejecutiva embebida.
+              const esMonBarras = sector.key === 'fábrica-de-hielo' && typeof g === 'string' && g.startsWith('Monitoreo de Barras');
+              if (esMonBarras) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <MonitoreoBarras />
+                  </div>
+                );
+              }
+              // Presupuesto (Fábrica de Hielo): tabla ejecutiva embebida (presup. vs real).
+              const esPresupuesto = sector.key === 'fábrica-de-hielo' && typeof g === 'string' && g.startsWith('Presupuesto');
+              if (esPresupuesto) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <Presupuesto />
+                  </div>
+                );
+              }
+              // Consumo de Gasoil (Logística): dashboard embebido (semanal, lt/100km).
+              const esGasoil = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Consumo de Gasoil');
+              if (esGasoil) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <ConsumoGasoil />
+                  </div>
+                );
+              }
+              // Costo por Frigorífico (Logística): dashboard embebido ($ x Kg).
+              const esCostoFrig = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Costo por Frigorífico');
+              if (esCostoFrig) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <CostoFrigorifico />
+                  </div>
+                );
+              }
+              // Stock de Hiel (Logística): dashboard embebido (libro diario de stock).
+              const esStockHiel = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Stock de Hiel');
+              if (esStockHiel) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <StockHiel />
+                  </div>
+                );
+              }
+              // Necesidad de Tambores (Logística): dashboard embebido (real, por semana).
+              const esTambores = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Necesidad de Tambores');
+              if (esTambores) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <NecesidadTambores />
+                  </div>
+                );
+              }
+              // Disponibilidad de Flota (Logística): dashboard embebido (real, por semana).
+              const esFlota = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Disponibilidad de Flota');
+              if (esFlota) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <DisponibilidadFlota />
+                  </div>
+                );
+              }
+              // Presupuesto (Logística): tabla ejecutiva embebida (presup. vs real).
+              const esPresupLog = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Presupuesto');
+              if (esPresupLog) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <PresupuestoLogistica />
+                  </div>
+                );
+              }
+              // Presupuesto (Insumos / Compras): tabla ejecutiva embebida (presup. vs real).
+              const esPresupIns = sector.key === 'insumos' && typeof g === 'string' && g.startsWith('Presupuesto');
+              if (esPresupIns) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <PresupuestoInsumos />
+                  </div>
+                );
+              }
+              const esPresupCom = sector.key === 'compras' && typeof g === 'string' && g.startsWith('Presupuesto');
+              if (esPresupCom) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <PresupuestoCompras />
+                  </div>
+                );
+              }
+              // Compras · Pendientes y Vencidas: dashboard KPI embebido (hoja KPI, primera tabla).
+              const esComPend = sector.key === 'compras' && typeof g === 'string' && g.startsWith('Pendientes y vencid');
+              if (esComPend) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <ComprasPendientes />
+                  </div>
+                );
+              }
+              // Compras · Actividad de la semana: flujo de requisiciones + composición de pendientes.
+              const esComAct = sector.key === 'compras' && typeof g === 'string' && g.startsWith('Actividad de la semana');
+              if (esComAct) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <ComprasActividad />
+                  </div>
+                );
+              }
+              // Compras · Vencidas por semana: desglose de las vencidas por semana de origen (KPI · A112).
+              const esComVenc = sector.key === 'compras' && typeof g === 'string' && g.startsWith('Vencidas por semana');
+              if (esComVenc) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <ComprasVencidas />
+                  </div>
+                );
+              }
+              const esPresupCong = sector.key === 'congelado' && typeof g === 'string' && g.startsWith('Presupuesto');
+              if (esPresupCong) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <PresupuestoCongelado />
+                  </div>
+                );
+              }
+              const esPresupTal = sector.key === 'taller' && typeof g === 'string' && g.startsWith('Presupuesto');
+              if (esPresupTal) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <PresupuestoTaller />
+                  </div>
+                );
+              }
+              const esPresupLav = sector.key === 'lavadero' && typeof g === 'string' && g.startsWith('Presupuesto');
+              if (esPresupLav) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <PresupuestoLavadero />
+                  </div>
+                );
+              }
+              // Objetivo: cuadro de KPIs asignados del sector (hoja del archivo de objetivos).
+              const esObjetivo = g === 'Objetivo' && sector.objetivos;
+              if (esObjetivo) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <CuadroObjetivos data={sector.objetivos} />
                   </div>
                 );
               }

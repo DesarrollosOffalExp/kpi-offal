@@ -1,0 +1,174 @@
+<title>Vencidas por Semana</title>
+<style>
+  :root{
+    --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
+    --line:#23353f; --line-2:#2c414d;
+    --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
+    --brand:#e11f46; --brand-dim:rgba(225,31,70,.13); --brand-line:rgba(225,31,70,.45);
+    --info:#26b6d9; --info-dim:rgba(38,182,217,.14); --good:#22e39b; --bad:#ff4d67; --amber:#f5a623;
+    --radius:12px;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.4;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 40px;}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px;}
+  .overline{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--info);margin:0 0 5px;}
+  h1{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .sub{font-size:12.5px;color:var(--muted);margin:5px 0 0;max-width:640px;}
+  .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:9px;}
+  .fuente{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;}
+  .fuente::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--info);box-shadow:0 0 7px 1px rgba(38,182,217,.7);}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px;}
+  .kpi{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--panel) 0%,var(--panel-2) 135%);border:1px solid var(--line);border-radius:13px;padding:15px 16px;box-shadow:0 1px 2px rgba(0,0,0,.25),0 12px 26px -16px rgba(0,0,0,.6);}
+  .kpi.hero{border-color:var(--brand-line);background:linear-gradient(135deg,var(--brand-dim) 0%,var(--panel) 60%,var(--panel-2) 130%);border-top:3px solid var(--brand);}
+  .kpi .kl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .kpi .kv{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1;color:#fff;margin-top:8px;}
+  .kpi .kd{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:5px;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 20px;margin-bottom:16px;}
+  .panel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;}
+  .panel h3{font-size:15px;font-weight:800;margin:0;}
+  .panel .psub{font-size:11.5px;color:var(--muted);margin:2px 0 0;}
+  .chart{width:100%;}
+  .compbar{display:flex;width:100%;height:44px;border-radius:9px;overflow:hidden;border:1px solid var(--line);margin-top:4px;}
+  .compseg{position:relative;height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#0c1c26;cursor:pointer;transition:filter .12s ease;min-width:2px;}
+  .compseg:hover{filter:brightness(1.12);}
+  .leg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px 16px;margin-top:16px;}
+  .leg .li{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--muted);cursor:pointer;padding:5px 7px;border-radius:8px;transition:background .12s ease;}
+  .leg .li:hover{background:rgba(255,255,255,.03);}
+  .leg .li .sw{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+  .leg .li .lw{color:var(--text);font-weight:700;}
+  .leg .li b{color:var(--text);margin-left:auto;padding-left:12px;}
+  .leg .li .pc{color:var(--muted-2);font-weight:600;min-width:38px;text-align:right;}
+  .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:9px 12px;font-size:12.5px;line-height:1.55;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:260px;}
+  .tip.show{opacity:1;transform:none;}
+  .pie{margin-top:6px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
+  .scale-note{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted-2);margin-top:2px;}
+  .scale-bar{width:120px;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--amber),#e11f46,#8a0f2a);}
+  @media(max-width:820px){ .kpis{grid-template-columns:repeat(2,1fr);} }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <p class="overline">Offal · Compras</p>
+      <h1>Vencidas por Semana</h1>
+      <p class="sub">Cómo está armado el total de requisiciones vencidas: desglose por la <b>semana de origen</b> de cada requisición. Cuanto más antigua la semana, más crítica la demora.</p>
+    </div>
+    <div class="head-right"><span class="fuente" id="fuente">Datos reales · Archivo a trabajar (KPI · A112)</span></div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="panel">
+    <div class="panel-head"><div><h3>Desglose de las vencidas por semana de origen</h3><p class="psub">Cantidad de requisiciones vencidas según la semana en que ingresaron · pasá el mouse por cada barra.</p></div>
+      <div class="scale-note">nuevas<span class="scale-bar"></span>más antiguas</div></div>
+    <div class="chart" id="chart"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><div><h3>Composición del total</h3><p class="psub" id="compsub"></p></div></div>
+    <div class="compbar" id="compbar"></div>
+    <div class="leg" id="leg"></div>
+    <p class="pie">Fuente: <b>Archivo a trabajar.xlsx</b> (SharePoint · Compras), hoja <b>KPI</b> · tabla dinámica en <b>A112</b> (Estado = Aprobada/o). El total coincide con las vencidas de la última semana cargada.</p>
+  </section>
+</div>
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  const DATA = {"latestSem":32,"total":14,"weeks":[{"sem":17,"n":3},{"sem":18,"n":4},{"sem":23,"n":4},{"sem":30,"n":1},{"sem":31,"n":2}]};
+  const W = DATA.weeks.slice().sort((a,b)=>a.sem-b.sem);
+  const TOTAL = DATA.total, LATEST = DATA.latestSem;
+  const maxAge = Math.max.apply(null, W.map(w=>LATEST-w.sem));
+  const minAge = Math.min.apply(null, W.map(w=>LATEST-w.sem));
+
+  // ----- escala de color por antigüedad (nuevas=ámbar, viejas=rojo profundo) -----
+  function hx(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+  function lerp(a,b,t){return Math.round(a+(b-a)*t);}
+  const C0=hx('f5a623'), C1=hx('e11f46'), C2=hx('8a0f2a');
+  function colorFor(sem){
+    const age=LATEST-sem; let t = maxAge===minAge?0.5:(age-minAge)/(maxAge-minAge);
+    let a,b,tt;
+    if(t<0.5){ a=C0;b=C1;tt=t/0.5; } else { a=C1;b=C2;tt=(t-0.5)/0.5; }
+    return 'rgb('+lerp(a[0],b[0],tt)+','+lerp(a[1],b[1],tt)+','+lerp(a[2],b[2],tt)+')';
+  }
+
+  // ----- KPI tiles -----
+  const mx = Math.max.apply(null, W.map(w=>w.n));
+  const topWeeks = W.filter(w=>w.n===mx).map(w=>'S'+w.sem).join(' · ');
+  const oldest = W[0].sem, ageOld = LATEST-oldest;
+  const kpis=[
+    {l:'Total vencidas', v:TOTAL, d:'Requisiciones vencidas (última semana)', hero:true},
+    {l:'Semanas de origen', v:W.length, d:'Semanas distintas que aportan vencidas'},
+    {l:'Más antigua', v:'S'+oldest, d:ageOld+' semanas de demora'},
+    {l:'Máximo por semana', v:mx, d:topWeeks}
+  ];
+  document.getElementById('kpis').innerHTML = kpis.map(k=>
+    '<div class="kpi'+(k.hero?' hero':'')+'"><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kd">'+k.d+'</div></div>').join('');
+
+  // ----- tooltip -----
+  const tip=document.getElementById('tip');
+  function showTip(html,e){ tip.innerHTML=html; tip.classList.add('show'); moveTip(e); }
+  function moveTip(e){ let x=e.clientX+14, y=e.clientY+14; const w=tip.offsetWidth,h=tip.offsetHeight;
+    if(x+w>innerWidth-8)x=e.clientX-w-14; if(y+h>innerHeight-8)y=e.clientY-h-14; tip.style.left=x+'px'; tip.style.top=y+'px'; }
+  function hideTip(){ tip.classList.remove('show'); }
+
+  // ----- gráfico de barras verticales -----
+  function tipHtml(w){ const pct=(w.n/TOTAL*100); const age=LATEST-w.sem;
+    return '<b>Semana de origen '+w.sem+'</b>\n'+w.n+' vencida'+(w.n===1?'':'s')+' · '+pct.toFixed(1)+'% del total\nAntigüedad: '+age+' semana'+(age===1?'':'s'); }
+
+  function drawBars(){
+    const el=document.getElementById('chart');
+    const wpx=el.clientWidth||1000, H=320, padL=40, padR=16, padT=22, padB=42;
+    const iw=wpx-padL-padR, ih=H-padT-padB;
+    const n=W.length, slot=iw/n, bw=Math.min(74, slot*0.56);
+    const ymax=Math.max(mx,1); const nice=Math.ceil(ymax/1)*1;
+    const y=v=>padT+ih-(v/nice)*ih;
+    const cx=i=>padL+slot*i+slot/2;
+    let g='';
+    // gridlines
+    const steps=Math.min(nice,5); for(let s=0;s<=steps;s++){ const val=Math.round(nice*s/steps); const yy=y(val);
+      g+='<line x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(wpx-padR)+'" y2="'+yy.toFixed(1)+'" stroke="var(--line)" stroke-width="1" '+(s===0?'':'stroke-dasharray="3 4"')+'/>';
+      g+='<text x="'+(padL-8)+'" y="'+(yy+3.5).toFixed(1)+'" text-anchor="end" font-size="10" fill="var(--muted-2)">'+val+'</text>'; }
+    // barras
+    W.forEach((w,i)=>{ const bx=cx(i)-bw/2, by=y(w.n), bh=padT+ih-by; const col=colorFor(w.sem); const gid='bg'+i;
+      g+='<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+col+'" stop-opacity="1"/><stop offset="1" stop-color="'+col+'" stop-opacity=".62"/></linearGradient></defs>';
+      g+='<rect x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(bh,1).toFixed(1)+'" rx="6" fill="url(#'+gid+')" stroke="'+col+'" stroke-opacity=".5"/>';
+      g+='<text x="'+cx(i).toFixed(1)+'" y="'+(by-7).toFixed(1)+'" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">'+w.n+'</text>';
+      g+='<text x="'+cx(i).toFixed(1)+'" y="'+(padT+ih+18).toFixed(1)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--text)">Sem '+w.sem+'</text>';
+      g+='<text x="'+cx(i).toFixed(1)+'" y="'+(padT+ih+32).toFixed(1)+'" text-anchor="middle" font-size="9.5" fill="var(--muted-2)">'+(LATEST-w.sem)+' sem</text>';
+      // hover hit-area
+      g+='<rect x="'+(padL+slot*i).toFixed(1)+'" y="'+padT+'" width="'+slot.toFixed(1)+'" height="'+ih+'" fill="transparent" style="cursor:pointer" data-i="'+i+'"/>';
+    });
+    el.innerHTML='<svg viewBox="0 0 '+wpx+' '+H+'" width="100%" height="'+H+'" style="display:block">'+g+'</svg>';
+    el.querySelectorAll('rect[data-i]').forEach(r=>{ const w=W[+r.getAttribute('data-i')];
+      r.addEventListener('mouseenter',e=>showTip(tipHtml(w),e));
+      r.addEventListener('mousemove',moveTip); r.addEventListener('mouseleave',hideTip); });
+  }
+
+  // ----- barra de composición + leyenda -----
+  function drawComp(){
+    document.getElementById('compsub').textContent='Las '+TOTAL+' vencidas, repartidas por semana de origen (100%).';
+    const bar=document.getElementById('compbar'); bar.innerHTML='';
+    W.forEach(w=>{ const pct=w.n/TOTAL*100; const seg=document.createElement('div'); seg.className='compseg';
+      seg.style.width=pct+'%'; seg.style.background=colorFor(w.sem);
+      seg.textContent = pct>=9 ? ('S'+w.sem) : '';
+      seg.addEventListener('mouseenter',e=>showTip(tipHtml(w),e));
+      seg.addEventListener('mousemove',moveTip); seg.addEventListener('mouseleave',hideTip);
+      bar.appendChild(seg); });
+    const leg=document.getElementById('leg');
+    leg.innerHTML=W.map(w=>{ const pct=(w.n/TOTAL*100).toFixed(1);
+      return '<div class="li" data-sem="'+w.sem+'"><span class="sw" style="background:'+colorFor(w.sem)+'"></span><span class="lw">Semana '+w.sem+'</span><b>'+w.n+'</b><span class="pc">'+pct+'%</span></div>'; }).join('');
+    leg.querySelectorAll('.li').forEach(li=>{ const w=W.find(x=>x.sem===+li.getAttribute('data-sem'));
+      li.addEventListener('mouseenter',e=>showTip(tipHtml(w),e));
+      li.addEventListener('mousemove',moveTip); li.addEventListener('mouseleave',hideTip); });
+  }
+
+  function render(){ drawBars(); drawComp(); postH(); }
+  function postH(){ try{ parent.postMessage({tipo:'matriz-alto', alto:document.body.scrollHeight}, '*'); }catch(e){} }
+  render();
+  let rt; window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(render,120); });
+  window.addEventListener('load',postH);
+})();
+</script>

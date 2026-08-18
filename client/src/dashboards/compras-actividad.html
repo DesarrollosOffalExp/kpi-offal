@@ -1,0 +1,145 @@
+<title>Actividad de la Semana</title>
+<style>
+  :root{
+    --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
+    --line:#23353f; --line-2:#2c414d;
+    --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
+    --brand:#e11f46; --brand-dim:rgba(225,31,70,.13); --brand-line:rgba(225,31,70,.45);
+    --info:#26b6d9; --info-dim:rgba(38,182,217,.14); --good:#22e39b; --bad:#ff4d67; --amber:#f5a623;
+    --radius:12px;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.4;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 40px;}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px;}
+  .overline{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--info);margin:0 0 5px;}
+  h1{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .sub{font-size:12.5px;color:var(--muted);margin:5px 0 0;}
+  .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:9px;}
+  .fuente{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;}
+  .fuente::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--info);box-shadow:0 0 7px 1px rgba(38,182,217,.7);}
+  .filtro{display:flex;align-items:center;gap:8px;}
+  .filtro label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  select{appearance:none;background:var(--panel-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238ba0ab' stroke-width='3' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>") no-repeat right 10px center;border:1px solid var(--line);border-radius:8px;color:var(--text);font:inherit;font-size:13px;font-weight:600;padding:8px 30px 8px 12px;cursor:pointer;}
+  select:focus{outline:none;border-color:var(--info);}
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px;}
+  .kpi{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--panel) 0%,var(--panel-2) 135%);border:1px solid var(--line);border-radius:13px;padding:14px 15px;box-shadow:0 1px 2px rgba(0,0,0,.25),0 12px 26px -16px rgba(0,0,0,.6);}
+  .kpi.hero{border-color:var(--brand-line);background:linear-gradient(135deg,var(--brand-dim) 0%,var(--panel) 60%,var(--panel-2) 130%);border-top:3px solid var(--brand);}
+  .kpi .kl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;position:relative;z-index:1;}
+  .kpi .kv{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1;color:#fff;margin-top:7px;position:relative;z-index:1;}
+  .kpi .kd{font-size:11px;font-weight:600;color:var(--muted);margin-top:4px;position:relative;z-index:1;}
+  .kpi .kd .up{color:var(--good);} .kpi .kd .down{color:var(--bad);}
+  .kpi .spark{position:absolute;right:0;bottom:0;width:52%;height:44%;opacity:.45;}
+  .cols2{display:grid;grid-template-columns:1fr 1.25fr;gap:16px;} @media(max-width:900px){ .cols2{grid-template-columns:1fr;} .kpis{grid-template-columns:repeat(2,1fr);} }
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 18px;margin-bottom:16px;}
+  .panel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+  .panel h3{font-size:15px;font-weight:800;margin:0;}
+  .panel .psub{font-size:11.5px;color:var(--muted);margin:2px 0 0;}
+  .donut-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center;}
+  .leg{display:flex;flex-direction:column;gap:9px;font-size:12.5px;}
+  .leg .li{display:flex;align-items:center;gap:9px;color:var(--muted);} .leg .li .sw{width:12px;height:12px;border-radius:3px;flex-shrink:0;} .leg .li b{color:var(--text);margin-left:auto;padding-left:16px;}
+  .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:9px 12px;font-size:12.5px;line-height:1.55;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:280px;}
+  .tip.show{opacity:1;transform:none;}
+  .pie{margin-top:12px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <p class="overline">Offal · Compras</p>
+      <h1>Actividad de la Semana</h1>
+      <p class="sub">Flujo de requisiciones (hoja KPI). Tarjetas de la semana elegida; abajo la composición de pendientes y la evolución de vencidas.</p>
+    </div>
+    <div class="head-right"><span class="fuente">Datos reales · Archivo a trabajar (KPI)</span>
+      <div class="filtro"><label>Semana</label><select id="selSem"></select></div></div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <div class="cols2">
+    <section class="panel">
+      <div class="panel-head"><div><h3 id="comp-title">Composición de pendientes</h3><p class="psub" id="comp-sub"></p></div></div>
+      <div class="donut-wrap"><div id="donut"></div><div class="leg" id="leg"></div></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><h3>Vencidas por semana</h3><p class="psub">Total de requisiciones vencidas · clic para seleccionar la semana.</p></div></div>
+      <div id="chart-venc"></div>
+    </section>
+  </div>
+  <p class="pie">Fuente: <b>Archivo a trabajar.xlsx</b> (SharePoint · Compras), hoja <b>KPI</b>. <b>Pendientes</b> = Vencidas + Por vencer + En plazo.</p>
+</div>
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  const DATA = {"weeks":[{"sem":1,"antVenc":403,"antSinVenc":45,"reqSem":15,"tratadas":13,"rechazadas":1,"anuladas":1,"sinTratarSem":0,"totalSinTratar":448,"totalVenc":403,"vencNuevas":210,"vencViejas":193,"porVencer":5,"enPlazo":40,"totalPend":448,"urgentes":0,"totalTratadas":null,"obs":""},{"sem":2,"antVenc":201,"antSinVenc":45,"reqSem":119,"tratadas":113,"rechazadas":1,"anuladas":5,"sinTratarSem":0,"totalSinTratar":246,"totalVenc":201,"vencNuevas":4,"vencViejas":197,"porVencer":5,"enPlazo":44,"totalPend":452,"urgentes":0,"totalTratadas":null,"obs":""},{"sem":3,"antVenc":44,"antSinVenc":90,"reqSem":185,"tratadas":162,"rechazadas":7,"anuladas":9,"sinTratarSem":7,"totalSinTratar":141,"totalVenc":44,"vencNuevas":9,"vencViejas":35,"porVencer":30,"enPlazo":67,"totalPend":141,"urgentes":0,"totalTratadas":null,"obs":""},{"sem":4,"antVenc":46,"antSinVenc":90,"reqSem":176,"tratadas":84,"rechazadas":7,"anuladas":4,"sinTratarSem":81,"totalSinTratar":217,"totalVenc":46,"vencNuevas":2,"vencViejas":44,"porVencer":37,"enPlazo":134,"totalPend":217,"urgentes":0,"totalTratadas":null,"obs":""},{"sem":5,"antVenc":17,"antSinVenc":133,"reqSem":154,"tratadas":47,"rechazadas":1,"anuladas":4,"sinTratarSem":102,"totalSinTratar":252,"totalVenc":17,"vencNuevas":7,"vencViejas":10,"porVencer":65,"enPlazo":170,"totalPend":252,"urgentes":0,"totalTratadas":null,"obs":""},{"sem":6,"antVenc":37,"antSinVenc":48,"reqSem":110,"tratadas":71,"rechazadas":3,"anuladas":3,"sinTratarSem":33,"totalSinTratar":118,"totalVenc":37,"vencNuevas":6,"vencViejas":31,"porVencer":65,"enPlazo":16,"totalPend":118,"urgentes":2,"totalTratadas":null,"obs":""},{"sem":7,"antVenc":20,"antSinVenc":61,"reqSem":124,"tratadas":54,"rechazadas":5,"anuladas":4,"sinTratarSem":61,"totalSinTratar":142,"totalVenc":20,"vencNuevas":5,"vencViejas":15,"porVencer":15,"enPlazo":107,"totalPend":142,"urgentes":13,"totalTratadas":null,"obs":""},{"sem":8,"antVenc":14,"antSinVenc":7,"reqSem":133,"tratadas":81,"rechazadas":0,"anuladas":5,"sinTratarSem":47,"totalSinTratar":127,"totalVenc":14,"vencNuevas":0,"vencViejas":14,"porVencer":19,"enPlazo":94,"totalPend":127,"urgentes":2,"totalTratadas":null,"obs":""},{"sem":9,"antVenc":23,"antSinVenc":67,"reqSem":136,"tratadas":74,"rechazadas":0,"anuladas":4,"sinTratarSem":58,"totalSinTratar":148,"totalVenc":23,"vencNuevas":11,"vencViejas":12,"porVencer":44,"enPlazo":81,"totalPend":148,"urgentes":4,"totalTratadas":null,"obs":""},{"sem":10,"antVenc":11,"antSinVenc":57,"reqSem":149,"tratadas":95,"rechazadas":0,"anuladas":1,"sinTratarSem":53,"totalSinTratar":121,"totalVenc":11,"vencNuevas":7,"vencViejas":4,"porVencer":11,"enPlazo":99,"totalPend":121,"urgentes":6,"totalTratadas":null,"obs":""},{"sem":11,"antVenc":10,"antSinVenc":66,"reqSem":128,"tratadas":102,"rechazadas":22,"anuladas":2,"sinTratarSem":42,"totalSinTratar":118,"totalVenc":10,"vencNuevas":4,"vencViejas":6,"porVencer":29,"enPlazo":79,"totalPend":118,"urgentes":2,"totalTratadas":null,"obs":""},{"sem":12,"antVenc":27,"antSinVenc":52,"reqSem":203,"tratadas":149,"rechazadas":1,"anuladas":5,"sinTratarSem":48,"totalSinTratar":127,"totalVenc":27,"vencNuevas":22,"vencViejas":6,"porVencer":27,"enPlazo":73,"totalPend":121,"urgentes":0,"totalTratadas":null,"obs":""},{"sem":13,"antVenc":12,"antSinVenc":321,"reqSem":380,"tratadas":70,"rechazadas":1,"anuladas":3,"sinTratarSem":306,"totalSinTratar":639,"totalVenc":12,"vencNuevas":7,"vencViejas":5,"porVencer":194,"enPlazo":433,"totalPend":639,"urgentes":3,"totalTratadas":null,"obs":""},{"sem":14,"antVenc":16,"antSinVenc":245,"reqSem":38,"tratadas":9,"rechazadas":1,"anuladas":0,"sinTratarSem":28,"totalSinTratar":289,"totalVenc":16,"vencNuevas":9,"vencViejas":7,"porVencer":211,"enPlazo":62,"totalPend":289,"urgentes":1,"totalTratadas":null,"obs":""},{"sem":15,"antVenc":57,"antSinVenc":27,"reqSem":224,"tratadas":54,"rechazadas":4,"anuladas":3,"sinTratarSem":163,"totalSinTratar":247,"totalVenc":57,"vencNuevas":53,"vencViejas":4,"porVencer":84,"enPlazo":106,"totalPend":247,"urgentes":2,"totalTratadas":266,"obs":""},{"sem":16,"antVenc":51,"antSinVenc":55,"reqSem":196,"tratadas":38,"rechazadas":2,"anuladas":3,"sinTratarSem":153,"totalSinTratar":259,"totalVenc":51,"vencNuevas":36,"vencViejas":15,"porVencer":85,"enPlazo":123,"totalPend":259,"urgentes":0,"totalTratadas":184,"obs":""},{"sem":17,"antVenc":20,"antSinVenc":0,"reqSem":406,"tratadas":45,"rechazadas":0,"anuladas":1,"sinTratarSem":360,"totalSinTratar":394,"totalVenc":20,"vencNuevas":12,"vencViejas":8,"porVencer":300,"enPlazo":74,"totalPend":394,"urgentes":5,"totalTratadas":285,"obs":""},{"sem":18,"antVenc":20,"antSinVenc":14,"reqSem":249,"tratadas":75,"rechazadas":3,"anuladas":3,"sinTratarSem":168,"totalSinTratar":202,"totalVenc":20,"vencNuevas":11,"vencViejas":9,"porVencer":56,"enPlazo":126,"totalPend":202,"urgentes":1,"totalTratadas":441,"obs":""},{"sem":19,"antVenc":19,"antSinVenc":78,"reqSem":160,"tratadas":6,"rechazadas":2,"anuladas":2,"sinTratarSem":150,"totalSinTratar":247,"totalVenc":19,"vencNuevas":19,"vencViejas":0,"porVencer":121,"enPlazo":107,"totalPend":247,"urgentes":2,"totalTratadas":115,"obs":""},{"sem":20,"antVenc":19,"antSinVenc":2,"reqSem":178,"tratadas":59,"rechazadas":3,"anuladas":0,"sinTratarSem":116,"totalSinTratar":137,"totalVenc":19,"vencNuevas":13,"vencViejas":6,"porVencer":52,"enPlazo":66,"totalPend":137,"urgentes":1,"totalTratadas":288,"obs":""},{"sem":21,"antVenc":13,"antSinVenc":54,"reqSem":317,"tratadas":25,"rechazadas":1,"anuladas":3,"sinTratarSem":289,"totalSinTratar":356,"totalVenc":13,"vencNuevas":1,"vencViejas":12,"porVencer":122,"enPlazo":234,"totalPend":356,"urgentes":2,"totalTratadas":99,"obs":""},{"sem":22,"antVenc":17,"antSinVenc":179,"reqSem":130,"tratadas":58,"rechazadas":2,"anuladas":0,"sinTratarSem":72,"totalSinTratar":268,"totalVenc":17,"vencNuevas":5,"vencViejas":12,"porVencer":160,"enPlazo":108,"totalPend":268,"urgentes":1,"totalTratadas":220,"obs":""},{"sem":23,"antVenc":34,"antSinVenc":20,"reqSem":368,"tratadas":66,"rechazadas":1,"anuladas":9,"sinTratarSem":293,"totalSinTratar":347,"totalVenc":34,"vencNuevas":22,"vencViejas":12,"porVencer":116,"enPlazo":231,"totalPend":347,"urgentes":3,"totalTratadas":290,"obs":"124 Req corresponden a pedidos de ULMA (OC 12839)"},{"sem":24,"antVenc":43,"antSinVenc":93,"reqSem":151,"tratadas":39,"rechazadas":0,"anuladas":0,"sinTratarSem":112,"totalSinTratar":248,"totalVenc":43,"vencNuevas":12,"vencViejas":31,"porVencer":96,"enPlazo":152,"totalPend":248,"urgentes":3,"totalTratadas":250,"obs":"De las Req vencidas 29 corresponden a MAREL + 7 Req que le quedaron a Quimey por anular una OC al momento de sacar el reporte (Caso compra directa a fabricante Piaz)"},{"sem":25,"antVenc":106,"antSinVenc":6,"reqSem":225,"tratadas":57,"rechazadas":1,"anuladas":1,"sinTratarSem":167,"totalSinTratar":279,"totalVenc":106,"vencNuevas":75,"vencViejas":31,"porVencer":32,"enPlazo":247,"totalPend":279,"urgentes":2,"totalTratadas":195,"obs":"El incremento en Vencidas deriva de 95 REQ que corresponden a repuestos de Marel. Ademas hay 2 Req que debian cancelarse el saldo, y 3 que estaban para emitir la OC y no se realizo al corte del reporte."},{"sem":26,"antVenc":102,"antSinVenc":20,"reqSem":276,"tratadas":11,"rechazadas":0,"anuladas":6,"sinTratarSem":259,"totalSinTratar":381,"totalVenc":102,"vencNuevas":4,"vencViejas":98,"porVencer":205,"enPlazo":176,"totalPend":381,"urgentes":4,"totalTratadas":174,"obs":"Siguen las 93 REQ de Marel, por recibir la Cotizacion, y solo 4 pasaron a vencerse, que estan siendo tratadas para cerrar tras validacion de info(Disco y AutoCad), mas la espera de nueva REQ para los gastos de envio(por la Banda) y Reestablecer sistema el proveedor para cotizar(Movistar)."},{"sem":27,"antVenc":95,"antSinVenc":47,"reqSem":279,"tratadas":75,"rechazadas":3,"anuladas":2,"sinTratarSem":199,"totalSinTratar":341,"totalVenc":95,"vencNuevas":0,"vencViejas":95,"porVencer":140,"enPlazo":106,"totalPend":341,"urgentes":2,"totalTratadas":319,"obs":"Excluyendo las de Marel, solo hay 2 vencidas (Rueda y Disco para servidor que esta validando Jair). Semana entrante se emitira la OC de Marel, ya que esta la cotizacion pero resta ser vista con Mantenimiento por algunas consultas tecnicas."},{"sem":28,"antVenc":26,"antSinVenc":62,"reqSem":196,"tratadas":118,"rechazadas":0,"anuladas":1,"sinTratarSem":77,"totalSinTratar":165,"totalVenc":26,"vencNuevas":13,"vencViejas":13,"porVencer":44,"enPlazo":95,"totalPend":165,"urgentes":1,"totalTratadas":372,"obs":"De las REQ de Marel restan que coticen 12 items(81 ya fueron vinculados a una OC), De las 13 vencidas nuevas, 8 ya estan para hacer OC, pero para el corte del reporte no se avanzaron."},{"sem":29,"antVenc":35,"antSinVenc":11,"reqSem":161,"tratadas":127,"rechazadas":0,"anuladas":6,"sinTratarSem":28,"totalSinTratar":74,"totalVenc":35,"vencNuevas":21,"vencViejas":14,"porVencer":24,"enPlazo":15,"totalPend":74,"urgentes":6,"totalTratadas":252,"obs":"Se detecta que quedaron 173 REQ sin aprobar de la semana 29 (Req 33227 a 33473), Se redujo satisfactoriamente las Req de semanas anteriores que quedaron sin procesar."},{"sem":30,"antVenc":15,"antSinVenc":0,"reqSem":292,"tratadas":188,"rechazadas":0,"anuladas":3,"sinTratarSem":101,"totalSinTratar":116,"totalVenc":15,"vencNuevas":3,"vencViejas":12,"porVencer":67,"enPlazo":34,"totalPend":116,"urgentes":6,"totalTratadas":250,"obs":"De las 3 nuevas que se vencieron, una es una reparacion IN SITU; y la otra esta a la espera de firma de Direccion por el importe.La restante es un repuesto que no se comercializa en el mercado local."},{"sem":31,"antVenc":17,"antSinVenc":2,"reqSem":137,"tratadas":97,"rechazadas":1,"anuladas":7,"sinTratarSem":32,"totalSinTratar":51,"totalVenc":17,"vencNuevas":6,"vencViejas":11,"porVencer":19,"enPlazo":15,"totalPend":51,"urgentes":3,"totalTratadas":202,"obs":""},{"sem":32,"antVenc":14,"antSinVenc":0,"reqSem":281,"tratadas":258,"rechazadas":5,"anuladas":3,"sinTratarSem":15,"totalSinTratar":29,"totalVenc":14,"vencNuevas":3,"vencViejas":11,"porVencer":10,"enPlazo":5,"totalPend":29,"urgentes":1,"totalTratadas":303,"obs":""}],"ultima":32};
+  const W = DATA.weeks;
+  const nf=new Intl.NumberFormat('es-AR');
+  let wi = W.findIndex(w=>w.sem===DATA.ultima); if(wi<0) wi=W.length-1;
+
+  function spark(vals,color){
+    const nums=vals.filter(v=>v!=null); if(nums.length<2) return '';
+    const Wd=150,H=48,pad=3, mn=Math.min(...nums),mx=Math.max(...nums),sp=(mx-mn)||1;
+    const x=i=>pad+(Wd-2*pad)*i/(vals.length-1), y=v=>H-pad-((v-mn)/sp)*(H-2*pad);
+    return '<svg class="spark" viewBox="0 0 '+Wd+' '+H+'" preserveAspectRatio="none"><polyline points="'+vals.map((v,i)=>x(i).toFixed(1)+','+y(v).toFixed(1)).join(' ')+'" fill="none" stroke="'+color+'" stroke-width="2"/></svg>';
+  }
+  function renderKpis(){
+    const w=W[wi], prev=wi>0?W[wi-1]:null;
+    function d(cur,pv,upGood){ if(pv==null) return ''; const df=cur-pv; if(df===0) return 'sin cambio vs sem. ant.'; const up=df>0; return '<span class="'+((up===upGood)?'up':'down')+'">'+(up?'▲ +':'▼ ')+Math.abs(df)+' vs Sem '+prev.sem+'</span>'; }
+    const cards=[
+      {hero:1,l:'Requis de la semana',v:nf.format(w.reqSem),d:d(w.reqSem,prev&&prev.reqSem,true),sp:spark(W.map(x=>x.reqSem),'var(--info)')},
+      {l:'Requis tratadas',v:nf.format(w.tratadas),d:d(w.tratadas,prev&&prev.tratadas,true),sp:spark(W.map(x=>x.tratadas),'var(--good)')},
+      {l:'Rechazadas',v:nf.format(w.rechazadas),d:d(w.rechazadas,prev&&prev.rechazadas,false),sp:spark(W.map(x=>x.rechazadas),'var(--amber)')},
+      {l:'Anuladas',v:nf.format(w.anuladas),d:d(w.anuladas,prev&&prev.anuladas,false),sp:spark(W.map(x=>x.anuladas),'var(--muted)')},
+      {l:'Sin tratar (semana)',v:nf.format(w.sinTratarSem),d:d(w.sinTratarSem,prev&&prev.sinTratarSem,false),sp:spark(W.map(x=>x.sinTratarSem),'var(--bad)')},
+      {l:'Total req. tratadas',v:w.totalTratadas==null?'—':nf.format(w.totalTratadas),d:'Acumulado',sp:spark(W.map(x=>x.totalTratadas||0),'var(--good)')},
+    ];
+    document.getElementById('kpis').innerHTML=cards.map(c=>'<div class="kpi'+(c.hero?' hero':'')+'"><div class="kl">'+c.l+'</div><div class="kv">'+c.v+'</div><div class="kd">'+(c.d||'')+'</div>'+(c.sp||'')+'</div>').join('');
+  }
+
+  function renderDonut(){
+    const w=W[wi];
+    const segs=[{n:'Vencidas',v:w.totalVenc,c:'#ff4d67'},{n:'Por vencer',v:w.porVencer,c:'#f5a623'},{n:'En plazo',v:Math.max(0,w.enPlazo),c:'#22e39b'}];
+    document.getElementById('comp-title').textContent='Composición de pendientes · Sem '+w.sem;
+    document.getElementById('comp-sub').textContent='Total pendientes: '+w.totalPend+(w.enPlazo<0?' · (En plazo ajustado '+w.enPlazo+')':'');
+    const tot=segs.reduce((a,s)=>a+s.v,0)||1, size=170, sw=size*0.17, r=size/2-sw/2-4, cx=size/2, cy=size/2, C=2*Math.PI*r;
+    let off=0, s='<svg viewBox="0 0 '+size+' '+size+'" width="'+size+'" height="'+size+'"><circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#0e1e28" stroke-width="'+sw+'"/>';
+    segs.forEach(sg=>{ const frac=sg.v/tot, len=frac*C; const tt=sg.n+'\n'+sg.v+' ('+Math.round(frac*100)+'%)';
+      s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+sg.c+'" stroke-width="'+sw+'" stroke-dasharray="'+len.toFixed(2)+' '+(C-len).toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'" transform="rotate(-90 '+cx+' '+cy+')" data-tip="'+tt+'"/>'; off+=len; });
+    s+='<text x="'+cx+'" y="'+(cy-4)+'" font-size="26" font-weight="800" fill="#fff" text-anchor="middle">'+w.totalPend+'</text><text x="'+cx+'" y="'+(cy+15)+'" font-size="10" fill="#8ba0ab" text-anchor="middle" letter-spacing=".05em">PENDIENTES</text></svg>';
+    document.getElementById('donut').innerHTML=s;
+    document.getElementById('leg').innerHTML=segs.map(sg=>'<span class="li"><span class="sw" style="background:'+sg.c+'"></span>'+sg.n+' <b>'+sg.v+'</b></span>').join('')
+      +'<span class="li" style="color:var(--muted-2);font-size:11px">Vencidas nuevas '+w.vencNuevas+' · viejas '+w.vencViejas+' · urgentes '+w.urgentes+'</span>';
+  }
+
+  function renderVenc(){
+    const Wd=560,H=250,padL=30,padR=14,padT=18,padB=30, iw=Wd-padL-padR, ih=H-padT-padB;
+    const vals=W.map(w=>w.totalVenc), max=Math.max(...vals)*1.14, n=W.length, bw=iw/n*0.62;
+    const x=i=>padL+iw*(i+0.5)/n, y=v=>padT+ih-(v/max)*ih;
+    let s='<svg viewBox="0 0 '+Wd+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
+    s+='<defs><linearGradient id="vb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(255,77,103,.95)"/><stop offset="1" stop-color="rgba(255,77,103,.4)"/></linearGradient></defs>';
+    for(let t=0;t<=3;t++){ const yy=padT+ih*t/3; s+='<line x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(Wd-padR)+'" y2="'+yy.toFixed(1)+'" stroke="#23353f" stroke-dasharray="3 3"/>'; }
+    W.forEach((w,i)=>{ const bx=x(i)-bw/2, by=y(w.totalVenc), bh=padT+ih-by, sel=i===wi;
+      s+='<rect x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="3" fill="'+(sel?'#fff':'url(#vb)')+'"/>';
+      if(i%3===0||sel||i===n-1) s+='<text x="'+x(i).toFixed(1)+'" y="'+(H-11)+'" font-size="9" fill="'+(sel?'#eef2f5':'#8ba0ab')+'" text-anchor="middle">'+w.sem+'</text>';
+      s+='<rect x="'+(x(i)-iw/n/2).toFixed(1)+'" y="'+padT+'" width="'+(iw/n).toFixed(1)+'" height="'+ih+'" fill="transparent" style="cursor:pointer" data-i="'+i+'" data-tip="Semana '+w.sem+'\nVencidas: '+w.totalVenc+'\nNuevas '+w.vencNuevas+' · Viejas '+w.vencViejas+'"/>';
+    });
+    s+='</svg>';
+    document.getElementById('chart-venc').innerHTML=s;
+    document.querySelectorAll('#chart-venc [data-i]').forEach(r=>r.onclick=()=>sel(+r.dataset.i));
+  }
+
+  function sel(i){ wi=i; document.getElementById('selSem').value=i; renderKpis(); renderDonut(); renderVenc(); if(window.parent!==window)setTimeout(postAlto,30); }
+
+  document.getElementById('selSem').innerHTML=W.map((w,i)=>'<option value="'+i+'"'+(i===wi?' selected':'')+'>Semana '+w.sem+'</option>').join('');
+  document.getElementById('selSem').onchange=e=>sel(+e.target.value);
+
+  const tip=document.getElementById('tip');
+  document.addEventListener('mousemove',e=>{ const el=e.target.closest&&e.target.closest('[data-tip]'); if(el){ tip.textContent=el.getAttribute('data-tip'); tip.classList.add('show'); const r=tip.getBoundingClientRect(); let nx=e.clientX+14,ny=e.clientY+14; if(nx+r.width>innerWidth-8)nx=e.clientX-r.width-14; if(ny+r.height>innerHeight-8)ny=e.clientY-r.height-14; tip.style.left=nx+'px'; tip.style.top=ny+'px'; } else if(tip.classList.contains('show')) tip.classList.remove('show'); });
+
+  renderKpis(); renderDonut(); renderVenc();
+  function postAlto(){ try{ parent.postMessage({tipo:'matriz-alto',alto:document.body.scrollHeight},'*'); }catch(e){} }
+  if(window.parent!==window){ postAlto(); window.addEventListener('resize',postAlto); new MutationObserver(postAlto).observe(document.body,{subtree:true,childList:true}); }
+})();
+</script>
