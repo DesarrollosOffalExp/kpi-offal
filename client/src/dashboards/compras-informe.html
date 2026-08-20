@@ -47,6 +47,10 @@
   .clegend .ci{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--text);}
   .clegend .ci .sw{width:13px;height:13px;border-radius:3px;flex-shrink:0;}
   .clegend .ci small{color:var(--muted);font-weight:500;}
+  .clegend .ci.pct{color:var(--muted);} .clegend .ci.pct b{color:var(--text);font-weight:700;}
+  #chart svg .bar{transition:filter .12s ease;cursor:pointer;}
+  #chart svg .bar:hover{filter:brightness(1.18) drop-shadow(0 0 6px rgba(255,255,255,.12));}
+  #chart svg .bar.dim{filter:saturate(.35) brightness(.7);opacity:.5;}
   /* nota de análisis */
   .note{margin-top:14px;background:linear-gradient(135deg,rgba(38,182,217,.09),var(--panel-2));border:1px solid var(--line);border-left:3px solid var(--info);border-radius:10px;padding:13px 16px;}
   .note h4{margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--info);display:flex;align-items:center;gap:7px;}
@@ -93,6 +97,7 @@
       <div class="clegend">
         <span class="ci"><span class="sw" style="background:var(--good)"></span>En tiempo <small>(recibido en fecha o antes)</small></span>
         <span class="ci"><span class="sw" style="background:var(--bad)"></span>Fuera de plazo <small>(recibido tarde)</small></span>
+        <span class="ci pct"><b>%</b> sobre cada mes: incumplimiento <small>(fuera de plazo / recibidos)</small></span>
       </div>
       <div id="chart"></div>
       <div class="note" id="note"></div>
@@ -200,28 +205,45 @@
       '<div class="li"><span class="sw" style="background:var(--bad)"></span>Fuera de plazo<b>'+nf.format(late)+'</b><span class="pc">'+(late/tot*100).toFixed(1)+'%</span></div>';
   }
 
-  // ----- barras apiladas mensuales -----
+  // ----- barras agrupadas mensuales (cumplido vs. demora, con % de incumplimiento) -----
   function drawChart(meses){
-    const el=document.getElementById('chart'); const wpx=el.clientWidth||900, H=300, padL=42,padR=12,padT=16,padB=38;
-    const iw=wpx-padL-padR, ih=H-padT-padB, n=meses.length||1, slot=iw/n, bw=Math.min(46, slot*0.62);
-    const mx=Math.max(1,...meses.map(m=>m.ot+m.late)); const nice=Math.ceil(mx/50)*50||mx;
+    const el=document.getElementById('chart'); const wpx=el.clientWidth||900, H=330, padL=44,padR=14,padT=40,padB=40;
+    const iw=wpx-padL-padR, ih=H-padT-padB, n=meses.length||1, slot=iw/n;
+    const bw=Math.max(8,Math.min(28, slot*0.30)), gap=Math.max(3,Math.min(9, slot*0.09)), gw=bw*2+gap;
+    // escala por el valor individual mayor (no la suma) → se aprecian mejor las diferencias
+    const mx=Math.max(1,...meses.map(m=>Math.max(m.ot,m.late))); const nice=Math.ceil(mx/50)*50||mx;
     const y=v=>padT+ih-(v/nice)*ih, cx=i=>padL+slot*i+slot/2;
+    const defs='<defs>'
+      +'<linearGradient id="gOt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3af1ad"/><stop offset="1" stop-color="#13b57d"/></linearGradient>'
+      +'<linearGradient id="gLa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6a7f"/><stop offset="1" stop-color="#d81a3f"/></linearGradient>'
+      +'</defs>';
     let g='';
     const steps=4; for(let s=0;s<=steps;s++){ const val=Math.round(nice*s/steps), yy=y(val);
-      g+='<line x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(wpx-padR)+'" y2="'+yy.toFixed(1)+'" stroke="var(--line)" '+(s?'stroke-dasharray="3 4"':'')+'/>';
-      g+='<text x="'+(padL-7)+'" y="'+(yy+3.5).toFixed(1)+'" text-anchor="end" font-size="9.5" fill="var(--muted-2)">'+val+'</text>'; }
-    meses.forEach((m,i)=>{ const tot=m.ot+m.late; const x=cx(i)-bw/2; const op=m.partial?' fill-opacity=".5"':'';
-      const hOt=(m.ot/nice)*ih, hLa=(m.late/nice)*ih; const yLa=padT+ih-hLa, yOt=yLa-hOt;
-      if(m.late>0) g+='<rect x="'+x.toFixed(1)+'" y="'+yLa.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hLa.toFixed(1)+'" fill="var(--bad)"'+op+'/>';
-      if(m.ot>0) g+='<rect x="'+x.toFixed(1)+'" y="'+yOt.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hOt.toFixed(1)+'" fill="var(--good)"'+op+'/>';
-      const showLbl = n<=14 || i%Math.ceil(n/14)===0;
-      if(showLbl) g+='<text x="'+cx(i).toFixed(1)+'" y="'+(padT+ih+16).toFixed(1)+'" text-anchor="middle" font-size="10" fill="'+(m.partial?'var(--info)':'var(--muted)')+'">'+m.label+(m.partial?' •':'')+'</text>';
-      g+='<rect x="'+(padL+slot*i).toFixed(1)+'" y="'+padT+'" width="'+slot.toFixed(1)+'" height="'+ih+'" fill="transparent" style="cursor:pointer" data-i="'+i+'"/>';
+      g+='<line x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(wpx-padR)+'" y2="'+yy.toFixed(1)+'" stroke="var(--line)" '+(s?'stroke-dasharray="3 5"':'')+'/>';
+      g+='<text x="'+(padL-8)+'" y="'+(yy+3.5).toFixed(1)+'" text-anchor="end" font-size="9.5" fill="var(--muted-2)">'+val+'</text>'; }
+    meses.forEach((m,i)=>{ const tot=m.ot+m.late; const c=cx(i);
+      const xOt=c-gw/2, xLa=xOt+bw+gap;
+      const hOt=Math.max(0,(m.ot/nice)*ih), hLa=Math.max(0,(m.late/nice)*ih);
+      const yOt=padT+ih-hOt, yLa=padT+ih-hLa; const rx=Math.min(5,bw/2);
+      const op=m.partial?' opacity=".5"':'';
+      if(m.ot>0) g+='<rect class="bar" data-i="'+i+'" x="'+xOt.toFixed(1)+'" y="'+yOt.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hOt.toFixed(1)+'" rx="'+rx+'" fill="url(#gOt)"'+op+'/>';
+      if(m.late>0) g+='<rect class="bar" data-i="'+i+'" x="'+xLa.toFixed(1)+'" y="'+yLa.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hLa.toFixed(1)+'" rx="'+rx+'" fill="url(#gLa)"'+op+'/>';
+      if(m.ot>0) g+='<text x="'+(xOt+bw/2).toFixed(1)+'" y="'+(yOt-5).toFixed(1)+'" text-anchor="middle" font-size="9" font-weight="700" fill="#93ecc7">'+nf.format(m.ot)+'</text>';
+      if(m.late>0) g+='<text x="'+(xLa+bw/2).toFixed(1)+'" y="'+(yLa-5).toFixed(1)+'" text-anchor="middle" font-size="9" font-weight="700" fill="#ff9dab">'+nf.format(m.late)+'</text>';
+      // % de incumplimiento del mes, resaltado arriba del grupo
+      const pLa = tot? m.late/tot*100 : 0;
+      const bc = pLa<30?'#22e39b':(pLa<45?'#f5a623':'#ff4d67');
+      g+='<text x="'+c.toFixed(1)+'" y="'+(padT-20).toFixed(1)+'" text-anchor="middle" font-size="12.5" font-weight="800" fill="'+bc+'">'+pLa.toFixed(0)+'%</text>';
+      g+='<text x="'+c.toFixed(1)+'" y="'+(padT+ih+16).toFixed(1)+'" text-anchor="middle" font-size="10.5" fill="'+(m.partial?'var(--info)':'var(--muted)')+'">'+m.label+(m.partial?' •':'')+'</text>';
+      g+='<rect x="'+(padL+slot*i).toFixed(1)+'" y="'+padT+'" width="'+slot.toFixed(1)+'" height="'+ih+'" fill="transparent" style="cursor:pointer" data-hit="'+i+'"/>';
     });
-    el.innerHTML='<svg viewBox="0 0 '+wpx+' '+H+'" width="100%" height="'+H+'">'+g+'</svg>';
-    el.querySelectorAll('rect[data-i]').forEach(r=>{ const m=meses[+r.getAttribute('data-i')]; const tot=m.ot+m.late;
-      r.addEventListener('mouseenter',e=>showTip('<b>'+m.label+'</b>\nRecibidos: '+nf.format(tot)+'\nEn tiempo: '+nf.format(m.ot)+' ('+(tot?(m.ot/tot*100).toFixed(0):0)+'%)\nFuera de plazo: '+nf.format(m.late)+' ('+(tot?(m.late/tot*100).toFixed(0):0)+'%)',e));
-      r.addEventListener('mousemove',moveTip); r.addEventListener('mouseleave',hideTip); });
+    el.innerHTML='<svg viewBox="0 0 '+wpx+' '+H+'" width="100%" height="'+H+'">'+defs+g+'</svg>';
+    const bars=[...el.querySelectorAll('.bar')];
+    el.querySelectorAll('rect[data-hit]').forEach(r=>{ const i=+r.getAttribute('data-hit'); const m=meses[i]; const tot=m.ot+m.late;
+      r.addEventListener('mouseenter',e=>{ bars.forEach(b=>b.classList.toggle('dim', b.getAttribute('data-i')!=i));
+        showTip('<b>'+m.label+(m.partial?' (parcial)':'')+'</b>\nRecibidos: '+nf.format(tot)+'\nEn tiempo: '+nf.format(m.ot)+' ('+(tot?(m.ot/tot*100).toFixed(0):0)+'%)\nFuera de plazo: '+nf.format(m.late)+' ('+(tot?(m.late/tot*100).toFixed(0):0)+'%)',e); });
+      r.addEventListener('mousemove',moveTip);
+      r.addEventListener('mouseleave',()=>{ bars.forEach(b=>b.classList.remove('dim')); hideTip(); }); });
   }
 
   // ----- ranking: barra de % cumplido (recibido en tiempo) -----
