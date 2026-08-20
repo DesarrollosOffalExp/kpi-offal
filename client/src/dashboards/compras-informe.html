@@ -1,0 +1,260 @@
+<title>Informe de Recepción</title>
+<style>
+  :root{
+    --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
+    --line:#23353f; --line-2:#2c414d;
+    --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
+    --brand:#e11f46; --brand-dim:rgba(225,31,70,.13); --brand-line:rgba(225,31,70,.45);
+    --info:#26b6d9; --info-dim:rgba(38,182,217,.14); --good:#22e39b; --bad:#ff4d67; --amber:#f5a623;
+    --radius:12px;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.4;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 40px;}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px;}
+  .overline{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--info);margin:0 0 5px;}
+  h1{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .sub{font-size:12.5px;color:var(--muted);margin:5px 0 0;max-width:640px;}
+  .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:9px;}
+  .fuente{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;}
+  .fuente::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--info);box-shadow:0 0 7px 1px rgba(38,182,217,.7);}
+  .filtro{display:flex;align-items:center;gap:8px;}
+  .filtro label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  select{appearance:none;background:var(--panel-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238ba0ab' stroke-width='3' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>") no-repeat right 10px center;border:1px solid var(--line);border-radius:8px;color:var(--text);font:inherit;font-size:13px;font-weight:600;padding:8px 30px 8px 12px;cursor:pointer;}
+  select:focus{outline:none;border-color:var(--info);}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:16px;}
+  .kpi{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--panel) 0%,var(--panel-2) 135%);border:1px solid var(--line);border-radius:13px;padding:15px 16px;box-shadow:0 1px 2px rgba(0,0,0,.25),0 12px 26px -16px rgba(0,0,0,.6);}
+  .kpi.hero{border-color:var(--brand-line);background:linear-gradient(135deg,var(--brand-dim) 0%,var(--panel) 60%,var(--panel-2) 130%);border-top:3px solid var(--brand);}
+  .kpi.good{border-top:3px solid var(--good);} .kpi.bad{border-top:3px solid var(--bad);}
+  .kpi .kl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .kpi .kv{font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1;color:#fff;margin-top:8px;}
+  .kpi .kd{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:5px;}
+  .cols2{display:grid;grid-template-columns:0.9fr 1.4fr;gap:16px;} @media(max-width:900px){ .cols2{grid-template-columns:1fr;} .kpis{grid-template-columns:repeat(2,1fr);} }
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 18px;margin-bottom:16px;}
+  .panel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+  .panel h3{font-size:15px;font-weight:800;margin:0;}
+  .panel .psub{font-size:11.5px;color:var(--muted);margin:2px 0 0;}
+  .donut-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .leg{display:flex;flex-direction:column;gap:8px;font-size:12.5px;width:100%;}
+  .leg .li{display:flex;align-items:center;gap:9px;color:var(--muted);} .leg .li .sw{width:12px;height:12px;border-radius:3px;flex-shrink:0;} .leg .li b{color:var(--text);margin-left:auto;}
+  .leg .li .pc{color:var(--muted-2);font-weight:600;min-width:44px;text-align:right;}
+  .seg-toggle{display:inline-flex;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:2px;gap:2px;}
+  .seg-toggle button{background:none;border:none;color:var(--muted);font:inherit;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:6px;cursor:pointer;}
+  .seg-toggle button.on{background:var(--info-dim);color:#fff;}
+  /* leyenda de colores del gráfico */
+  .clegend{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 10px 2px;}
+  .clegend .ci{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--text);}
+  .clegend .ci .sw{width:13px;height:13px;border-radius:3px;flex-shrink:0;}
+  .clegend .ci small{color:var(--muted);font-weight:500;}
+  /* nota de análisis */
+  .note{margin-top:14px;background:linear-gradient(135deg,rgba(38,182,217,.09),var(--panel-2));border:1px solid var(--line);border-left:3px solid var(--info);border-radius:10px;padding:13px 16px;}
+  .note h4{margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--info);display:flex;align-items:center;gap:7px;}
+  .note p{margin:0 0 7px;font-size:12.8px;line-height:1.6;color:var(--text);}
+  .note p:last-child{margin-bottom:0;}
+  .note .conc{color:var(--good);font-weight:700;}
+  .note b.up{color:var(--good);} .note b.down{color:var(--bad);}
+  /* ranking: barra de % cumplido */
+  .rank .row{display:grid;grid-template-columns:168px 1fr 132px;align-items:center;gap:12px;margin-bottom:9px;font-size:12px;}
+  .rank .nm{color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rank .nm small{display:block;color:var(--muted-2);font-weight:500;font-size:10.5px;}
+  .rank .track{position:relative;height:22px;border-radius:6px;background:var(--panel-3);overflow:hidden;cursor:pointer;border:1px solid var(--line);}
+  .rank .fill{height:100%;border-radius:0;transition:width .3s ease;}
+  .rank .track .meta{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,.35);}
+  .rank .rt{display:flex;align-items:baseline;gap:6px;justify-content:flex-end;}
+  .rank .rt .big{font-weight:800;font-size:15px;} .rank .rt small{font-size:10.5px;color:var(--bad);font-weight:700;}
+  .rank .axis{display:grid;grid-template-columns:168px 1fr 132px;gap:12px;margin-bottom:6px;font-size:9.5px;color:var(--muted-2);}
+  .rank .axis .sc{display:flex;justify-content:space-between;}
+  .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:9px 12px;font-size:12.5px;line-height:1.55;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:260px;}
+  .tip.show{opacity:1;transform:none;}
+  .pie{margin-top:10px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <p class="overline">Offal · Compras</p>
+      <h1>Informe de Recepción</h1>
+      <p class="sub">Cumplimiento de entregas: cuántos ítems de OC se recibieron <b>en tiempo</b> vs. <b>fuera de plazo</b>, comparando la Fecha de Entrega comprometida (col. AX) con la Fecha de Recepción (col. BI).</p>
+    </div>
+    <div class="head-right"><span class="fuente">Datos reales · Ordenes de Compra (Reporte)</span>
+      <div class="filtro"><label>Año</label><select id="selYear"></select></div></div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <div class="cols2">
+    <section class="panel">
+      <div class="panel-head"><div><h3>En tiempo vs. fuera de plazo</h3><p class="psub" id="donsub"></p></div></div>
+      <div class="donut-wrap"><div id="donut"></div><div class="leg" id="leg"></div></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><h3>Evolución mensual</h3><p class="psub">Ítems con Fecha de Entrega comprometida hasta hoy, según si se recibieron en fecha o tarde.</p></div></div>
+      <div class="clegend">
+        <span class="ci"><span class="sw" style="background:var(--good)"></span>En tiempo <small>(recibido en fecha o antes)</small></span>
+        <span class="ci"><span class="sw" style="background:var(--bad)"></span>Fuera de plazo <small>(recibido tarde)</small></span>
+      </div>
+      <div id="chart"></div>
+      <div class="note" id="note"></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head"><div><h3>Ranking por cumplimiento</h3><p class="psub" id="ranksub">La barra muestra el <b>% recibido en tiempo</b>. Ordenado de menor a mayor cumplimiento (los más problemáticos, arriba). Mínimo 20 ítems.</p></div>
+      <div class="seg-toggle" id="toggle"><button data-m="rubros" class="on">Por rubro</button><button data-m="prov">Por proveedor</button></div>
+    </div>
+    <div class="rank" id="rank"></div>
+    <p class="pie">Fuente: <b>Ordenes de Compra actualizable.xlsx</b> (SharePoint · Compras), hoja <b>Reporte</b>. Se consideran los ítems con Fecha de Recepción cargada; el mes corresponde a la Fecha de Entrega comprometida. Los ítems sin recepción figuran como pendientes y no entran en el cálculo de cumplimiento.</p>
+  </section>
+</div>
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  const DATA = {"generado":"18/08/2026","hoy":"2026-08-18","recibidos":38093,"pendientes":6860,"totalOt":19834,"totalLate":18259,"years":[2023,2024,2025,2026],"byYear":{"2023":{"ot":478,"late":2009,"meses":[{"m":1,"ot":0,"late":0},{"m":2,"ot":0,"late":0},{"m":3,"ot":0,"late":0},{"m":4,"ot":0,"late":0},{"m":5,"ot":0,"late":0},{"m":6,"ot":0,"late":0},{"m":7,"ot":0,"late":0},{"m":8,"ot":9,"late":108},{"m":9,"ot":80,"late":401},{"m":10,"ot":151,"late":518},{"m":11,"ot":143,"late":449},{"m":12,"ot":95,"late":533}],"rubros":[{"k":"MATERIAL DE EMPAQUE","ot":215,"late":506,"total":721},{"k":"FERRETERIA","ot":61,"late":384,"total":445},{"k":"ELECTRICIDAD","ot":4,"late":254,"total":258},{"k":"CAÑERIAS","ot":27,"late":158,"total":185},{"k":"LIMPIEZA","ot":18,"late":88,"total":106},{"k":"ELEMENTOS DE SEGURIDAD Y ROPA","ot":25,"late":81,"total":106},{"k":"NEUMATICA","ot":7,"late":88,"total":95},{"k":"PLANTA","ot":11,"late":70,"total":81},{"k":"LIBRERIA","ot":16,"late":52,"total":68},{"k":"REPUESTO DE MAQUINAS","ot":12,"late":41,"total":53},{"k":"QUIMICOS","ot":4,"late":44,"total":48},{"k":"RODAMIENTOS","ot":17,"late":26,"total":43}],"prov":[{"k":"ARGENCRAFT S.A.","ot":133,"late":325,"total":458},{"k":"PEM PRODUCTOS ELECTRICOS SA","ot":5,"late":187,"total":192},{"k":"INSUMOS INDUSTRIALES BULFERIND","ot":18,"late":137,"total":155},{"k":"GRUPO CANFEMA SRL (ex casa fernandez)","ot":32,"late":103,"total":135},{"k":"PLASTICOS LUJUMAR S.A","ot":52,"late":65,"total":117},{"k":"FAMIQ S.A.","ot":2,"late":115,"total":117},{"k":"SEGURIDAD NAVAL E INDUSTRIAL SRL","ot":14,"late":96,"total":110},{"k":"CAVEGO SA","ot":0,"late":81,"total":81},{"k":"AUTOMACION MICROMECANICA SAIC","ot":0,"late":73,"total":73},{"k":"BOTTA DIEGO FERNANDO","ot":2,"late":63,"total":65},{"k":"MILAN BENITEZ REYES HUGO","ot":22,"late":40,"total":62},{"k":"ZONA OFFICE SRL","ot":16,"late":33,"total":49}]},"2024":{"ot":3562,"late":6821,"meses":[{"m":1,"ot":102,"late":474},{"m":2,"ot":174,"late":435},{"m":3,"ot":220,"late":471},{"m":4,"ot":177,"late":517},{"m":5,"ot":336,"late":517},{"m":6,"ot":137,"late":385},{"m":7,"ot":242,"late":653},{"m":8,"ot":305,"late":630},{"m":9,"ot":412,"late":829},{"m":10,"ot":464,"late":830},{"m":11,"ot":352,"late":389},{"m":12,"ot":641,"late":691}],"rubros":[{"k":"SERVICIOS","ot":558,"late":1394,"total":1952},{"k":"MATERIAL DE EMPAQUE","ot":740,"late":1116,"total":1856},{"k":"FERRETERIA","ot":428,"late":897,"total":1325},{"k":"ELECTRICIDAD","ot":257,"late":765,"total":1022},{"k":"FLETES Y ACARREOS","ot":202,"late":365,"total":567},{"k":"PLANTA","ot":152,"late":289,"total":441},{"k":"CAÑERIAS","ot":148,"late":290,"total":438},{"k":"ELEMENTOS DE SEGURIDAD Y ROPA","ot":105,"late":277,"total":382},{"k":"LIMPIEZA","ot":229,"late":85,"total":314},{"k":"REPUESTO DE MAQUINAS","ot":68,"late":238,"total":306},{"k":"REPARADO","ot":105,"late":162,"total":267},{"k":"QUIMICOS","ot":68,"late":131,"total":199}],"prov":[{"k":"ARGENCRAFT S.A.","ot":474,"late":633,"total":1107},{"k":"PEM PRODUCTOS ELECTRICOS SA","ot":147,"late":316,"total":463},{"k":"INSUMOS INDUSTRIALES BULFERIND","ot":96,"late":316,"total":412},{"k":"CAVEGO SA","ot":71,"late":303,"total":374},{"k":"PLASTICOS LUJUMAR S.A","ot":131,"late":212,"total":343},{"k":"FAMIQ S.A.","ot":63,"late":262,"total":325},{"k":"FRANCHI R.E. Y FRANCHI A.M. SH","ot":21,"late":243,"total":264},{"k":"SEGURIDAD NAVAL E INDUSTRIAL SRL","ot":78,"late":174,"total":252},{"k":"JCFA S.R.L.","ot":40,"late":116,"total":156},{"k":"HEAL WATER S.A.","ot":65,"late":86,"total":151},{"k":"ROEL JULIO JOSE","ot":116,"late":27,"total":143},{"k":"GRUPO CANFEMA SRL (ex casa fernandez)","ot":61,"late":77,"total":138}]},"2025":{"ot":9633,"late":5784,"meses":[{"m":1,"ot":501,"late":549},{"m":2,"ot":597,"late":340},{"m":3,"ot":588,"late":320},{"m":4,"ot":865,"late":370},{"m":5,"ot":946,"late":333},{"m":6,"ot":512,"late":389},{"m":7,"ot":708,"late":408},{"m":8,"ot":1017,"late":629},{"m":9,"ot":1192,"late":522},{"m":10,"ot":923,"late":752},{"m":11,"ot":658,"late":404},{"m":12,"ot":1126,"late":768}],"rubros":[{"k":"SERVICIOS","ot":3652,"late":2160,"total":5812},{"k":"MATERIAL DE EMPAQUE","ot":1600,"late":450,"total":2050},{"k":"FLETES Y ACARREOS","ot":842,"late":401,"total":1243},{"k":"FERRETERIA","ot":488,"late":740,"total":1228},{"k":"ELECTRICIDAD","ot":426,"late":369,"total":795},{"k":"PLANTA","ot":263,"late":277,"total":540},{"k":"INFORMATICA","ot":226,"late":210,"total":436},{"k":"ELEMENTOS DE SEGURIDAD Y ROPA","ot":299,"late":135,"total":434},{"k":"REPARADO","ot":247,"late":155,"total":402},{"k":"LIMPIEZA","ot":273,"late":57,"total":330},{"k":"LOGISTICA","ot":264,"late":36,"total":300},{"k":"PRODUCCION","ot":166,"late":101,"total":267}],"prov":[{"k":"ARGENCRAFT S.A.","ot":1084,"late":137,"total":1221},{"k":"LA TELECRISTAL SA","ot":736,"late":313,"total":1049},{"k":"INSUMOS INDUSTRIALES BULFERIND","ot":114,"late":264,"total":378},{"k":"TRANSPORTE FERMOSELLE S.R.L.","ot":200,"late":171,"total":371},{"k":"TRANSPORTE JUAN AMENDOLIA SRL","ot":295,"late":70,"total":365},{"k":"PEM PRODUCTOS ELECTRICOS SA","ot":228,"late":134,"total":362},{"k":"JCFA S.R.L.","ot":228,"late":131,"total":359},{"k":"PLASTICOS LUJUMAR S.A","ot":199,"late":157,"total":356},{"k":"BULON TOOLS SRL","ot":69,"late":252,"total":321},{"k":"EXPORT QUALITY SAS","ot":197,"late":105,"total":302},{"k":"FILIPPI LILIANA ELIDA","ot":170,"late":109,"total":279},{"k":"MORON GOMA S.A.","ot":148,"late":106,"total":254}]},"2026":{"ot":6161,"late":3645,"meses":[{"m":1,"ot":622,"late":601},{"m":2,"ot":451,"late":520},{"m":3,"ot":1109,"late":635},{"m":4,"ot":601,"late":560},{"m":5,"ot":803,"late":477},{"m":6,"ot":896,"late":469},{"m":7,"ot":1229,"late":324},{"m":8,"ot":450,"late":59},{"m":9,"ot":0,"late":0},{"m":10,"ot":0,"late":0},{"m":11,"ot":0,"late":0},{"m":12,"ot":0,"late":0}],"rubros":[{"k":"SERVICIOS","ot":1778,"late":1773,"total":3551},{"k":"MATERIAL DE EMPAQUE","ot":824,"late":314,"total":1138},{"k":"FLETES Y ACARREOS","ot":491,"late":408,"total":899},{"k":"FERRETERIA","ot":616,"late":206,"total":822},{"k":"ELEMENTOS DE SEGURIDAD Y ROPA","ot":452,"late":218,"total":670},{"k":"ELECTRICIDAD","ot":400,"late":129,"total":529},{"k":"LOGISTICA","ot":357,"late":85,"total":442},{"k":"PLANTA","ot":157,"late":110,"total":267},{"k":"LIMPIEZA","ot":177,"late":22,"total":199},{"k":"REPARADO","ot":113,"late":51,"total":164},{"k":"CAÑERIAS","ot":110,"late":37,"total":147},{"k":"INFORMATICA","ot":82,"late":50,"total":132}],"prov":[{"k":"LA TELECRISTAL SA","ot":365,"late":482,"total":847},{"k":"ARGENCRAFT S.A.","ot":515,"late":151,"total":666},{"k":"MORON GOMA S.A.","ot":259,"late":158,"total":417},{"k":"JFS TECNOTOOLS SRL","ot":251,"late":97,"total":348},{"k":"EXPORT QUALITY SAS","ot":160,"late":183,"total":343},{"k":"DIESEL SAN JUSTO SRL","ot":291,"late":46,"total":337},{"k":"PLASTICOS LUJUMAR S.A","ot":161,"late":84,"total":245},{"k":"BULON TOOLS SRL","ot":164,"late":63,"total":227},{"k":"TRANSPORTE FERMOSELLE S.R.L.","ot":80,"late":130,"total":210},{"k":"TRANSPORTE JUAN AMENDOLIA SRL","ot":116,"late":62,"total":178},{"k":"CAVEGO SA","ot":139,"late":38,"total":177},{"k":"DORELLE MARTIN GABRIEL","ot":89,"late":68,"total":157}]}},"mesesAll":[{"ym":"2023-08","ot":9,"late":108},{"ym":"2023-09","ot":80,"late":401},{"ym":"2023-10","ot":151,"late":518},{"ym":"2023-11","ot":143,"late":449},{"ym":"2023-12","ot":95,"late":533},{"ym":"2024-01","ot":102,"late":474},{"ym":"2024-02","ot":174,"late":435},{"ym":"2024-03","ot":220,"late":471},{"ym":"2024-04","ot":177,"late":517},{"ym":"2024-05","ot":336,"late":517},{"ym":"2024-06","ot":137,"late":385},{"ym":"2024-07","ot":242,"late":653},{"ym":"2024-08","ot":305,"late":630},{"ym":"2024-09","ot":412,"late":829},{"ym":"2024-10","ot":464,"late":830},{"ym":"2024-11","ot":352,"late":389},{"ym":"2024-12","ot":641,"late":691},{"ym":"2025-01","ot":501,"late":549},{"ym":"2025-02","ot":597,"late":340},{"ym":"2025-03","ot":588,"late":320},{"ym":"2025-04","ot":865,"late":370},{"ym":"2025-05","ot":946,"late":333},{"ym":"2025-06","ot":512,"late":389},{"ym":"2025-07","ot":708,"late":408},{"ym":"2025-08","ot":1017,"late":629},{"ym":"2025-09","ot":1192,"late":522},{"ym":"2025-10","ot":923,"late":752},{"ym":"2025-11","ot":658,"late":404},{"ym":"2025-12","ot":1126,"late":768},{"ym":"2026-01","ot":622,"late":601},{"ym":"2026-02","ot":451,"late":520},{"ym":"2026-03","ot":1109,"late":635},{"ym":"2026-04","ot":601,"late":560},{"ym":"2026-05","ot":803,"late":477},{"ym":"2026-06","ot":896,"late":469},{"ym":"2026-07","ot":1229,"late":324},{"ym":"2026-08","ot":450,"late":59}],"rubrosAll":[{"k":"SERVICIOS","ot":5988,"late":5331,"total":11319},{"k":"MATERIAL DE EMPAQUE","ot":3379,"late":2386,"total":5765},{"k":"FERRETERIA","ot":1593,"late":2227,"total":3820},{"k":"FLETES Y ACARREOS","ot":1536,"late":1184,"total":2720},{"k":"ELECTRICIDAD","ot":1087,"late":1517,"total":2604},{"k":"ELEMENTOS DE SEGURIDAD Y ROPA","ot":881,"late":711,"total":1592},{"k":"PLANTA","ot":583,"late":746,"total":1329},{"k":"CAÑERIAS","ot":434,"late":588,"total":1022},{"k":"LIMPIEZA","ot":697,"late":252,"total":949},{"k":"REPARADO","ot":467,"late":407,"total":874},{"k":"LOGISTICA","ot":685,"late":175,"total":860},{"k":"INFORMATICA","ot":327,"late":396,"total":723},{"k":"REPUESTO DE MAQUINAS","ot":176,"late":524,"total":700},{"k":"QUIMICOS","ot":327,"late":284,"total":611},{"k":"LIBRERIA","ot":351,"late":203,"total":554}],"provAll":[{"k":"ARGENCRAFT S.A.","ot":2206,"late":1246,"total":3452},{"k":"LA TELECRISTAL SA","ot":1104,"late":835,"total":1939},{"k":"PEM PRODUCTOS ELECTRICOS SA","ot":442,"late":645,"total":1087},{"k":"PLASTICOS LUJUMAR S.A","ot":543,"late":518,"total":1061},{"k":"INSUMOS INDUSTRIALES BULFERIND","ot":229,"late":718,"total":947},{"k":"MORON GOMA S.A.","ot":435,"late":379,"total":814},{"k":"CAVEGO SA","ot":310,"late":503,"total":813},{"k":"FAMIQ S.A.","ot":257,"late":441,"total":698},{"k":"EXPORT QUALITY SAS","ot":358,"late":311,"total":669},{"k":"TRANSPORTE FERMOSELLE S.R.L.","ot":292,"late":375,"total":667},{"k":"JCFA S.R.L.","ot":308,"late":346,"total":654},{"k":"DIESEL SAN JUSTO SRL","ot":527,"late":95,"total":622},{"k":"TRANSPORTE JUAN AMENDOLIA SRL","ot":427,"late":176,"total":603},{"k":"BULON TOOLS SRL","ot":233,"late":315,"total":548},{"k":"BOTTA DIEGO FERNANDO","ot":279,"late":192,"total":471}]};
+  const MES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const nf=new Intl.NumberFormat('es-AR');
+  let year='2026', rankMode='rubros';
+
+  // ----- selector de año -----
+  const sy=document.getElementById('selYear');
+  sy.innerHTML='<option value="todos">Todos</option>'+DATA.years.filter(y=>DATA.byYear[y]).map(y=>'<option value="'+y+'"'+(String(y)===year?' selected':'')+'>'+y+'</option>').join('');
+  sy.value=year; sy.addEventListener('change',e=>{year=e.target.value; render();});
+
+  const HOY_YM = DATA.hoy ? DATA.hoy.slice(0,7) : '';
+  function scope(){
+    if(year==='todos'){ return { ot:DATA.totalOt, late:DATA.totalLate,
+      meses:DATA.mesesAll.filter(m=>(m.ot+m.late)>0).map(m=>({label:m.ym.slice(2), ot:m.ot, late:m.late, partial:m.ym===HOY_YM})),
+      rubros:DATA.rubrosAll, prov:DATA.provAll, pend:DATA.pendientes, isAll:true }; }
+    const Y=DATA.byYear[year];
+    return { ot:Y.ot, late:Y.late,
+      meses:Y.meses.filter(m=>(m.ot+m.late)>0).map(m=>({label:MES[m.m-1], ot:m.ot, late:m.late, partial:(year+'-'+String(m.m).padStart(2,'0'))===HOY_YM})),
+      rubros:Y.rubros, prov:Y.prov, pend:null, isAll:false };
+  }
+
+  // ----- tooltip -----
+  const tip=document.getElementById('tip');
+  function showTip(html,e){ tip.innerHTML=html; tip.classList.add('show'); moveTip(e); }
+  function moveTip(e){ let x=e.clientX+14,y=e.clientY+14; const w=tip.offsetWidth,h=tip.offsetHeight; if(x+w>innerWidth-8)x=e.clientX-w-14; if(y+h>innerHeight-8)y=e.clientY-h-14; tip.style.left=x+'px'; tip.style.top=y+'px'; }
+  function hideTip(){ tip.classList.remove('show'); }
+
+  function render(){
+    const s=scope(); const recib=s.ot+s.late; const pctOt=recib?s.ot/recib*100:0, pctLate=recib?s.late/recib*100:0;
+    // KPIs
+    const kpis=[
+      {l:'Ítems recibidos', v:nf.format(recib), d:(year==='todos'?'todos los años':'año '+year), cls:''},
+      {l:'En tiempo', v:nf.format(s.ot), d:pctOt.toFixed(1)+'% del total', cls:'good'},
+      {l:'Fuera de plazo', v:nf.format(s.late), d:pctLate.toFixed(1)+'% del total', cls:'bad'},
+      {l:'% Cumplimiento', v:pctOt.toFixed(1)+'%', d:(s.isAll?nf.format(s.pend)+' pendientes sin recibir':'recibidos en fecha o antes'), cls:'hero'}
+    ];
+    document.getElementById('kpis').innerHTML=kpis.map(k=>'<div class="kpi '+k.cls+'"><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kd">'+k.d+'</div></div>').join('');
+
+    drawDonut(s.ot,s.late); drawChart(s.meses); drawRank(s); drawNote(s.meses);
+    document.getElementById('donsub').textContent=(year==='todos'?'Todos los años':'Año '+year)+' · '+nf.format(recib)+' ítems recibidos.';
+    postH();
+  }
+
+  // ----- nota de análisis de la evolución del incumplimiento -----
+  function drawNote(meses){
+    const el=document.getElementById('note');
+    const md=meses.map(m=>({label:m.label, t:m.ot+m.late, pl:(m.ot+m.late)?m.late/(m.ot+m.late)*100:0, partial:m.partial}));
+    if(md.length<2){ el.style.display='none'; return; } el.style.display='';
+    const full=md.filter(m=>!m.partial);                     // meses completos para la tendencia
+    const serie=full.length>=2?full:md;
+    const first=serie[0], last=serie[serie.length-1];
+    const best=serie.reduce((a,b)=>b.pl<a.pl?b:a), worst=serie.reduce((a,b)=>b.pl>a.pl?b:a);
+    const delta=first.pl-last.pl;                              // + = bajó el incumplimiento (mejora)
+    const parcial=md[md.length-1].partial?md[md.length-1]:null;
+    const mejora=delta>=3, retro=delta<=-3;
+    const dirTxt = mejora? '<b class="up">bajó '+delta.toFixed(0)+' puntos</b>' : retro? '<b class="down">subió '+Math.abs(delta).toFixed(0)+' puntos</b>' : 'se mantuvo estable';
+    let p1='El incumplimiento (recepciones fuera de plazo) pasó de <b>'+first.pl.toFixed(0)+'%</b> en '+first.label
+      +' a <b>'+last.pl.toFixed(0)+'%</b> en '+last.label+', es decir '+dirTxt+' en el período.';
+    let p2='El mejor mes fue <b>'+best.label+'</b> ('+best.pl.toFixed(0)+'% fuera de plazo) y el más flojo <b>'+worst.label+'</b> ('+worst.pl.toFixed(0)+'%).'
+      +(parcial? ' El último mes ('+parcial.label+') está <b>en curso</b>, con '+parcial.pl.toFixed(0)+'% hasta hoy.' : '');
+    let conc = mejora
+      ? 'Conclusión: la gestión de entregas viene <span class="conc">mejorando de forma sostenida</span>; de sostener el ritmo, el cumplimiento seguiría subiendo mes a mes.'
+      : retro
+      ? 'Conclusión: el cumplimiento se <span class="conc" style="color:var(--bad)">deterioró</span> en el período; conviene revisar a los proveedores con más demoras del ranking de abajo.'
+      : 'Conclusión: el cumplimiento se mantuvo <span class="conc" style="color:var(--amber)">estable</span>; el foco debería estar en los rubros y proveedores más flojos del ranking.';
+    el.innerHTML='<h4>📉 Análisis de la evolución</h4><p>'+p1+'</p><p>'+p2+'</p><p>'+conc+'</p>';
+  }
+
+  // ----- donut -----
+  function drawDonut(ot,late){
+    const tot=ot+late||1, R=76, r=50, cx=95, cy=95, C=2*Math.PI*((R+r)/2), sw=R-r;
+    const segs=[{v:ot,c:'var(--good)',n:'En tiempo'},{v:late,c:'var(--bad)',n:'Fuera de plazo'}];
+    let off=0, g='';
+    segs.forEach(sg=>{ const frac=sg.v/tot, len=frac*C; if(sg.v>0){
+      g+='<circle cx="'+cx+'" cy="'+cy+'" r="'+((R+r)/2)+'" fill="none" stroke="'+sg.c+'" stroke-width="'+sw+'" stroke-dasharray="'+len.toFixed(2)+' '+(C-len).toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'" transform="rotate(-90 '+cx+' '+cy+')" data-n="'+sg.n+'" data-v="'+sg.v+'" style="cursor:pointer"/>'; }
+      off+=len; });
+    const pct=(ot/tot*100);
+    g+='<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" font-size="30" font-weight="800" fill="#fff">'+pct.toFixed(0)+'%</text>';
+    g+='<text x="'+cx+'" y="'+(cy+15)+'" text-anchor="middle" font-size="10.5" fill="var(--muted)" letter-spacing=".05em">EN TIEMPO</text>';
+    const el=document.getElementById('donut'); el.innerHTML='<svg viewBox="0 0 190 190" width="190" height="190">'+g+'</svg>';
+    el.querySelectorAll('circle[data-n]').forEach(c=>{ const n=c.getAttribute('data-n'),v=+c.getAttribute('data-v');
+      c.addEventListener('mouseenter',e=>showTip('<b>'+n+'</b>\n'+nf.format(v)+' ítems · '+(v/tot*100).toFixed(1)+'%',e));
+      c.addEventListener('mousemove',moveTip); c.addEventListener('mouseleave',hideTip); });
+    // leyenda
+    document.getElementById('leg').innerHTML=
+      '<div class="li"><span class="sw" style="background:var(--good)"></span>En tiempo<b>'+nf.format(ot)+'</b><span class="pc">'+(ot/tot*100).toFixed(1)+'%</span></div>'+
+      '<div class="li"><span class="sw" style="background:var(--bad)"></span>Fuera de plazo<b>'+nf.format(late)+'</b><span class="pc">'+(late/tot*100).toFixed(1)+'%</span></div>';
+  }
+
+  // ----- barras apiladas mensuales -----
+  function drawChart(meses){
+    const el=document.getElementById('chart'); const wpx=el.clientWidth||900, H=300, padL=42,padR=12,padT=16,padB=38;
+    const iw=wpx-padL-padR, ih=H-padT-padB, n=meses.length||1, slot=iw/n, bw=Math.min(46, slot*0.62);
+    const mx=Math.max(1,...meses.map(m=>m.ot+m.late)); const nice=Math.ceil(mx/50)*50||mx;
+    const y=v=>padT+ih-(v/nice)*ih, cx=i=>padL+slot*i+slot/2;
+    let g='';
+    const steps=4; for(let s=0;s<=steps;s++){ const val=Math.round(nice*s/steps), yy=y(val);
+      g+='<line x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(wpx-padR)+'" y2="'+yy.toFixed(1)+'" stroke="var(--line)" '+(s?'stroke-dasharray="3 4"':'')+'/>';
+      g+='<text x="'+(padL-7)+'" y="'+(yy+3.5).toFixed(1)+'" text-anchor="end" font-size="9.5" fill="var(--muted-2)">'+val+'</text>'; }
+    meses.forEach((m,i)=>{ const tot=m.ot+m.late; const x=cx(i)-bw/2; const op=m.partial?' fill-opacity=".5"':'';
+      const hOt=(m.ot/nice)*ih, hLa=(m.late/nice)*ih; const yLa=padT+ih-hLa, yOt=yLa-hOt;
+      if(m.late>0) g+='<rect x="'+x.toFixed(1)+'" y="'+yLa.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hLa.toFixed(1)+'" fill="var(--bad)"'+op+'/>';
+      if(m.ot>0) g+='<rect x="'+x.toFixed(1)+'" y="'+yOt.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hOt.toFixed(1)+'" fill="var(--good)"'+op+'/>';
+      const showLbl = n<=14 || i%Math.ceil(n/14)===0;
+      if(showLbl) g+='<text x="'+cx(i).toFixed(1)+'" y="'+(padT+ih+16).toFixed(1)+'" text-anchor="middle" font-size="10" fill="'+(m.partial?'var(--info)':'var(--muted)')+'">'+m.label+(m.partial?' •':'')+'</text>';
+      g+='<rect x="'+(padL+slot*i).toFixed(1)+'" y="'+padT+'" width="'+slot.toFixed(1)+'" height="'+ih+'" fill="transparent" style="cursor:pointer" data-i="'+i+'"/>';
+    });
+    el.innerHTML='<svg viewBox="0 0 '+wpx+' '+H+'" width="100%" height="'+H+'">'+g+'</svg>';
+    el.querySelectorAll('rect[data-i]').forEach(r=>{ const m=meses[+r.getAttribute('data-i')]; const tot=m.ot+m.late;
+      r.addEventListener('mouseenter',e=>showTip('<b>'+m.label+'</b>\nRecibidos: '+nf.format(tot)+'\nEn tiempo: '+nf.format(m.ot)+' ('+(tot?(m.ot/tot*100).toFixed(0):0)+'%)\nFuera de plazo: '+nf.format(m.late)+' ('+(tot?(m.late/tot*100).toFixed(0):0)+'%)',e));
+      r.addEventListener('mousemove',moveTip); r.addEventListener('mouseleave',hideTip); });
+  }
+
+  // ----- ranking: barra de % cumplido (recibido en tiempo) -----
+  function cumColor(p){ return p>=75?'var(--good)':p>=50?'var(--amber)':'var(--bad)'; }
+  function drawRank(s){
+    let items=(rankMode==='rubros'?s.rubros:s.prov).slice().filter(x=>x.total>=20);
+    items.forEach(x=>{ x.pOt=x.ot/x.total*100; x.pLa=x.late/x.total*100; });
+    items.sort((a,b)=>a.pOt-b.pOt); items=items.slice(0,10);   // menor cumplimiento primero
+    const el=document.getElementById('rank');
+    if(!items.length){ el.innerHTML='<div style="color:var(--muted-2);font-size:12.5px;padding:8px 0">Sin datos suficientes (mínimo 20 ítems).</div>'; return; }
+    const avg = (s.ot+s.late)? s.ot/(s.ot+s.late)*100 : 0;
+    let html='<div class="axis"><div></div><div class="sc"><span>0%</span><span>prom. '+avg.toFixed(0)+'%</span><span>100% cumplido</span></div><div></div></div>';
+    html+=items.map(x=>{ const col=cumColor(x.pOt);
+      return '<div class="row"><div class="nm" title="'+x.k.replace(/"/g,'')+'">'+x.k+'<small>'+nf.format(x.total)+' ítems recibidos</small></div>'
+        +'<div class="track" data-k="'+x.k.replace(/"/g,'')+'" data-ot="'+x.ot+'" data-la="'+x.late+'">'
+          +'<div class="fill" style="width:'+x.pOt.toFixed(1)+'%;background:'+col+'"></div>'
+          +'<div class="meta" style="left:'+avg.toFixed(1)+'%" title="promedio"></div></div>'
+        +'<div class="rt"><span class="big" style="color:'+col+'">'+x.pOt.toFixed(0)+'%</span><small>'+x.pLa.toFixed(0)+'% fuera</small></div></div>';
+    }).join('');
+    el.innerHTML=html;
+    el.querySelectorAll('.track').forEach(b=>{ const k=b.getAttribute('data-k'),ot=+b.getAttribute('data-ot'),la=+b.getAttribute('data-la'),t=ot+la;
+      b.addEventListener('mouseenter',e=>showTip('<b>'+k+'</b>\nRecibidos: '+nf.format(t)+'\nEn tiempo: '+nf.format(ot)+' ('+(ot/t*100).toFixed(0)+'% cumplido)\nFuera de plazo: '+nf.format(la)+' ('+(la/t*100).toFixed(0)+'%)',e));
+      b.addEventListener('mousemove',moveTip); b.addEventListener('mouseleave',hideTip); });
+  }
+
+  document.querySelectorAll('#toggle button').forEach(btn=>btn.addEventListener('click',()=>{
+    document.querySelectorAll('#toggle button').forEach(b=>b.classList.remove('on')); btn.classList.add('on');
+    rankMode=btn.getAttribute('data-m'); drawRank(scope());
+  }));
+
+  function postH(){ try{ parent.postMessage({tipo:'matriz-alto', alto:document.body.scrollHeight}, '*'); }catch(e){} }
+  render();
+  let rt; window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(render,140);});
+  window.addEventListener('load',postH);
+})();
+</script>

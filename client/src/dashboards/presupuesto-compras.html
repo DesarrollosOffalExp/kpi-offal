@@ -65,6 +65,25 @@
   .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:8px 11px;font-size:12px;line-height:1.5;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:280px;}
   .tip.show{opacity:1;transform:none;}
   @media(max-width:900px){ .kpis{grid-template-columns:repeat(2,1fr);} }
+  #detalle td.clk{cursor:pointer;text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px;}
+  #detalle td.clk:hover{background:var(--info-dim);color:#fff;}
+  #detalle td.realcell{color:#fff;font-weight:700;}
+  #detalle tr.idrow>td{background:var(--panel-2);padding:0;border-bottom:1px solid var(--line);}
+  .idet{padding:10px 14px 14px;}
+  .idet .ih{font-size:12px;font-weight:800;color:var(--info);margin:2px 0 8px;display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;}
+  .idet .ih .tot{color:var(--text);font-weight:600;} .idet .ih .badge{font-size:9px;font-weight:800;text-transform:uppercase;background:var(--panel-3);color:var(--muted-2);padding:2px 7px;border-radius:999px;letter-spacing:.03em;}
+  .idet table{width:100%;font-size:11.8px;border-collapse:separate;border-spacing:0;}
+  .idet thead th{position:static;background:var(--panel-3);font-size:9.5px;padding:6px 10px;text-align:right;color:var(--muted);text-transform:uppercase;}
+  .idet thead th:first-child{text-align:left;}
+  .idet tbody td{padding:5px 10px;border-bottom:1px solid var(--line-2);text-align:right;}
+  .idet tbody tr:last-child td{border-bottom:none;}
+  .idet tbody td.di{text-align:left;color:var(--text);font-weight:500;white-space:normal;max-width:520px;}
+  .idet tbody td.df{color:var(--muted-2);white-space:nowrap;}
+  .idet tbody td.dv{color:var(--text);font-weight:600;white-space:nowrap;} .idet tbody td.dv.neg{color:var(--good);}
+  .idet .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;} @media(max-width:760px){.idet .cols{grid-template-columns:1fr;}}
+  .idet .col .ch{font-size:11px;font-weight:800;color:var(--text);margin:0 0 6px;padding-bottom:4px;border-bottom:1px solid var(--line);}
+  .idet .note{margin-top:8px;font-size:10.5px;color:var(--muted-2);}
+  .idet .empty{color:var(--muted-2);font-size:12px;padding:8px 0;}
 </style>
 
 <div class="wrap">
@@ -96,7 +115,7 @@
       <p class="psub" id="det-sub"></p>
     </div>
     <div class="tscroll"><table id="detalle"><thead id="det-head"></thead><tbody id="det-body"></tbody></table></div>
-    <p class="pie">Fuente: <b>PRESUPUESTO COMPRAS.xlsx</b> (SharePoint · Gerencia de Operaciones / Compras). Vista general de la hoja <b>RESUMEN</b>; el detalle sale de la hoja de cada mes (Presupuestado vs. Gasto Real). <b>Desvío</b> = Real − Presupuestado · <b>Ejecución</b> = Real / Presupuestado.</p>
+    <p class="pie">Fuente: <b>Carpeta Presupuesto · GERENCIA DE OPERACIONES (archivos mensuales 01–07 2026)</b> (SharePoint · Gerencia de Operaciones / Presupuesto), hoja <b>Resumen Gerencia</b> — gasto real donde <b>Centro Costo Destino = COMPRAS</b>. Vista general de la hoja <b>RESUMEN</b>; el detalle sale de la hoja de cada mes (Presupuestado vs. Gasto Real). <b>Desvío</b> = Real − Presupuestado · <b>Ejecución</b> = Real / Presupuestado.</p>
   </section>
 </div>
 <div class="tip" id="tip" role="status" aria-live="polite"></div>
@@ -106,6 +125,7 @@
   const RESUMEN={"meses":["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio"],"grupos":[{"g":"MATERIAL","vals":[1553160,7299,856362,36157,15519,1924187,71668]},{"g":"SERVICIOS","vals":[0,1700000,34000,0,0,0,0]},{"g":"FLETES","vals":[0,0,0,0,0,0,0]},{"g":"SERVICIOS PUBLICOS","vals":[0,0,0,0,0,0,0]},{"g":"MO EVENTUAL","vals":[null,0,0,0,0,0,0]},{"g":"MO PROPIA","vals":[0,16020622,15978407,16507581,17620586,17676258,18248802]}]};
   const DETALLE={"Enero":{"grupos":[{"g":"MATERIAL","presup":159720,"real":1553160}]},"Febrero":{"grupos":[{"g":"MATERIAL","presup":164192,"real":7299},{"g":"SERVICIOS","presup":0,"real":1700000},{"g":"FLETES","presup":0,"real":0},{"g":"SERVICIOS PUBLICOS","presup":0,"real":0},{"g":"MO EVENTUAL","presup":0,"real":0},{"g":"MO PROPIA","presup":14573557,"real":16020622}]},"Marzo":{"grupos":[{"g":"MATERIAL","presup":169118,"real":856362},{"g":"SERVICIOS","presup":0,"real":34000},{"g":"FLETES","presup":0,"real":0},{"g":"SERVICIOS PUBLICOS","presup":0,"real":0},{"g":"MO EVENTUAL","presup":0,"real":0},{"g":"MO PROPIA","presup":15010764,"real":15978407}]},"Abril":{"grupos":[{"g":"MATERIAL","presup":174019,"real":36157},{"g":"SERVICIOS","presup":0,"real":0},{"g":"FLETES","presup":0,"real":0},{"g":"SERVICIOS PUBLICOS","presup":0,"real":0},{"g":"MO EVENTUAL","presup":0,"real":0},{"g":"MO PROPIA","presup":15445785,"real":16507581}]},"Mayo":{"grupos":[{"g":"MATERIAL","presup":177500,"real":15519},{"g":"SERVICIOS","presup":0,"real":0},{"g":"FLETES","presup":0,"real":0},{"g":"SERVICIOS PUBLICOS","presup":0,"real":0},{"g":"MO EVENTUAL","presup":0,"real":0},{"g":"MO PROPIA","presup":15754700,"real":17620586}]},"Junio":{"grupos":[{"g":"MATERIAL","presup":199561,"real":1924187},{"g":"SERVICIOS","presup":0,"real":0},{"g":"FLETES","presup":0,"real":0},{"g":"SERVICIOS PUBLICOS","presup":0,"real":0},{"g":"MO EVENTUAL","presup":0,"real":0},{"g":"MO PROPIA","presup":17620000,"real":17676258}]},"Julio":{"grupos":[{"g":"MATERIAL","presup":221047,"real":71668},{"g":"SERVICIOS","presup":0,"real":0},{"g":"FLETES","presup":0,"real":0},{"g":"SERVICIOS PUBLICOS","presup":0,"real":0},{"g":"MO EVENTUAL","presup":0,"real":0},{"g":"MO PROPIA","presup":18130980,"real":18248802}]}};
 
+  const ITEMS={"Enero":{"MATERIAL":{"rec":false,"agg":true,"its":[{"d":"Consolidado del mes (sin desglose de ítems en el archivo)","f":"","v":1553160}],"total":1553160}},"Febrero":{"MATERIAL":{"rec":true,"its":[{"d":"BIDONES DE AGUA","f":"21/02/2026","v":-3649},{"d":"BIDONES DE AGUA","f":"28/02/2026","v":-3649}],"total":-7298},"SERVICIOS":{"rec":true,"its":[{"d":"GI GROUP BUSQUEDA Y SELECCIONPLANIFICADOR DE MANTENIMIENTOANALISTA DE COMPRAS","f":"","v":-1700000}],"total":-1700000},"MO PROPIA":{"rec":true,"its":[{"d":"COMPRAS","f":"","v":-16020622}],"total":-16020622}},"Marzo":{"MATERIAL":{"rec":true,"its":[{"d":"CELULAR GAMA BAJA","f":"03/03/2026","v":-659502},{"d":"CARGADOR TIPO C","f":"03/03/2026","v":-101160},{"d":"GLASS","f":"03/03/2026","v":-42150},{"d":"FUNDA  PARA CELULAR","f":"03/03/2026","v":-42150},{"d":"BIDONES DE AGUA","f":"11/03/2026","v":-3800},{"d":"BIDONES DE AGUA","f":"12/03/2026","v":-3800},{"d":"BIDONES DE AGUA","f":"31/03/2026","v":-3800}],"total":-856362},"SERVICIOS":{"rec":true,"its":[{"d":"COMPRAS","f":"31/03/2026","v":-34000}],"total":-34000},"MO PROPIA":{"rec":true,"its":[{"d":"COMPRAS","f":"31/03/2026","v":-15978407}],"total":-15978407}},"Abril":{"MATERIAL":{"rec":true,"its":[{"d":"RESMAS A4","f":"07/04/2026","v":-15372},{"d":"BIDONES DE AGUA","f":"08/04/2026","v":-3895},{"d":"BIDONES DE AGUA","f":"15/04/2026","v":-3895},{"d":"BIDONES DE AGUA","f":"22/04/2026","v":-3895},{"d":"BIDONES DE AGUA","f":"29/04/2026","v":-3895},{"d":"CUADERNOS RAYADO CHICO","f":"07/04/2026","v":-2283},{"d":"RESALTADORES DE COLORES","f":"07/04/2026","v":-2185},{"d":"LAPICERA AZUL","f":"07/04/2026","v":-737},{"d":"LAPICERA VERDE","f":"07/04/2026","v":0}],"total":-36157},"MO PROPIA":{"rec":true,"its":[{"d":"COMPRAS","f":"30/04/2026","v":-16507581}],"total":-16507581}},"Mayo":{"MATERIAL":{"rec":true,"its":[{"d":"BIDONES DE AGUA","f":"13/05/2026","v":-7760},{"d":"BIDONES DE AGUA","f":"20/05/2026","v":-3880},{"d":"BIDONES DE AGUA","f":"28/05/2026","v":-3880}],"total":-15520},"MO PROPIA":{"rec":false,"agg":true,"its":[{"d":"Nómina propia · asignación del sector","f":"","v":17620586}],"total":17620586}},"Junio":{"MATERIAL":{"rec":true,"its":[{"d":"NOTEBOOK I5","f":"","v":-1862592},{"d":"RESMAS A4","f":"","v":-15243},{"d":"MOUSEPAD","f":"","v":-12573},{"d":"MOUSE INALAMBRICO","f":"","v":-10515},{"d":"SOPORTE NOTEBOOK","f":"","v":-8562},{"d":"BIDONES DE AGUA","f":"","v":-3800},{"d":"BIDONES DE AGUA","f":"","v":-3800},{"d":"LAPICEROS","f":"","v":-1719},{"d":"CUADERNOS RAYADO CHICO","f":"","v":-1566},{"d":"RESALTADORES DE COLORES","f":"","v":-1089},{"d":"GANCHOS 50","f":"","v":-1049},{"d":"LAPIZ HB2","f":"","v":-847},{"d":"REGLA 30CM","f":"","v":-395},{"d":"LAPICERA AZUL","f":"","v":-371},{"d":"GOMAS","f":"","v":-68}],"total":-1924189},"MO PROPIA":{"rec":false,"agg":true,"its":[{"d":"Nómina propia · asignación del sector","f":"","v":17676258}],"total":17676258}},"Julio":{"MATERIAL":{"rec":true,"its":[{"d":"RESMAS A4","f":"31/07/2026","v":-20913},{"d":"SEPARADORES","f":"31/07/2026","v":-19668},{"d":"BIBLIORATOS LOMO ANCHO A4 GRIS","f":"31/07/2026","v":-7404},{"d":"FOLIOS A4","f":"31/07/2026","v":-5960},{"d":"CUADERNOS CUADRICULADO CHICO","f":"31/07/2026","v":-4425},{"d":"CINTA PASACA NYLON 15 MTS 4MM","f":"14/07/2026","v":-4224},{"d":"BIDONES DE AGUA","f":"20/07/2026","v":-3800},{"d":"RESALTADORES DE COLORES","f":"31/07/2026","v":-2240},{"d":"REGLA 30CM","f":"31/07/2026","v":-1220},{"d":"CLIPS CHICOS","f":"31/07/2026","v":-1051},{"d":"LAPICERA AZUL","f":"31/07/2026","v":-763}],"total":-71668},"MO PROPIA":{"rec":false,"agg":true,"its":[{"d":"Nómina propia · asignación del sector","f":"","v":18248802}],"total":18248802}}};
   RESUMEN.grupos.forEach(g=>g.vals=g.vals.map(v=>v==null?null:Math.abs(v)));
   RESUMEN.totales=RESUMEN.meses.map((_,i)=>{ const s=RESUMEN.grupos.reduce((a,g)=>a+(g.vals[i]||0),0); return s||null; });
 
@@ -119,7 +139,7 @@
 
   let mi=RESUMEN.meses.length-1, sortKey='real', sortDir=-1;
   const resGrupos=RESUMEN.grupos.filter(g=>g.vals.some(v=>v));
-  const detGrupos=mes=>(DETALLE[mes]?.grupos||[]).filter(x=>x.presup>0||x.real>0).map(x=>({g:LBL[x.g]||x.g, presup:x.presup, real:x.real}));
+  const detGrupos=mes=>(DETALLE[mes]?.grupos||[]).filter(x=>x.presup>0||x.real>0).map(x=>({g:LBL[x.g]||x.g, gk:x.g, presup:x.presup, real:x.real}));
   const desvio=r=>r.real-r.presup, execPct=r=>r.presup>0?r.real/r.presup*100:null;
 
   function spark(vals){
@@ -139,7 +159,7 @@
     document.getElementById('seg').innerHTML=RESUMEN.meses.map((m,i)=>'<button data-m="'+i+'"'+(i===mi?' class="on"':'')+' role="tab">'+M3(m)+'</button>').join('');
     document.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>selMes(+b.dataset.m));
   }
-  function selMes(i){ mi=i; document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',+x.dataset.m===i)); render(); }
+  function selMes(i){ mi=i; openDetail=null; document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',+x.dataset.m===i)); render(); }
 
   function renderKpis(){
     const real=RESUMEN.totales[mi], presup=detGrupos(RESUMEN.meses[mi]).reduce((a,r)=>a+r.presup,0);
@@ -167,7 +187,7 @@
     document.querySelectorAll('#res-head th.mes').forEach(th=>th.onclick=()=>selMes(+th.dataset.m));
   }
 
-  const DCOLS=[{k:'g',lbl:'Grupo'},{k:'presup',lbl:'Presupuestado'},{k:'real',lbl:'Gasto real'},{k:'desvio',lbl:'Desvío $'},{k:'exec',lbl:'Ejecución'},{k:'estado',lbl:'Estado'}];
+  const DCOLS=[{k:'g',lbl:'Grupo'},{k:'presup',lbl:'Presupuestado'},{k:'real',lbl:'Gasto real'},{k:'dreal',lbl:'Dif. mes ant.'},{k:'desvio',lbl:'Desvío $'},{k:'exec',lbl:'Ejecución'},{k:'estado',lbl:'Estado'}];
   function renderDetalle(){
     const mes=RESUMEN.meses[mi];
     document.getElementById('det-title').textContent='Detalle de '+mes+' · presupuestado vs. real';
@@ -175,22 +195,52 @@
     document.getElementById('det-sub').textContent=rows.length+' grupos · hoja '+M3(mes).toUpperCase()+'-26 · clic en una columna para ordenar.';
     document.getElementById('det-head').innerHTML='<tr>'+DCOLS.map(c=>{const on=c.k===sortKey,ar=on?(sortDir<0?'▼':'▲'):'';return '<th data-k="'+c.k+'" class="'+(on?'sorted':'')+'">'+c.lbl+'<span class="ar">'+ar+'</span></th>';}).join('')+'</tr>';
     rows.sort((a,b)=> sortKey==='g'?sortDir*a.g.localeCompare(b.g,'es'):sortKey==='desvio'?sortDir*(desvio(a)-desvio(b)):sortKey==='exec'?sortDir*((execPct(a)??-1)-(execPct(b)??-1)):sortDir*((a[sortKey]??0)-(b[sortKey]??0)));
+    const prevReal={}; if(mi>0){ detGrupos(RESUMEN.meses[mi-1]).forEach(x=>prevReal[x.gk]=x.real); }
     const body=rows.map(r=>{
       const d=desvio(r),dcls=d>0?'dpos':d<0?'dneg':'zero', e=execPct(r);
+      const pr=mi>0?(prevReal[r.gk]||0):null, dr=pr==null?null:r.real-pr;
+      const drCell=dr==null?'<td class="zero">—</td>':'<td class="clk '+(dr>0?'dpos':dr<0?'dneg':'zero')+'" data-act="diff" data-gk="'+r.gk+'" title="clic: ítems que explican la diferencia">'+(dr>0?'+':'')+money(dr)+'</td>';
+      const detReal=(openDetail&&openDetail.gk===r.gk&&openDetail.act==='real')?detailRowHtml(r.gk,'real'):'';
+      const detDiff=(openDetail&&openDetail.gk===r.gk&&openDetail.act==='diff')?detailRowHtml(r.gk,'diff'):'';
       const desv='<span class="'+dcls+'">'+(d>0?'+':'')+money(d)+(r.presup>0?' <span class="zero">('+pctTxt(d/r.presup*100)+')</span>':'')+'</span>';
       let exec='<span class="zero">—</span>';
       if(e!=null){ const over=e>100; exec='<span class="exec"><span class="track"><span class="fill" style="width:'+Math.min(e,100).toFixed(0)+'%;background:'+(over?'var(--bad)':'var(--good)')+'"></span></span><span class="num '+(over?'dpos':'dneg')+'">'+Math.round(e)+'%</span></span>'; }
       const chip=r.presup<=0?'<span class="chip na">s/ presup.</span>':d>0?'<span class="chip over">Sobre pres.</span>':d<0?'<span class="chip under">Bajo pres.</span>':'<span class="chip na">En línea</span>';
-      return '<tr><td>'+r.g+'</td><td>'+money(r.presup)+'</td><td>'+money(r.real)+'</td><td>'+desv+'</td><td>'+exec+'</td><td>'+chip+'</td></tr>';
+      return '<tr><td>'+r.g+'</td><td>'+money(r.presup)+'</td><td class="clk realcell" data-act="real" data-gk="'+r.gk+'" title="clic: ítems que forman el real">'+money(r.real)+'</td>'+drCell+'<td>'+desv+'</td><td>'+exec+'</td><td>'+chip+'</td></tr>'+detReal+detDiff;
     }).join('');
-    const tp=rows.reduce((a,r)=>a+r.presup,0), tr=rows.reduce((a,r)=>a+r.real,0), td=tr-tp, te=tp>0?tr/tp*100:null;
-    const totRow='<tr class="total"><td>TOTAL</td><td>'+money(tp)+'</td><td>'+money(tr)+'</td><td class="'+(td>0?'dpos':'dneg')+'">'+(td>0?'+':'')+money(td)+'</td><td class="'+(te!=null&&te>100?'dpos':'dneg')+'">'+(te==null?'—':Math.round(te)+'%')+'</td><td>'+(td>0?'<span class="chip over">Sobre pres.</span>':'<span class="chip under">Bajo pres.</span>')+'</td></tr>';
+    const tp=rows.reduce((a,r)=>a+r.presup,0), tr=rows.reduce((a,r)=>a+r.real,0), td=tr-tp, te=tp>0?tr/tp*100:null; const tdr=mi>0?(tr-rows.reduce((a,r)=>a+(prevReal[r.gk]||0),0)):null;
+    const totRow='<tr class="total"><td>TOTAL</td><td>'+money(tp)+'</td><td>'+money(tr)+'</td>'+(tdr==null?'<td class="zero">—</td>':'<td class="'+(tdr>0?'dpos':tdr<0?'dneg':'zero')+'">'+(tdr>0?'+':'')+money(tdr)+'</td>')+'<td class="'+(td>0?'dpos':'dneg')+'">'+(td>0?'+':'')+money(td)+'</td><td class="'+(te!=null&&te>100?'dpos':'dneg')+'">'+(te==null?'—':Math.round(te)+'%')+'</td><td>'+(td>0?'<span class="chip over">Sobre pres.</span>':'<span class="chip under">Bajo pres.</span>')+'</td></tr>';
     document.getElementById('det-body').innerHTML=body+totRow;
-    document.querySelectorAll('#det-head th').forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(k==='estado') return; if(k===sortKey) sortDir=-sortDir; else { sortKey=k; sortDir=(k==='g')?1:-1; } renderDetalle(); if(window.parent!==window)setTimeout(postAlto,30); });
+    document.querySelectorAll('#det-body td.clk').forEach(td=>td.onclick=()=>{ const gk=td.dataset.gk, act=td.dataset.act; openDetail=(openDetail&&openDetail.gk===gk&&openDetail.act===act)?null:{gk,act}; renderDetalle(); if(window.parent!==window)setTimeout(postAlto,30); });
+    document.querySelectorAll('#det-head th').forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(k==='estado'||k==='dreal') return; if(k===sortKey) sortDir=-sortDir; else { sortKey=k; sortDir=(k==='g')?1:-1; } renderDetalle(); if(window.parent!==window)setTimeout(postAlto,30); });
   }
 
   const tip=document.getElementById('tip');
   document.addEventListener('mousemove',e=>{ const el=e.target.closest&&e.target.closest('[data-tip]'); if(el){ tip.textContent=el.getAttribute('data-tip'); tip.classList.add('show'); const r=tip.getBoundingClientRect(); let nx=e.clientX+14,ny=e.clientY+14; if(nx+r.width>innerWidth-8)nx=e.clientX-r.width-14; if(ny+r.height>innerHeight-8)ny=e.clientY-r.height-14; tip.style.left=nx+'px'; tip.style.top=ny+'px'; } else if(tip.classList.contains('show')) tip.classList.remove('show'); });
+
+  const GKLBL={'MATERIAL':'Material','SERVICIOS':'Servicios','FLETES':'Fletes','SERVICIOS PUBLICOS':'Servicios Públicos','MO EVENTUAL':'MO Eventual','MO PROPIA':'MO Propia'};
+  let openDetail=null;
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+  function itemsFor(mes,gk){ return (ITEMS[mes]&&ITEMS[mes][gk])||null; }
+  function itemRowsHtml(list){ if(!list||!list.length) return '<tr><td class="di" colspan="3"><span class="empty">Sin ítems.</span></td></tr>';
+    return list.map(x=>'<tr><td class="di">'+esc(x.d)+'</td><td class="df">'+esc(x.f||'')+'</td><td class="dv'+(x.v<0?' neg':'')+'">'+money(x.v)+'</td></tr>').join(''); }
+  function detailRowHtml(gk,act){
+    const mes=RESUMEN.meses[mi], cur=itemsFor(mes,gk), title=GKLBL[gk]||gk;
+    let inner='';
+    if(act==='real'){
+      const tot=cur?Math.abs(cur.total):0, n=cur?cur.its.length:0, badge=cur&&cur.rec?'':'<span class="badge">consolidado</span>';
+      inner='<div class="ih">Ítems que forman el gasto real · '+title+' · '+mes+' <span class="tot">— Total '+money(tot)+' · '+n+' ítem(s)</span> '+badge+'</div>'
+        +'<table><thead><tr><th>Detalle</th><th>Fecha</th><th>Importe</th></tr></thead><tbody>'+itemRowsHtml(cur&&cur.its)+'</tbody></table>'
+        +((cur&&cur.its.some(x=>x.v<0))?'<div class="note">Valores negativos = consumo/egreso; positivos = ingreso/devolución (reporte de consumos).</div>':'');
+    } else {
+      const pmes=RESUMEN.meses[mi-1], prev=itemsFor(pmes,gk);
+      const cR=cur?Math.abs(cur.total):0, pR=prev?Math.abs(prev.total):0, diff=cR-pR;
+      inner='<div class="ih">Ítems que explican la diferencia · '+title+' <span class="tot">— '+mes+' ('+money(cR)+') vs '+pmes+' ('+money(pR)+') = <b class="'+(diff>0?"dpos":"dneg")+'">'+(diff>0?'+':'')+money(diff)+'</b></span></div>'
+        +'<div class="cols"><div class="col"><div class="ch">'+mes+' · '+money(cR)+'</div><table><tbody>'+itemRowsHtml(cur&&cur.its)+'</tbody></table></div>'
+        +'<div class="col"><div class="ch">'+pmes+' · '+money(pR)+'</div><table><tbody>'+itemRowsHtml(prev&&prev.its)+'</tbody></table></div></div>';
+    }
+    return '<tr class="idrow"><td colspan="'+DCOLS.length+'"><div class="idet">'+inner+'</div></td></tr>';
+  }
 
   function render(){ renderKpis(); renderResumen(); renderDetalle(); if(window.parent!==window)setTimeout(postAlto,30); }
   renderSeg(); render();

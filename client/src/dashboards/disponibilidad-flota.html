@@ -58,6 +58,26 @@
   .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:8px 11px;font-size:12px;line-height:1.5;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:280px;}
   .tip.show{opacity:1;transform:none;}
   .pie{margin-top:14px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
+  /* Unidades paradas — formato elegante */
+  #par thead th{background:linear-gradient(180deg,var(--panel-3),var(--panel-2));border-bottom:2px solid var(--line-2);}
+  #par tbody tr:nth-child(even) td{background:rgba(255,255,255,.015);}
+  #par tbody tr:hover td{background:rgba(38,182,217,.06);}
+  #par tbody td{padding:9px 13px;vertical-align:middle;}
+  .plate{display:inline-flex;align-items:center;font-family:ui-monospace,"Cascadia Code",Consolas,monospace;font-weight:700;font-size:12px;letter-spacing:.07em;color:#fff;background:linear-gradient(180deg,var(--panel-3),var(--panel-2));border:1px solid var(--line-2);border-left:3px solid var(--info);border-radius:6px;padding:4px 10px;box-shadow:0 1px 2px rgba(0,0,0,.3);}
+  .tp{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-weight:700;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;}
+  .tp.tractor{background:rgba(38,182,217,.13);color:var(--info);box-shadow:inset 0 0 0 1px rgba(38,182,217,.22);}
+  .tp.semi{background:rgba(245,166,35,.13);color:var(--amber);box-shadow:inset 0 0 0 1px rgba(245,166,35,.22);}
+  .tp.otro{background:rgba(139,160,171,.13);color:var(--muted);}
+  .tag{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-weight:600;font-size:12px;}
+  .tag .tdot{width:7px;height:7px;border-radius:50%;background:var(--muted-2);flex:none;}
+  .tag.taller .tdot{background:var(--amber);box-shadow:0 0 6px 1px rgba(245,166,35,.6);} .tag.taller{color:#e9d6ad;}
+  .tag.zucars .tdot{background:var(--info);box-shadow:0 0 6px 1px rgba(38,182,217,.55);} .tag.zucars{color:#bfe6f2;}
+  .tag.hielo .tdot{background:var(--good);box-shadow:0 0 6px 1px rgba(34,227,155,.55);} .tag.hielo{color:#bff2df;}
+  .obsc{color:var(--muted);font-weight:500;}
+  .dnum{display:inline-flex;align-items:center;justify-content:center;min-width:30px;padding:3px 9px;border-radius:8px;font-weight:800;font-size:12.5px;}
+  .dnum.lo{background:rgba(34,227,155,.14);color:var(--good);}
+  .dnum.mid{background:rgba(245,166,35,.16);color:var(--amber);}
+  .dnum.hi{background:rgba(255,77,103,.16);color:var(--bad);box-shadow:inset 0 0 0 1px rgba(255,77,103,.28);}
 </style>
 
 <div class="wrap">
@@ -176,7 +196,10 @@
     const w=W[wi];
     document.getElementById('par-title').textContent='Unidades paradas · '+w.label;
     document.getElementById('par-sub').textContent=w.paradas+' unidades ('+w.desde+'–'+w.hasta+') · desde BASE DE DATOS';
-    document.getElementById('par-body').innerHTML=w.unidades.map(u=>'<tr><td>'+u.dom+'</td><td style="text-align:left">'+u.tipo+'</td><td class="wrap">'+(u.obs||'—')+'</td><td class="wrap">'+(u.destino||'—')+'</td><td>'+u.dias+'</td></tr>').join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:14px">Sin paradas.</td></tr>';
+    const tipoPill=t=>{const u=(t||'').toUpperCase();const c=u.indexOf('TRACTOR')>=0?'tractor':(u.indexOf('SEMI')>=0?'semi':'otro');return '<span class="tp '+c+'">'+(t||'—')+'</span>';};
+    const destTag=v=>{if(!v)return '<span class="tag"><span class="tdot"></span>—</span>';const t=v.toUpperCase();let c='';if(t.indexOf('TALLER')>=0)c='taller';else if(t.indexOf('ZUCARS')>=0)c='zucars';else if(t.indexOf('HIELO')>=0)c='hielo';return '<span class="tag '+c+'"><span class="tdot"></span>'+v+'</span>';};
+    const diasBadge=d=>{d=+d||0;const c=d>=8?'hi':(d>=5?'mid':'lo');return '<span class="dnum '+c+'">'+d+'</span>';};
+    document.getElementById('par-body').innerHTML=w.unidades.map(u=>'<tr><td><span class="plate">'+u.dom+'</span></td><td style="text-align:left">'+tipoPill(u.tipo)+'</td><td class="wrap obsc">'+(u.obs||'—')+'</td><td class="wrap" style="text-align:right">'+destTag(u.destino)+'</td><td>'+diasBadge(u.dias)+'</td></tr>').join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:14px">Sin paradas.</td></tr>';
   }
 
   function renderRoster(){

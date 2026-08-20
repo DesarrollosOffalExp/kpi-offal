@@ -1,0 +1,174 @@
+<title>Eficiencia de Materiales</title>
+<style>
+  :root{
+    --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
+    --line:#23353f; --line-2:#2c414d;
+    --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
+    --brand:#e11f46; --brand-dim:rgba(225,31,70,.13); --brand-line:rgba(225,31,70,.45);
+    --info:#26b6d9; --info-dim:rgba(38,182,217,.14); --good:#22e39b; --bad:#ff4d67; --amber:#f5a623;
+    --radius:12px;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.4;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 40px;}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px;}
+  .overline{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--info);margin:0 0 5px;}
+  h1{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .sub{font-size:12.5px;color:var(--muted);margin:5px 0 0;max-width:680px;}
+  .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:9px;}
+  .fuente{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;}
+  .fuente::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--info);box-shadow:0 0 7px 1px rgba(38,182,217,.7);}
+  .filtro{display:flex;align-items:center;gap:8px;}
+  .filtro label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  select{appearance:none;background:var(--panel-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238ba0ab' stroke-width='3' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>") no-repeat right 10px center;border:1px solid var(--line);border-radius:8px;color:var(--text);font:inherit;font-size:13px;font-weight:600;padding:8px 30px 8px 12px;cursor:pointer;}
+  select:focus{outline:none;border-color:var(--info);}
+  .sec-title{display:flex;align-items:center;gap:10px;margin:6px 0 12px;}
+  .sec-title h2{font-size:16px;font-weight:800;margin:0;letter-spacing:-.01em;}
+  .sec-title .ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+  .sec-title .ic.r{background:var(--info-dim);color:var(--info);} .sec-title .ic.e{background:rgba(34,227,155,.14);color:var(--good);}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:16px;}
+  .kpi{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--panel) 0%,var(--panel-2) 135%);border:1px solid var(--line);border-radius:13px;padding:15px 16px;box-shadow:0 1px 2px rgba(0,0,0,.25),0 12px 26px -16px rgba(0,0,0,.6);}
+  .kpi.hero{border-color:var(--brand-line);background:linear-gradient(135deg,var(--brand-dim) 0%,var(--panel) 60%,var(--panel-2) 130%);border-top:3px solid var(--brand);}
+  .kpi.good{border-top:3px solid var(--good);} .kpi.info{border-top:3px solid var(--info);} .kpi.bad{border-top:3px solid var(--bad);}
+  .kpi .kl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .kpi .kv{font-size:27px;font-weight:800;letter-spacing:-.03em;line-height:1;color:#fff;margin-top:8px;}
+  .kpi .kd{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:5px;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 18px;margin-bottom:16px;}
+  .panel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+  .panel h3{font-size:14.5px;font-weight:800;margin:0;}
+  .panel .psub{font-size:11.5px;color:var(--muted);margin:2px 0 0;}
+  .cols2{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;} @media(max-width:900px){ .cols2{grid-template-columns:1fr;} .kpis{grid-template-columns:repeat(2,1fr);} }
+  .tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;white-space:nowrap;}
+  thead th{text-align:right;font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding:9px 12px;background:var(--panel-2);border-bottom:1px solid var(--line);}
+  thead th:first-child{text-align:left;}
+  tbody td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:right;}
+  tbody td:first-child{text-align:left;color:var(--text);font-weight:600;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr.sel td{background:var(--info-dim);color:#fff;}
+  .divider{height:1px;background:var(--line);margin:24px 0 20px;}
+  .chart{width:100%;}
+  .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:9px 12px;font-size:12.5px;line-height:1.55;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:250px;}
+  .tip.show{opacity:1;transform:none;}
+  .pie{margin-top:12px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <p class="overline">Offal · Insumos</p>
+      <h1>Eficiencia de Materiales</h1>
+      <p class="sub">Eficiencia en la <b>recepción</b> y en la <b>entrega</b> de materiales, mes a mes. Elegí el mes para las tarjetas; los gráficos muestran todos los meses.</p>
+    </div>
+    <div class="head-right"><span class="fuente">Datos reales · Indicadores Insumos (hojas 5 y 7)</span>
+      <div class="filtro"><label>Mes</label><select id="selMes"></select></div></div>
+  </header>
+
+  <!-- ===== RECEPCIÓN ===== -->
+  <div class="sec-title"><span class="ic r">📥</span><h2>Eficiencia en la Recepción de Materiales</h2></div>
+  <section class="kpis" id="kpis-r"></section>
+  <div class="cols2">
+    <section class="panel">
+      <div class="panel-head"><div><h3>Eficiencia en la Recepción (%) · mes a mes</h3><p class="psub">Clic en una barra para seleccionar el mes.</p></div></div>
+      <div class="chart" id="chart-r"></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><h3>Detalle mensual</h3></div></div>
+      <div class="tscroll"><table id="tab-r"><thead><tr><th>Mes</th><th>Horas trab.</th><th>Recepciones</th><th>Con error</th><th>Eficiencia</th></tr></thead><tbody id="tb-r"></tbody></table></div>
+    </section>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ===== ENTREGA ===== -->
+  <div class="sec-title"><span class="ic e">📤</span><h2>Eficiencia en la Entrega de Materiales</h2></div>
+  <section class="kpis" id="kpis-e"></section>
+  <div class="cols2">
+    <section class="panel">
+      <div class="panel-head"><div><h3>Eficiencia en la Entrega (%) · mes a mes</h3><p class="psub">Clic en una barra para seleccionar el mes.</p></div></div>
+      <div class="chart" id="chart-e"></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><h3>Detalle mensual</h3></div></div>
+      <div class="tscroll"><table id="tab-e"><thead><tr><th>Mes</th><th>Egresos</th><th>Diferencias</th><th>Eficiencia</th></tr></thead><tbody id="tb-e"></tbody></table></div>
+    </section>
+  </div>
+  <p class="pie">Fuente: <b>Indicadores Insumos - 2026.xlsx</b> (SharePoint · Insumos). Recepción (hoja <b>5</b>): eficiencia = 1 − (recepciones con error ÷ total de recepciones). Entrega (hoja <b>7</b>): eficiencia = 1 − (diferencias ÷ egresos).</p>
+</div>
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  const R = {"meses":[{"mes":1,"mesNom":"Enero","horas":730.13,"total":160,"error":0,"efic":1},{"mes":2,"mesNom":"Febrero","horas":440.3,"total":135,"error":0,"efic":1},{"mes":3,"mesNom":"Marzo","horas":1705.67,"total":150,"error":0,"efic":1},{"mes":4,"mesNom":"Abril","horas":790.92,"total":183,"error":0,"efic":1},{"mes":5,"mesNom":"Mayo","horas":869.95,"total":141,"error":0,"efic":1},{"mes":6,"mesNom":"Junio","horas":832.37,"total":186,"error":0,"efic":1},{"mes":7,"mesNom":"Julio","horas":783.28,"total":195,"error":0,"efic":1}],"ultima":7};   // recepción
+  const E = {"meses":[{"mes":1,"mesNom":"Enero","egresos":1134,"dif":3,"efic":0.9974},{"mes":2,"mesNom":"Febrero","egresos":811,"dif":3,"efic":0.9963},{"mes":3,"mesNom":"Marzo","egresos":962,"dif":21,"efic":0.9782},{"mes":4,"mesNom":"Abril","egresos":1102,"dif":23,"efic":0.9791},{"mes":5,"mesNom":"Mayo","egresos":1133,"dif":6,"efic":0.9947},{"mes":6,"mesNom":"Junio","egresos":1152,"dif":5,"efic":0.9957},{"mes":7,"mesNom":"Julio","egresos":1303,"dif":0,"efic":1}],"ultima":7};   // entrega
+  const nf=new Intl.NumberFormat('es-AR');
+  const RM=R.meses, EM=E.meses;
+  let mi = RM.findIndex(x=>x.mes===R.ultima); if(mi<0) mi=RM.length-1;
+
+  const pc=e=>e==null?'—':(e*100).toFixed(2)+'%';
+  const hm=h=>{ if(h==null) return '—'; const H=Math.floor(h), M=Math.round((h-H)*60); return H+':'+String(M).padStart(2,'0'); };
+  function efColor(e){ if(e==null) return 'var(--muted-2)'; return e>=0.995?'var(--good)':e>=0.98?'var(--amber)':'var(--bad)'; }
+
+  // selector
+  const sel=document.getElementById('selMes');
+  sel.innerHTML=RM.map((x,i)=>'<option value="'+i+'"'+(i===mi?' selected':'')+'>'+x.mesNom+'</option>').join('');
+  sel.addEventListener('change',e=>{ mi=+e.target.value; render(); });
+
+  // tooltip
+  const tip=document.getElementById('tip');
+  function showTip(h,e){ tip.innerHTML=h; tip.classList.add('show'); moveTip(e); }
+  function moveTip(e){ let x=e.clientX+14,y=e.clientY+14; const w=tip.offsetWidth,hh=tip.offsetHeight; if(x+w>innerWidth-8)x=e.clientX-w-14; if(y+hh>innerHeight-8)y=e.clientY-hh-14; tip.style.left=x+'px'; tip.style.top=y+'px'; }
+  function hideTip(){ tip.classList.remove('show'); }
+
+  function cards(el, list){ document.getElementById(el).innerHTML=list.map(c=>'<div class="kpi '+(c.cls||'')+'"><div class="kl">'+c.l+'</div><div class="kv"'+(c.color?' style="color:'+c.color+'"':'')+'>'+c.v+'</div><div class="kd">'+c.d+'</div></div>').join(''); }
+
+  function drawBars(elId, list, valFn, tipFn){
+    const el=document.getElementById(elId); const wpx=el.clientWidth||600,H=250,padL=44,padR=12,padT=18,padB=30;
+    const iw=wpx-padL-padR, ih=H-padT-padB, n=list.length, slot=iw/n, bw=Math.min(46,slot*0.55);
+    const vals=list.map(valFn); const mn=Math.min(...vals); const lo=Math.max(0, Math.floor((mn*100)-1)/100), hi=1;
+    const y=v=>padT+ih-((v-lo)/(hi-lo))*ih, cx=i=>padL+slot*i+slot/2;
+    let g=''; const steps=4;
+    for(let s=0;s<=steps;s++){ const val=lo+(hi-lo)*s/steps, yy=y(val); g+='<line x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(wpx-padR)+'" y2="'+yy.toFixed(1)+'" stroke="var(--line)" '+(s?'stroke-dasharray="3 4"':'')+'/>'; g+='<text x="'+(padL-7)+'" y="'+(yy+3.5).toFixed(1)+'" text-anchor="end" font-size="9.5" fill="var(--muted-2)">'+(val*100).toFixed(1)+'%</text>'; }
+    list.forEach((x,i)=>{ const v=valFn(x); const by=y(v), bh=padT+ih-by; const col=efColor(v); const selc=i===mi;
+      g+='<rect x="'+(cx(i)-bw/2).toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(bh,1).toFixed(1)+'" rx="4" fill="'+col+'" fill-opacity="'+(selc?1:0.72)+'"'+(selc?' stroke="#fff" stroke-width="1.2"':'')+'/>';
+      g+='<text x="'+cx(i).toFixed(1)+'" y="'+(by-6).toFixed(1)+'" text-anchor="middle" font-size="10.5" font-weight="800" fill="'+col+'">'+(v*100).toFixed(v>=0.9995?0:1)+'%</text>';
+      g+='<text x="'+cx(i).toFixed(1)+'" y="'+(padT+ih+15).toFixed(1)+'" text-anchor="middle" font-size="10" fill="'+(selc?'#fff':'var(--muted)')+'">'+x.mesNom.slice(0,3)+'</text>';
+      g+='<rect x="'+(padL+slot*i).toFixed(1)+'" y="'+padT+'" width="'+slot.toFixed(1)+'" height="'+ih+'" fill="transparent" style="cursor:pointer" data-i="'+i+'"/>';
+    });
+    el.innerHTML='<svg viewBox="0 0 '+wpx+' '+H+'" width="100%" height="'+H+'">'+g+'</svg>';
+    el.querySelectorAll('rect[data-i]').forEach(r=>{ const i=+r.getAttribute('data-i');
+      r.addEventListener('mouseenter',e=>showTip(tipFn(list[i]),e)); r.addEventListener('mousemove',moveTip); r.addEventListener('mouseleave',hideTip);
+      r.addEventListener('click',()=>{ mi=i; sel.value=i; render(); }); });
+  }
+
+  function render(){
+    const r=RM[mi], e=EM[mi];
+    // cards recepción
+    cards('kpis-r',[
+      {l:'Eficiencia en recepción', v:pc(r.efic), d:r.mesNom+' · recepciones OK', cls:'hero', color:efColor(r.efic)},
+      {l:'Total de recepciones', v:nf.format(r.total), d:'recepciones del mes', cls:'info'},
+      {l:'Recepciones con error', v:nf.format(r.error), d:'con diferencia', cls:'bad'},
+      {l:'Horas trabajadas', v:hm(r.horas)+' h', d:'facturadas · depósito', cls:''}
+    ]);
+    // cards entrega
+    cards('kpis-e',[
+      {l:'Eficiencia en entrega', v:pc(e.efic), d:e.mesNom+' · egresos OK', cls:'hero', color:efColor(e.efic)},
+      {l:'Cantidad de egresos', v:nf.format(e.egresos), d:'egresos del mes', cls:'info'},
+      {l:'Cantidad de diferencias', v:nf.format(e.dif), d:'egresos con diferencia', cls:'bad'},
+      {l:'Egresos correctos', v:nf.format(e.egresos-e.dif), d:'sin diferencia', cls:'good'}
+    ]);
+    // tablas
+    document.getElementById('tb-r').innerHTML=RM.map((x,i)=>'<tr class="'+(i===mi?'sel':'')+'"><td>'+x.mesNom+'</td><td>'+hm(x.horas)+'</td><td>'+nf.format(x.total)+'</td><td>'+nf.format(x.error)+'</td><td style="font-weight:800;color:'+efColor(x.efic)+'">'+pc(x.efic)+'</td></tr>').join('');
+    document.getElementById('tb-e').innerHTML=EM.map((x,i)=>'<tr class="'+(i===mi?'sel':'')+'"><td>'+x.mesNom+'</td><td>'+nf.format(x.egresos)+'</td><td>'+nf.format(x.dif)+'</td><td style="font-weight:800;color:'+efColor(x.efic)+'">'+pc(x.efic)+'</td></tr>').join('');
+    // charts
+    drawBars('chart-r', RM, x=>x.efic, x=>'<b>'+x.mesNom+'</b>\nEficiencia: '+pc(x.efic)+'\nRecepciones: '+nf.format(x.total)+'\nCon error: '+nf.format(x.error));
+    drawBars('chart-e', EM, x=>x.efic, x=>'<b>'+x.mesNom+'</b>\nEficiencia: '+pc(x.efic)+'\nEgresos: '+nf.format(x.egresos)+'\nDiferencias: '+nf.format(x.dif));
+    postH();
+  }
+  function postH(){ try{ parent.postMessage({tipo:'matriz-alto', alto:document.body.scrollHeight}, '*'); }catch(e){} }
+  render();
+  let rt; window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(render,140);});
+  window.addEventListener('load',postH);
+})();
+</script>
