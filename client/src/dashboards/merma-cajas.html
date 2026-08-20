@@ -1,0 +1,164 @@
+<title>Merma de Cajas</title>
+<style>
+  :root{
+    --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
+    --line:#23353f; --line-2:#2c414d;
+    --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
+    --brand:#e11f46; --brand-dim:rgba(225,31,70,.13); --brand-line:rgba(225,31,70,.45);
+    --info:#26b6d9; --info-dim:rgba(38,182,217,.14); --good:#22e39b; --bad:#ff4d67; --amber:#f5a623;
+    --radius:12px;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.4;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 40px;}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px;}
+  .overline{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--info);margin:0 0 5px;}
+  h1{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .sub{font-size:12.5px;color:var(--muted);margin:5px 0 0;max-width:680px;}
+  .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:9px;}
+  .fuente{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;}
+  .fuente::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--info);box-shadow:0 0 7px 1px rgba(38,182,217,.7);}
+  .filtro{display:flex;align-items:center;gap:8px;}
+  .filtro label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  select{appearance:none;background:var(--panel-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238ba0ab' stroke-width='3' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>") no-repeat right 10px center;border:1px solid var(--line);border-radius:8px;color:var(--text);font:inherit;font-size:13px;font-weight:600;padding:8px 30px 8px 12px;cursor:pointer;}
+  select:focus{outline:none;border-color:var(--info);}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px;}
+  .kpi{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--panel) 0%,var(--panel-2) 135%);border:1px solid var(--line);border-radius:13px;padding:15px 16px;box-shadow:0 1px 2px rgba(0,0,0,.25),0 12px 26px -16px rgba(0,0,0,.6);}
+  .kpi.hero{border-color:var(--brand-line);background:linear-gradient(135deg,var(--brand-dim) 0%,var(--panel) 60%,var(--panel-2) 130%);border-top:3px solid var(--brand);}
+  .kpi.info{border-top:3px solid var(--info);} .kpi.bad{border-top:3px solid var(--bad);}
+  .kpi .kl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .kpi .kv{font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1;color:#fff;margin-top:8px;}
+  .kpi .kd{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:5px;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 18px;margin-bottom:16px;}
+  .panel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+  .panel h3{font-size:15px;font-weight:800;margin:0;}
+  .panel .psub{font-size:11.5px;color:var(--muted);margin:2px 0 0;}
+  .tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;white-space:nowrap;}
+  thead th{position:sticky;top:0;z-index:2;text-align:right;font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding:9px 12px;background:var(--panel-2);border-bottom:1px solid var(--line);cursor:pointer;user-select:none;}
+  thead th:first-child,thead th.l{text-align:left;} thead th:hover{color:var(--text);}
+  thead th .ar{opacity:0;margin-left:4px;font-size:9px;} thead th.sorted{color:#fff;} thead th.sorted .ar{opacity:1;color:var(--info);}
+  tbody td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:right;}
+  tbody td.l{text-align:left;color:var(--text);font-weight:600;}
+  tbody td.tipo{text-align:left;color:var(--muted);font-weight:500;white-space:normal;max-width:280px;}
+  tbody tr:hover td{background:rgba(255,255,255,.025);}
+  tbody tr.tot td{font-weight:800;color:#fff;border-top:2px solid var(--line-2);border-bottom:none;background:var(--panel-3);}
+  .kpibar{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end;}
+  .kpibar .track{position:relative;width:56px;height:7px;background:var(--panel-3);border-radius:5px;overflow:hidden;}
+  .kpibar .fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;}
+  .kpibar .num{min-width:46px;font-weight:800;}
+  .zero{color:var(--muted-2);}
+  .chart{width:100%;}
+  .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:9px 12px;font-size:12.5px;line-height:1.55;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:260px;}
+  .tip.show{opacity:1;transform:none;}
+  .pie{margin-top:12px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
+  @media(max-width:820px){ .kpis{grid-template-columns:repeat(2,1fr);} }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <p class="overline">Offal · Insumos</p>
+      <h1>Merma de Cajas</h1>
+      <p class="sub">Planchas utilizadas vs. cajas producidas por tipo de caja. <b>Merma (KPI) = (Planchas − Producidas) ÷ Producidas</b>. Elegí el mes; abajo, la evolución de la merma total.</p>
+    </div>
+    <div class="head-right"><span class="fuente">Datos reales · Indicadores Insumos (Consumos Depósito + Producción)</span>
+      <div class="filtro"><label>Mes</label><select id="selMes"></select></div></div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="panel">
+    <div class="panel-head"><div><h3 id="tab-title">Merma por tipo de caja</h3><p class="psub" id="tab-sub"></p></div></div>
+    <div class="tscroll"><table id="tab"><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><div><h3>Evolución de la merma total por mes</h3><p class="psub">KPI total (columna G) mes a mes · pasá el mouse por cada barra · clic para seleccionar el mes.</p></div></div>
+    <div class="chart" id="chart"></div>
+    <p class="pie">Fuente: <b>Indicadores Insumos - 2026.xlsx</b> (SharePoint · Insumos), hoja <b>2</b> (tabla filas 8–23). <b>Planchas utilizadas</b> (col. D) desde <b>Consumos Depósito</b> (SUMIFS por mes, código y proceso); <b>Cajas producidas</b> (col. E) desde <b>Producción</b>. KPI = diferencia ÷ producidas.</p>
+  </section>
+</div>
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  const DATA = {"meses":[{"mes":1,"mesNom":"Enero","rows":[{"n":"N° 1","code":"EMP-CCR-0001","tipo":"GENERICA CHICA OFFAL","D":221319,"E":218134,"F":3185,"G":0.0146,"vacio":false},{"n":"N° 2","code":"EMP-CCR-0002","tipo":"GENERICA MEDIANA OFFAL","D":null,"E":null,"F":null,"G":null,"vacio":true},{"n":"N° 3","code":"EMP-CCR-0003","tipo":"GENERICA GRANDE OFFAL","D":164418,"E":161551,"F":2867,"G":0.0177,"vacio":false},{"n":"N° 4","code":"EMP-CCR-0004","tipo":"FONDOS MANUALES","D":43183,"E":43074,"F":109,"G":0.0025,"vacio":false},{"n":"N° 5","code":"EMP-CCR-0005","tipo":"TAPA DRAGON OFFAL","D":0,"E":null,"F":null,"G":null,"vacio":false},{"n":"N° 6","code":"EMP-CCR-0006","tipo":"TAPA SANTA MARTA / TAPA TORO / TAPA USA","D":43604,"E":43074,"F":530,"G":0.0123,"vacio":false},{"n":"N° 7","code":"EMP-CCR-0007","tipo":"GENERICA GRANDE DRAGON OFFAL","D":25680,"E":25214,"F":466,"G":0.0185,"vacio":false},{"n":"N° 8","code":"EMP-CCR-0008","tipo":"GENERICA GRANDE SANTA MARTA","D":13973,"E":13812,"F":161,"G":0.0117,"vacio":false},{"n":"N° 9","code":"EMP-CCR-0009","tipo":"GENERICA GRANDE SANTA CASILDA MARRON","D":11351,"E":11259,"F":92,"G":0.0082,"vacio":false},{"n":"N° 10","code":"EMP-CCR-0010","tipo":"GENERICA MEDIANA SANTA CASILDA BLANCA","D":8697,"E":7987,"F":710,"G":0.0889,"vacio":false},{"n":"N° 11","code":"EMP-CCR-0011","tipo":"GENERICA CHICA LISA","D":0,"E":0,"F":0,"G":null,"vacio":false},{"n":"N° 12","code":"EMP-CCR-0012","tipo":"GENERICA CHICA LISA","D":0,"E":0,"F":0,"G":null,"vacio":false},{"n":"N° 13","code":"EMP-CCR-0013","tipo":"FONDO TAVIL 560X380X145 MM","D":13725,"E":13455,"F":270,"G":0.0201,"vacio":false},{"n":"N° 14","code":"EMP-CCR-0014","tipo":"TAPA TAVIL 587X395X145 MM DRAGON","D":13733,"E":13455,"F":278,"G":0.0207,"vacio":false}],"total":{"D":559683,"E":551015,"F":8668,"G":0.0157}},{"mes":2,"mesNom":"Febrero","rows":[{"n":"N° 1","code":"EMP-CCR-0001","tipo":"GENERICA CHICA OFFAL","D":195259,"E":191594,"F":3665,"G":0.0191,"vacio":false},{"n":"N° 2","code":"EMP-CCR-0002","tipo":"GENERICA MEDIANA OFFAL","D":null,"E":null,"F":null,"G":null,"vacio":true},{"n":"N° 3","code":"EMP-CCR-0003","tipo":"GENERICA GRANDE OFFAL","D":149461,"E":144157,"F":5304,"G":0.0368,"vacio":false},{"n":"N° 4","code":"EMP-CCR-0004","tipo":"FONDOS MANUALES","D":42938,"E":42016,"F":922,"G":0.0219,"vacio":false},{"n":"N° 5","code":"EMP-CCR-0005","tipo":"TAPA DRAGON OFFAL","D":0,"E":null,"F":null,"G":null,"vacio":false},{"n":"N° 6","code":"EMP-CCR-0006","tipo":"TAPA SANTA MARTA / TAPA TORO / TAPA USA","D":42648,"E":42016,"F":632,"G":0.015,"vacio":false},{"n":"N° 7","code":"EMP-CCR-0007","tipo":"GENERICA GRANDE DRAGON OFFAL","D":24252,"E":23487,"F":765,"G":0.0326,"vacio":false},{"n":"N° 8","code":"EMP-CCR-0008","tipo":"GENERICA GRANDE SANTA MARTA","D":12837,"E":12405,"F":432,"G":0.0348,"vacio":false},{"n":"N° 9","code":"EMP-CCR-0009","tipo":"GENERICA GRANDE SANTA CASILDA MARRON","D":7712,"E":7463,"F":249,"G":0.0334,"vacio":false},{"n":"N° 10","code":"EMP-CCR-0010","tipo":"GENERICA MEDIANA SANTA CASILDA BLANCA","D":8375,"E":8299,"F":76,"G":0.0092,"vacio":false},{"n":"N° 11","code":"EMP-CCR-0011","tipo":"GENERICA CHICA LISA","D":0,"E":0,"F":0,"G":null,"vacio":false},{"n":"N° 12","code":"EMP-CCR-0012","tipo":"GENERICA CHICA LISA","D":0,"E":0,"F":0,"G":null,"vacio":false},{"n":"N° 13","code":"EMP-CCR-0013","tipo":"FONDO TAVIL 560X380X145 MM","D":12170,"E":11990,"F":180,"G":0.015,"vacio":false},{"n":"N° 14","code":"EMP-CCR-0014","tipo":"TAPA TAVIL 587X395X145 MM DRAGON","D":12825,"E":11990,"F":835,"G":0.0696,"vacio":false}],"total":{"D":508477,"E":495417,"F":13060,"G":0.0264}},{"mes":3,"mesNom":"Marzo","rows":[{"n":"N° 1","code":"EMP-CCR-0001","tipo":"GENERICA CHICA OFFAL","D":204393,"E":199953,"F":4440,"G":0.0222,"vacio":false},{"n":"N° 2","code":"EMP-CCR-0002","tipo":"GENERICA MEDIANA OFFAL","D":null,"E":null,"F":null,"G":null,"vacio":true},{"n":"N° 3","code":"EMP-CCR-0003","tipo":"GENERICA GRANDE OFFAL","D":164502,"E":160897,"F":3605,"G":0.0224,"vacio":false},{"n":"N° 4","code":"EMP-CCR-0004","tipo":"FONDOS MANUALES","D":48943,"E":48577,"F":366,"G":0.0075,"vacio":false},{"n":"N° 5","code":"EMP-CCR-0005","tipo":"TAPA DRAGON OFFAL","D":0,"E":null,"F":null,"G":null,"vacio":false},{"n":"N° 6","code":"EMP-CCR-0006","tipo":"TAPA SANTA MARTA / TAPA TORO / TAPA USA","D":48659,"E":48577,"F":82,"G":0.0017,"vacio":false},{"n":"N° 7","code":"EMP-CCR-0007","tipo":"GENERICA GRANDE DRAGON OFFAL","D":27612,"E":26898,"F":714,"G":0.0265,"vacio":false},{"n":"N° 8","code":"EMP-CCR-0008","tipo":"GENERICA GRANDE SANTA MARTA","D":14456,"E":13880,"F":576,"G":0.0415,"vacio":false},{"n":"N° 9","code":"EMP-CCR-0009","tipo":"GENERICA GRANDE SANTA CASILDA MARRON","D":11526,"E":11133,"F":393,"G":0.0353,"vacio":false},{"n":"N° 10","code":"EMP-CCR-0010","tipo":"GENERICA MEDIANA SANTA CASILDA BLANCA","D":13112,"E":12462,"F":650,"G":0.0522,"vacio":false},{"n":"N° 11","code":"EMP-CCR-0011","tipo":"GENERICA CHICA LISA","D":0,"E":0,"F":0,"G":null,"vacio":false},{"n":"N° 12","code":"EMP-CCR-0012","tipo":"GENERICA CHICA LISA","D":0,"E":0,"F":0,"G":null,"vacio":false},{"n":"N° 13","code":"EMP-CCR-0013","tipo":"FONDO TAVIL 560X380X145 MM","D":14792,"E":14716,"F":76,"G":0.0052,"vacio":false},{"n":"N° 14","code":"EMP-CCR-0014","tipo":"TAPA TAVIL 587X395X145 MM DRAGON","D":15468,"E":14716,"F":752,"G":0.0511,"vacio":false}],"total":{"D":563463,"E":551809,"F":11654,"G":0.0211}},{"mes":4,"mesNom":"Abril","rows":[{"n":"N° 1","code":"EMP-CCR-0001","tipo":"GENERICA CHICA OFFAL","D":147024,"E":144156,"F":2868,"G":0.0199,"vacio":false},{"n":"N° 2","code":"EMP-CCR-0002","tipo":"GENERICA MEDIANA OFFAL","D":null,"E":null,"F":null,"G":null,"vacio":true},{"n":"N° 3","code":"EMP-CCR-0003","tipo":"GENERICA GRANDE OFFAL","D":130824,"E":127792,"F":3032,"G":0.0237,"vacio":false},{"n":"N° 4","code":"EMP-CCR-0004","tipo":"FONDOS MANUALES","D":43467,"E":42621,"F":846,"G":0.0198,"vacio":false},{"n":"N° 5","code":"EMP-CCR-0005","tipo":"TAPA DRAGON OFFAL","D":0,"E":null,"F":null,"G":null,"vacio":false},{"n":"N° 6","code":"EMP-CCR-0006","tipo":"TAPA SANTA MARTA / TAPA TORO / TAPA USA","D":43475,"E":42621,"F":854,"G":0.02,"vacio":false},{"n":"N° 7","code":"EMP-CCR-0007","tipo":"GENERICA GRANDE DRAGON OFFAL","D":17822,"E":17430,"F":392,"G":0.0225,"vacio":false},{"n":"N° 8","code":"EMP-CCR-0008","tipo":"GENERICA GRANDE SANTA MARTA","D":11729,"E":11329,"F":400,"G":0.0353,"vacio":false},{"n":"N° 9","code":"EMP-CCR-0009","tipo":"GENERICA GRANDE SANTA CASILDA MARRON","D":6390,"E":6329,"F":61,"G":0.0096,"vacio":false},{"n":"N° 10","code":"EMP-CCR-0010","tipo":"GENERICA MEDIANA SANTA CASILDA BLANCA","D":14944,"E":14137,"F":807,"G":0.0571,"vacio":false},{"n":"N° 11","code":"EMP-CCR-0011","tipo":"GENERICA CHICA LISA","D":0,"E":0,"F":0,"G":null,"vacio":false},{"n":"N° 12","code":"EMP-CCR-0012","tipo":"GENERICA CHICA LISA","D":0,"E":0,"F":0,"G":null,"vacio":false},{"n":"N° 13","code":"EMP-CCR-0013","tipo":"FONDO TAVIL 560X380X145 MM","D":13107,"E":12166,"F":941,"G":0.0773,"vacio":false},{"n":"N° 14","code":"EMP-CCR-0014","tipo":"TAPA TAVIL 587X395X145 MM DRAGON","D":13028,"E":12166,"F":862,"G":0.0709,"vacio":false}],"total":{"D":441810,"E":430747,"F":11063,"G":0.0257}},{"mes":5,"mesNom":"Mayo","rows":[{"n":"N° 1","code":"EMP-CCR-0001","tipo":"GENERICA CHICA OFFAL","D":186392,"E":182216,"F":4176,"G":0.0229,"vacio":false},{"n":"N° 2","code":"EMP-CCR-0002","tipo":"GENERICA MEDIANA OFFAL","D":null,"E":null,"F":null,"G":null,"vacio":true},{"n":"N° 3","code":"EMP-CCR-0003","tipo":"GENERICA GRANDE OFFAL","D":165312,"E":161481,"F":3831,"G":0.0237,"vacio":false},{"n":"N° 4","code":"EMP-CCR-0004","tipo":"FONDOS MANUALES","D":46933,"E":46552,"F":381,"G":0.0082,"vacio":false},{"n":"N° 5","code":"EMP-CCR-0005","tipo":"TAPA DRAGON OFFAL","D":0,"E":null,"F":null,"G":null,"vacio":false},{"n":"N° 6","code":"EMP-CCR-0006","tipo":"TAPA SANTA MARTA / TAPA TORO / TAPA USA","D":46988,"E":46552,"F":436,"G":0.0094,"vacio":false},{"n":"N° 7","code":"EMP-CCR-0007","tipo":"GENERICA GRANDE DRAGON OFFAL","D":18545,"E":18084,"F":461,"G":0.0255,"vacio":false},{"n":"N° 8","code":"EMP-CCR-0008","tipo":"GENERICA GRANDE SANTA MARTA","D":13905,"E":13604,"F":301,"G":0.0221,"vacio":false},{"n":"N° 9","code":"EMP-CCR-0009","tipo":"GENERICA GRANDE SANTA CASILDA MARRON","D":9770,"E":9587,"F":183,"G":0.0191,"vacio":false},{"n":"N° 10","code":"EMP-CCR-0010","tipo":"GENERICA MEDIANA SANTA CASILDA BLANCA","D":14661,"E":13934,"F":727,"G":0.0522,"vacio":false},{"n":"N° 11","code":"EMP-CCR-0011","tipo":"GENERICA CHICA LISA","D":0,"E":0,"F":0,"G":null,"vacio":false},{"n":"N° 12","code":"EMP-CCR-0012","tipo":"GENERICA CHICA LISA","D":0,"E":0,"F":0,"G":null,"vacio":false},{"n":"N° 13","code":"EMP-CCR-0013","tipo":"FONDO TAVIL 560X380X145 MM","D":15396,"E":14933,"F":463,"G":0.031,"vacio":false},{"n":"N° 14","code":"EMP-CCR-0014","tipo":"TAPA TAVIL 587X395X145 MM DRAGON","D":15441,"E":14933,"F":508,"G":0.034,"vacio":false}],"total":{"D":533343,"E":521876,"F":11467,"G":0.022}},{"mes":6,"mesNom":"Junio","rows":[{"n":"N° 1","code":"EMP-CCR-0001","tipo":"GENERICA CHICA OFFAL","D":191392,"E":188755,"F":2637,"G":0.014,"vacio":false},{"n":"N° 2","code":"EMP-CCR-0002","tipo":"GENERICA MEDIANA OFFAL","D":null,"E":null,"F":null,"G":null,"vacio":true},{"n":"N° 3","code":"EMP-CCR-0003","tipo":"GENERICA GRANDE OFFAL","D":168465,"E":166104,"F":2361,"G":0.0142,"vacio":false},{"n":"N° 4","code":"EMP-CCR-0004","tipo":"FONDOS MANUALES","D":44990,"E":44948,"F":42,"G":0.0009,"vacio":false},{"n":"N° 5","code":"EMP-CCR-0005","tipo":"TAPA DRAGON OFFAL","D":0,"E":null,"F":null,"G":null,"vacio":false},{"n":"N° 6","code":"EMP-CCR-0006","tipo":"TAPA SANTA MARTA / TAPA TORO / TAPA USA","D":45221,"E":44948,"F":273,"G":0.0061,"vacio":false},{"n":"N° 7","code":"EMP-CCR-0007","tipo":"GENERICA GRANDE DRAGON OFFAL","D":19397,"E":18812,"F":585,"G":0.0311,"vacio":false},{"n":"N° 8","code":"EMP-CCR-0008","tipo":"GENERICA GRANDE SANTA MARTA","D":13015,"E":12873,"F":142,"G":0.011,"vacio":false},{"n":"N° 9","code":"EMP-CCR-0009","tipo":"GENERICA GRANDE SANTA CASILDA MARRON","D":11758,"E":11549,"F":209,"G":0.0181,"vacio":false},{"n":"N° 10","code":"EMP-CCR-0010","tipo":"GENERICA MEDIANA SANTA CASILDA BLANCA","D":15428,"E":14938,"F":490,"G":0.0328,"vacio":false},{"n":"N° 11","code":"EMP-CCR-0011","tipo":"GENERICA CHICA LISA","D":0,"E":0,"F":0,"G":null,"vacio":false},{"n":"N° 12","code":"EMP-CCR-0012","tipo":"GENERICA CHICA LISA","D":0,"E":0,"F":0,"G":null,"vacio":false},{"n":"N° 13","code":"EMP-CCR-0013","tipo":"FONDO TAVIL 560X380X145 MM","D":15452,"E":14767,"F":685,"G":0.0464,"vacio":false},{"n":"N° 14","code":"EMP-CCR-0014","tipo":"TAPA TAVIL 587X395X145 MM DRAGON","D":15162,"E":14767,"F":395,"G":0.0267,"vacio":false}],"total":{"D":540280,"E":532461,"F":7819,"G":0.0147}},{"mes":7,"mesNom":"Julio","rows":[{"n":"N° 1","code":"EMP-CCR-0001","tipo":"GENERICA CHICA OFFAL","D":223196,"E":219494,"F":3702,"G":0.0169,"vacio":false},{"n":"N° 2","code":"EMP-CCR-0002","tipo":"GENERICA MEDIANA OFFAL","D":null,"E":null,"F":null,"G":null,"vacio":true},{"n":"N° 3","code":"EMP-CCR-0003","tipo":"GENERICA GRANDE OFFAL","D":198585,"E":194968,"F":3617,"G":0.0186,"vacio":false},{"n":"N° 4","code":"EMP-CCR-0004","tipo":"FONDOS MANUALES","D":66188,"E":66001,"F":187,"G":0.0028,"vacio":false},{"n":"N° 5","code":"EMP-CCR-0005","tipo":"TAPA DRAGON OFFAL","D":0,"E":null,"F":null,"G":null,"vacio":false},{"n":"N° 6","code":"EMP-CCR-0006","tipo":"TAPA SANTA MARTA / TAPA TORO / TAPA USA","D":66233,"E":66001,"F":232,"G":0.0035,"vacio":false},{"n":"N° 7","code":"EMP-CCR-0007","tipo":"GENERICA GRANDE DRAGON OFFAL","D":24992,"E":24153,"F":839,"G":0.0347,"vacio":false},{"n":"N° 8","code":"EMP-CCR-0008","tipo":"GENERICA GRANDE SANTA MARTA","D":17133,"E":16761,"F":372,"G":0.0222,"vacio":false},{"n":"N° 9","code":"EMP-CCR-0009","tipo":"GENERICA GRANDE SANTA CASILDA MARRON","D":20828,"E":20462,"F":366,"G":0.0179,"vacio":false},{"n":"N° 10","code":"EMP-CCR-0010","tipo":"GENERICA MEDIANA SANTA CASILDA BLANCA","D":21440,"E":20991,"F":449,"G":0.0214,"vacio":false},{"n":"N° 11","code":"EMP-CCR-0011","tipo":"GENERICA CHICA LISA","D":0,"E":0,"F":0,"G":null,"vacio":false},{"n":"N° 12","code":"EMP-CCR-0012","tipo":"GENERICA CHICA LISA","D":525,"E":471,"F":54,"G":0.1146,"vacio":false},{"n":"N° 13","code":"EMP-CCR-0013","tipo":"FONDO TAVIL 560X380X145 MM","D":17155,"E":16716,"F":439,"G":0.0263,"vacio":false},{"n":"N° 14","code":"EMP-CCR-0014","tipo":"TAPA TAVIL 587X395X145 MM DRAGON","D":17397,"E":16716,"F":681,"G":0.0407,"vacio":false}],"total":{"D":673672,"E":662734,"F":10938,"G":0.0165}}],"ultima":7,"mesesData":[1,2,3,4,5,6,7]};
+  const M = DATA.meses; const nf=new Intl.NumberFormat('es-AR');
+  let mi = M.findIndex(x=>x.mes===DATA.ultima); if(mi<0) mi=M.length-1;
+  let sortKey='G', sortDir=-1;
+
+  const pctG=g=>g==null?'—':(g*100).toFixed(2)+'%';
+  function mermaColor(g){ if(g==null) return 'var(--muted-2)'; return g<=0.02?'var(--good)':g<=0.05?'var(--amber)':'var(--bad)'; }
+
+  // selector
+  const sel=document.getElementById('selMes');
+  sel.innerHTML=M.map((x,i)=>'<option value="'+i+'"'+(i===mi?' selected':'')+'>'+x.mesNom+'</option>').join('');
+  sel.addEventListener('change',e=>{ mi=+e.target.value; render(); });
+
+  // tooltip
+  const tip=document.getElementById('tip');
+  function showTip(h,e){ tip.innerHTML=h; tip.classList.add('show'); moveTip(e); }
+  function moveTip(e){ let x=e.clientX+14,y=e.clientY+14; const w=tip.offsetWidth,hh=tip.offsetHeight; if(x+w>innerWidth-8)x=e.clientX-w-14; if(y+hh>innerHeight-8)y=e.clientY-hh-14; tip.style.left=x+'px'; tip.style.top=y+'px'; }
+  function hideTip(){ tip.classList.remove('show'); }
+
+  function renderKpis(){
+    const t=M[mi].total; const col=mermaColor(t.G);
+    const cards=[
+      {l:'Merma total', v:pctG(t.G), d:M[mi].mesNom+' · KPI del mes', cls:'hero'},
+      {l:'Planchas utilizadas', v:nf.format(t.D), d:'consumo de depósito', cls:'info'},
+      {l:'Cajas producidas', v:nf.format(t.E), d:'producción del mes', cls:''},
+      {l:'Cajas mermadas', v:nf.format(t.F), d:'diferencia (planchas − prod.)', cls:'bad'}
+    ];
+    document.getElementById('kpis').innerHTML=cards.map(c=>'<div class="kpi '+c.cls+'"><div class="kl">'+c.l+'</div><div class="kv"'+(c.cls==='hero'?' style="color:'+col+'"':'')+'>'+c.v+'</div><div class="kd">'+c.d+'</div></div>').join('');
+  }
+
+  const COLS=[{k:'n',l:'N°',cls:'l'},{k:'tipo',l:'Tipo de caja',cls:'l'},{k:'D',l:'Planchas utilizadas'},{k:'E',l:'Cajas producidas'},{k:'F',l:'Diferencia'},{k:'G',l:'Merma (KPI)'}];
+  function renderTabla(){
+    const mes=M[mi]; const rows=mes.rows.filter(r=>!r.vacio);
+    document.getElementById('tab-title').textContent='Merma por tipo de caja · '+mes.mesNom;
+    document.getElementById('tab-sub').textContent=rows.length+' tipos de caja · clic en una columna para ordenar.';
+    document.getElementById('thead').innerHTML=COLS.map(c=>'<th class="'+(c.cls==='l'?'l':'')+(c.k===sortKey?' sorted':'')+'" data-k="'+c.k+'">'+c.l+'<span class="ar">'+(c.k===sortKey?(sortDir<0?'▼':'▲'):'')+'</span></th>').join('');
+    const sorted=rows.slice().sort((a,b)=>{ let va=a[sortKey],vb=b[sortKey]; if(sortKey==='n'){va=+a.n.replace(/\D/g,'');vb=+b.n.replace(/\D/g,'');} if(typeof va==='string'){va=(va||'').toLowerCase();vb=(vb||'').toLowerCase(); return va<vb?-sortDir:va>vb?sortDir:0;} return ((va==null?-1:va)-(vb==null?-1:vb))*sortDir; });
+    let body=sorted.map(r=>{ const col=mermaColor(r.G);
+      return '<tr><td class="l">'+r.n+'</td><td class="tipo">'+(r.tipo||'')+'</td>'
+        +'<td>'+(r.D==null?'<span class="zero">—</span>':nf.format(r.D))+'</td>'
+        +'<td>'+(r.E==null?'<span class="zero">—</span>':nf.format(r.E))+'</td>'
+        +'<td>'+(r.F==null?'<span class="zero">—</span>':nf.format(r.F))+'</td>'
+        +'<td>'+(r.G==null?'<span class="zero">—</span>':'<span class="kpibar"><span class="track"><span class="fill" style="width:'+Math.min(r.G/0.12*100,100).toFixed(0)+'%;background:'+col+'"></span></span><span class="num" style="color:'+col+'">'+pctG(r.G)+'</span></span>')+'</td></tr>';
+    }).join('');
+    const t=mes.total;
+    body+='<tr class="tot"><td class="l">Total</td><td class="tipo" style="color:#fff">Todas las cajas</td><td>'+nf.format(t.D)+'</td><td>'+nf.format(t.E)+'</td><td>'+nf.format(t.F)+'</td><td style="color:'+mermaColor(t.G)+'">'+pctG(t.G)+'</td></tr>';
+    document.getElementById('tbody').innerHTML=body;
+    document.querySelectorAll('#thead th').forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(k===sortKey)sortDir=-sortDir; else{sortKey=k;sortDir=(k==='n'||k==='tipo')?1:-1;} renderTabla(); });
+  }
+
+  function drawChart(){
+    const el=document.getElementById('chart'); const wpx=el.clientWidth||900,H=280,padL=42,padR=14,padT=20,padB=32;
+    const iw=wpx-padL-padR, ih=H-padT-padB, n=M.length, slot=iw/n, bw=Math.min(56,slot*0.5);
+    const mx=Math.max(0.02,...M.map(x=>x.total.G||0)); const nice=Math.ceil(mx*100/1)/100; // tope %
+    const y=v=>padT+ih-(v/nice)*ih, cx=i=>padL+slot*i+slot/2;
+    let g=''; const steps=4;
+    for(let s=0;s<=steps;s++){ const val=nice*s/steps, yy=y(val); g+='<line x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(wpx-padR)+'" y2="'+yy.toFixed(1)+'" stroke="var(--line)" '+(s?'stroke-dasharray="3 4"':'')+'/>'; g+='<text x="'+(padL-7)+'" y="'+(yy+3.5).toFixed(1)+'" text-anchor="end" font-size="9.5" fill="var(--muted-2)">'+(val*100).toFixed(1)+'%</text>'; }
+    M.forEach((x,i)=>{ const v=x.total.G||0; const by=y(v), bh=padT+ih-by; const col=mermaColor(v); const selc=i===mi;
+      g+='<rect x="'+(cx(i)-bw/2).toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(bh,1).toFixed(1)+'" rx="4" fill="'+col+'" fill-opacity="'+(selc?1:0.72)+'"'+(selc?' stroke="#fff" stroke-width="1.2"':'')+'/>';
+      g+='<text x="'+cx(i).toFixed(1)+'" y="'+(by-7).toFixed(1)+'" text-anchor="middle" font-size="11.5" font-weight="800" fill="'+col+'">'+(v*100).toFixed(2)+'%</text>';
+      g+='<text x="'+cx(i).toFixed(1)+'" y="'+(padT+ih+16).toFixed(1)+'" text-anchor="middle" font-size="10.5" fill="'+(selc?'#fff':'var(--muted)')+'">'+x.mesNom.slice(0,3)+'</text>';
+      g+='<rect x="'+(padL+slot*i).toFixed(1)+'" y="'+padT+'" width="'+slot.toFixed(1)+'" height="'+ih+'" fill="transparent" style="cursor:pointer" data-i="'+i+'"/>';
+    });
+    el.innerHTML='<svg viewBox="0 0 '+wpx+' '+H+'" width="100%" height="'+H+'">'+g+'</svg>';
+    el.querySelectorAll('rect[data-i]').forEach(r=>{ const i=+r.getAttribute('data-i'), x=M[i], t=x.total;
+      r.addEventListener('mouseenter',e=>showTip('<b>'+x.mesNom+'</b>\nMerma total: '+pctG(t.G)+'\nPlanchas: '+nf.format(t.D)+'\nProducidas: '+nf.format(t.E)+'\nMermadas: '+nf.format(t.F),e));
+      r.addEventListener('mousemove',moveTip); r.addEventListener('mouseleave',hideTip);
+      r.addEventListener('click',()=>{ mi=i; sel.value=i; render(); });
+    });
+  }
+
+  function render(){ renderKpis(); renderTabla(); drawChart(); postH(); }
+  function postH(){ try{ parent.postMessage({tipo:'matriz-alto', alto:document.body.scrollHeight}, '*'); }catch(e){} }
+  render();
+  let rt; window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{drawChart();postH();},140);});
+  window.addEventListener('load',postH);
+})();
+</script>

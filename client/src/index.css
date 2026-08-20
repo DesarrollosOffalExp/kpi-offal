@@ -366,16 +366,25 @@ body {
 
 /* ---------- Sub-pestañas (secciones navegables de un sector) ---------- */
 .subtabs {
-  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
+  display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 20px;
   padding-bottom: 16px; border-bottom: 1px solid var(--line);
 }
 .subtab {
-  font: inherit; font-size: 12.5px; font-weight: 600; color: var(--muted);
-  background: transparent; border: 1px solid var(--line); border-radius: 9px;
-  padding: 8px 15px; cursor: pointer; transition: color .15s, background .15s, border-color .15s;
+  font: inherit; font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: -.005em;
+  background: linear-gradient(165deg, rgba(255,255,255,.028), rgba(255,255,255,0));
+  border: 1px solid var(--line); border-radius: 11px;
+  padding: 6px 15px; cursor: pointer;
+  min-height: 46px; max-width: 186px;
+  display: inline-flex; align-items: center; justify-content: center;
+  text-align: center; line-height: 1.2; text-wrap: balance; overflow-wrap: break-word;
+  transition: color .16s, background .16s, border-color .16s, transform .16s, box-shadow .16s;
 }
-.subtab:hover { color: var(--text); border-color: var(--primary); }
-.subtab.on { color: var(--primary-bright); background: rgba(199, 22, 58, .12); border-color: var(--primary); }
+.subtab:hover { color: var(--text); border-color: var(--primary); transform: translateY(-1px); box-shadow: 0 8px 18px -12px rgba(0,0,0,.65); }
+.subtab.on {
+  color: var(--primary-bright); border-color: var(--primary);
+  background: linear-gradient(165deg, rgba(199,22,58,.18), rgba(199,22,58,.05));
+  box-shadow: inset 0 0 0 1px rgba(225,31,70,.28), 0 8px 20px -13px rgba(225,31,70,.5);
+}
 
 /* ---------- Tabla tipo KPI (Matriz de Costo, Costos x Frigorífico, etc.) ---------- */
 .panel-full { grid-column: 1 / -1; }

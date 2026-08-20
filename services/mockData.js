@@ -25,13 +25,15 @@ const INSUMOS = {
   // Cuadro de KPIs asignados (hoja "Insumos" del archivo KPI Gerencia de Operaciones 2026).
   objetivos: {"persona":"Luis Ramos","total":3,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"REDUCIR EL WORKING CAPITAL INMOVILIZADO UN 10 %","kpi":"CANTIDAD DE MATERIALES OBSOLETOS A ENERO 2026 VS DICIEMBRE 2026","area":"Insumos","meta":"3%","vals":["31%","","","","2%","1%",""]},{"n":"2","objetivo":"REDUCIR EL WORKING CAPITAL INMOVILIZADO UN 10 %","kpi":"CANTIDAD DE MATERIALES CON SOBRESTOCK ENERO 2026 VS DICIEMBRE 2026","area":"Insumos","meta":"20%","vals":["34%","","","","17%","18%",""]},{"n":"3","objetivo":"REDUCIR EL WORKING CAPITAL INMOVILIZADO UN 10 %","kpi":"DIAS DE STOCK DE INSUMOS PRODUCTIVOS ENERO 2025 VS DICIEMBRE 2026","area":"Insumos","meta":"20%","vals":["30%","","","","27%","27%",""]},{"n":"4","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Insumos","meta":"","vals":["","","","","","",""]}],"promedio":null},
   kpis: [
-    // Sección Productividad (principal: armado de cajas + cerramiento por Bestpack).
-    { id: 'productividad', grupo: 'Productividad', titulo: 'Productividad de armado de cajas', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100,
-      valor: 89, desglose: [{ nombre: 'Día', valor: 89 }, { nombre: 'Noche', valor: 89 }],
-      info: 'Índice de armado: cajas por hora reales vs. ideal por formadora, semana en curso. Es el dato PRINCIPAL. (Hoja INSUMOS)' },
-    { id: 'cerramiento', grupo: 'Productividad', titulo: 'Cerramiento por Bestpack', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100,
-      serie: serie(SEMANAS, CERRAMIENTO),
-      info: 'Cierre de cajas de las cerradoras (Bestpack) vs. estándar (72), por semana. Antes figuraba como "formadoras". (Hoja INSUMOS, fila 111)' },
+    // Productividad de Armado de Cajas (embebido; ProductividadArmado.jsx). Solo registra el grupo/subtab.
+    { id: 'prod_armado', grupo: 'Productividad de Armado de Cajas', titulo: 'Productividad de Armado de Cajas', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100, valor: null,
+      info: 'Índice de cajas por hora vs. ideal por formadora y turno, por semana (hoja Prod. Armado de Cajas).' },
+    // Merma de Cajas (embebido; MermaCajas.jsx). Solo registra el grupo/subtab.
+    { id: 'merma_cajas', grupo: 'Merma de Cajas', titulo: 'Merma de Cajas', unidad: '%', formato: 'porcentaje', sentido: 'down', meta: null, valor: null,
+      info: 'Planchas utilizadas vs. cajas producidas por tipo de caja y mes (hoja 2 · Consumos Depósito + Producción).' },
+    // Productividad en Cerrado de Cajas (embebido; ProductividadCerrado.jsx). Solo registra el grupo/subtab.
+    { id: 'cerrado_cajas', grupo: 'Productividad en Cerrado de Cajas', titulo: 'Productividad en Cerrado de Cajas', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: null,
+      info: 'Cajas cerradas por las Bestpack, picos y máximos por máquina y mes (Picos de empaque TPM · réplica de Comparativo_Semanal).' },
     // Sección Eficiencia de materiales.
     { id: 'recepcion', grupo: 'Eficiencia de materiales', titulo: 'Eficiencia en Recepción', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100,
       serie: serie(MESES, RECEPCION),
@@ -41,12 +43,6 @@ const INSUMOS = {
       info: 'Egresos sin diferencias sobre el total de egresos del mes. (Hoja INSUMOS, columna U · mensual)' },
   ],
   graficos: [
-    { tipo: 'bar', grupo: 'Productividad', titulo: 'Cerrado por Bestpack · última semana', info: 'Máximo de producción de la última semana (S31) por máquina.',
-      datos: [{ nombre: 'Bestpack 1', valor: 190 }, { nombre: 'Bestpack 2', valor: 195 }, { nombre: 'Bestpack 3', valor: 161 }] },
-    { tipo: 'line', grupo: 'Productividad', titulo: 'Máximos por Bestpack por semana', info: 'Comparativo semana a semana de la producción máxima de cada Bestpack.',
-      periodos: SEMANAS, series: [{ nombre: 'Bestpack 1', datos: BP1 }, { nombre: 'Bestpack 2', datos: BP2 }, { nombre: 'Bestpack 3', datos: BP3 }] },
-    { tipo: 'line', grupo: 'Productividad', titulo: 'Producción por semana (histórico)', info: 'Producción total de armado de cajas, semana a semana.',
-      periodos: PROD_HIST_SEM, series: [{ nombre: 'Producción', datos: PROD_HIST }] },
     { tipo: 'line', grupo: 'Eficiencia de materiales', titulo: 'Eficiencia mensual', info: 'Recepción vs. entrega de materiales, mes a mes.',
       periodos: MESES, series: [{ nombre: 'Recepción', datos: RECEPCION }, { nombre: 'Entrega', datos: ENTREGA }] },
     // Presupuesto (embebido; PresupuestoInsumos.jsx). Solo registra el grupo/subtab, va
@@ -90,6 +86,10 @@ const COMPRAS = {
     // Vencidas por semana: gráfico embebido (ComprasVencidas.jsx) con el desglose de la
     // tabla A112 (composición de las vencidas por semana de origen). Solo registra el grupo/subtab.
     { tipo: 'tabla', grupo: 'Vencidas por semana', titulo: 'Vencidas por semana', info: 'Desglose de cómo se componen las vencidas por semana de origen (hoja KPI · A112).', columnas: [], filas: [] },
+    // Órdenes demoradas (embebido; ComprasDemoradas.jsx): tabla agrupada de la hoja Demoradas con detalle.
+    { tipo: 'tabla', grupo: 'Órdenes demoradas', titulo: 'Órdenes demoradas', info: 'Ítems de OC vencidos y pendientes de recepción, por proveedor y rubro (hoja Demoradas).', columnas: [], filas: [] },
+    // Informe (embebido; ComprasInforme.jsx): recepción en tiempo vs. fuera de plazo (hoja Reporte, AX vs BI).
+    { tipo: 'tabla', grupo: 'Informe', titulo: 'Informe', info: 'Cumplimiento de entregas: ítems recibidos en tiempo vs. fuera de plazo (hoja Reporte).', columnas: [], filas: [] },
     // Presupuesto (embebido; PresupuestoCompras.jsx). Solo registra el grupo/subtab, va
     // último para que Presupuesto y Objetivo queden como los dos últimos de la ventana.
     { tipo: 'tabla', grupo: 'Presupuesto', titulo: 'Presupuesto', info: 'Presupuestado vs. gasto real por grupo de costo, mes a mes (Compras).', columnas: [], filas: [] },
@@ -99,7 +99,7 @@ const COMPRAS = {
 // FÁBRICA DE HIELO: productividad de la semana (tabla semanal que se sobrescribe).
 // KPIs de la fila RESUMEN; gráficos de las filas diarias. Datos de la Semana 31.
 const HIELO = {
-  key: 'fábrica-de-hielo', nombre: 'Fábrica de Hielo', estado: 'ok', periodo: 'Semana 31', objetivoPendiente: true,
+  key: 'fábrica-de-hielo', nombre: 'Fábrica de Hielo', estado: 'ok', objetivoPendiente: true,
   // Cuadro de KPIs asignados (hoja "Fabrica de hielo" del archivo KPI Gerencia de Operaciones 2026).
   objetivos: {"persona":"Juan Retamero","total":5,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"Capacidad de producción y consumo, junto y separado.","kpi":"HORAS TRABAJADAS VS PRODUCCION","area":"Fabrica de Hielo","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"2","objetivo":"Capacidad de producción y consumo, junto y separado.","kpi":"STOCK DE BARRAS, PALLETS DE MADERA Y PLASTICOS, SEGUIMIENTO POR FRIGORIFICO  DE DEUDA DE PALLETS.","area":"Fabrica de Hielo","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"3","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Fabrica de Hielo","meta":"70%","vals":["","","","","","",""]}],"promedio":null},
   kpis: [
@@ -145,7 +145,7 @@ const HIELO = {
 
 // SISTEMAS: foto de la última semana (misma mecánica que Compras). Semana 31.
 const SISTEMAS = {
-  key: 'sistemas', nombre: 'Sistemas', estado: 'ok', periodo: 'Semana 31', objetivoPendiente: true,
+  key: 'sistemas', nombre: 'Sistemas', estado: 'ok', objetivoPendiente: true,
   kpis: [
     // 1er conjunto: pendientes (gerencia pidió dejar solo esto, sin "vencidas").
     { id: 'abiertos', grupo: 'Pendientes', titulo: 'Total de Abiertos', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 60,
@@ -165,7 +165,7 @@ const SISTEMAS = {
 };
 
 // LOGÍSTICA: hoja con muchos bloques distintos (períodos mixtos) → sub-pestañas.
-const G = { costo: 'Matriz de Costo · Junio', flota: 'Disponibilidad de Flota',
+const G = { costo: 'Matriz de Costo · Junio', metrica: 'Métrica de Costo', flota: 'Disponibilidad de Flota',
   lavado: 'Lavado de Camiones · Sem 30', tambores: 'Necesidad de Tambores',
   gasoil: 'Consumo de Gasoil', frig: 'Costo por Frigorífico', hiel: 'Stock de Hiel' };
 // Rendimiento KG/LT semana a semana (S1–S31) para el histórico de gasoil.
@@ -187,6 +187,9 @@ const LOGISTICA = {
       info: 'Descarga kg neta en Junio. (MATRIZ DE COSTO · Descarga KG Neta)' },
     { id: 'dolar_ref', grupo: G.costo, titulo: 'Dólar de referencia', unidad: '', formato: 'moneda', sentido: 'up', meta: null, valor: 1500,
       info: 'Valorización del dólar oficial usada en Junio (Banco Nación). (MATRIZ DE COSTO)' },
+    // Métrica de Costo (embebido; MetricaCosto.jsx): $/ton descargada real vs. proyección INDEC. Solo registra el grupo.
+    { id: 'metrica_costo_reg', grupo: G.metrica, titulo: 'Métrica de Costo', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 0,
+      info: '$/ton descargada real mes a mes vs. proyección por inflación (INDEC), con conclusión. (hoja Gastos)' },
     // Disponibilidad de Flota (Sem 30)
     { id: 'disp_general', grupo: G.flota, titulo: 'Disponibilidad de flota', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: null, valor: 84,
       desglose: [{ nombre: 'Disponibles', valor: 67 }, { nombre: 'Total', valor: 80 }],

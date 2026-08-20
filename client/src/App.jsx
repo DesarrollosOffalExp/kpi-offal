@@ -15,6 +15,8 @@ import PresupuestoCompras from './components/PresupuestoCompras';
 import ComprasPendientes from './components/ComprasPendientes';
 import ComprasActividad from './components/ComprasActividad';
 import ComprasVencidas from './components/ComprasVencidas';
+import ComprasDemoradas from './components/ComprasDemoradas';
+import ComprasInforme from './components/ComprasInforme';
 import PresupuestoCongelado from './components/PresupuestoCongelado';
 import PresupuestoTaller from './components/PresupuestoTaller';
 import PresupuestoLavadero from './components/PresupuestoLavadero';
@@ -25,6 +27,11 @@ import ProductividadBarras from './components/ProductividadBarras';
 import StockHiel from './components/StockHiel';
 import ConsumoGasoil from './components/ConsumoGasoil';
 import CostoFrigorifico from './components/CostoFrigorifico';
+import MetricaCosto from './components/MetricaCosto';
+import ProductividadArmado from './components/ProductividadArmado';
+import MermaCajas from './components/MermaCajas';
+import EficienciaMateriales from './components/EficienciaMateriales';
+import ProductividadCerrado from './components/ProductividadCerrado';
 import KpiSistemas from './components/KpiSistemas';
 
 function formatearFecha(iso) {
@@ -184,6 +191,56 @@ export default function App() {
                   </div>
                 );
               }
+              // Métrica de Costo (Logística): $/ton descargada real vs. proyección INDEC + conclusión.
+              const esMetricaCosto = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Métrica de Costo');
+              if (esMetricaCosto) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <MetricaCosto />
+                  </div>
+                );
+              }
+              // Productividad de Armado de Cajas (Insumos): dashboard embebido por formadora/turno/semana.
+              const esArmado = sector.key === 'insumos' && typeof g === 'string' && g.startsWith('Productividad de Armado de Cajas');
+              if (esArmado) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <ProductividadArmado />
+                  </div>
+                );
+              }
+              // Productividad en Cerrado de Cajas (Insumos): Bestpack, picos y máximos por máquina y mes.
+              const esCerrado = sector.key === 'insumos' && typeof g === 'string' && g.startsWith('Productividad en Cerrado de Cajas');
+              if (esCerrado) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <ProductividadCerrado />
+                  </div>
+                );
+              }
+              // Eficiencia de Materiales (Insumos): recepción (hoja 5) + entrega (hoja 7).
+              const esEficMat = sector.key === 'insumos' && typeof g === 'string' && g.startsWith('Eficiencia de materiales');
+              if (esEficMat) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <EficienciaMateriales />
+                  </div>
+                );
+              }
+              // Merma de Cajas (Insumos): planchas utilizadas vs. producidas por caja y mes.
+              const esMerma = sector.key === 'insumos' && typeof g === 'string' && g.startsWith('Merma de Cajas');
+              if (esMerma) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <MermaCajas />
+                  </div>
+                );
+              }
               // Productividad (Fábrica de Hielo): dashboard embebido (productividad de barras).
               const esProd = sector.key === 'fábrica-de-hielo' && g === 'Productividad';
               if (esProd) {
@@ -330,6 +387,26 @@ export default function App() {
                   <div className="grupo" key={g}>
                     {!conSub && <h2 className="grupo-titulo">{g}</h2>}
                     <ComprasVencidas />
+                  </div>
+                );
+              }
+              // Compras · Órdenes demoradas: tabla agrupada con detalle (hoja Demoradas).
+              const esComDem = sector.key === 'compras' && typeof g === 'string' && g.startsWith('Órdenes demoradas');
+              if (esComDem) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <ComprasDemoradas />
+                  </div>
+                );
+              }
+              // Compras · Informe: recepción en tiempo vs. fuera de plazo (hoja Reporte).
+              const esComInf = sector.key === 'compras' && typeof g === 'string' && g.startsWith('Informe');
+              if (esComInf) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <ComprasInforme />
                   </div>
                 );
               }
