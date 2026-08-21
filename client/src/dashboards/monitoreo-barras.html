@@ -52,7 +52,19 @@
   tr.total .barfill{display:none;}
   .empty-row td{text-align:center;color:var(--muted);padding:18px;}
   .pie{margin-top:16px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
-  @media(max-width:1000px){ .kpis{grid-template-columns:repeat(3,1fr);} }
+  .cmpgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+  .cmpc{background:linear-gradient(160deg,var(--panel-2) 0%,var(--panel) 130%);border:1px solid var(--line);border-radius:11px;padding:13px 14px;}
+  .cmpc .cl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .cmpc .cvv{font-size:21px;font-weight:800;color:#fff;margin-top:5px;letter-spacing:-.02em;}
+  .cmpc .cfrom{font-size:11.5px;color:var(--muted-2);margin-top:3px;}
+  .cmpc .cdelta{font-size:12px;font-weight:800;margin-top:5px;display:inline-block;}
+  .swap{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);}
+  .swap b{color:var(--text);font-weight:700;}
+  .cmp-sub{font-size:11.5px;color:var(--muted-2);}
+  #cmp-tabla th.grp{text-align:center;font-size:10px;color:var(--muted-2);cursor:default;}
+  #cmp-tabla th.gact{color:var(--info);}
+  #cmp-tabla td.prevcell{color:var(--muted);}
+  @media(max-width:1000px){ .kpis{grid-template-columns:repeat(3,1fr);} .cmpgrid{grid-template-columns:repeat(2,1fr);} }
   @media(max-width:640px){ .kpis{grid-template-columns:repeat(2,1fr);} }
 </style>
 
@@ -61,9 +73,9 @@
     <div>
       <p class="overline">Offal · Fábrica de Hielo</p>
       <h1>Monitoreo de Barras</h1>
-      <p class="sub">Barras de hielo por proveedor de tambores: estimadas vs. usadas, promedio por tambor y costo por kilo.</p>
+      <p class="sub">Barras de hielo por proveedor de tambores: estimadas vs. usadas, promedio por tambor y costo por kilo. Abajo, el comparativo contra la semana anterior.</p>
     </div>
-    <span class="fuente">Datos reales · última consulta</span>
+    <span class="fuente" id="fuente">Datos reales · semana 8 al 14 de agosto</span>
   </header>
 
   <section class="kpis" id="kpis"></section>
@@ -71,7 +83,7 @@
   <section class="panel">
     <div class="panel-head">
       <div>
-        <h3>Detalle por proveedor</h3>
+        <h3>Detalle por proveedor · <span style="color:var(--info)">8 al 14 de agosto</span></h3>
         <p class="psub" id="tsub"></p>
       </div>
       <div class="search">
@@ -80,14 +92,28 @@
       </div>
     </div>
     <div class="tscroll"><table id="tabla"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
-    <p class="pie">Fuente: <b>NUEVO MONITOREO DE BARRAS.xlsx</b> (SharePoint · Gerencia de Operaciones / Fábrica de Hielo). <b>Dif. barras</b> = Barras estimadas − Barras usadas. <b>Prom.</b> = barras por tambor (estimado vs. enviado). Clic en una columna para ordenar.</p>
+    <p class="pie">Fuente: <b>MONITOREO DE BARRAS DEL 8 AL 14 DE AGOSTO.xlsx</b> y <b>… DEL 1 AL 7 DE AGOSTO.xlsx</b> (SharePoint · Gerencia de Operaciones / Fábrica de Hielo). <b>Dif. barras</b> = Barras estimadas − Barras usadas. <b>Prom.</b> = barras por tambor (estimado vs. enviado). Clic en una columna para ordenar.</p>
+  </section>
+
+  <section class="panel" style="margin-top:16px;">
+    <div class="panel-head">
+      <div>
+        <h3>Comparativo entre semanas</h3>
+        <p class="psub"><span class="swap"><b>1 al 7 de agosto</b> → <b style="color:var(--info)">8 al 14 de agosto</b></span></p>
+      </div>
+      <span class="cmp-sub">La flecha compara la última semana contra la anterior.</span>
+    </div>
+    <div class="cmpgrid" id="cmp-tot"></div>
+    <div class="tscroll"><table id="cmp-tabla"><thead id="cmp-thead"></thead><tbody id="cmp-tbody"></tbody></table></div>
+    <p class="pie">Cada fila enfrenta al mismo proveedor en las dos semanas. <b>Δ</b> es la variación de la última respecto de la anterior. En <b>$/Kg</b> una baja es favorable, por eso el color se invierte.</p>
   </section>
 </div>
 
 <script>
 (function(){
-  const DATA=[{"prov":"Agroindustrias S.A","kilos":58815,"viajes":7,"tachosEnv":521,"barrasEst":679,"barrasEnv":775,"barrasUsadas":725,"difBarras":-46,"promEst":1.6,"promEnv":1.39,"costoKg":50.07,"remont":false,"enfriar":50,"stockAnt":0,"stock":0},{"prov":"Arre Beef S.A","kilos":130156,"viajes":10,"tachosEnv":934,"barrasEst":1502,"barrasEnv":1640,"barrasUsadas":1402,"difBarras":100,"promEst":1.4,"promEnv":1.5,"costoKg":47.88,"remont":false,"enfriar":176,"stockAnt":0,"stock":0},{"prov":"Black Bamboo Enterprises S.A","kilos":70227,"viajes":5,"tachosEnv":506,"barrasEst":810,"barrasEnv":1110,"barrasUsadas":950,"difBarras":-140,"promEst":1.76,"promEnv":1.88,"costoKg":60.06,"remont":false,"enfriar":160,"stockAnt":0,"stock":0},{"prov":"Carnes Pampeanas S.A","kilos":83224,"viajes":4,"tachosEnv":502,"barrasEst":960,"barrasEnv":940,"barrasUsadas":840,"difBarras":120,"promEst":1.31,"promEnv":1.67,"costoKg":42.92,"remont":true,"enfriar":44,"stockAnt":144,"stock":200},{"prov":"Compañia Bernal S.A","kilos":129186,"viajes":15,"tachosEnv":1130,"barrasEst":1491,"barrasEnv":1850,"barrasUsadas":2005,"difBarras":-514,"promEst":2.02,"promEnv":1.77,"costoKg":54.42,"remont":false,"enfriar":60,"stockAnt":259,"stock":44},{"prov":"Ecocarnes S.A","kilos":95875,"viajes":8,"tachosEnv":900,"barrasEst":1106,"barrasEnv":1485,"barrasUsadas":1605,"difBarras":-499,"promEst":2.18,"promEnv":1.78,"costoKg":58.86,"remont":false,"enfriar":208,"stockAnt":328,"stock":null},{"prov":"EPC-CARCARAÑA","kilos":67475,"viajes":5,"tachosEnv":500,"barrasEst":779,"barrasEnv":810,"barrasUsadas":700,"difBarras":79,"promEst":1.35,"promEnv":1.4,"costoKg":45.62,"remont":false,"enfriar":45,"stockAnt":180,"stock":240},{"prov":"FRIAR S,A 1970","kilos":71331,"viajes":6,"tachosEnv":564,"barrasEst":823,"barrasEnv":1160,"barrasUsadas":829,"difBarras":-6,"promEst":1.51,"promEnv":1.47,"costoKg":61.8,"remont":false,"enfriar":0,"stockAnt":45,"stock":376},{"prov":"FRIAR S.A 249","kilos":67572,"viajes":4,"tachosEnv":467,"barrasEst":780,"barrasEnv":765,"barrasUsadas":541,"difBarras":239,"promEst":1.04,"promEnv":1.16,"costoKg":43.02,"remont":true,"enfriar":113,"stockAnt":336,"stock":383},{"prov":"Frigorifico Bermejo S.A","kilos":86170,"viajes":6,"tachosEnv":600,"barrasEst":994,"barrasEnv":1780,"barrasUsadas":1416,"difBarras":-422,"promEst":2.14,"promEnv":2.36,"costoKg":78.5,"remont":true,"enfriar":480,"stockAnt":176,"stock":60},{"prov":"Frigorifico Frigolar S.A","kilos":129255,"viajes":10,"tachosEnv":930,"barrasEst":1491,"barrasEnv":1325,"barrasUsadas":1219,"difBarras":272,"promEst":1.23,"promEnv":1.31,"costoKg":38.95,"remont":false,"enfriar":100,"stockAnt":0,"stock":0},{"prov":"Frigorifico Gorina S.A.I.C","kilos":210612,"viajes":20,"tachosEnv":1698,"barrasEst":2430,"barrasEnv":2430,"barrasUsadas":2368,"difBarras":62,"promEst":1.46,"promEnv":1.39,"costoKg":43.84,"remont":false,"enfriar":62,"stockAnt":0,"stock":0},{"prov":"FRIGORIFICO GRAL PICO S.A.","kilos":73867,"viajes":5,"tachosEnv":648,"barrasEst":852,"barrasEnv":1125,"barrasUsadas":998,"difBarras":-146,"promEst":1.76,"promEnv":1.54,"costoKg":57.87,"remont":false,"enfriar":127,"stockAnt":0,"stock":0},{"prov":"Frigorifico Gral. Deheza S.A","kilos":64658,"viajes":5,"tachosEnv":633,"barrasEst":746,"barrasEnv":1125,"barrasUsadas":762,"difBarras":-16,"promEst":1.53,"promEnv":1.2,"costoKg":66.12,"remont":false,"enfriar":205,"stockAnt":0,"stock":158},{"prov":"Frigorifico Rioplatense SAICIF","kilos":341929,"viajes":24,"tachosEnv":2395,"barrasEst":3945,"barrasEnv":3150,"barrasUsadas":2954,"difBarras":991,"promEst":1.12,"promEnv":1.23,"costoKg":35.01,"remont":false,"enfriar":80,"stockAnt":0,"stock":0},{"prov":"Ganadera San Roque S.A.","kilos":40894,"viajes":5,"tachosEnv":380,"barrasEst":472,"barrasEnv":460,"barrasUsadas":419,"difBarras":53,"promEst":1.33,"promEnv":1.1,"costoKg":42.74,"remont":false,"enfriar":20,"stockAnt":0,"stock":0},{"prov":"Jorge L. Tolosa S.A","kilos":46734,"viajes":5,"tachosEnv":483,"barrasEst":539,"barrasEnv":720,"barrasUsadas":620,"difBarras":-81,"promEst":1.72,"promEnv":1.28,"costoKg":58.54,"remont":false,"enfriar":100,"stockAnt":0,"stock":0},{"prov":"Mat. Y Frig. Federal S.A","kilos":89792,"viajes":10,"tachosEnv":668,"barrasEst":1036,"barrasEnv":1055,"barrasUsadas":838,"difBarras":198,"promEst":1.21,"promEnv":1.25,"costoKg":44.65,"remont":false,"enfriar":140,"stockAnt":0,"stock":0},{"prov":"MATTIEVICH S.A.-ARROYO SECO","kilos":38686,"viajes":3,"tachosEnv":300,"barrasEst":446,"barrasEnv":495,"barrasUsadas":375,"difBarras":71,"promEst":1.26,"promEnv":1.25,"costoKg":48.62,"remont":false,"enfriar":120,"stockAnt":0,"stock":0},{"prov":"Procesadora Ganadera Entrerriana S.A","kilos":90758,"viajes":5,"tachosEnv":500,"barrasEst":1047,"barrasEnv":850,"barrasUsadas":670,"difBarras":377,"promEst":0.96,"promEnv":1.34,"costoKg":35.59,"remont":true,"enfriar":100,"stockAnt":20,"stock":100},{"prov":"Runfo S.A","kilos":141925,"viajes":12,"tachosEnv":1018,"barrasEst":1638,"barrasEnv":1720,"barrasUsadas":1355,"difBarras":283,"promEst":1.24,"promEnv":1.33,"costoKg":46.05,"remont":false,"enfriar":125,"stockAnt":0,"stock":0},{"prov":"TRESNAL S.A.","kilos":44896,"viajes":7,"tachosEnv":470,"barrasEst":518,"barrasEnv":630,"barrasUsadas":571,"difBarras":-53,"promEst":1.65,"promEnv":1.21,"costoKg":48.33,"remont":false,"enfriar":0,"stockAnt":0,"stock":0},{"prov":"Velsud S.A","kilos":49293,"viajes":8,"tachosEnv":492,"barrasEst":569,"barrasEnv":850,"barrasUsadas":679,"difBarras":-110,"promEst":1.79,"promEnv":1.38,"costoKg":52.34,"remont":false,"enfriar":50,"stockAnt":0,"stock":0}];
-  const TOTAL={"kilos":2223330,"tachosEnv":17239,"barrasEst":25654,"barrasEnv":28250,"barrasUsadas":24841,"difBarras":813,"promEst":1.45,"promEnv":1.44,"enfriar":2565,"stockAnt":null,"stock":1561};
+  const SEMANAS=[{"label":"1 al 7 de agosto","desde":"1 ago","hasta":"7 ago","data":[{"prov":"Agroindustrias S.A","kilos":58815,"viajes":7,"tachosEnv":521,"barrasEst":679,"barrasEnv":775,"barrasUsadas":725,"difBarras":-46,"promEst":1.6,"promEnv":1.39,"costoKg":50.07,"remont":false,"enfriar":50,"stockAnt":0,"stock":0,"id":"p23"},{"prov":"Arre Beef S.A","kilos":130156,"viajes":10,"tachosEnv":934,"barrasEst":1502,"barrasEnv":1640,"barrasUsadas":1402,"difBarras":100,"promEst":1.4,"promEnv":1.5,"costoKg":47.88,"remont":false,"enfriar":176,"stockAnt":0,"stock":0,"id":"p01"},{"prov":"Black Bamboo Enterprises S.A","kilos":70227,"viajes":5,"tachosEnv":506,"barrasEst":810,"barrasEnv":1110,"barrasUsadas":950,"difBarras":-140,"promEst":1.76,"promEnv":1.88,"costoKg":60.06,"remont":false,"enfriar":160,"stockAnt":0,"stock":0,"id":"p02"},{"prov":"Carnes Pampeanas S.A","kilos":83224,"viajes":4,"tachosEnv":502,"barrasEst":960,"barrasEnv":940,"barrasUsadas":840,"difBarras":120,"promEst":1.31,"promEnv":1.67,"costoKg":42.92,"remont":true,"enfriar":44,"stockAnt":144,"stock":200,"id":"p03"},{"prov":"Compañia Bernal S.A","kilos":129186,"viajes":15,"tachosEnv":1130,"barrasEst":1491,"barrasEnv":1850,"barrasUsadas":2005,"difBarras":-514,"promEst":2.02,"promEnv":1.77,"costoKg":54.42,"remont":false,"enfriar":60,"stockAnt":259,"stock":44,"id":"p04"},{"prov":"Ecocarnes S.A","kilos":95875,"viajes":8,"tachosEnv":900,"barrasEst":1106,"barrasEnv":1485,"barrasUsadas":1605,"difBarras":-499,"promEst":2.18,"promEnv":1.78,"costoKg":58.86,"remont":false,"enfriar":208,"stockAnt":328,"stock":0,"id":"p05"},{"prov":"EPC-CARCARAÑA","kilos":67475,"viajes":5,"tachosEnv":500,"barrasEst":779,"barrasEnv":810,"barrasUsadas":700,"difBarras":79,"promEst":1.35,"promEnv":1.4,"costoKg":45.62,"remont":false,"enfriar":45,"stockAnt":180,"stock":240,"id":"p06"},{"prov":"FRIAR S,A 1970","kilos":71331,"viajes":6,"tachosEnv":564,"barrasEst":823,"barrasEnv":1160,"barrasUsadas":829,"difBarras":-6,"promEst":1.51,"promEnv":1.47,"costoKg":61.8,"remont":false,"enfriar":0,"stockAnt":45,"stock":376,"id":"p07"},{"prov":"FRIAR S.A 249","kilos":67572,"viajes":4,"tachosEnv":467,"barrasEst":780,"barrasEnv":765,"barrasUsadas":541,"difBarras":239,"promEst":1.04,"promEnv":1.16,"costoKg":43.02,"remont":true,"enfriar":113,"stockAnt":336,"stock":383,"id":"p08"},{"prov":"Frigorifico Bermejo S.A","kilos":86170,"viajes":6,"tachosEnv":600,"barrasEst":994,"barrasEnv":1780,"barrasUsadas":1416,"difBarras":-422,"promEst":2.14,"promEnv":2.36,"costoKg":78.5,"remont":true,"enfriar":480,"stockAnt":176,"stock":60,"id":"p09"},{"prov":"Frigorifico Frigolar S.A","kilos":129255,"viajes":10,"tachosEnv":930,"barrasEst":1491,"barrasEnv":1325,"barrasUsadas":1219,"difBarras":272,"promEst":1.23,"promEnv":1.31,"costoKg":38.95,"remont":false,"enfriar":100,"stockAnt":0,"stock":0,"id":"p10"},{"prov":"Frigorifico Gorina S.A.I.C","kilos":210612,"viajes":20,"tachosEnv":1698,"barrasEst":2430,"barrasEnv":2430,"barrasUsadas":2368,"difBarras":62,"promEst":1.46,"promEnv":1.39,"costoKg":43.84,"remont":false,"enfriar":62,"stockAnt":0,"stock":0,"id":"p11"},{"prov":"FRIGORIFICO GRAL PICO S.A.","kilos":73867,"viajes":5,"tachosEnv":648,"barrasEst":852,"barrasEnv":1125,"barrasUsadas":998,"difBarras":-146,"promEst":1.76,"promEnv":1.54,"costoKg":57.87,"remont":false,"enfriar":127,"stockAnt":0,"stock":0,"id":"p12"},{"prov":"Frigorifico Gral. Deheza S.A","kilos":64658,"viajes":5,"tachosEnv":633,"barrasEst":746,"barrasEnv":1125,"barrasUsadas":762,"difBarras":-16,"promEst":1.53,"promEnv":1.2,"costoKg":66.12,"remont":false,"enfriar":205,"stockAnt":0,"stock":158,"id":"p13"},{"prov":"Frigorifico Rioplatense SAICIF","kilos":341929,"viajes":24,"tachosEnv":2395,"barrasEst":3945,"barrasEnv":3150,"barrasUsadas":2954,"difBarras":991,"promEst":1.12,"promEnv":1.23,"costoKg":35.01,"remont":false,"enfriar":80,"stockAnt":0,"stock":0,"id":"p14"},{"prov":"Ganadera San Roque S.A.","kilos":40894,"viajes":5,"tachosEnv":380,"barrasEst":472,"barrasEnv":460,"barrasUsadas":419,"difBarras":53,"promEst":1.33,"promEnv":1.1,"costoKg":42.74,"remont":false,"enfriar":20,"stockAnt":0,"stock":0,"id":"p15"},{"prov":"Jorge L. Tolosa S.A","kilos":46734,"viajes":5,"tachosEnv":483,"barrasEst":539,"barrasEnv":720,"barrasUsadas":620,"difBarras":-81,"promEst":1.72,"promEnv":1.28,"costoKg":58.54,"remont":false,"enfriar":100,"stockAnt":0,"stock":0,"id":"p16"},{"prov":"Mat. Y Frig. Federal S.A","kilos":89792,"viajes":10,"tachosEnv":668,"barrasEst":1036,"barrasEnv":1055,"barrasUsadas":838,"difBarras":198,"promEst":1.21,"promEnv":1.25,"costoKg":44.65,"remont":false,"enfriar":140,"stockAnt":0,"stock":0,"id":"p17"},{"prov":"MATTIEVICH S.A.-ARROYO SECO","kilos":38686,"viajes":3,"tachosEnv":300,"barrasEst":446,"barrasEnv":495,"barrasUsadas":375,"difBarras":71,"promEst":1.26,"promEnv":1.25,"costoKg":48.62,"remont":false,"enfriar":120,"stockAnt":0,"stock":0,"id":"p18"},{"prov":"Procesadora Ganadera Entrerriana S.A","kilos":90758,"viajes":5,"tachosEnv":500,"barrasEst":1047,"barrasEnv":850,"barrasUsadas":670,"difBarras":377,"promEst":0.96,"promEnv":1.34,"costoKg":35.59,"remont":true,"enfriar":100,"stockAnt":20,"stock":100,"id":"p19"},{"prov":"Runfo S.A","kilos":141925,"viajes":12,"tachosEnv":1018,"barrasEst":1638,"barrasEnv":1720,"barrasUsadas":1355,"difBarras":283,"promEst":1.24,"promEnv":1.33,"costoKg":46.05,"remont":false,"enfriar":125,"stockAnt":0,"stock":0,"id":"p20"},{"prov":"TRESNAL S.A.","kilos":44896,"viajes":7,"tachosEnv":470,"barrasEst":518,"barrasEnv":630,"barrasUsadas":571,"difBarras":-53,"promEst":1.65,"promEnv":1.21,"costoKg":48.33,"remont":false,"enfriar":0,"stockAnt":0,"stock":0,"id":"p21"},{"prov":"Velsud S.A","kilos":49293,"viajes":8,"tachosEnv":492,"barrasEst":569,"barrasEnv":850,"barrasUsadas":679,"difBarras":-110,"promEst":1.79,"promEnv":1.38,"costoKg":52.34,"remont":false,"enfriar":50,"stockAnt":0,"stock":0,"id":"p22"}],"total":{"kilos":2223330,"tachosEnv":17239,"barrasEst":25654,"barrasEnv":28250,"barrasUsadas":24841,"difBarras":813,"promEst":1.45,"promEnv":1.44,"costoKg":null,"enfriar":2565,"stockAnt":0,"stock":1561}},{"label":"8 al 14 de agosto","desde":"8 ago","hasta":"14 ago","data":[{"prov":"Agro Industria S.A","kilos":61989,"viajes":8,"tachosEnv":525,"barrasEst":715,"barrasEnv":845,"barrasUsadas":691,"difBarras":24,"promEst":1.45,"promEnv":1.32,"costoKg":51.8,"remont":false,"enfriar":46,"stockAnt":0,"stock":0,"id":"p23"},{"prov":"Arre Beef S.A","kilos":114132,"viajes":10,"tachosEnv":1038,"barrasEst":1317,"barrasEnv":1630,"barrasUsadas":1390,"difBarras":-73,"promEst":1.58,"promEnv":1.34,"costoKg":54.27,"remont":false,"enfriar":175,"stockAnt":0,"stock":0,"id":"p01"},{"prov":"Black Bamboo Enterprises S.A","kilos":73804,"viajes":5,"tachosEnv":522,"barrasEst":852,"barrasEnv":1200,"barrasUsadas":1030,"difBarras":-178,"promEst":1.81,"promEnv":1.97,"costoKg":61.78,"remont":false,"enfriar":170,"stockAnt":0,"stock":0,"id":"p02"},{"prov":"Carnes Pampeanas S.A","kilos":71842,"viajes":4,"tachosEnv":517,"barrasEst":829,"barrasEnv":855,"barrasUsadas":835,"difBarras":-6,"promEst":1.51,"promEnv":1.62,"costoKg":45.22,"remont":false,"enfriar":40,"stockAnt":200,"stock":180,"id":"p03"},{"prov":"Compañia Bernal S.A","kilos":195182,"viajes":19,"tachosEnv":1386,"barrasEst":2252,"barrasEnv":2680,"barrasUsadas":2421,"difBarras":-169,"promEst":1.61,"promEnv":1.75,"costoKg":52.18,"remont":false,"enfriar":35,"stockAnt":44,"stock":268,"id":"p04"},{"prov":"Ecocarnes S.A","kilos":126155,"viajes":8,"tachosEnv":892,"barrasEst":1456,"barrasEnv":1503,"barrasUsadas":1323,"difBarras":133,"promEst":1.36,"promEnv":1.48,"costoKg":45.27,"remont":false,"enfriar":201,"stockAnt":296,"stock":275,"id":"p05"},{"prov":"EPC-CARCARAÑA","kilos":75298,"viajes":5,"tachosEnv":484,"barrasEst":869,"barrasEnv":720,"barrasUsadas":611,"difBarras":258,"promEst":1.05,"promEnv":1.26,"costoKg":36.34,"remont":true,"enfriar":99,"stockAnt":240,"stock":225,"id":"p06"},{"prov":"FRIAR S,A 1970","kilos":73619,"viajes":6,"tachosEnv":580,"barrasEst":849,"barrasEnv":1300,"barrasUsadas":1255,"difBarras":-406,"promEst":2.22,"promEnv":2.16,"costoKg":67.1,"remont":false,"enfriar":0,"stockAnt":45,"stock":90,"id":"p07"},{"prov":"FRIAR S.A 249","kilos":68903,"viajes":4,"tachosEnv":496,"barrasEst":795,"barrasEnv":810,"barrasUsadas":587,"difBarras":208,"promEst":1.11,"promEnv":1.18,"costoKg":44.67,"remont":false,"enfriar":124,"stockAnt":383,"stock":405,"id":"p08"},{"prov":"Frigorifico Bermejo S.A","kilos":91467,"viajes":7,"tachosEnv":692,"barrasEst":1055,"barrasEnv":2370,"barrasUsadas":1661,"difBarras":-606,"promEst":2.36,"promEnv":2.4,"costoKg":98.46,"remont":false,"enfriar":509,"stockAnt":60,"stock":260,"id":"p09"},{"prov":"Frigorifico Frigolar S.A","kilos":121189,"viajes":10,"tachosEnv":815,"barrasEst":1398,"barrasEnv":1325,"barrasUsadas":1223,"difBarras":175,"promEst":1.31,"promEnv":1.5,"costoKg":41.55,"remont":true,"enfriar":102,"stockAnt":0,"stock":0,"id":"p10"},{"prov":"Frigorifico Gorina S.A.I.C","kilos":190127,"viajes":24,"tachosEnv":1934,"barrasEst":2194,"barrasEnv":2525,"barrasUsadas":2508,"difBarras":-314,"promEst":1.71,"promEnv":1.3,"costoKg":50.47,"remont":false,"enfriar":17,"stockAnt":0,"stock":0,"id":"p11"},{"prov":"FRIGORIFICO GRAL PICO S.A.","kilos":65272,"viajes":5,"tachosEnv":512,"barrasEst":753,"barrasEnv":1035,"barrasUsadas":902,"difBarras":-149,"promEst":1.8,"promEnv":1.76,"costoKg":60.26,"remont":false,"enfriar":133,"stockAnt":0,"stock":0,"id":"p12"},{"prov":"Frigorifico Gral. Deheza S.A","kilos":51635,"viajes":5,"tachosEnv":433,"barrasEst":596,"barrasEnv":855,"barrasUsadas":608,"difBarras":-12,"promEst":1.53,"promEnv":1.4,"costoKg":62.92,"remont":false,"enfriar":180,"stockAnt":158,"stock":225,"id":"p13"},{"prov":"Frigorifico Rioplatense SAICIF","kilos":273661,"viajes":24,"tachosEnv":2404,"barrasEst":3158,"barrasEnv":3150,"barrasUsadas":2939,"difBarras":219,"promEst":1.4,"promEnv":1.22,"costoKg":43.74,"remont":false,"enfriar":90,"stockAnt":0,"stock":0,"id":"p14"},{"prov":"Ganadera San Roque S.A.","kilos":57808,"viajes":8,"tachosEnv":550,"barrasEst":667,"barrasEnv":645,"barrasUsadas":590,"difBarras":77,"promEst":1.33,"promEnv":1.07,"costoKg":42.4,"remont":false,"enfriar":25,"stockAnt":0,"stock":0,"id":"p15"},{"prov":"Jorge L. Tolosa S.A","kilos":104934,"viajes":8,"tachosEnv":665,"barrasEst":1211,"barrasEnv":945,"barrasUsadas":845,"difBarras":366,"promEst":1.05,"promEnv":1.27,"costoKg":34.22,"remont":true,"enfriar":100,"stockAnt":0,"stock":0,"id":"p16"},{"prov":"Mat. Y Frig. Federal S.A","kilos":100848,"viajes":10,"tachosEnv":806,"barrasEst":1164,"barrasEnv":1050,"barrasUsadas":920,"difBarras":244,"promEst":1.19,"promEnv":1.14,"costoKg":39.56,"remont":false,"enfriar":130,"stockAnt":0,"stock":0,"id":"p17"},{"prov":"MATTIEVICH S.A.-ARROYO SECO","kilos":34104,"viajes":3,"tachosEnv":300,"barrasEst":394,"barrasEnv":450,"barrasUsadas":330,"difBarras":64,"promEst":1.26,"promEnv":1.1,"costoKg":50.14,"remont":false,"enfriar":120,"stockAnt":180,"stock":180,"id":"p18"},{"prov":"Procesadora Ganadera Entrerriana S.A","kilos":79491,"viajes":5,"tachosEnv":500,"barrasEst":917,"barrasEnv":1000,"barrasUsadas":945,"difBarras":-28,"promEst":1.55,"promEnv":1.89,"costoKg":47.8,"remont":true,"enfriar":100,"stockAnt":320,"stock":275,"id":"p19"},{"prov":"Runfo S.A","kilos":119294,"viajes":11,"tachosEnv":949,"barrasEst":1376,"barrasEnv":1650,"barrasUsadas":1385,"difBarras":-9,"promEst":1.51,"promEnv":1.46,"costoKg":52.56,"remont":false,"enfriar":125,"stockAnt":0,"stock":0,"id":"p20"},{"prov":"TRESNAL S.A.","kilos":66501,"viajes":9,"tachosEnv":532,"barrasEst":767,"barrasEnv":720,"barrasUsadas":634,"difBarras":133,"promEst":1.24,"promEnv":1.19,"costoKg":36.23,"remont":false,"enfriar":0,"stockAnt":0,"stock":0,"id":"p21"},{"prov":"Velsud S.A","kilos":64167,"viajes":8,"tachosEnv":646,"barrasEst":740,"barrasEnv":1075,"barrasUsadas":889,"difBarras":-149,"promEst":1.8,"promEnv":1.38,"costoKg":52.65,"remont":false,"enfriar":50,"stockAnt":0,"stock":0,"id":"p22"}],"total":{"kilos":2281422,"tachosEnv":18178,"barrasEst":26324,"barrasEnv":30338,"barrasUsadas":26522,"difBarras":-198,"promEst":1.51,"promEnv":1.46,"costoKg":null,"enfriar":2571,"stockAnt":0,"stock":2383}}];
+  const CUR=SEMANAS.length-1;              // la ultima semana es la que se muestra arriba
+  const DATA=SEMANAS[CUR].data, TOTAL=SEMANAS[CUR].total;
 
   const nf=new Intl.NumberFormat('es-AR');
   const dec=v=> v==null?'':v.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -168,9 +194,90 @@
     document.getElementById('tbody').innerHTML=body+totalRow;
   }
 
+  // ---------- comparativo entre las dos ultimas semanas ----------
+  const PREV=SEMANAS[CUR-1];
+  function pct(cur,ant){ if(ant==null||ant===0||cur==null) return null; return (cur-ant)/Math.abs(ant)*100; }
+  function deltaTxt(cur,ant,o){
+    o=o||{};
+    if(cur==null||ant==null) return '<span class="zero">—</span>';
+    const d=cur-ant, pp=pct(cur,ant);
+    const bueno = o.down ? d<0 : d>0;
+    const cls = d===0 ? 'zero' : (bueno?'dpos':'dneg');
+    const ar  = d===0 ? '' : (d>0?'▲ +':'▼ ');
+    const val = o.dec2 ? dec(Math.abs(d)) : nf.format(Math.abs(Math.round(d)));
+    const sp  = (d===0||pp==null||!isFinite(pp)) ? '' : ' ('+(d>0?'+':'-')+Math.abs(Math.round(pp*10)/10).toLocaleString('es-AR')+'%)';
+    return '<span class="'+cls+'">'+ar+val+sp+'</span>';
+  }
+  const CMPCOLS=[
+    {k:'kilos',        lbl:'Kilos'},
+    {k:'barrasEnv',    lbl:'Barras env.'},
+    {k:'barrasUsadas', lbl:'Usadas'},
+    {k:'difBarras',    lbl:'Dif. barras', signo:true},
+    {k:'promEnv',      lbl:'Prom. env.',  dec2:true},
+    {k:'costoKg',      lbl:'$/Kg',        dec2:true, money:true, down:true}
+  ];
+  function renderCmpTot(){
+    const a=PREV.total, b=TOTAL;
+    const cards=[
+      {l:'Kilos recibidos', k:'kilos'},
+      {l:'Barras estimadas',k:'barrasEst'},
+      {l:'Barras enviadas', k:'barrasEnv'},
+      {l:'Barras usadas',   k:'barrasUsadas'},
+      {l:'Dif. barras',     k:'difBarras', signo:true},
+      {l:'Prom. enviado',   k:'promEnv',   dec2:true},
+      {l:'Enfriar',         k:'enfriar'},
+      {l:'Stock',           k:'stock'}
+    ];
+    document.getElementById('cmp-tot').innerHTML=cards.map(function(c){
+      const cur=b[c.k], ant=a[c.k];
+      const f=function(v){ return v==null?'—':(c.dec2?dec(v):((c.signo&&v>0?'+':'')+nf.format(v))); };
+      return '<div class="cmpc"><div class="cl">'+c.l+'</div>'
+        +'<div class="cvv">'+f(cur)+'</div>'
+        +'<div class="cfrom">antes '+f(ant)+'</div>'
+        +'<div class="cdelta">'+deltaTxt(cur,ant,{down:c.down,dec2:c.dec2})+'</div></div>';
+    }).join('');
+  }
+  let cmpKey='kilos', cmpDir=-1;
+  function renderCmpHead(){
+    let g='<tr><th class="grp" rowspan="2" style="text-align:left">Proveedor</th>';
+    CMPCOLS.forEach(function(c){ g+='<th class="grp" colspan="3">'+c.lbl+'</th>'; });
+    g+='</tr><tr>';
+    CMPCOLS.forEach(function(c){
+      const on=c.k===cmpKey, ar=on?(cmpDir<0?'▼':'▲'):'';
+      g+='<th class="grp">ant.</th>'
+       + '<th class="grp gact" data-ck="'+c.k+'" style="cursor:pointer">act.<span class="ar" style="opacity:'+(on?1:0)+'">'+ar+'</span></th>'
+       + '<th class="grp">Δ</th>';
+    });
+    g+='</tr>';
+    document.getElementById('cmp-thead').innerHTML=g;
+    document.querySelectorAll('#cmp-thead th[data-ck]').forEach(function(th){
+      th.onclick=function(){
+        const k=th.dataset.ck;
+        if(k===cmpKey){ cmpDir=-cmpDir; } else { cmpKey=k; cmpDir=-1; }
+        renderCmpHead(); renderCmpBody();
+        if(window.parent!==window) setTimeout(postAlto,30);
+      };
+    });
+  }
+  function renderCmpBody(){
+    const antById=new Map(PREV.data.map(function(d){ return [d.id,d]; }));
+    const rows=DATA.filter(function(d){ return antById.has(d.id); }).slice()
+      .sort(function(x,y){ return cmpDir*((x[cmpKey]==null?0:x[cmpKey])-(y[cmpKey]==null?0:y[cmpKey])); });
+    document.getElementById('cmp-tbody').innerHTML=rows.map(function(r){
+      const a=antById.get(r.id);
+      const f=function(c,v){ return v==null?'—':(c.money?'$ '+dec(v):(c.dec2?dec(v):((c.signo&&v>0?'+':'')+nf.format(v)))); };
+      return '<tr><td>'+r.prov+'</td>'+CMPCOLS.map(function(c){
+        return '<td class="prevcell">'+f(c,a[c.k])+'</td>'
+          + '<td>'+f(c,r[c.k])+'</td>'
+          + '<td>'+deltaTxt(r[c.k],a[c.k],{down:c.down,dec2:c.dec2})+'</td>';
+      }).join('')+'</tr>';
+    }).join('');
+  }
+
   function render(){
-    document.getElementById('tsub').textContent=DATA.length+' proveedores · clic en una columna para ordenar.';
+    document.getElementById('tsub').textContent=DATA.length+' proveedores · semana '+SEMANAS[CUR].label+' · clic en una columna para ordenar.';
     renderKpis(); renderHead(); renderBody();
+    renderCmpTot(); renderCmpHead(); renderCmpBody();
     if(window.parent!==window) setTimeout(postAlto,30);
   }
 
