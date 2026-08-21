@@ -165,7 +165,7 @@ const SISTEMAS = {
 };
 
 // LOGÍSTICA: hoja con muchos bloques distintos (períodos mixtos) → sub-pestañas.
-const G = { costo: 'Matriz de Costo · Junio', metrica: 'Métrica de Costo', flota: 'Disponibilidad de Flota',
+const G = { costo: 'Matriz de Costo · Julio', metrica: 'Métrica de Costo', flota: 'Disponibilidad de Flota',
   lavado: 'Lavado de Camiones · Sem 30', tambores: 'Necesidad de Tambores',
   gasoil: 'Consumo de Gasoil', frig: 'Costo por Frigorífico', hiel: 'Stock de Hiel' };
 // Rendimiento KG/LT semana a semana (S1–S31) para el histórico de gasoil.
