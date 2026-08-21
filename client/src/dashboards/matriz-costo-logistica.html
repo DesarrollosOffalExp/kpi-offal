@@ -135,7 +135,7 @@
       <p class="sub">Costo logístico mes a mes · hoja <b>Gastos</b>. Variaciones vs. mes anterior.</p>
     </div>
     <div class="head-right">
-      <span class="fuente">Datos reales · Enero a Junio</span>
+      <span class="fuente">Datos reales · Enero a Julio</span>
       <div class="seg" id="seg" role="tablist" aria-label="Vista">
         <button data-v="anio" role="tab">Año completo</button>
         <button data-v="sem1" class="on" role="tab" aria-selected="true">1.º semestre</button>
@@ -150,28 +150,47 @@
 
   <div class="blocks" id="blocks"></div>
   <div class="tip" id="tip" role="status" aria-live="polite"></div>
-  <p class="pie">Fuente: <b>2026 Consumo de combustible.xlsx</b> · hoja <b>Gastos</b> (filas 7–47). Julio a Diciembre aún sin datos en el original · se muestran vacíos (-). LED en USD/ton: verde &lt;70 · ámbar 70–100 · rojo &gt;100. Celdas coloreadas por intensidad de costo dentro de cada fila (verde=menor, rojo=mayor).</p>
+  <p class="pie">Fuente: <b>2026 Consumo de combustible.xlsx</b> · hoja <b>Gastos</b> (filas 7–47). Agosto a Diciembre aún sin datos en el original · se muestran vacíos (-). LED en USD/ton: verde &lt;70 · ámbar 70–100 · rojo &gt;100. Celdas coloreadas por intensidad de costo dentro de cada fila (verde=menor, rojo=mayor).</p>
 </div>
 
 <script>
 (function(){
   const ABBR=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  const CUR=5;
+  const CUR=6;
   const N=a=>a.concat(Array(12-a.length).fill(null));
   const D={
-    dolar:N([1465,1420,1405,1415,1430,1500]), indec:N([0.029,0.029,0.034,0.026,0.021,0.019]),
-    descProd:N([6374977,5388443,5297767,4846034,5983368,6070550]), descNeta:N([10430399,8546571,10090865,8104433,10124075,10917908]),
-    descProp:N([4615842,4474926,5058980,4660439,5841572,6269946]), descFlet:N([5814556,4071645,5031885,3443994,4282503,4647962]),
-    propTotal:N([170311650,135284531,225726369,147618376,174169228,251927671]), propKg:N([36.90,30.23,44.62,31.67,29.82,40.18]), propUsd:N([25.19,21.29,31.76,22.39,20.85,26.79]),
-    fletTotal:N([556192701,604028315,701667920,516434800,637802650,799914600]), fletKg:N([95.66,148.35,139.44,149.95,148.93,172.10]), fletUsd:N([65.29,104.47,99.25,105.97,104.15,114.73]),
-    logTotal:N([726504350,739312846,927394289,664053176,811971878,1051842271]), logKg:N([69.65,86.50,91.90,81.94,80.20,96.34]), logUsd:N([47.54,60.92,65.41,57.91,56.09,64.23]),
-    lavTotal:N([65894989,61665571,69857126,70342932,73344283,78540283]), lavPor:N([79487,81568,82185,82756,86287,92400]), lavUsdLav:N([54.26,57.44,58.49,58.49,60.34,61.60]), lavCant:N([829,756,850,850,850,850]), lavUsdTon:N([4.31,5.08,4.93,6.13,5.07,4.80]),
-    tallTotal:N([41309801,64853812,46625124,74493537,112892410,45890383]), tallUsd:N([2.70,5.34,3.29,6.50,7.80,2.80]),
-    genTotal:N([833709140,865832229,1043876539,808889645,998208572,1176272936]), genSinFlet:N([277516440,261803914,342208619,292454845,360405922,376358336]),
-    usdSinFlet:N([18.16,21.57,24.14,25.50,24.89,22.98]), usdTonDesc:N([54.56,69.15,70.61,68.13,67.30,73.54]),
-    pesoTonDesc:N([79931,101308,103448,99808,98598,107738]), pesoTonProd:N([130778,160683,197041,166918,166831,193767]),
-    pctPropios:N([0.443,0.524,0.501,0.575,0.577,0.574]), pctFletes:N([0.557,0.476,0.499,0.425,0.423,0.426]),
-    ajusteIndec:N([0,82249,104752,106137,101904,100471]), pctIndec:N([null,0.188,-0.013,-0.063,-0.034,0.067]),
+    dolar:N([1465,1420,1405,1415,1430,1500,1510]),
+    indec:N([0.029,0.029,0.034,0.026,0.021,0.019,0.021]),
+    descProd:N([6374977,5388443,5297767,4846034,5983368,6070550,6386183]),
+    descNeta:N([10212865,8830780,9663137,8802345,10222863,11283260,11103409]),
+    descProp:N([4615842,4474926,5058980,4660439,5841572,6354686,6890343]),
+    descFlet:N([5814556,4071645,5031885,3443994,4282503,4928574,4213066]),
+    propTotal:N([170311650,135284531,225726369,147618376,174169228,251927671,226645202]),
+    propKg:N([36.9,30.23,44.62,31.67,29.82,39.64,32.89,22.55,28.09,21.63,22.73,19.41]),
+    propUsd:N([25.19,21.29,31.76,22.39,20.85,26.43,21.78,16.58,20.07,14.66,15.41,13.12]),
+    fletTotal:N([556192701,604028315,701667920,516434800,637802650,736698500,723689740]),
+    fletKg:N([95.66,148.35,139.44,149.95,148.93,149.47,171.77,109.15,107.95,113.4,122.77,107.56]),
+    fletUsd:N([65.29,104.47,99.25,105.97,104.15,99.65,113.76,80.26,77.11,76.88,83.23,72.67]),
+    logTotal:N([726504350,739312846,927394289,664053176,811971878,988626171,950334942,0,0,0,0,0]),
+    logKg:N([71.14,83.72,95.97,75.44,79.43,87.62,85.59]),
+    logUsd:N([48.56,58.96,68.31,53.31,55.54,58.41,56.68]),
+    lavTotal:N([65894989,61665571,69857126,70342932,73344283,78540283,69437561]),
+    lavPor:N([79487,81568,82185,82756,86287,92400,81691]),
+    lavUsdLav:N([54.26,57.44,58.49,58.49,60.34,61.6,54.1]),
+    lavCant:N([829,756,850,850,850,850,850]),
+    lavUsdTon:N([4.4,4.92,5.15,5.65,5.02,4.64,4.14]),
+    tallTotal:N([41309801,64853812,46625124,74493537,112892410,45890383,112625551]),
+    tallUsd:N([2.76,5.17,3.43,5.98,7.72,2.71,6.72]),
+    genTotal:N([833709140,865832229,1043876539,808889645,998208572,1113056836,1132398054]),
+    genSinFlet:N([277516440,261803914,342208619,292454845,360405922,376358336,408708314]),
+    usdSinFlet:N([18.55,20.88,25.21,23.48,24.65,22.24,24.38]),
+    usdTonDesc:N([55.72,66.93,73.74,62.73,66.65,67.34,67.54]),
+    pesoTonDesc:N([81633,98047,108027,91895,97645,98647,101987]),
+    pesoTonProd:N([130778,160683,197041,166918,166831,183354,177320]),
+    pctPropios:N([0.452,0.507,0.524,0.529,0.571,0.556,0.621]),
+    pctFletes:N([0.569,0.461,0.521,0.391,0.419,0.412,0.379]),
+    ajusteIndec:N([0,84001,101381,110835,93825,99500,100718]),
+    pctIndec:N([null,0.1433,0.0615,-0.2061,0.0391,-0.0086,0.0124]),
   };
 
   const nf=new Intl.NumberFormat('es-AR');
@@ -207,7 +226,7 @@
   /* ---------- Card protagonista ---------- */
   function renderPrimary(){
     document.getElementById('primary').innerHTML=
-      '<div class="pcard"><div class="phead"><span class="peyebrow">Dato principal · Junio</span>'
+      '<div class="pcard"><div class="phead"><span class="peyebrow">Dato principal · Julio</span>'
       +'<span class="ptitle">Costo por tonelada descargada</span></div><div class="pstats">'
       +'<div class="pstat"><span class="pv">'+fmt(D.pesoTonDesc[CUR],'money')+'</span><span class="pl">$ / ton descargada</span></div><div class="pdiv"></div>'
       +'<div class="pstat"><span class="pv">USD '+fmt(D.usdTonDesc[CUR],'dec')+led(D.usdTonDesc[CUR])+'</span><span class="pl">USD / ton descargada</span></div>'
@@ -215,7 +234,7 @@
   }
 
   /* ---------- Secciones (scorecards + línea) ---------- */
-  const VS = ' La flecha y el % son la variación respecto al mes anterior (Mayo a Junio).';
+  const VS = ' La flecha y el % son la variación respecto al mes anterior (Junio a Julio).';
   const SEMAF = ' El punto es un semáforo: verde por debajo de 70, ámbar entre 70 y 100, rojo por encima de 100.';
   const SECTIONS=[
     { title:'Costo por Tonelada', sub:'descargada vs. producida',
@@ -316,13 +335,13 @@
   }
   function renderDonuts(){
     document.getElementById('donuts').innerHTML=
-      donutPanel('Costo General por componente','Junio · participación en el costo total',[
+      donutPanel('Costo General por componente','Julio · participación en el costo total',[
         {name:'Fletes',v:D.fletTotal[CUR],c:'#d99a2b'},
         {name:'Propios',v:D.propTotal[CUR],c:'#2f9e6e'},
         {name:'Lavatachos',v:D.lavTotal[CUR],c:'#7d93a0'},
         {name:'Taller',v:D.tallTotal[CUR],c:'#e08a6a'},
       ])
-      +donutPanel('Kg descargados por origen','Junio · propios vs. fletes',[
+      +donutPanel('Kg descargados por origen','Julio · propios vs. fletes',[
         {name:'Propios',v:D.descProp[CUR],c:'#2f9e6e'},
         {name:'Fletes',v:D.descFlet[CUR],c:'#d99a2b'},
       ]);
