@@ -23,7 +23,7 @@ const PROD_HIST = [131151, 104523, 108596, 124286, 125108, 105281, 100126];
 const INSUMOS = {
   key: 'insumos', nombre: 'Insumos', estado: 'ok', objetivoPendiente: true,
   // Cuadro de KPIs asignados (hoja "Insumos" del archivo KPI Gerencia de Operaciones 2026).
-  objetivos: {"persona":"Luis Ramos","total":3,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"REDUCIR EL WORKING CAPITAL INMOVILIZADO UN 10 %","kpi":"CANTIDAD DE MATERIALES OBSOLETOS A ENERO 2026 VS DICIEMBRE 2026","area":"Insumos","meta":"3%","vals":["31%","","","","2%","1%",""]},{"n":"2","objetivo":"REDUCIR EL WORKING CAPITAL INMOVILIZADO UN 10 %","kpi":"CANTIDAD DE MATERIALES CON SOBRESTOCK ENERO 2026 VS DICIEMBRE 2026","area":"Insumos","meta":"20%","vals":["34%","","","","17%","18%",""]},{"n":"3","objetivo":"REDUCIR EL WORKING CAPITAL INMOVILIZADO UN 10 %","kpi":"DIAS DE STOCK DE INSUMOS PRODUCTIVOS ENERO 2025 VS DICIEMBRE 2026","area":"Insumos","meta":"20%","vals":["30%","","","","27%","27%",""]},{"n":"4","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Insumos","meta":"","vals":["","","","","","",""]}],"promedio":null},
+  objetivos: {"persona":"Luis Ramos","total":3,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"REDUCIR EL WORKING CAPITAL INMOVILIZADO UN 10 %","kpi":"CANTIDAD DE MATERIALES OBSOLETOS A ENERO 2026 VS DICIEMBRE 2026","area":"Insumos","meta":"3%","vals":["31%","","","","2%","1%","1%"]},{"n":"2","objetivo":"REDUCIR EL WORKING CAPITAL INMOVILIZADO UN 10 %","kpi":"CANTIDAD DE MATERIALES CON SOBRESTOCK ENERO 2026 VS DICIEMBRE 2026","area":"Insumos","meta":"20%","vals":["34%","","","","17%","18%","17%"]},{"n":"3","objetivo":"REDUCIR EL WORKING CAPITAL INMOVILIZADO UN 10 %","kpi":"DIAS DE STOCK DE INSUMOS PRODUCTIVOS ENERO 2025 VS DICIEMBRE 2026","area":"Insumos","meta":"20%","vals":["30%","","","","27%","27%","24%"]},{"n":"4","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Insumos","meta":"","vals":["","","","","","",""]}],"promedio":null},
   kpis: [
     // Productividad de Armado de Cajas (embebido; ProductividadArmado.jsx). Solo registra el grupo/subtab.
     { id: 'prod_armado', grupo: 'Productividad de Armado de Cajas', titulo: 'Productividad de Armado de Cajas', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: 100, valor: null,
@@ -56,7 +56,7 @@ const INSUMOS = {
 const COMPRAS = {
   key: 'compras', nombre: 'Compras', estado: 'ok', objetivoPendiente: true,
   // Cuadro de KPIs asignados (hoja "Compras" del archivo KPI Gerencia de Operaciones 2026).
-  objetivos: {"persona":"Juan Retamero","total":5,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"Mejorar un 10% el costo por tonelada mediante la mejora de costos de compras","kpi":"SE DEBE SACAR EL INFORME \"IMFORME DE PRECIOS PROMEDIO PONDERADO\" (ES EL UNICO QUE ENCONTRAMOS QUE TIRABA LOS PRECIOS DE LOS MATERIALES) MES A MES Y SE LO DEBE CALCULAR CON LA INFLACION MENSUAL.","area":"Compras","meta":"4%","vals":["-6%","-5%","-4%","-6%","-2%","",""]},{"n":"2","objetivo":"","kpi":"INDICADOR DE NUEVOS PROVEEDORES EN EL PERIODO MEDIDO","area":"Compras","meta":"2%","vals":["","","","","3%","",""]},{"n":"3","objetivo":"","kpi":"LICITACIONES","area":"Compras","meta":"2%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"4","objetivo":"Asegurar el proyecto de transformación antes del fin del 1er semestre","kpi":"MATRIZ","area":"Compras","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"5","objetivo":"","kpi":"MATRIZ DE HABILIDADES","area":"Compras","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"6","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Compras","meta":"70%","vals":["","","","","","",""]}],"promedio":null},
+  objetivos: {"persona":"Juan Retamero","total":5,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"Mejorar un 10% el costo por tonelada mediante la mejora de costos de compras","kpi":"SE DEBE SACAR EL INFORME \"IMFORME DE PRECIOS PROMEDIO PONDERADO\" (ES EL UNICO QUE ENCONTRAMOS QUE TIRABA LOS PRECIOS DE LOS MATERIALES) MES A MES Y SE LO DEBE CALCULAR CON LA INFLACION MENSUAL.","area":"Compras","meta":"4%","vals":["-6%","-5%","-4%","-6%","-2%","",""]},{"n":"2","objetivo":"","kpi":"INDICADOR DE NUEVOS PROVEEDORES EN EL PERIODO MEDIDO","area":"Compras","meta":"2%","vals":["","","","","3%","6%","7%"]},{"n":"3","objetivo":"","kpi":"LICITACIONES","area":"Compras","meta":"2%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"4","objetivo":"Asegurar el proyecto de transformación antes del fin del 1er semestre","kpi":"MATRIZ","area":"Compras","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"5","objetivo":"","kpi":"MATRIZ DE HABILIDADES","area":"Compras","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"6","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Compras","meta":"70%","vals":["","","","","","",""]}],"promedio":null},
   kpis: [
     // 1er conjunto: entender de dónde nace el total de pendientes.
     { id: 'pendientes', grupo: 'Pendientes y vencidos', titulo: 'Total Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 51,
@@ -148,19 +148,19 @@ const SISTEMAS = {
   key: 'sistemas', nombre: 'Sistemas', estado: 'ok', objetivoPendiente: true,
   kpis: [
     // 1er conjunto: pendientes (gerencia pidió dejar solo esto, sin "vencidas").
-    { id: 'abiertos', grupo: 'Pendientes', titulo: 'Total de Abiertos', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 60,
+    { id: 'abiertos', grupo: 'Pendientes', titulo: 'Total de Abiertos', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 72,
       info: 'Total de tickets abiertos. (SISTEMAS, columna S)' },
-    { id: 'pendientes', grupo: 'Pendientes', titulo: 'Tickets Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
+    { id: 'pendientes', grupo: 'Pendientes', titulo: 'Tickets Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 9,
       info: 'Tickets que quedaron pendientes en la semana. (SISTEMAS, columna R)' },
     // 2do conjunto: actividad de la semana.
-    { id: 'tickets_semana', grupo: 'Actividad de la semana', titulo: 'Tickets de la Semana', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 77,
+    { id: 'tickets_semana', grupo: 'Actividad de la semana', titulo: 'Tickets de la Semana', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 75,
       info: 'Tickets ingresados en la semana. (SISTEMAS, columna N)' },
-    { id: 'tratados', grupo: 'Actividad de la semana', titulo: 'Tickets Tratados', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 60,
+    { id: 'tratados', grupo: 'Actividad de la semana', titulo: 'Tickets Tratados', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 66,
       info: 'Tickets resueltos o gestionados en la semana. (SISTEMAS, columna O)' },
   ],
   graficos: [
     { tipo: 'bar', grupo: 'Actividad de la semana', titulo: 'Gestión de la semana', info: 'Flujo de tickets de la última semana: ingresados, tratados y pendientes.',
-      datos: [{ nombre: 'Ingresados', valor: 77 }, { nombre: 'Tratados', valor: 60 }, { nombre: 'Pendientes', valor: 17 }] },
+      datos: [{ nombre: 'Ingresados', valor: 75 }, { nombre: 'Tratados', valor: 66 }, { nombre: 'Pendientes', valor: 9 }] },
   ],
 };
 
