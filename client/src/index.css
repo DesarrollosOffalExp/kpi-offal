@@ -22,7 +22,11 @@
 }
 
 * { box-sizing: border-box; }
-html, body, #root { height: 100%; }
+/* min-height y no height: con `height: 100%` el #root queda del alto de la
+   ventana aunque el contenido sea más largo, y como la navbar es sticky dentro
+   de él, se despegaba y se iba con el scroll a mitad de página. */
+html, body { margin: 0; }
+#root { min-height: 100vh; }
 
 body {
   margin: 0;
@@ -126,7 +130,7 @@ body {
   max-width: var(--maxw);
   margin: 0 auto;
   padding: clamp(20px, 4vw, 36px) clamp(16px, 4vw, 28px) 48px;
-  min-height: calc(100% - 64px);
+  min-height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
 }
@@ -464,3 +468,38 @@ body {
 }
 .vacio-sector b { color: var(--text); font-size: 16px; }
 .vacio-sector p { margin: 8px auto 0; max-width: 52ch; font-size: 14px; }
+
+/* ---------------------------------------------------------------------------
+   Ubicación en la navbar. Aparece cuando las pestañas (o sub-pestañas) quedan
+   arriba de la pantalla, para no perder de vista dónde estás parado; al volver
+   al tope se saca, porque las pestañas reales vuelven a verse.
+   Los chips replican el aspecto de la pestaña activa y llevan de vuelta arriba.
+--------------------------------------------------------------------------- */
+.nav-ctx {
+  display: flex; align-items: center; gap: 8px;
+  min-width: 0; flex: 1;
+  margin: 0 clamp(10px, 2vw, 22px);
+  animation: ctx-in .18s ease-out;
+}
+@keyframes ctx-in { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+.nav-ctx-chip {
+  font: inherit; font-size: 12.5px; font-weight: 700;
+  color: var(--muted);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 15px;
+  cursor: pointer;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 30ch;
+  transition: color .15s, background .15s, border-color .15s;
+}
+.nav-ctx-chip:hover { color: var(--text); border-color: var(--primary); }
+.nav-ctx-chip.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+.nav-ctx-chip.on:hover { background: var(--primary-bright); border-color: var(--primary-bright); }
+.nav-ctx-sep { color: var(--muted); font-size: 14px; flex-shrink: 0; }
+/* en pantallas chicas alcanza con el sector */
+@media (max-width: 820px) {
+  .nav-ctx-sep, .nav-ctx-chip:not(.on) { display: none; }
+  .nav-ctx-chip.on { max-width: 18ch; }
+}
+@media (max-width: 560px) { .nav-ctx { display: none; } }
