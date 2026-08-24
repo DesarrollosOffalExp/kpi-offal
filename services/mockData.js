@@ -52,44 +52,42 @@ const INSUMOS = {
 };
 
 // COMPRAS: foto de la última semana cargada (Semana 31). Valores tomados de la
-// fila de la semana 31, columnas A→R de la hoja COMPRAS.
+// fila de la semana 34, columnas A→R de la hoja KPI.
 const COMPRAS = {
-  key: 'compras', nombre: 'Compras', estado: 'ok', objetivoPendiente: true,
+  key: 'compras', nombre: 'Compras', estado: 'ok', periodo: 'semana 34', objetivoPendiente: true,
   // Cuadro de KPIs asignados (hoja "Compras" del archivo KPI Gerencia de Operaciones 2026).
   objetivos: {"persona":"Juan Retamero","total":5,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"Mejorar un 10% el costo por tonelada mediante la mejora de costos de compras","kpi":"SE DEBE SACAR EL INFORME \"IMFORME DE PRECIOS PROMEDIO PONDERADO\" (ES EL UNICO QUE ENCONTRAMOS QUE TIRABA LOS PRECIOS DE LOS MATERIALES) MES A MES Y SE LO DEBE CALCULAR CON LA INFLACION MENSUAL.","area":"Compras","meta":"4%","vals":["-6%","-5%","-4%","-6%","-2%","",""]},{"n":"2","objetivo":"","kpi":"INDICADOR DE NUEVOS PROVEEDORES EN EL PERIODO MEDIDO","area":"Compras","meta":"2%","vals":["","","","","3%","6%","7%"]},{"n":"3","objetivo":"","kpi":"LICITACIONES","area":"Compras","meta":"2%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"4","objetivo":"Asegurar el proyecto de transformación antes del fin del 1er semestre","kpi":"MATRIZ","area":"Compras","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"5","objetivo":"","kpi":"MATRIZ DE HABILIDADES","area":"Compras","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"6","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Compras","meta":"70%","vals":["","","","","","",""]}],"promedio":null},
   kpis: [
     // 1er conjunto: entender de dónde nace el total de pendientes.
-    { id: 'pendientes', grupo: 'Pendientes y vencidos', titulo: 'Total Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 77,
+    { id: 'pendientes', grupo: 'Pendientes y vencidos', titulo: 'Total Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 313,
       info: 'Total de requisiciones pendientes al cierre de la semana. (COMPRAS, columna O)' },
-    { id: 'sin_tratar', grupo: 'Pendientes y vencidos', titulo: 'Requis sin Tratar', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 58,
+    { id: 'sin_tratar', grupo: 'Pendientes y vencidos', titulo: 'Requis sin Tratar', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 292,
       info: 'Requisiciones de la semana que quedaron sin gestionar. (COMPRAS, columna G)' },
-    { id: 'vencidas', grupo: 'Pendientes y vencidos', titulo: 'Total Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 15,
-      desglose: [{ nombre: 'Nuevas', valor: 6 }, { nombre: 'Viejas', valor: 11 }],
+    { id: 'vencidas', grupo: 'Pendientes y vencidos', titulo: 'Total Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
+      desglose: [{ nombre: 'Nuevas', valor: 5 }, { nombre: 'Viejas', valor: 12 }],
       info: 'Requisiciones vencidas (pasaron su plazo), con desglose entre nuevas y viejas. (COMPRAS, columna J; K nuevas / L viejas)' },
-    { id: 'total_sin_tratar', grupo: 'Pendientes y vencidos', titulo: 'Total de Requis Sin Tratar', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 77,
+    { id: 'total_sin_tratar', grupo: 'Pendientes y vencidos', titulo: 'Total de Requis Sin Tratar', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 313,
       info: 'Total de requisiciones sin tratar (acumulado: anteriores + de la semana). (COMPRAS, columna H)' },
-    { id: 'ant_vencidas', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 15,
+    { id: 'ant_vencidas', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
       info: 'Requisiciones vencidas que vienen de semanas anteriores. (COMPRAS, columna A)' },
     { id: 'ant_sin_vencer', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Sin Vencer', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 4,
       info: 'Requisiciones de semanas anteriores que aún no vencieron. (COMPRAS, columna B)' },
     // 2do conjunto: actividad de la semana.
-    { id: 'requis_semana', grupo: 'Actividad de la semana', titulo: 'Requis de la Semana', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 327,
+    { id: 'requis_semana', grupo: 'Actividad de la semana', titulo: 'Requis de la Semana', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 339,
       info: 'Requisiciones de compra ingresadas en la semana. (COMPRAS, columna C)' },
-    { id: 'tratadas', grupo: 'Actividad de la semana', titulo: 'Requis Tratadas', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 261,
+    { id: 'tratadas', grupo: 'Actividad de la semana', titulo: 'Requis Tratadas', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 45,
       info: 'Requisiciones gestionadas / resueltas en la semana. (COMPRAS, columna D)' },
   ],
   graficos: [
     { tipo: 'bar', grupo: 'Pendientes y vencidos', titulo: 'Composición de pendientes', info: 'De qué se componen los pendientes de la última semana.',
-      datos: [{ nombre: 'Por vencer', valor: 24 }, { nombre: 'En plazo', valor: 38 }, { nombre: 'Vencidas', valor: 15 }] },
+      datos: [{ nombre: 'Por vencer', valor: 202 }, { nombre: 'En plazo', valor: 94 }, { nombre: 'Vencidas', valor: 17 }] },
     { tipo: 'bar', grupo: 'Actividad de la semana', titulo: 'Gestión de la semana', info: 'Flujo de requisiciones de la última semana: ingresadas, tratadas y las que quedaron.',
-      datos: [{ nombre: 'Ingresadas', valor: 327 }, { nombre: 'Tratadas', valor: 261 }, { nombre: 'Sin tratar', valor: 58 }, { nombre: 'Rechazadas', valor: 1 }, { nombre: 'Anuladas', valor: 7 }] },
+      datos: [{ nombre: 'Ingresadas', valor: 339 }, { nombre: 'Tratadas', valor: 45 }, { nombre: 'Sin tratar', valor: 292 }, { nombre: 'Rechazadas', valor: 1 }, { nombre: 'Anuladas', valor: 1 }] },
     // Vencidas por semana: gráfico embebido (ComprasVencidas.jsx) con el desglose de la
     // tabla A112 (composición de las vencidas por semana de origen). Solo registra el grupo/subtab.
     { tipo: 'tabla', grupo: 'Vencidas por semana', titulo: 'Vencidas por semana', info: 'Desglose de cómo se componen las vencidas por semana de origen (hoja KPI · A112).', columnas: [], filas: [] },
     // Órdenes demoradas (embebido; ComprasDemoradas.jsx): tabla agrupada de la hoja Demoradas con detalle.
     { tipo: 'tabla', grupo: 'Órdenes demoradas', titulo: 'Órdenes demoradas', info: 'Ítems de OC vencidos y pendientes de recepción, por proveedor y rubro (hoja Demoradas).', columnas: [], filas: [] },
-    // Informe (embebido; ComprasInforme.jsx): recepción en tiempo vs. fuera de plazo (hoja Reporte, AX vs BI).
-    { tipo: 'tabla', grupo: 'Informe', titulo: 'Informe', info: 'Cumplimiento de entregas: ítems recibidos en tiempo vs. fuera de plazo (hoja Reporte).', columnas: [], filas: [] },
     // Presupuesto (embebido; PresupuestoCompras.jsx). Solo registra el grupo/subtab, va
     // último para que Presupuesto y Objetivo queden como los dos últimos de la ventana.
     { tipo: 'tabla', grupo: 'Presupuesto', titulo: 'Presupuesto', info: 'Presupuestado vs. gasto real por grupo de costo, mes a mes (Compras).', columnas: [], filas: [] },
