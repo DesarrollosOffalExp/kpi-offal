@@ -793,13 +793,21 @@
   // En Presupuesto y Objetivos no aplican las tarjetas de tickets (#primary): se ocultan.
   const SIN_TICKETS=['presupuesto','objetivos'];
   function aplicarPrimary(v){ document.getElementById('primary').style.display = SIN_TICKETS.includes(v) ? 'none' : ''; }
+  // El marco no dibuja sub-pestañas para Sistemas, así que le avisamos cuál está
+  // activa para que la navbar pueda mostrarla al hacer scroll, igual que el resto.
+  function postSub(b){ try{ parent.postMessage({tipo:'sub', sub:b.textContent.trim()},'*'); }catch(e){} }
   document.querySelectorAll('#subnav button').forEach(b=>b.onclick=()=>{
     document.querySelectorAll('#subnav button').forEach(x=>x.classList.remove('on'));
     b.classList.add('on');
     document.querySelectorAll('.view').forEach(el=>el.classList.toggle('on', el.dataset.view===b.dataset.v));
     aplicarPrimary(b.dataset.v);
+    postSub(b);
     if(window.parent!==window) setTimeout(postAlto,30);
   });
+  if(window.parent!==window){
+    var bAct=document.querySelector('#subnav button.on');
+    if(bAct) [0,150,600].forEach(function(t){ setTimeout(function(){ postSub(bAct); }, t); });
+  }
 
   renderPrimary(); renderSections(); renderDonuts(); renderOperadores(); renderBlocks(); renderOpen(); renderObjetivos(); renderTerceros(); renderPresupuesto();
 
