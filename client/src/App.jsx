@@ -34,6 +34,9 @@ import EficienciaMateriales from './components/EficienciaMateriales';
 import ProductividadCerrado from './components/ProductividadCerrado';
 import KpiSistemas from './components/KpiSistemas';
 
+// Alto de la navbar sticky (.nav-inner en index.css).
+const ALTO_NAV = 64;
+
 function formatearFecha(iso) {
   if (!iso) return '';
   const d = new Date(iso);
@@ -106,6 +109,30 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Al bajar y perder de vista las pestañas, la navbar muestra dónde estás
+  // (sector · sub-pestaña). Al volver arriba se saca, porque las pestañas
+  // reales ya se ven. Se mide contra la última fila de navegación visible,
+  // así vale igual para los sectores con y sin sub-pestañas.
+  const [compacto, setCompacto] = useState(false);
+  useEffect(() => {
+    function medir() {
+      const el = document.querySelector('.subtabs') || document.querySelector('.tabs');
+      const fuera = el ? el.getBoundingClientRect().bottom < ALTO_NAV : false;
+      setCompacto((v) => (v === fuera ? v : fuera));
+    }
+    medir();
+    window.addEventListener('scroll', medir, { passive: true });
+    window.addEventListener('resize', medir);
+    // los tableros embebidos cambian de alto solos y corren el layout
+    const ro = new ResizeObserver(medir);
+    ro.observe(document.body);
+    return () => {
+      window.removeEventListener('scroll', medir);
+      window.removeEventListener('resize', medir);
+      ro.disconnect();
+    };
+  }, []);
+
   if (cargando) return <div className="estado">Cargando indicadores…</div>;
   if (error) return <div className="estado error">{error}</div>;
 
@@ -129,9 +156,19 @@ export default function App() {
   const conSub = grupos.length > 1 && sector?.layout !== 'stacked';
   const subActual = grupos.includes(subActivo) ? subActivo : grupos[0];
 
+  // Lo que muestra la navbar cuando las pestañas quedaron arriba. Sistemas trae
+  // su propio tablero con navegación interna: el marco no dibuja sub-pestañas,
+  // así que tampoco se anuncia una.
+  const contextoNav = compacto && sector
+    ? { sector: sector.nombre, sub: (conSub && sector.key !== 'sistemas') ? subActual : null }
+    : null;
+
   return (
     <>
-      <Navbar usuario={usuario} />
+      <Navbar
+        usuario={usuario}
+        contexto={contextoNav}
+      />
       <main className="wrap">
         <div className="head">
           <div>

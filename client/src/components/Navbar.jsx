@@ -21,9 +21,10 @@ const IconHome = () => (
  * logo en círculo blanco, título, botón "Inicio" → portal, y chip de usuario
  * con menú de "Cerrar sesión". Misma disposición que las otras apps (paleta navy).
  */
-export default function Navbar({ usuario }) {
+export default function Navbar({ usuario, contexto }) {
   const [abierto, setAbierto] = useState(false);
   const nombre = usuario?.nombre || usuario?.email || 'Usuario';
+  const alTope = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
     <header className="nav">
@@ -32,6 +33,24 @@ export default function Navbar({ usuario }) {
           <span className="brand-badge"><img src="/logo.png" alt="Offal" /></span>
           <span className="brand-mark">Offal <span className="brand-sub">· Tablero KPI</span></span>
         </a>
+
+        {/* Dónde estás parado. Sólo aparece cuando las pestañas quedaron
+            arriba de la pantalla; al volver al tope se saca. */}
+        {contexto && (
+          <div className="nav-ctx" aria-label="Ubicación actual">
+            <button className="nav-ctx-chip on" onClick={alTope} title="Volver a las pestañas">
+              {contexto.sector}
+            </button>
+            {contexto.sub && (
+              <>
+                <span className="nav-ctx-sep" aria-hidden="true">›</span>
+                <button className="nav-ctx-chip" onClick={alTope} title="Volver a las pestañas">
+                  {contexto.sub}
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         <div className="nav-right">
           <a className="nav-btn" href={PORTAL_URL} title="Volver al portal">
