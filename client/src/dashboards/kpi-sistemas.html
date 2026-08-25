@@ -265,6 +265,24 @@
   .opill.sd{background:var(--panel-3);color:var(--muted-2);}
   .oobj{display:block;font-size:10.5px;color:var(--muted-2);font-weight:500;margin-top:2px;}
 
+  /* --- tabla mes a mes del objetivo de Sistemas --- */
+  .otabla td.ocel{cursor:pointer;position:relative;font-variant-numeric:tabular-nums;transition:box-shadow .12s;}
+  .otabla td.ocel:hover{box-shadow:inset 0 0 0 2px var(--info);}
+  .otabla td.ocel[data-on]{box-shadow:inset 0 0 0 2px var(--info);}
+  .otabla td.ocel.ok{background:rgba(34,227,155,.12);color:var(--good);font-weight:700;}
+  .otabla td.ocel.bajo{background:rgba(255,77,103,.12);color:var(--bad);font-weight:700;}
+  .otabla td.ocel.fuerte{font-size:14px;font-weight:800;}
+  .otabla td.ocel.na{color:var(--muted-2);}
+  .otabla td.omes{font-weight:700;color:var(--muted);}
+  .obar{display:block;height:3px;border-radius:2px;background:var(--line-2);margin-top:5px;overflow:hidden;}
+  .obar i{display:block;height:100%;background:currentColor;opacity:.85;}
+  .ocuenta{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;}
+  .oform{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--info);
+    background:var(--panel-3);border-radius:7px;padding:6px 9px;margin-bottom:9px;}
+  table.tabla-obj.mini{font-size:11px;}
+  table.tabla-obj.mini th,table.tabla-obj.mini td{padding:4px 7px;}
+  .delta-lbl{font-size:9.5px;color:var(--muted-2);}
+
 </style>
 
 <div class="wrap">
@@ -766,36 +784,107 @@
       +'<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="2.5" stroke-linejoin="round"/>'+dots+xs+hits+'</svg>';
   }
 
+  /* ---- base que respalda cada métrica ---- */
+  function oBase(k,mi){
+    const m=mi+1;
+    if(k===0){ const b=OBJ.base.find(x=>x.m===m); return (b&&b.t)?{ok:b.ok,e:b.e,t:b.t,u:'tickets cerrados',crit:'cerrados en 90 días o menos'}:null; }
+    if(k===1){ const b=OBJ.inf.find(x=>x.m===m); return (b&&b.t)?{ok:b.ok,e:b.e,t:b.t,u:'informes',crit:'presentados en plazo'}:null; }
+    return null;
+  }
+  const O_FORM=['tickets cerrados en ≤90 días ÷ tickets cerrados',
+                'informes en plazo ÷ informes presentados',
+                'días hábiles hasta notificar el estado (sin base cargada)',
+                'informes de gestión presentados ÷ esperados (sin base cargada)'];
+  const oEnt=n=>n==null?'—':Number(n).toLocaleString('es-AR');
+  const oInt=v=>v==null?'—':Math.round(v)+'%';
+  const oDec=v=>v==null?'—':String(Math.round(v*10)/10).replace('.',',')+'%';
+
+  /* ---- tarjetas de cabecera, mismo formato que el resto del tablero ---- */
+  function oSpark(serie,color){
+    const pts=serie.map((v,i)=>({i,v})).filter(p=>p.v!=null); if(pts.length<2) return '';
+    const W=120,H=22,p=3,vs=pts.map(x=>x.v);
+    let lo=Math.min(...vs),hi=Math.max(...vs); if(hi===lo){hi=lo+1;lo=lo-1;}
+    const x=i=>p+(W-2*p)*i/11, y=v=>H-p-((v-lo)/(hi-lo))*(H-2*p);
+    const d=pts.map((q,k)=>(k?'L':'M')+x(q.i).toFixed(1)+','+y(q.v).toFixed(1)).join(' ');
+    const l=pts[pts.length-1];
+    return '<div class="spark-wrap"><svg class="spark" viewBox="0 0 '+W+' '+H+'"><path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="1.8" stroke-linejoin="round"/>'
+      +'<circle cx="'+x(l.i).toFixed(1)+'" cy="'+y(l.v).toFixed(1)+'" r="2.6" fill="'+color+'"/></svg></div>';
+  }
+  function oTarjetas(serie){
+    const con=serie.filter(v=>v!=null);
+    const prom=con.length?con.reduce((a,v)=>a+v,0)/con.length:null;
+    const ok=con.filter(v=>v>=O_META).length;
+    const conCarga=OBJ.filas.filter(f=>f.vals.some(v=>v!=null)).length;
+    const ant=oMi>0?serie[oMi-1]:null, act=serie[oMi];
+    let delta='<span class="delta neutral">—</span>';
+    if(act!=null&&ant!=null){ const d=Math.round((act-ant)*10)/10;
+      delta='<span class="delta '+(d>0?'good':d<0?'bad':'neutral')+'">'+(d>0?'▲':d<0?'▼':'')+' '+String(Math.abs(d)).replace('.',',')+' pp</span>'; }
+    const C=[
+      {k:'Número del área · '+O_MES[oMi], v:oInt(act), sub:delta, lbl:'vs. mes anterior', sp:oSpark(serie,'var(--info)')},
+      {k:'Promedio del período', v:oInt(prom), sub:'<span class="delta '+(prom>=O_META?'good':'bad')+'">'+(prom>=O_META?'sobre la meta':'bajo la meta')+'</span>', lbl:O_MES[0]+' a '+O_MES[OBJ.hastaMes]},
+      {k:'Meta del objetivo', v:O_META+'%', sub:'<span class="delta neutral">fija</span>', lbl:'definida para el año'},
+      {k:'Meses que cumplen', v:ok+' / '+con.length, sub:'<span class="delta '+(ok===con.length?'good':'bad')+'">'+Math.round(ok/con.length*100)+'%</span>', lbl:'de los meses con carga'},
+      {k:'Métricas que aportan', v:conCarga+' / '+OBJ.filas.length, sub:'<span class="delta '+(conCarga===OBJ.filas.length?'good':'neutral')+'">'+(OBJ.filas.length-conCarga)+' sin carga</span>', lbl:'forman el promedio'},
+    ];
+    return '<div class="cards">'+C.map(c=>'<div class="card"><span class="ck">'+c.k+'</span><span class="cv">'+c.v+'</span>'
+      +c.sub+'<span class="delta-lbl">'+c.lbl+'</span>'+(c.sp||'')+'</div>').join('')+'</div>';
+  }
+
+  /* ---- detalle de una celda de la tabla ---- */
+  let oCel=null;                                  // {k:'area'|índice de métrica, mi}
+  function oDetalleCelda(){
+    if(!oCel) return '<div class="ocalc"><span class="op">Tocá cualquier número de la tabla para ver de dónde sale.</span></div>';
+    const mi=oCel.mi;
+    if(oCel.k==='area'){
+      const c=metricasConDato(mi);
+      if(!c.length) return '<div class="ocalc"><span class="op">'+O_MES[mi]+' no tiene ninguna métrica cargada.</span></div>';
+      return '<div class="ocalc"><div><b>Número del área · '+O_MES[mi]+'</b></div>'
+        +c.map(f=>'<div><span class="op">métrica '+f.n+'</span>  '+oDec(f.vals[mi])+'  <span class="op">· '+oEsc(f.kpi.slice(0,54))+(f.kpi.length>54?'…':'')+'</span></div>').join('')
+        +'<div><span class="op">(</span>'+c.map(f=>String(Math.round(f.vals[mi]*10)/10).replace('.',',')).join(' <span class="op">+</span> ')
+        +'<span class="op">) ÷ '+c.length+' =</span> '+oDec(promMes(mi))+' <span class="op">→ redondeado</span> <b>'+oInt(promMes(mi))+'</b></div>'
+        +(OBJ.filas.length-c.length? '<div><span class="op">'+(OBJ.filas.length-c.length)+' métrica(s) sin carga ese mes: no entran en el promedio.</span></div>':'')
+        +'</div>';
+    }
+    const k=oCel.k, f=OBJ.filas[k], b=oBase(k,mi);
+    if(f.vals[mi]==null) return '<div class="ocalc"><div><b>Métrica '+f.n+' · '+O_MES[mi]+'</b></div>'
+      +'<div><span class="op">Sin valor cargado. La cuenta sería: '+O_FORM[k]+'.</span></div></div>';
+    if(!b) return '<div class="ocalc"><div><b>Métrica '+f.n+' · '+O_MES[mi]+'</b></div>'
+      +'<div>'+oDec(f.vals[mi])+' <span class="op">— cargado a mano; la base detallada no está en la planilla.</span></div></div>';
+    return '<div class="ocalc"><div><b>Métrica '+f.n+' · '+O_MES[mi]+'</b>  <span class="op">'+O_FORM[k]+'</span></div>'
+      +'<div><span class="op">'+b.crit+'</span>  <b>'+oEnt(b.ok)+'</b></div>'
+      +'<div><span class="op">fuera de criterio</span>  '+oEnt(b.e)+'</div>'
+      +'<div><span class="op">total de '+b.u+'</span>  '+oEnt(b.t)+'</div>'
+      +'<div>'+oEnt(b.ok)+' <span class="op">÷</span> '+oEnt(b.t)+' <span class="op">=</span> '+oDec(b.ok/b.t*100)
+      +' <span class="op">→ cargado</span> '+oDec(f.vals[mi])+' <span class="op">→ redondeado</span> <b>'+oInt(f.vals[mi])+'</b></div></div>';
+  }
+
   /* ---- ventana 1: objetivo estratégico ---- */
   function oEstrategico(){
     const serie=O_MES.map((m,i)=>promMes(i));
-    const ult=serie[oMi], comp=metricasConDato(oMi);
-    const cuenta=comp.length
-      ? '<div>'+comp.map(f=>'<div><span class="op">métrica '+f.n+'</span>  '+oNum(f.vals[oMi])+'  <span class="op">· '+oEsc(f.kpi.slice(0,52))+(f.kpi.length>52?'…':'')+'</span></div>').join('')
-        +'<div><span class="op">(</span>'+comp.map(f=>String(f.vals[oMi]).replace('.',',')).join(' <span class="op">+</span> ')+'<span class="op">) ÷ '+comp.length+' =</span> <b>'+oNum(ult)+'</b></div></div>'
-      : '<div class="op">Ninguna métrica tiene dato en '+O_MES[oMi]+'.</div>';
-    const sinDato=OBJ.filas.length-comp.length;
-    const filasT=O_MES.map((m,i)=>{
-      const v=serie[i]; if(v==null&&i>OBJ.hastaMes) return '';
-      const ok=v==null?null:v>=O_META;
-      return '<tr'+(i===oMi?' class="osel"':'')+'><td class="izq">'+m+'</td>'
-        +OBJ.filas.map(f=>'<td>'+(f.vals[i]==null?'<span class="cel-na">N/A</span>':oNum(f.vals[i]))+'</td>').join('')
-        +'<td class="'+(ok===true?'cel-ok':ok===false?'cel-bajo':'')+'"><b>'+oNum(v)+'</b></td></tr>';
+    const meses=O_MES.map((m,i)=>i).filter(i=>i<=OBJ.hastaMes);
+    const cel=(v,cls,k,mi,extra)=>'<td class="ocel '+cls+'" data-k="'+k+'" data-mi="'+mi+'"'
+      +(oCel&&String(oCel.k)===String(k)&&oCel.mi===mi?' data-on="1"':'')+'>'+(v==null?'<span class="cel-na">N/A</span>':oInt(v))+(extra||'')+'</td>';
+    const filasT=meses.map(i=>{
+      const v=serie[i], ok=v==null?null:v>=O_META;
+      const barra=v==null?'':'<span class="obar"><i style="width:'+Math.max(2,Math.min(100,v))+'%"></i></span>';
+      return '<tr>'
+        +'<td class="izq omes">'+O_MES[i]+'</td>'
+        +OBJ.filas.map((f,k)=>cel(f.vals[i], f.vals[i]==null?'na':(f.meta!=null&&f.vals[i]>=f.meta?'ok':f.meta!=null?'bajo':''), k, i)).join('')
+        +cel(v, ok===true?'ok fuerte':ok===false?'bajo fuerte':'na','area',i,barra)
+        +'</tr>';
     }).join('');
     return '<div class="panel">'
       +'<div class="ohead"><div><h3>Respuesta de tickets y notificación de tratamiento</h3>'
-      +'<p class="psub">Responsable: '+oEsc(OBJ.agente)+' · meta '+O_META+'% · el número del área es el promedio de las métricas que carga el sector.</p></div>'
-      +'<div class="obig"><span class="olbl">'+O_MES[oMi]+'</span><span class="oval '+(ult>=O_META?'ok':'bajo')+'">'+oNum(ult)+'</span>'
-      +'<span class="olbl">promedio del período '+oNum(Math.round(serie.filter(v=>v!=null).reduce((a,v)=>a+v,0)/serie.filter(v=>v!=null).length*10)/10)+'</span></div></div>'
+      +'<p class="psub">Responsable: '+oEsc(OBJ.agente)+' · el número del área es el promedio de las métricas que carga el sector.</p></div></div>'
+      +oTarjetas(serie)
       +'<div class="ocols">'
       +'<div><div class="ostep">Evolución del número del área</div>'+oChart(serie,O_META,'var(--info)',210)
-      +'<p class="opie">Clic en un mes para ver cómo se forma.</p></div>'
-      +'<div><div class="ostep">Cómo se forma el número de '+O_MES[oMi]+'</div><div class="ocalc">'+cuenta+'</div>'
-      +(sinDato?'<p class="opie">'+sinDato+' de las '+OBJ.filas.length+' métricas todavía no tienen carga, así que no entran en el promedio.</p>':'')
-      +'</div></div>'
+      +'<p class="opie">Clic en un mes del gráfico o en cualquier número de la tabla.</p></div>'
+      +'<div><div class="ostep">De dónde sale el dato</div>'+oDetalleCelda()+'</div></div>'
       +'<div class="ostep">Mes a mes</div>'
-      +'<div class="tscroll"><table class="tabla-obj"><thead><tr><th class="izq">Mes</th>'
-      +OBJ.filas.map(f=>'<th title="'+oEsc(f.kpi)+'">Métrica '+f.n+'</th>').join('')+'<th>Área</th></tr></thead><tbody>'+filasT+'</tbody></table></div>'
+      +'<div class="tscroll"><table class="tabla-obj otabla"><thead><tr><th class="izq">Mes</th>'
+      +OBJ.filas.map(f=>'<th title="'+oEsc(f.kpi)+'">M'+f.n+'</th>').join('')+'<th>Área</th></tr></thead><tbody>'+filasT+'</tbody></table></div>'
+      +'<p class="opie">Valores redondeados a entero. M1 a M'+OBJ.filas.length+' son las métricas del sector; «Área» es el promedio de las que ese mes tienen carga.</p>'
       +'</div>';
   }
 
@@ -803,54 +892,54 @@
   function oCelda(v,f,k,mi){
     if(v==null) return '<td class="cel-na">N/A</td>';
     const base=f.meta==null?'':(v>=f.meta?'cel-ok':'cel-bajo');
-    if(f.meta==null) return '<td class="'+base+'">'+oNum(v)+'</td>';
-    return '<td class="'+base+' cel-clk" data-punto="1" data-fila="'+k+'" data-mes="'+mi+'" title="Ver detalle de '+O_MES[mi]+'">'+oNum(v)+'</td>';
+    const b=oBase(k,mi);
+    const t=b? oEnt(b.ok)+' de '+oEnt(b.t)+' '+b.u+' = '+oDec(b.ok/b.t*100) : oDec(v);
+    return '<td class="'+base+' cel-clk" data-punto="1" data-fila="'+k+'" data-mes="'+mi+'" title="'+O_MES[mi]+': '+t+'">'+oInt(v)+'</td>';
   }
   function oKpis(){
-    const hasta=OBJ.hastaMes;
-    const ms=O_MES.slice(0,hasta+1);
+    const ms=O_MES.slice(0,OBJ.hastaMes+1);
     const th='<th>#</th><th class="izq">KPI / métrica</th><th>Meta</th>'+ms.map(m=>'<th>'+m+'</th>').join('')+'<th>Prom.</th><th>Estado</th>';
     const rows=OBJ.filas.map((f,k)=>{
-      const meta=f.meta==null?'N/A':f.meta+'%';
-      const prom=f.prom==null?'<td class="cel-na">—</td>':'<td class="meta">'+oNum(f.prom)+'</td>';
       const est=f.estado==='Logrado'?'<td class="ok">✅ Logrado</td>':'<td class="cel-na">'+(f.estado||'—')+'</td>';
       const clk=f.meta!=null&&f.vals.some(v=>v!=null)?' class="obj-row" data-obj="'+k+'"':'';
-      return '<tr'+clk+'><td>'+f.n+'</td><td class="obj">'+oEsc(f.kpi)+(f.obj?'<small class="oobj">'+oEsc(f.obj)+'</small>':'')+'</td>'
-        +'<td class="meta">'+meta+'</td>'+ms.map((m,mi)=>oCelda(f.vals[mi],f,k,mi)).join('')+prom+est+'</tr>';
+      return '<tr'+clk+'><td>'+f.n+'</td><td class="obj">'+oEsc(f.kpi)
+        +'<small class="oobj">Cuenta: '+O_FORM[k]+'</small></td>'
+        +'<td class="meta">'+(f.meta==null?'N/A':f.meta+'%')+'</td>'
+        +ms.map((m,mi)=>oCelda(f.vals[mi],f,k,mi)).join('')
+        +(f.prom==null?'<td class="cel-na">—</td>':'<td class="meta">'+oInt(f.prom)+'</td>')+est+'</tr>';
     }).join('');
-    const promRow='<tr class="prom"><td></td><td class="obj">Promedio general del área</td><td class="meta">'+O_META+'%</td>'
-      +ms.map((m,mi)=>'<td>'+oNum(promMes(mi))+'</td>').join('')+'<td></td><td></td></tr>';
+    const promRow='<tr class="prom"><td></td><td class="obj">Promedio general del área<small class="oobj">Cuenta: promedio de las métricas con carga en el mes</small></td>'
+      +'<td class="meta">'+O_META+'%</td>'+ms.map((m,mi)=>'<td title="'+O_MES[mi]+': ('+metricasConDato(mi).map(f=>oDec(f.vals[mi])).join(' + ')+') ÷ '+metricasConDato(mi).length+' = '+oDec(promMes(mi))+'">'+oInt(promMes(mi))+'</td>').join('')+'<td></td><td></td></tr>';
 
     const tarjetas=OBJ.filas.map((f,k)=>{
       const color=O_SERIE[k%4], conDato=f.vals.some(v=>v!=null);
-      const est=f.estado==='Logrado'?'<span class="opill ok">Logrado</span>'
-        :'<span class="opill sd">Sin datos</span>';
-      let extra='';
-      if(k===0&&OBJ.base.length){
-        const b=OBJ.base.filter(x=>x.t>0);
-        extra='<p class="opie">Base: '+b.reduce((a,x)=>a+x.t,0).toLocaleString('es-AR')+' tickets cerrados, '
-          +b.reduce((a,x)=>a+x.e,0)+' excedieron los 90 días.'
-          +(b.length>OBJ.hastaMes+1?' Agosto ya tiene base cargada ('+b[b.length-1].ok+'/'+b[b.length-1].t+') pero todavía no está volcada al KPI.':'')+'</p>';
-      }
-      if(k===1&&OBJ.inf.length){
-        extra='<p class="opie">Base: '+OBJ.inf.reduce((a,x)=>a+x.t,0).toLocaleString('es-AR')+' informes, '
-          +OBJ.inf.reduce((a,x)=>a+x.e,0)+' fuera de plazo.</p>';
-      }
-      if(!conDato) extra='<p class="opie">La métrica está definida pero el sector todavía no cargó valores.</p>';
+      const est=f.estado==='Logrado'?'<span class="opill ok">Logrado</span>':'<span class="opill sd">Sin datos</span>';
+      const filasB=O_MES.map((m,mi)=>{ const b=oBase(k,mi); if(!b) return '';
+        return '<tr><td class="izq">'+m+'</td><td>'+oEnt(b.ok)+'</td><td>'+oEnt(b.e)+'</td><td>'+oEnt(b.t)+'</td>'
+          +'<td class="'+(f.meta!=null&&b.ok/b.t*100>=f.meta?'cel-ok':'cel-bajo')+'">'+oDec(b.ok/b.t*100)+'</td></tr>'; }).join('');
+      const tot=[0,1].includes(k)?(k===0?OBJ.base:OBJ.inf).filter(x=>x.t>0):[];
+      const sumOk=tot.reduce((a,x)=>a+x.ok,0), sumT=tot.reduce((a,x)=>a+x.t,0);
+      const cuenta=filasB
+        ? '<div class="ocuenta"><div class="ostep">La cuenta</div>'
+          +'<div class="oform">'+oEsc(O_FORM[k])+'</div>'
+          +'<div class="tscroll"><table class="tabla-obj mini"><thead><tr><th class="izq">Mes</th><th>En criterio</th><th>Fuera</th><th>Total</th><th>%</th></tr></thead>'
+          +'<tbody>'+filasB+'<tr class="prom"><td class="izq">Total</td><td>'+oEnt(sumOk)+'</td><td>'+oEnt(sumT-sumOk)+'</td><td>'+oEnt(sumT)+'</td><td>'+oDec(sumOk/sumT*100)+'</td></tr></tbody></table></div></div>'
+        : '<div class="ocuenta"><div class="ostep">La cuenta</div><div class="oform">'+oEsc(O_FORM[k])+'</div>'
+          +'<p class="opie">'+(conDato?'El valor se carga a mano en la planilla; no hay base detallada.':'La métrica está definida pero el sector todavía no cargó ni valores ni base.')+'</p></div>';
       return '<div class="ocard'+(conDato?'':' vacia')+'">'
         +'<div class="ocard-h"><span class="osw" style="background:'+color+'"></span>'
         +'<div><h4 title="'+oEsc(f.kpi)+'">'+oEsc(f.kpi)+'</h4>'
         +'<div class="ocard-m">Métrica '+f.n+' · meta '+(f.meta==null?'N/A':f.meta+'%')+'</div></div>'
-        +'<div class="ocard-v">'+(f.prom==null?'—':oNum(f.prom))+est+'</div></div>'
-        +oChart(f.vals,f.meta,color,170)+extra+'</div>';
+        +'<div class="ocard-v">'+(f.prom==null?'—':oInt(f.prom))+est+'</div></div>'
+        +oChart(f.vals,f.meta,color,170)+cuenta+'</div>';
     }).join('');
 
     return '<div class="panel"><h3>KPIs asignados · '+oEsc(OBJ.agente)+'</h3>'
-      +'<p class="psub">Las '+OBJ.filas.length+' métricas que carga el sector. Verde = cumple la meta, rojo = por debajo. '
-      +'<b>Clic en un mes</b> para el detalle de ese dato · <b>clic en la métrica</b> para la tendencia del año.</p>'
+      +'<p class="psub">Las '+OBJ.filas.length+' métricas que carga el sector, redondeadas a entero. Verde = cumple la meta, rojo = por debajo. '
+      +'Pasá el mouse por un mes para ver la cuenta · <b>clic</b> para el detalle.</p>'
       +'<div class="tscroll"><table class="tabla-obj"><thead><tr>'+th+'</tr></thead><tbody>'+rows+promRow+'</tbody></table></div></div>'
       +'<div class="panel"><h3>Las '+OBJ.filas.length+' métricas, mes a mes</h3>'
-      +'<p class="psub">Una tarjeta por métrica, con su meta marcada. Las que todavía no tienen carga se muestran igual, con el eje y la meta.</p>'
+      +'<p class="psub">Cada tarjeta trae su gráfico con la meta marcada y, debajo, la cuenta con la que se llega al número.</p>'
       +'<div class="ogrid">'+tarjetas+'</div></div>';
   }
 
@@ -864,8 +953,12 @@
     document.querySelectorAll('#objetivos .oventana').forEach(b=>b.onclick=()=>{
       oVent=b.dataset.vo; renderObjetivos(); if(window.parent!==window) setTimeout(postAlto,40); });
     document.querySelectorAll('#objetivos .ohit').forEach(h=>h.onclick=()=>{
-      const i=+h.dataset.mes; if(promMes(i)==null&&oVent==='estrategico') return;
-      oMi=i; if(oVent==='estrategico'){ renderObjetivos(); if(window.parent!==window) setTimeout(postAlto,40); } });
+      const i=+h.dataset.mes;
+      if(oVent==='estrategico'){ oMi=i; oCel={k:'area',mi:i}; renderObjetivos(); if(window.parent!==window) setTimeout(postAlto,40); } });
+    document.querySelectorAll('#objetivos .ocel').forEach(td=>td.onclick=()=>{
+      const k=td.dataset.k, mi=+td.dataset.mi;
+      oCel={k:k==='area'?'area':+k, mi}; if(k==='area') oMi=mi;
+      renderObjetivos(); if(window.parent!==window) setTimeout(postAlto,40); });
   }
 
   // ---- Desarrollo de Terceros (sub-secciones, vacías por ahora) ----
