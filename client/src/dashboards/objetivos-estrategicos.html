@@ -1,0 +1,688 @@
+<title>Objetivos estratégicos · Gerencia de Operaciones</title>
+<style>
+  :root{
+    --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
+    --line:#23353f; --line-2:#2c414d;
+    --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
+    --brand:#e11f46; --brand-dim:rgba(225,31,70,.13); --brand-line:rgba(225,31,70,.45);
+    --info:#26b6d9; --info-dim:rgba(38,182,217,.14); --good:#22e39b; --bad:#ff4d67; --amber:#f5a623;
+    --good-dim:rgba(34,227,155,.14); --bad-dim:rgba(255,77,103,.14); --amber-dim:rgba(245,166,35,.14);
+    /* series de KPI: cian / ámbar / violeta, validadas sobre el panel */
+    --s1:#1f93b8; --s2:#c9821c; --s3:#8f6ad0;
+    --radius:12px;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.4;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 40px;}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px;}
+  .overline{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--info);margin:0 0 5px;}
+  h1{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .sub{font-size:12.5px;color:var(--muted);margin:5px 0 0;max-width:min(680px,100%);}
+  .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:9px;}
+  .fuente{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;}
+  .fuente::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--info);box-shadow:0 0 7px 1px rgba(38,182,217,.7);}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+  .chip{font:inherit;font-size:12px;font-weight:700;color:var(--muted);background:var(--panel);border:1px solid var(--line);
+    border-radius:999px;padding:7px 15px;cursor:pointer;transition:color .15s,border-color .15s,background .15s;}
+  .chip:hover{color:var(--text);border-color:var(--info);}
+  .chip.on{color:#fff;border-color:var(--info);background:var(--info-dim);}
+  .chip:focus-visible{outline:2px solid var(--info);outline-offset:2px;}
+  .chip .n{color:var(--muted-2);font-weight:600;margin-left:6px;}
+  .chip.on .n{color:rgba(255,255,255,.7);}
+
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin-bottom:18px;}
+  @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr);}}
+  .kpi{background:linear-gradient(160deg,var(--panel) 0%,var(--panel-2) 135%);border:1px solid var(--line);border-radius:13px;
+    padding:15px 16px;box-shadow:0 1px 2px rgba(0,0,0,.25),0 12px 26px -16px rgba(0,0,0,.6);}
+  .kpi.hero{border-top:3px solid var(--brand);} .kpi.good{border-top:3px solid var(--good);}
+  .kpi.bad{border-top:3px solid var(--bad);} .kpi.warn{border-top:3px solid var(--amber);}
+  .kpi .kl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .kpi .kv{font-size:27px;font-weight:800;letter-spacing:-.03em;line-height:1;color:#fff;margin-top:8px;}
+  .kpi .kd{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:5px;}
+
+  .grid-obj{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:13px;margin-bottom:18px;}
+  .card{position:relative;text-align:left;font:inherit;color:inherit;cursor:pointer;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px 13px;
+    display:flex;flex-direction:column;gap:9px;transition:border-color .16s,transform .16s,box-shadow .16s;min-width:0;}
+  .card:hover{border-color:var(--info);transform:translateY(-2px);box-shadow:0 14px 30px -18px rgba(0,0,0,.8);}
+  .card.on{border-color:var(--info);box-shadow:inset 0 0 0 1px rgba(38,182,217,.35),0 14px 30px -18px rgba(0,0,0,.8);}
+  .card:focus-visible{outline:2px solid var(--info);outline-offset:2px;}
+  .card .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .card .area{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--info);
+    background:var(--info-dim);border-radius:999px;padding:3px 9px;}
+  .card h4{margin:0;font-size:13.5px;font-weight:700;line-height:1.35;color:var(--text);}
+  .card .resp{font-size:11px;color:var(--muted-2);}
+  .card .cifras{display:flex;align-items:flex-end;gap:14px;margin-top:2px;}
+  .card .big{font-size:23px;font-weight:800;line-height:1;letter-spacing:-.02em;}
+  .card .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted-2);}
+  .card .spark{margin-top:2px;}
+
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap;}
+  .badge.ok{background:var(--good-dim);color:var(--good);} .badge.no{background:var(--bad-dim);color:var(--bad);}
+  .badge.sd{background:var(--panel-3);color:var(--muted);} .badge.cu{background:var(--info-dim);color:var(--info);}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 18px;margin-bottom:16px;min-width:0;}
+  .panel-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;min-width:0;}
+  .panel-head>div{min-width:0;}
+  .panel h3{font-size:15px;font-weight:800;margin:0;}
+  .panel .psub{font-size:11.5px;color:var(--muted);margin:3px 0 0;max-width:min(720px,100%);}
+  .detalle{border-top:3px solid var(--info);}
+  .cols2{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;} .cols2>*{min-width:0;}
+  @media(max-width:980px){.cols2{grid-template-columns:1fr;}}
+
+  .step{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--info);margin:16px 0 7px;}
+  .step:first-child{margin-top:0;}
+  .calc{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.8px;line-height:1.95;overflow-x:auto;}
+  .calc .op{color:var(--muted-2);} .calc b{color:#fff;}
+  .alerta{background:linear-gradient(135deg,var(--amber-dim),var(--panel-2));border:1px solid var(--line);
+    border-left:3px solid var(--amber);border-radius:10px;padding:12px 15px;font-size:12.5px;line-height:1.6;margin-top:14px;}
+  .alerta b{color:#fff;}
+  .note{background:linear-gradient(135deg,rgba(38,182,217,.09),var(--panel-2));border:1px solid var(--line);
+    border-left:3px solid var(--info);border-radius:10px;padding:13px 16px;margin-top:14px;}
+  .note h4{margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--info);}
+  .note p{margin:0 0 8px;font-size:12.6px;line-height:1.6;color:var(--text);} .note p:last-child{margin-bottom:0;}
+
+  .scroll{overflow:auto;border:1px solid var(--line);border-radius:10px;}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;}
+  thead th{position:sticky;top:0;z-index:2;background:var(--panel-2);color:var(--muted);font-size:10px;font-weight:700;
+    letter-spacing:.04em;text-transform:uppercase;text-align:center;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  thead th.izq{text-align:left;}
+  tbody td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap;color:var(--text);}
+  tbody td.izq{text-align:left;white-space:normal;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover td{background:rgba(255,255,255,.025);}
+  tr.click{cursor:pointer;} tr.on td{background:rgba(38,182,217,.09);}
+  .ok-cell{background:var(--good-dim);color:var(--good);font-weight:700;}
+  .no-cell{background:var(--bad-dim);color:var(--bad);font-weight:700;}
+  .na-cell{color:var(--muted-2);} .dash{color:var(--muted-2);}
+  .sw{width:11px;height:11px;border-radius:3px;display:inline-block;flex-shrink:0;}
+  .kpiname{display:flex;align-items:flex-start;gap:8px;} .kpiname .sw{margin-top:3px;}
+  .peso{font-size:10.5px;font-weight:800;color:var(--muted-2);}
+
+  svg{display:block;} .gl{stroke:var(--line);stroke-width:1;} .zl{stroke:var(--line-2);stroke-width:1.5;}
+  .axt{fill:var(--muted-2);font-size:10.5px;} .lbl{font-size:11px;font-weight:700;}
+  .hit{fill:transparent;cursor:pointer;}
+  .clegend{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0 0;}
+  .clegend .ci{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--muted);max-width:100%;}
+  .clegend .ci .bar{width:14px;height:3px;border-radius:2px;flex-shrink:0;}
+  .clegend .ci span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  .cumplido{display:flex;flex-wrap:wrap;gap:6px;}
+  .cumplido .m{font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;background:var(--panel-3);color:var(--muted-2);}
+  .cumplido .m.ok{background:var(--good-dim);color:var(--good);}
+  .cumplido .m.na{background:var(--panel-2);color:var(--muted-2);}
+
+  .btn{background:var(--panel-2);border:1px solid var(--line);color:var(--text);font:inherit;font-size:11.5px;
+    font-weight:700;padding:7px 13px;border-radius:8px;cursor:pointer;}
+  .btn:hover{border-color:var(--info);color:#fff;}
+  .btn:focus-visible{outline:2px solid var(--info);outline-offset:1px;}
+  select{appearance:none;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--text);
+    font:inherit;font-size:12.5px;font-weight:600;padding:7px 28px 7px 12px;cursor:pointer;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238ba0ab' stroke-width='3' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 9px center;}
+  select:focus{outline:none;border-color:var(--info);}
+  .bar-ctl{display:flex;flex-wrap:wrap;gap:9px;align-items:center;}
+  .empty{padding:26px;text-align:center;color:var(--muted-2);font-style:italic;}
+  ul.meth{margin:0;padding-left:19px;display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:var(--muted);line-height:1.55;}
+  ul.meth b{color:var(--text);}
+
+  /* --- matriz tipo planilla: sectores uno debajo del otro --- */
+  .matriz td.obj{position:sticky;left:0;z-index:1;background:var(--panel);max-width:330px;min-width:230px;}
+  .matriz thead th.objh{position:sticky;left:0;z-index:3;text-align:left;min-width:230px;}
+  .matriz tr:hover td.obj{background:var(--panel-3);}
+  .matriz tr.grp td{background:var(--panel-2);position:sticky;left:0;text-align:left;
+    font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--info);padding:9px 10px;}
+  .matriz td.cell{cursor:pointer;transition:box-shadow .12s;}
+  .matriz td.cell:hover{box-shadow:inset 0 0 0 2px var(--info);}
+  .matriz td.cell.sel{box-shadow:inset 0 0 0 2px var(--info);}
+  .matriz td.cell:focus-visible{outline:2px solid var(--info);outline-offset:-2px;}
+  .matriz .objtxt{font-size:12px;line-height:1.35;}
+  .matriz .objsub{font-size:10.5px;color:var(--muted-2);margin-top:2px;}
+  .hint{font-size:11.5px;color:var(--muted-2);margin:8px 0 0;}
+  .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;
+    padding:9px 12px;font-size:12px;line-height:1.55;color:var(--text);box-shadow:0 10px 30px rgba(0,0,0,.55);
+    opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:300px;}
+  .tip.show{opacity:1;transform:none;}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(10px);z-index:70;background:var(--panel-3);
+    border:1px solid var(--line-2);color:var(--text);padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:600;
+    opacity:0;transition:opacity .18s,transform .18s;pointer-events:none;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+
+<div class="wrap">
+  <div class="head">
+    <div>
+      <p class="overline" id="eyebrow"></p>
+      <h1 id="titulo"></h1>
+      <p class="sub" id="bajada"></p>
+    </div>
+    <div class="head-right">
+      <span class="fuente" id="fuente"></span>
+      <button type="button" class="btn" data-export="todo">Exportar a Excel</button>
+    </div>
+  </div>
+
+  <div class="chips" id="chips" role="group" aria-label="Filtrar por área"></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="grid-obj" id="tarjetas"></div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div><h3 id="tituloMatriz"></h3>
+        <p class="psub" id="subMatriz"></p></div>
+      <button type="button" class="btn" data-export="matriz">Exportar cuadro</button>
+    </div>
+    <div class="scroll"><table id="tMatriz" class="matriz"></table></div>
+    <p class="hint">Hacé clic en cualquier dato del cuadro para abrir el desglose de los KPI de ese objetivo en ese mes.</p>
+  </div>
+
+  <div class="panel detalle" id="detalle"></div>
+
+
+  <div class="panel">
+    <h3>Cómo se lee</h3>
+    <ul class="meth" id="meth" style="margin-top:10px"></ul>
+  </div>
+</div>
+
+<!--CONF-->
+<script type="application/json" id="ds">{"meta":{"archivo":"KPI_GerencinadeOperaciones_2026.xlsx","hojas":"ObjetivosMensuales + Carga Mensual KPI","origen":"SharePoint · Gerencia de Operaciones / Objetivos","generado":"24/08/2026"},"MESES":["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],"areas":["Sistemas","Compras","Logística","Fábrica de Hielo","Insumos"],"objetivos":[{"id":"O1","obj":"Respuesta de tickets >24hs y 5 días hábiles para informar tratamiento, Resolución >90días.","area":"Sistemas","areaKey":"sistemas","resp":"Nicolas Gutierrez","meta":{"t":"n","v":0.94},"vals":[{"t":"n","v":0.9555},{"t":"n","v":0.98},{"t":"n","v":0.99},{"t":"n","v":0.985},{"t":"n","v":1},{"t":"n","v":0.985},null,null,null,null,null,null],"prom":{"t":"n","v":0.9825833333333334},"vsMeta":{"t":"n","v":0.9406000000000001},"estado":"✅ Logrado","sentido":"up","comp":[{"v":0.9342,"n":2,"peso":1},{"v":0.968,"n":2,"peso":1},{"v":0.984,"n":2,"peso":1},{"v":0.976,"n":2,"peso":1},{"v":1,"n":2,"peso":1},null,null,null,null,null,null,null],"compProm":0.97244,"pesoTotal":1,"kpis":[{"n":12,"kpi":"INFORME QUE MUESTRE LA RESPUESTA DE CADA PEDIDO EN 24 HS Y LA FINALIZACION DENTRO DE LOS 90 DIAS.","peso":0.8,"vals":[{"t":"n","v":0.92},{"t":"n","v":0.96},{"t":"n","v":0.98},{"t":"n","v":0.97},{"t":"n","v":1},null,null,null,null,null,null,null],"prom":{"t":"n","v":0.966},"estado":"✅ Logrado"},{"n":13,"kpi":"INFORME DEL JEFE DEL SECTOR CON DATOS DE LA SEMANA Y ESTADISTICOS DEL AREA.","peso":0.2,"vals":[{"t":"n","v":0.991},{"t":"n","v":1},{"t":"n","v":1},{"t":"n","v":1},{"t":"n","v":1},null,null,null,null,null,null,null],"prom":{"t":"n","v":0.9982},"estado":"✅ Logrado"}]},{"id":"O2","obj":"Cumplimiento >70%","area":"Sistemas","areaKey":"sistemas","resp":"Nicolas Gutierrez","meta":{"t":"n","v":0.7},"vals":[null,null,null,null,null,null,null,null,null,null,null,null],"prom":null,"vsMeta":null,"estado":null,"sentido":"up","comp":[null,null,null,null,null,null,null,null,null,null,null,null],"compProm":null,"pesoTotal":1,"kpis":[{"n":16,"kpi":"SEGUIMIENTO SEMANAL DE LOS PROCEDIMIENTOS PARA DETECTAR POSIBLES INCUMPLIMIENTOS O DESCRIBIR MEJOR LAS TAREAS REALIZADAS","peso":1,"vals":[null,null,null,null,null,null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"}]},{"id":"O3","obj":"Mejorar un 10% el costo por tonelada mediante la mejora de costos de compras","area":"Compras","areaKey":"compras","resp":"Juan Jose Retamero","meta":{"t":"n","v":-0.1},"vals":[{"t":"n","v":0},{"t":"n","v":0.13},{"t":"n","v":0.12},{"t":"n","v":0.17},{"t":"n","v":-0.05},{"t":"n","v":-0.09},null,null,null,null,null,null],"prom":{"t":"n","v":0.04666666666666667},"vsMeta":{"t":"n","v":-0.1},"estado":"❌ No logrado","sentido":"down","comp":[{"v":0,"n":2,"peso":0.8},{"v":0,"n":2,"peso":0.8},{"v":0,"n":2,"peso":0.8},{"v":0,"n":2,"peso":0.8},{"v":0.015,"n":2,"peso":0.8},null,null,null,null,null,null,null],"compProm":0.003,"pesoTotal":1,"kpis":[{"n":4,"kpi":"SE DEBE SACAR EL INFORME \"IMFORME DE PRECIOS PROMEDIO PONDERADO\" (ES EL UNICO QUE ENCONTRAMOS QUE TIRABA LOS PRECIOS DE LOS MATERIALES) MES A MES Y SE LO DEBE CALCULAR CON LA INFLACION MENSUAL.","peso":0.4,"vals":[{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"},{"n":5,"kpi":"INDICADOR DE NUEVOS PROVEEDORES EN EL PERIODO MEDIDO","peso":0.4,"vals":[{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0.03},null,null,null,null,null,null,null],"prom":{"t":"n","v":0.03},"estado":"✅ Logrado"},{"n":6,"kpi":"LICITACIONES","peso":0.2,"vals":[{"t":"na"},{"t":"na"},{"t":"na"},{"t":"na"},{"t":"na"},null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"}]},{"id":"O4","obj":"Asegurar el proyecto de transformación antes del fin del 1er semestre","area":"Compras","areaKey":"compras","resp":"Juan Jose Retamero","meta":{"t":"na"},"vals":[{"t":"na"},{"t":"na"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"}],"prom":{"t":"na"},"vsMeta":{"t":"na"},"estado":"✅ Logrado","sentido":"down","comp":[null,null,null,null,null,null,null,null,null,null,null,null],"compProm":null,"pesoTotal":1,"kpis":[{"n":7,"kpi":"MATRIZ","peso":0.5,"vals":[{"t":"na"},{"t":"na"},{"t":"na"},{"t":"na"},{"t":"na"},null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"},{"n":8,"kpi":"MATRIZ DE HABILIDADES","peso":0.5,"vals":[{"t":"na"},{"t":"na"},{"t":"na"},{"t":"na"},{"t":"na"},null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"}]},{"id":"O5","obj":"Cumplimiento >70%","area":"Compras","areaKey":"compras","resp":"Juan Jose Retamero","meta":{"t":"n","v":0.7},"vals":[null,null,null,null,null,null,null,null,null,null,null,null],"prom":null,"vsMeta":null,"estado":null,"sentido":"up","comp":[null,null,null,null,null,null,null,null,null,null,null,null],"compProm":null,"pesoTotal":1,"kpis":[{"n":16,"kpi":"SEGUIMIENTO SEMANAL DE LOS PROCEDIMIENTOS PARA DETECTAR POSIBLES INCUMPLIMIENTOS O DESCRIBIR MEJOR LAS TAREAS REALIZADAS","peso":1,"vals":[null,null,null,null,null,null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"}]},{"id":"O6","obj":"Mejorar un 15% el costo por tonelada transportado (interno y externo)","area":"Logística","areaKey":"logística","resp":"Dario Pisano","meta":{"t":"n","v":-0.15},"vals":[{"t":"n","v":0},{"t":"n","v":0.19},{"t":"n","v":-0.01},{"t":"n","v":-0.06},{"t":"n","v":-0.03},null,null,null,null,null,null,null],"prom":{"t":"n","v":0.018},"vsMeta":{"t":"n","v":-0.15},"estado":"❌ No logrado","sentido":"down","comp":[{"v":0,"n":2,"peso":0.7},{"v":0,"n":2,"peso":0.7},{"v":0,"n":2,"peso":0.7},{"v":0,"n":2,"peso":0.7},{"v":0,"n":2,"peso":0.7},null,null,null,null,null,null,null],"compProm":0,"pesoTotal":1,"kpis":[{"n":9,"kpi":"CANTIDAD DE VIAJES Y COSTO DEL AÑO 2025 CONTRA LOS VIAJES REALIZADOS POR LA FLOTA PROPIA VALORIZADO.","peso":0.3,"vals":[{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"},{"n":10,"kpi":"CANTIDAD DE VIAJES Y COSTO DEL AÑO 2025 CONTRA LOS VIAJES REALIZADOS POR LA FLOTA PROPIA VALORIZADO.","peso":0.4,"vals":[{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"},{"n":11,"kpi":"SE TOMARAN LOS GASTOS DEL AÑO ANTERIOR MAS LA INFLACION DEL AÑO Y SE LO VA A COMPRARAR POR LO PAGADO AL TRANSPORTISTA.","peso":0.3,"vals":[{"t":"na"},{"t":"na"},{"t":"na"},{"t":"na"},{"t":"na"},null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"}]},{"id":"O7","obj":"Cumplimiento >70%","area":"Logística","areaKey":"logística","resp":"Dario Pisano","meta":{"t":"n","v":0.7},"vals":[null,null,null,null,null,null,null,null,null,null,null,null],"prom":null,"vsMeta":null,"estado":null,"sentido":"up","comp":[null,null,null,null,null,null,null,null,null,null,null,null],"compProm":null,"pesoTotal":1,"kpis":[{"n":16,"kpi":"SEGUIMIENTO SEMANAL DE LOS PROCEDIMIENTOS PARA DETECTAR POSIBLES INCUMPLIMIENTOS O DESCRIBIR MEJOR LAS TAREAS REALIZADAS","peso":1,"vals":[null,null,null,null,null,null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"}]},{"id":"O8","obj":"Capacidad de producción y consumo, junto y separado.","area":"Fábrica de Hielo","areaKey":"fábrica-de-hielo","resp":"Jose.Guardabassi","meta":{"t":"na"},"vals":[{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"},{"t":"s","v":"Cumplido"}],"prom":{"t":"na"},"vsMeta":{"t":"na"},"estado":"✅ Logrado","sentido":"down","comp":[null,null,null,null,null,null,null,null,null,null,null,null],"compProm":null,"pesoTotal":1,"kpis":[{"n":14,"kpi":"HORAS TRABAJADAS VS PRODUCCION","peso":0.5,"vals":[{"t":"na"},{"t":"na"},{"t":"na"},{"t":"na"},{"t":"na"},null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"},{"n":15,"kpi":"STOCK DE BARRAS, PALLETS DE MADERA Y PLASTICOS, SEGUIMIENTO POR FRIGORIFICO DE DEUDA DE PALLETS.","peso":0.5,"vals":[{"t":"na"},{"t":"na"},{"t":"na"},{"t":"na"},{"t":"na"},null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"}]},{"id":"O9","obj":"REDUCIR EL WORKING CAPITAL INMOVILIZADO UN 10 %","area":"Insumos","areaKey":"insumos","resp":"Luis Miguel Ramos","meta":{"t":"n","v":0.1},"vals":[{"t":"n","v":0},null,null,null,{"t":"n","v":0.1},{"t":"n","v":0.14},{"t":"n","v":0.06904866223166013},null,null,null,null,null],"prom":{"t":"n","v":0.08},"vsMeta":{"t":"n","v":0.1},"estado":"✅ Logrado","sentido":"down","comp":[{"v":0.316667,"n":3,"peso":0.99},{"v":0,"n":3,"peso":0.99},{"v":0,"n":3,"peso":0.99},{"v":0,"n":3,"peso":0.99},{"v":0.154133,"n":3,"peso":0.99},{"v":0.153,"n":3,"peso":0.99},{"v":0.139667,"n":3,"peso":0.99},{"v":0,"n":3,"peso":0.99},{"v":0,"n":3,"peso":0.99},{"v":0,"n":3,"peso":0.99},{"v":0,"n":3,"peso":0.99},{"v":0,"n":3,"peso":0.99}],"compProm":0.063622,"pesoTotal":0.99,"kpis":[{"n":1,"kpi":"CANTIDAD DE MATERIALES OBSOLETOS A ENERO 2026 VS DICIEMBRE 2026","peso":0.33,"vals":[{"t":"n","v":0.31},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0.0224},{"t":"n","v":0.009},{"t":"n","v":0.009},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0}],"prom":{"t":"n","v":0.0876},"estado":"✅ Logrado"},{"n":2,"kpi":"CANTIDAD DE MATERIALES CON SOBRESTOCK ENERO 2026 VS DICIEMBRE 2026","peso":0.33,"vals":[{"t":"n","v":0.34},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0.17},{"t":"n","v":0.18},{"t":"n","v":0.17},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0}],"prom":{"t":"n","v":0.215},"estado":"✅ Logrado"},{"n":3,"kpi":"DIAS DE STOCK DE INSUMOS PRODUCTIVOS ENERO 2025 VS DICIEMBRE 2026","peso":0.33,"vals":[{"t":"n","v":0.3},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0.27},{"t":"n","v":0.27},{"t":"n","v":0.24},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0},{"t":"n","v":0}],"prom":{"t":"n","v":0.27},"estado":"✅ Logrado"}]},{"id":"O10","obj":"Cumplimiento >70%","area":"Insumos","areaKey":"insumos","resp":"Luis Miguel Ramos","meta":{"t":"n","v":0.7},"vals":[null,null,null,null,null,null,null,null,null,null,null,null],"prom":null,"vsMeta":null,"estado":null,"sentido":"up","comp":[null,null,null,null,null,null,null,null,null,null,null,null],"compProm":null,"pesoTotal":1,"kpis":[{"n":16,"kpi":"SEGUIMIENTO SEMANAL DE LOS PROCEDIMIENTOS PARA DETECTAR POSIBLES INCUMPLIMIENTOS O DESCRIBIR MEJOR LAS TAREAS REALIZADAS","peso":1,"vals":[null,null,null,null,null,null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"}]}]}</script>
+<script>(function () {
+  var D = JSON.parse(document.getElementById('ds').textContent);
+  var M = D.MESES, OBJ = D.objetivos;
+  var SERIE = ['var(--s1)', 'var(--s2)', 'var(--s3)'];
+  var $ = function (s) { return document.querySelector(s); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function nf(v, d) { return (v == null || !isFinite(v)) ? '—' : v.toLocaleString('es-AR', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function pct(v, d) { return v == null ? '—' : nf(v * 100, d == null ? 1 : d) + ' %'; }
+  function pctS(v, d) { return v == null ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '') + nf(Math.abs(v) * 100, d == null ? 1 : d) + ' %'; }
+
+  // Una celda puede ser número, "N/A" o texto ("Cumplido").
+  function num(c) { return c && c.t === 'n' ? c.v : null; }
+  function txt(c) { return !c ? null : c.t === 'n' ? pct(c.v) : c.t === 'na' ? 'N/A' : c.v; }
+  function cumple(o, c) {
+    var v = num(c), m = num(o.meta);
+    if (v == null || m == null) return null;
+    return o.sentido === 'up' ? v >= m : v <= m;
+  }
+  function claseEstado(e) {
+    if (!e) return 'sd'; if (e.indexOf('No logrado') >= 0) return 'no';
+    if (e.indexOf('Logrado') >= 0) return 'ok'; return 'sd';
+  }
+  function textoEstado(e) { return e ? e.replace(/[✅❌]/g, '').trim() : 'Sin definir'; }
+
+  // El contenedor inyecta window.__CONF__ antes de este script.
+  // modo 'gerencia': todas las áreas, una debajo de la otra (pestaña Objetivos).
+  // modo 'sector'  : sólo el área desde la que se abre.
+  var CONF = window.__CONF__ || {};
+  var MODO = CONF.modo === 'sector' ? 'sector' : 'gerencia';
+  var areaSel = MODO === 'sector' ? (CONF.area || '') : '';
+  var objSel = null, mesSel = null;
+
+  /* ---------- tooltip / toast ---------- */
+  var tip = $('#tip'), toast = $('#toast'), tT;
+  function moveTip(e) {
+    var r = tip.getBoundingClientRect(), x = e.clientX + 14, y = e.clientY + 16;
+    if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+    if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 16;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  function bindTip(n, html) {
+    n.addEventListener('mouseenter', function (e) { tip.innerHTML = html; tip.classList.add('show'); moveTip(e); });
+    n.addEventListener('mousemove', moveTip);
+    n.addEventListener('mouseleave', function () { tip.classList.remove('show'); });
+  }
+  function say(m) { toast.textContent = m; toast.classList.add('show'); clearTimeout(tT); tT = setTimeout(function () { toast.classList.remove('show'); }, 3600); }
+
+  function visibles() { return areaSel ? OBJ.filter(function (o) { return o.area === areaSel; }) : OBJ; }
+  function porId(id) { for (var i = 0; i < OBJ.length; i++) if (OBJ[i].id === id) return OBJ[i]; return null; }
+  function abrir(id, mes) {
+    objSel = id; mesSel = (mes == null ? null : mes);
+    pintar();
+    $('#detalle').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ---------- chips de área ---------- */
+  function renderChips() {
+    if (MODO === 'sector') { $('#chips').style.display = 'none'; return; }
+    var items = [['', 'Todas las áreas', OBJ.length]].concat(D.areas.map(function (a) {
+      return [a, a, OBJ.filter(function (o) { return o.area === a; }).length];
+    }));
+    $('#chips').innerHTML = items.map(function (it) {
+      return '<button type="button" class="chip ' + (areaSel === it[0] ? 'on' : '') + '" data-area="' + esc(it[0]) + '">' +
+        esc(it[1]) + '<span class="n">' + it[2] + '</span></button>';
+    }).join('');
+  }
+
+  /* ---------- KPIs de cabecera ---------- */
+  function renderKPIs() {
+    var v = visibles();
+    var ok = v.filter(function (o) { return claseEstado(o.estado) === 'ok'; }).length;
+    var no = v.filter(function (o) { return claseEstado(o.estado) === 'no'; }).length;
+    var sd = v.length - ok - no;
+    var nk = v.reduce(function (a, o) { return a + o.kpis.length; }, 0);
+    var conDato = v.filter(function (o) { return o.vals.some(function (c) { return c != null; }); }).length;
+    var k = [
+      ['hero', 'Objetivos estratégicos', v.length, areaSel ? areaSel : D.areas.length + ' áreas'],
+      ['good', 'Logrados', ok, 'según la planilla'],
+      ['bad', 'No logrados', no, 'por debajo de la meta'],
+      ['warn', 'Sin definir', sd, 'sin estado cargado'],
+      ['', 'KPI / métrica asignados', nk, conDato + ' objetivos con carga'],
+    ];
+    $('#kpis').innerHTML = k.map(function (r) {
+      return '<div class="kpi ' + r[0] + '"><div class="kl">' + esc(r[1]) + '</div><div class="kv">' + r[2] + '</div><div class="kd">' + esc(r[3]) + '</div></div>';
+    }).join('');
+  }
+
+  /* ---------- sparkline ---------- */
+  function spark(o, w, h) {
+    var pts = o.vals.map(function (c, i) { return { i: i, v: num(c) }; }).filter(function (p) { return p.v != null; });
+    if (pts.length < 1) {
+      var q = o.vals.filter(function (c) { return c && c.t === 's'; }).length;
+      return '<div class="lbl" style="color:var(--muted-2);font-size:10.5px">' + (q ? q + ' meses marcados «Cumplido»' : 'Sin carga mensual') + '</div>';
+    }
+    var m = num(o.meta);
+    var vs = pts.map(function (p) { return p.v; }); if (m != null) vs = vs.concat([m]);
+    var lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs);
+    if (hi === lo) { hi = lo + Math.abs(lo || 1) * .2 + .01; lo -= Math.abs(lo || 1) * .2 + .01; }
+    var pad = (hi - lo) * .2; lo -= pad; hi += pad;
+    var x = function (i) { return 2 + i * ((w - 4) / 11); };
+    var y = function (v) { return h - 3 - (v - lo) / (hi - lo) * (h - 6); };
+    var d = pts.map(function (p, k) { return (k ? 'L' : 'M') + x(p.i).toFixed(1) + ',' + y(p.v).toFixed(1); }).join(' ');
+    var meta = m == null ? '' : '<line x1="2" x2="' + (w - 2) + '" y1="' + y(m).toFixed(1) + '" y2="' + y(m).toFixed(1) + '" stroke="var(--muted-2)" stroke-width="1" stroke-dasharray="3 3"/>';
+    var last = pts[pts.length - 1];
+    var col = cumple(o, o.vals[last.i]) === false ? 'var(--bad)' : 'var(--good)';
+    return '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%;height:' + h + 'px" aria-hidden="true">' + meta +
+      '<path d="' + d + '" fill="none" stroke="var(--info)" stroke-width="2" stroke-linejoin="round"/>' +
+      '<circle cx="' + x(last.i).toFixed(1) + '" cy="' + y(last.v).toFixed(1) + '" r="3.5" fill="' + col + '" stroke="var(--panel)" stroke-width="1.5"/></svg>';
+  }
+
+  /* ---------- tarjetas ---------- */
+  function renderTarjetas() {
+    if (MODO !== 'sector') { $('#tarjetas').style.display = 'none'; return; }
+    var v = visibles();
+    $('#tarjetas').innerHTML = v.map(function (o) {
+      var p = num(o.prom), m = num(o.meta);
+      var cifra = p != null ? pctS(p) : (o.vals.some(function (c) { return c && c.t === 's'; }) ? 'Cumplido' : '—');
+      var cls = claseEstado(o.estado);
+      return '<button type="button" class="card ' + (objSel === o.id ? 'on' : '') + '" data-obj="' + o.id + '">' +
+        '<div class="top"><span class="area">' + esc(o.area) + '</span>' +
+        '<span class="badge ' + cls + '">' + esc(textoEstado(o.estado)) + '</span></div>' +
+        '<h4>' + esc(o.obj) + '</h4>' +
+        '<div class="resp">' + esc(o.resp || 'Sin responsable') + ' · ' + o.kpis.length + ' KPI</div>' +
+        '<div class="cifras"><div><div class="lbl">Promedio</div><div class="big">' + cifra + '</div></div>' +
+        '<div><div class="lbl">Meta</div><div class="big" style="font-size:16px;color:var(--muted)">' + (m != null ? pctS(m) : 'N/A') + '</div></div></div>' +
+        '<div class="spark">' + spark(o, 240, 34) + '</div></button>';
+    }).join('') || '<div class="empty">No hay objetivos cargados para esta área.</div>';
+  }
+
+  /* ---------- gráfico del objetivo ---------- */
+  function chartObjetivo(o) {
+    var pts = o.vals.map(function (c, i) { return { i: i, v: num(c) }; }).filter(function (p) { return p.v != null; });
+    var comp = o.comp.map(function (c, i) { return c ? { i: i, v: c.v } : null; }).filter(Boolean);
+    if (!pts.length && !comp.length) {
+      var chips = o.vals.map(function (c, i) {
+        var t = c ? (c.t === 'na' ? 'na' : 'ok') : '';
+        return '<span class="m ' + t + '">' + M[i] + (c ? (c.t === 'na' ? ' N/A' : ' ✓') : '') + '</span>';
+      }).join('');
+      return '<div class="cumplido">' + chips + '</div>';
+    }
+    var W = 560, H = 230, ml = 52, mr = 16, mt = 14, mb = 30, iw = W - ml - mr, ih = H - mt - mb;
+    var m = num(o.meta);
+    var vs = pts.map(function (p) { return p.v; }).concat(comp.map(function (p) { return p.v; }));
+    if (m != null) vs.push(m); vs.push(0);
+    var lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs);
+    if (hi === lo) { hi = lo + .1; lo -= .1; }
+    var pad = (hi - lo) * .16; lo -= pad; hi += pad;
+    var x = function (i) { return ml + i * (iw / 11); };
+    var y = function (v) { return mt + ih - (v - lo) / (hi - lo) * ih; };
+    var g = '', xs = '';
+    for (var t = 0; t <= 4; t++) {
+      var vv = lo + (hi - lo) * t / 4;
+      g += '<line class="gl" x1="' + ml + '" x2="' + (W - mr) + '" y1="' + y(vv).toFixed(1) + '" y2="' + y(vv).toFixed(1) + '"/>' +
+        '<text class="axt" x="' + (ml - 7) + '" y="' + (y(vv) + 4).toFixed(1) + '" text-anchor="end">' + nf(vv * 100, 0) + '%</text>';
+    }
+    M.forEach(function (mm, i) { xs += '<text class="axt" x="' + x(i) + '" y="' + (H - 10) + '" text-anchor="middle">' + mm + '</text>'; });
+    var metaLn = m == null ? '' : '<line x1="' + ml + '" x2="' + (W - mr) + '" y1="' + y(m).toFixed(1) + '" y2="' + y(m).toFixed(1) +
+      '" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="6 4"/>' +
+      '<text class="lbl" x="' + (W - mr) + '" y="' + (y(m) - 6).toFixed(1) + '" text-anchor="end" fill="var(--amber)">meta ' + pctS(m, 0) + '</text>';
+    var dPl = pts.map(function (p, k) { return (k ? 'L' : 'M') + x(p.i) + ',' + y(p.v).toFixed(1); }).join(' ');
+    var dCo = comp.map(function (p, k) { return (k ? 'L' : 'M') + x(p.i) + ',' + y(p.v).toFixed(1); }).join(' ');
+    var dots = pts.map(function (p) {
+      var c = cumple(o, o.vals[p.i]);
+      return '<circle cx="' + x(p.i) + '" cy="' + y(p.v).toFixed(1) + '" r="5" fill="' + (c == null ? '#fff' : c ? 'var(--good)' : 'var(--bad)') +
+        '" stroke="var(--panel)" stroke-width="2"/>';
+    }).join('');
+    var hits = M.map(function (mm, i) {
+      return '<rect class="hit" x="' + (x(i) - iw / 22) + '" y="' + mt + '" width="' + (iw / 11) + '" height="' + ih + '" data-mes="' + i + '"/>';
+    }).join('');
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;min-width:330px;height:auto" role="img" aria-label="Evolución mensual del objetivo">' +
+      g + metaLn +
+      (dCo ? '<path d="' + dCo + '" fill="none" stroke="var(--muted-2)" stroke-width="2" stroke-dasharray="5 4"/>' : '') +
+      (dPl ? '<path d="' + dPl + '" fill="none" stroke="var(--info)" stroke-width="2.5"/>' : '') +
+      dots + xs + hits + '</svg>';
+  }
+
+  /* ---------- gráfico multi-serie de KPIs ---------- */
+  function chartKpis(o) {
+    var series = o.kpis.map(function (k, j) {
+      return { k: k, col: SERIE[j % 3], pts: k.vals.map(function (c, i) { return { i: i, v: num(c) }; }).filter(function (p) { return p.v != null; }) };
+    });
+    if (!series.some(function (s) { return s.pts.length; })) return '<div class="empty">Ninguno de los KPI de este objetivo tiene valores numéricos cargados.</div>';
+    var W = 560, H = 230, ml = 52, mr = 16, mt = 14, mb = 30, iw = W - ml - mr, ih = H - mt - mb;
+    var vs = []; series.forEach(function (s) { s.pts.forEach(function (p) { vs.push(p.v); }); }); vs.push(0);
+    var lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs);
+    if (hi === lo) { hi = lo + .1; lo -= .1; }
+    var pad = (hi - lo) * .16; lo -= pad; hi += pad;
+    var x = function (i) { return ml + i * (iw / 11); };
+    var y = function (v) { return mt + ih - (v - lo) / (hi - lo) * ih; };
+    var g = '', xs = '';
+    for (var t = 0; t <= 4; t++) {
+      var vv = lo + (hi - lo) * t / 4;
+      g += '<line class="gl" x1="' + ml + '" x2="' + (W - mr) + '" y1="' + y(vv).toFixed(1) + '" y2="' + y(vv).toFixed(1) + '"/>' +
+        '<text class="axt" x="' + (ml - 7) + '" y="' + (y(vv) + 4).toFixed(1) + '" text-anchor="end">' + nf(vv * 100, 0) + '%</text>';
+    }
+    M.forEach(function (mm, i) { xs += '<text class="axt" x="' + x(i) + '" y="' + (H - 10) + '" text-anchor="middle">' + mm + '</text>'; });
+    var lines = series.map(function (s) {
+      if (!s.pts.length) return '';
+      var d = s.pts.map(function (p, k) { return (k ? 'L' : 'M') + x(p.i) + ',' + y(p.v).toFixed(1); }).join(' ');
+      var dots = s.pts.map(function (p) { return '<circle cx="' + x(p.i) + '" cy="' + y(p.v).toFixed(1) + '" r="4" fill="' + s.col + '" stroke="var(--panel)" stroke-width="1.5"/>'; }).join('');
+      return '<path d="' + d + '" fill="none" stroke="' + s.col + '" stroke-width="2.5" stroke-linejoin="round"/>' + dots;
+    }).join('');
+    var hits = M.map(function (mm, i) {
+      return '<rect class="hit" x="' + (x(i) - iw / 22) + '" y="' + mt + '" width="' + (iw / 11) + '" height="' + ih + '" data-mes="' + i + '"/>';
+    }).join('');
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;min-width:330px;height:auto" role="img" aria-label="Evolución mensual de los KPI del objetivo">' +
+      g + lines + xs + hits + '</svg>';
+  }
+
+  /* ---------- detalle ---------- */
+  function renderDetalle() {
+    var o = null;
+    for (var i = 0; i < OBJ.length; i++) if (OBJ[i].id === objSel) { o = OBJ[i]; break; }
+    var c = $('#detalle');
+    if (!o) { c.innerHTML = '<div class="empty">Elegí un objetivo estratégico para ver sus KPI y la evolución mes a mes.</div>'; return; }
+
+    // mes por defecto: el último con número compuesto, o con valor de planilla
+    var mi = mesSel;
+    if (mi == null || (!o.comp[mi] && !o.vals[mi])) {
+      mi = null;
+      for (var j = 11; j >= 0; j--) { if (o.comp[j]) { mi = j; break; } }
+      if (mi == null) for (var j2 = 11; j2 >= 0; j2--) { if (o.vals[j2]) { mi = j2; break; } }
+      if (mi == null) mi = 0;
+    }
+
+    // cuenta del número compuesto
+    var comp = o.comp[mi], cuenta;
+    if (comp) {
+      var partes = o.kpis.map(function (k, j) {
+        var v = num(k.vals[mi]);
+        return v == null ? null : { j: j, v: v, w: k.peso, kpi: k.kpi };
+      }).filter(Boolean);
+      cuenta = partes.map(function (p) {
+        return '<div><span class="op">peso ' + nf(p.w, 2) + '</span>  ' + pct(p.v) + '  <span class="op">· ' + esc(p.kpi.slice(0, 54)) + (p.kpi.length > 54 ? '…' : '') + '</span></div>';
+      }).join('') +
+        '<div><span class="op">(' + partes.map(function (p) { return nf(p.v, 4) + '×' + nf(p.w, 2); }).join(' + ') + ')</span> <span class="op">÷</span> ' + nf(comp.peso, 2) +
+        ' <span class="op">=</span> <b>' + pct(comp.v) + '</b></div>';
+      if (partes.length < o.kpis.length) {
+        cuenta += '<div class="op">' + (o.kpis.length - partes.length) + ' KPI sin valor numérico en ' + M[mi] + ': su peso no entra en el reparto.</div>';
+      }
+    } else {
+      cuenta = '<div class="op">Ningún KPI de este objetivo tiene valor numérico en ' + M[mi] + '.</div>';
+    }
+
+    var planilla = o.vals[mi];
+    var difer = (comp && planilla && planilla.t === 'n' && Math.abs(comp.v - planilla.v) > 0.0005);
+
+    // tabla del objetivo mes a mes
+    var filaObj = '<tr><td class="izq"><b>Valor del objetivo</b><div class="peso">hoja ObjetivosMensuales</div></td>' +
+      M.map(function (mm, i) {
+        var cc = o.vals[i], ok = cumple(o, cc);
+        return '<td class="' + (ok === true ? 'ok-cell' : ok === false ? 'no-cell' : cc ? 'na-cell' : 'dash') + '">' + (txt(cc) || '·') + '</td>';
+      }).join('') + '<td><b>' + (txt(o.prom) || '—') + '</b></td></tr>' +
+      '<tr><td class="izq">Compuesto desde los KPI<div class="peso">promedio ponderado por peso</div></td>' +
+      M.map(function (mm, i) { return '<td class="' + (i === mi ? 'ok-cell' : '') + '" style="' + (i === mi ? '' : 'color:var(--muted)') + '">' + (o.comp[i] ? pct(o.comp[i].v) : '·') + '</td>'; }).join('') +
+      '<td>' + (o.compProm == null ? '—' : pct(o.compProm)) + '</td></tr>';
+
+    // tabla de KPIs
+    var filasK = o.kpis.map(function (k, j) {
+      return '<tr><td class="izq"><div class="kpiname"><i class="sw" style="background:' + SERIE[j % 3] + '"></i>' +
+        '<span>' + esc(k.kpi) + '<div class="peso">peso ' + nf(k.peso, 2) + '</div></span></div></td>' +
+        M.map(function (mm, i) {
+          var cc = k.vals[i];
+          return '<td class="' + (!cc ? 'dash' : cc.t === 'na' ? 'na-cell' : '') + '">' + (txt(cc) || '·') + '</td>';
+        }).join('') +
+        '<td><b>' + (txt(k.prom) || '—') + '</b></td></tr>';
+    }).join('');
+
+    var cls = claseEstado(o.estado);
+    c.innerHTML =
+      '<div class="panel-head"><div>' +
+      '<div class="top" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">' +
+      '<span class="area">' + esc(o.area) + '</span><span class="badge ' + cls + '">' + esc(textoEstado(o.estado)) + '</span></div>' +
+      '<h3>' + esc(o.obj) + '</h3>' +
+      '<p class="psub">' + esc(o.resp || 'Sin responsable') + ' · meta ' + (num(o.meta) != null ? pctS(num(o.meta)) : 'N/A') +
+      ' · ' + (o.sentido === 'up' ? 'cumple cuando sube' : 'cumple cuando baja') +
+      ' · ' + o.kpis.length + ' KPI (pesos suman ' + nf(o.pesoTotal, 2) + ')</p></div>' +
+      '<div class="bar-ctl"><label class="lbl" for="selMes" style="color:var(--muted)">Mes</label>' +
+      '<select id="selMes">' + M.map(function (mm, i) {
+        return '<option value="' + i + '"' + (i === mi ? ' selected' : '') + (!o.comp[i] && !o.vals[i] ? ' disabled' : '') + '>' + mm + '</option>';
+      }).join('') + '</select>' +
+      '<button type="button" class="btn" data-export="kpis">Exportar KPI</button></div></div>' +
+
+      '<div class="cols2">' +
+      '<div><div class="step">Evolución del objetivo</div>' + chartObjetivo(o) +
+      '<div class="clegend"><span class="ci"><i class="bar" style="background:var(--info)"></i><span>Valor cargado del objetivo</span></span>' +
+      (o.comp.some(Boolean) ? '<span class="ci"><i class="bar" style="background:var(--muted-2)"></i><span>Compuesto desde los KPI</span></span>' : '') +
+      (num(o.meta) != null ? '<span class="ci"><i class="bar" style="background:var(--amber)"></i><span>Meta</span></span>' : '') + '</div></div>' +
+      '<div><div class="step">Cómo se forma el número de ' + M[mi] + '</div><div class="calc">' + cuenta + '</div>' +
+      (difer ? '<div class="alerta"><b>El objetivo no coincide con sus KPI.</b> En ' + M[mi] + ' la hoja ObjetivosMensuales tiene ' +
+        pct(planilla.v) + ' y la suma ponderada de los KPI da ' + pct(comp.v) + '. Las dos filas se cargan por separado, así que conviene revisar cuál está desactualizada.</div>' : '') +
+      '</div></div>' +
+
+      '<div class="step">Evolución de cada KPI</div>' + chartKpis(o) +
+      '<div class="clegend">' + o.kpis.map(function (k, j) {
+        return '<span class="ci"><i class="bar" style="background:' + SERIE[j % 3] + '"></i><span title="' + esc(k.kpi) + '">' + esc(k.kpi.slice(0, 46)) + (k.kpi.length > 46 ? '…' : '') + '</span></span>';
+      }).join('') + '</div>' +
+
+      '<div class="step">Mes a mes</div>' +
+      '<div class="scroll"><table><thead><tr><th class="izq">Concepto</th>' + M.map(function (mm, i) {
+        return '<th' + (i === mi ? ' style="color:var(--info)"' : '') + '>' + mm + '</th>';
+      }).join('') + '<th>Prom.</th></tr></thead><tbody>' + filaObj +
+      '<tr><td class="izq" colspan="14" style="background:var(--panel-2);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">KPI / métrica que carga el sector</td></tr>' +
+      filasK + '</tbody></table></div>';
+
+    // interacciones del detalle
+    var sm = $('#selMes');
+    if (sm) sm.addEventListener('change', function (e) { mesSel = +e.target.value; renderDetalle(); });
+    Array.prototype.forEach.call(c.querySelectorAll('.hit'), function (h) {
+      var i = +h.dataset.mes;
+      var lineas = [];
+      var cc = o.vals[i]; if (cc) lineas.push('Objetivo: <b>' + txt(cc) + '</b>');
+      if (o.comp[i]) lineas.push('Compuesto: <b>' + pct(o.comp[i].v) + '</b>');
+      o.kpis.forEach(function (k, j) {
+        var t = txt(k.vals[i]);
+        if (t) lineas.push('<span style="color:' + SERIE[j % 3] + '">■</span> ' + esc(k.kpi.slice(0, 34)) + (k.kpi.length > 34 ? '…' : '') + ': <b>' + t + '</b>');
+      });
+      bindTip(h, '<b>' + M[i] + '</b><br>' + (lineas.length ? lineas.join('<br>') : 'Sin carga'));
+      h.addEventListener('click', function () { mesSel = i; renderDetalle(); });
+    });
+    postH();
+  }
+
+  /* ---------- matriz general ---------- */
+  function renderMatriz() {
+    var v = visibles();
+    var head = '<thead><tr><th class="objh">Objetivo estratégico</th><th>Meta</th>' +
+      M.map(function (m) { return '<th>' + m + '</th>'; }).join('') + '<th>Prom.</th><th class="izq">Estado</th></tr></thead>';
+    var body = '', areaAnterior = null;
+    v.forEach(function (o) {
+      if (MODO !== 'sector' && o.area !== areaAnterior) {
+        areaAnterior = o.area;
+        body += '<tr class="grp"><td colspan="' + (M.length + 4) + '">' + esc(o.area) + '</td></tr>';
+      }
+      body += '<tr data-fila="' + o.id + '">' +
+        '<td class="izq obj"><div class="objtxt">' + esc(o.obj) + '</div>' +
+        '<div class="objsub">' + esc(o.resp || 'Sin responsable') + ' · ' + o.kpis.length + ' KPI</div></td>' +
+        '<td>' + (num(o.meta) != null ? pctS(num(o.meta), 0) : 'N/A') + '</td>' +
+        M.map(function (mm, i) {
+          var cc = o.vals[i], ok = cumple(o, cc);
+          var cls = ok === true ? 'ok-cell' : ok === false ? 'no-cell' : cc ? 'na-cell' : 'dash';
+          var sel = (objSel === o.id && mesSel === i) ? ' sel' : '';
+          var t = !cc ? '·' : cc.t === 'n' ? nf(cc.v * 100, 0) + '%' : cc.t === 'na' ? 'N/A' : '✓';
+          return '<td class="cell ' + cls + sel + '" data-obj="' + o.id + '" data-mes="' + i + '" tabindex="0" role="button" ' +
+            'aria-label="' + esc(o.obj.slice(0, 40)) + ' — ' + mm + ': ' + t + '">' + t + '</td>';
+        }).join('') +
+        '<td><b>' + (txt(o.prom) || '—') + '</b></td>' +
+        '<td class="izq"><span class="badge ' + claseEstado(o.estado) + '">' + esc(textoEstado(o.estado)) + '</span></td></tr>';
+    });
+    $('#tMatriz').innerHTML = head + '<tbody>' + (body || '<tr><td class="empty" colspan="' + (M.length + 4) + '">No hay objetivos cargados.</td></tr>') + '</tbody>';
+
+    Array.prototype.forEach.call($('#tMatriz').querySelectorAll('td.cell'), function (td) {
+      var o = porId(td.dataset.obj), i = +td.dataset.mes, lineas = [];
+      var cc = o.vals[i];
+      if (cc) lineas.push('Objetivo: <b>' + txt(cc) + '</b>');
+      if (o.comp[i]) lineas.push('Compuesto de sus KPI: <b>' + pct(o.comp[i].v) + '</b>');
+      o.kpis.forEach(function (k, j) {
+        var t = txt(k.vals[i]);
+        if (t) lineas.push('<span style="color:' + SERIE[j % 3] + '">■</span> ' + esc(k.kpi.slice(0, 32)) + (k.kpi.length > 32 ? '…' : '') + ': <b>' + t + '</b>');
+      });
+      bindTip(td, '<b>' + M[i] + ' · ' + esc(o.area) + '</b><br>' + (lineas.length ? lineas.join('<br>') : 'Sin carga') +
+        '<br><span style="color:var(--muted-2)">Clic para ver el desglose</span>');
+      td.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(o.id, i); }
+      });
+    });
+  }
+
+  /* ---------- metodología ---------- */
+  function renderMeth() {
+    $('#meth').innerHTML = [
+      '<b>De dónde sale.</b> Hoja <b>ObjetivosMensuales</b> (un renglón por objetivo estratégico, con su meta y el valor mes a mes) y hoja <b>Carga Mensual KPI</b> (el desglose: los KPI que carga cada sector, con su peso).',
+      '<b>El número del objetivo.</b> Cada sector carga sus KPI y el conjunto forma un único número: promedio ponderado por peso. Cuando un KPI está en N/A ese mes, su peso no entra en el reparto y el resto se renormaliza.',
+      '<b>Cantidad de KPI.</b> Cada objetivo tiene 2 o 3 KPI asignados, salvo el de cumplimiento de informes, que es transversal a todas las áreas y tiene uno solo.',
+      '<b>Cuándo se cumple.</b> Los objetivos de nivel de servicio se cumplen cuando el valor sube por encima de la meta; los de reducción de costo, cuando baja por debajo. El sentido se deduce del propio veredicto de la planilla y, si no alcanza, de si la meta es de cumplimiento (≥50 %) o de reducción.',
+      '<b>Objetivos cualitativos.</b> Los que no tienen meta numérica se cargan como «Cumplido» mes a mes y se muestran como una tira de meses, no como gráfico.',
+      '<b>Dos filas independientes.</b> El valor del objetivo y sus KPI se cargan por separado en la planilla: no se calcula uno del otro. Por eso el tablero muestra los dos y avisa cuando no coinciden.',
+    ].map(function (t) { return '<li>' + t + '</li>'; }).join('');
+  }
+
+  /* ---------- exportación ---------- */
+  function csvNum(v) { return (v == null || !isFinite(v)) ? '' : String(v).replace('.', ','); }
+  function cell(v) { var s = v == null ? '' : String(v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+  function toCSV(rows) { return '﻿' + rows.map(function (r) { return r.map(cell).join(';'); }).join('\r\n'); }
+  function celdaCSV(c) { return !c ? '' : c.t === 'n' ? csvNum(+(c.v * 100).toFixed(4)) : c.t === 'na' ? 'N/A' : c.v; }
+  function dMatriz() {
+    var a = [['Area', 'Objetivo estrategico', 'Responsable', 'Meta %', 'Sentido'].concat(M).concat(['Promedio %', 'Estado'])];
+    visibles().forEach(function (o) {
+      a.push([o.area, o.obj, o.resp, num(o.meta) != null ? csvNum(+(num(o.meta) * 100).toFixed(4)) : 'N/A',
+        o.sentido === 'up' ? 'Sube = mejor' : 'Baja = mejor']
+        .concat(M.map(function (m, i) { return celdaCSV(o.vals[i]); }))
+        .concat([celdaCSV(o.prom), o.estado || '']));
+    });
+    return a;
+  }
+  function dKpis(soloUno) {
+    var a = [['Area', 'Objetivo estrategico', 'KPI / Metrica', 'Peso'].concat(M).concat(['Promedio %', 'Estado'])];
+    visibles().filter(function (o) { return !soloUno || o.id === objSel; }).forEach(function (o) {
+      o.kpis.forEach(function (k) {
+        a.push([o.area, o.obj, k.kpi, csvNum(k.peso)]
+          .concat(M.map(function (m, i) { return celdaCSV(k.vals[i]); }))
+          .concat([celdaCSV(k.prom), k.estado || '']));
+      });
+      a.push([o.area, o.obj, 'COMPUESTO PONDERADO DE LOS KPI', csvNum(o.pesoTotal)]
+        .concat(M.map(function (m, i) { return o.comp[i] ? csvNum(+(o.comp[i].v * 100).toFixed(4)) : ''; }))
+        .concat([o.compProm == null ? '' : csvNum(+(o.compProm * 100).toFixed(4)), '']));
+    });
+    return a;
+  }
+  function dTodo() { return dMatriz().concat([[]]).concat(dKpis(false)); }
+  var EXP = {
+    matriz: ['Objetivos estrategicos por mes.csv', dMatriz],
+    kpis: ['KPI del objetivo.csv', function () { return dKpis(true); }],
+    todo: ['Objetivos estrategicos y KPI.csv', dTodo],
+  };
+  function exportar(kind) {
+    var e = EXP[kind], csv = toCSV(e[1]());
+    try {
+      var b = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var u = URL.createObjectURL(b), a = document.createElement('a');
+      a.href = u; a.download = e[0]; document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(u); a.remove(); }, 500);
+      say('Descargando ' + e[0]);
+    } catch (err) {
+      if (navigator.clipboard) navigator.clipboard.writeText(csv.replace(/^﻿/, '').split('\r\n').map(function (l) { return l.split(';').join('\t'); }).join('\n'))
+        .then(function () { say('Copiado al portapapeles: pegalo en Excel con Ctrl+V.'); })
+        .catch(function () { say('No se pudo exportar en este navegador.'); });
+      else say('No se pudo exportar en este navegador.');
+    }
+  }
+
+  /* ---------- alto ---------- */
+  var ultimoAlto = 0, altoT;
+  function postH() {
+    clearTimeout(altoT);
+    var n = 0;
+    (function medir() {
+      var h = document.body.scrollHeight;
+      if (h !== ultimoAlto) { ultimoAlto = h; try { parent.postMessage({ tipo: 'matriz-alto', alto: h }, '*'); } catch (e) { } }
+      if (++n < 6) altoT = setTimeout(medir, 120);
+    })();
+  }
+
+  /* ---------- eventos ---------- */
+  function pintar() { renderChips(); renderKPIs(); renderTarjetas(); renderMatriz(); renderDetalle(); }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-export]');
+    if (b) { exportar(b.dataset.export); return; }
+    var ch = e.target.closest('.chip');
+    if (ch) {
+      areaSel = ch.dataset.area;
+      var v = visibles();
+      if (!v.some(function (o) { return o.id === objSel; })) { objSel = v.length ? v[0].id : null; mesSel = null; }
+      pintar(); return;
+    }
+    var celda = e.target.closest('td.cell');
+    if (celda) { abrir(celda.dataset.obj, +celda.dataset.mes); return; }
+    var card = e.target.closest('.card[data-obj]');
+    if (card) { abrir(card.dataset.obj, objSel === card.dataset.obj ? mesSel : null); }
+  });
+  addEventListener('message', function (e) {
+    if (!e.data) return;
+    if (e.data.tipo === 'medir-alto') postH();
+    if (e.data.tipo === 'area' && typeof e.data.area === 'string') {
+      var a = D.areas.filter(function (x) { return x === e.data.area; })[0];
+      areaSel = a || '';
+      var v = visibles();
+      objSel = v.length ? v[0].id : null; mesSel = null;
+      pintar();
+    }
+  });
+
+  /* ---------- init ---------- */
+  $('#fuente').textContent = D.meta.archivo + ' · ' + D.meta.hojas;
+  $('#eyebrow').textContent = 'Gerencia de Operaciones · Objetivos 2026';
+  if (MODO === 'sector') {
+    $('#titulo').textContent = 'Objetivo estratégico de ' + (areaSel || 'el sector');
+    $('#bajada').textContent = 'El sector carga sus KPI mes a mes y el conjunto, ponderado por peso, forma el número del objetivo. Elegí un dato del cuadro para ver el desglose.';
+    $('#tituloMatriz').textContent = 'Mes a mes';
+    $('#subMatriz').textContent = 'El valor cargado en la hoja ObjetivosMensuales. Verde cuando el mes cumple la meta, rojo cuando no.';
+  } else {
+    $('#titulo').textContent = 'Objetivos estratégicos de todas las áreas';
+    $('#bajada').textContent = 'Cada área carga sus KPI mes a mes y el conjunto, ponderado por peso, forma el número de su objetivo estratégico.';
+    $('#tituloMatriz').textContent = 'Todos los sectores, mes a mes';
+    $('#subMatriz').textContent = 'La planilla completa: cada sector con sus objetivos y los doce meses. Verde cuando el mes cumple la meta, rojo cuando no.';
+  }
+  var v0 = visibles();
+  objSel = v0.length ? v0[0].id : null;
+  pintar(); renderMeth(); postH();
+  addEventListener('resize', postH);
+  if (window.ResizeObserver) new ResizeObserver(postH).observe(document.body);
+  [150, 500, 1200].forEach(function (t) { setTimeout(postH, t); });
+})();
+</script>
+<div class="tip" id="tip"></div>
+<div class="toast" id="toast"></div>

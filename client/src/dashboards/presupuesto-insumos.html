@@ -84,6 +84,35 @@
   .idet .col .ch{font-size:11px;font-weight:800;color:var(--text);margin:0 0 6px;padding-bottom:4px;border-bottom:1px solid var(--line);}
   .idet .note{margin-top:8px;font-size:10.5px;color:var(--muted-2);}
   .idet .empty{color:var(--muted-2);font-size:12px;padding:8px 0;}
+  /* --- acciones correctivas y anexos del mes --- */
+  .accs{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px;}
+  .acc{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:13px 15px;
+    border-left:3px solid var(--info);min-width:0;}
+  .acc.pos{border-left-color:var(--bad);} .acc.neg{border-left-color:var(--good);}
+  .acc-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px;}
+  .acc-g{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--info);
+    background:rgba(38,182,217,.13);border-radius:999px;padding:3px 9px;}
+  .acc-d{font-size:11px;font-weight:700;} .acc-d.pos{color:var(--bad);} .acc-d.neg{color:var(--good);}
+  .acc p{margin:0;font-size:12.5px;line-height:1.6;color:var(--text);white-space:pre-line;}
+  .acc-f{margin-top:9px;padding-top:8px;border-top:1px solid var(--line);font-size:11px;color:var(--muted-2);
+    display:flex;gap:16px;flex-wrap:wrap;}
+  .acc-f b{color:var(--muted);font-weight:700;}
+  .anexo table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;}
+  .anexo th{position:sticky;top:0;z-index:2;background:var(--panel-2);color:var(--muted);font-size:10px;font-weight:700;
+    letter-spacing:.04em;text-transform:uppercase;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .anexo th.izq,.anexo td.izq{text-align:left;}
+  .anexo td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;}
+  .anexo td.wrap{white-space:normal;min-width:180px;}
+  .anexo tbody tr:hover td{background:rgba(255,255,255,.025);}
+  .anexo tr.tot td{background:var(--panel-3);font-weight:800;color:#fff;border-top:2px solid var(--line-2);}
+  .anexo .up{color:var(--bad);font-weight:700;} .anexo .dn{color:var(--good);font-weight:700;}
+  .anexo .cero{color:var(--muted-2);}
+  .anexo-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:11px;margin-bottom:14px;}
+  .anexo-kpi{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:13px 15px;}
+  .anexo-kpi .k{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);}
+  .anexo-kpi .v{font-size:21px;font-weight:800;color:#fff;margin-top:6px;letter-spacing:-.02em;}
+  .anexo-kpi .d{font-size:11px;color:var(--muted);margin-top:3px;}
+
 </style>
 
 <div class="wrap">
@@ -116,6 +145,12 @@
     </div>
     <div class="tscroll"><table id="detalle"><thead id="det-head"></thead><tbody id="det-body"></tbody></table></div>
     <p class="pie">Fuente: <b>Carpeta Presupuesto · GERENCIA DE OPERACIONES (archivos mensuales 01–07 2026)</b> (SharePoint · Gerencia de Operaciones / Presupuesto), hoja <b>Resumen Gerencia</b> — gasto real donde <b>Centro Costo Destino = ALMACEN INSUMOS</b>. Vista general de la hoja <b>RESUMEN</b>; el detalle sale de la hoja de cada mes (Presupuestado vs. Gasto Real). <b>Desvío</b> = Real − Presupuestado · <b>Ejecución</b> = Real / Presupuestado.</p>
+  </section>
+
+  <section class="panel" id="acc-panel">
+    <div class="panel-head"><div><h3>Justificación del mes · acciones correctivas</h3>
+      <p class="psub">Lo que el sector cargó en la planilla de 07/2026 para explicar cada grupo de gasto. La flecha marca si el real quedó por encima o por debajo de lo presupuestado.</p></div></div>
+    <div id="acc-body"></div>
   </section>
 </div>
 <div class="tip" id="tip" role="status" aria-live="polite"></div>
@@ -244,6 +279,28 @@
 
   function render(){ renderKpis(); renderResumen(); renderDetalle(); if(window.parent!==window)setTimeout(postAlto,30); }
   renderSeg(); render();
+
+
+  /* ----- acciones correctivas del mes (hoja Resumen Gerencia) ----- */
+  var ACC=[{"grupo":"MATERIAL","presup":606655.9123343476,"real":5519680.9196649995,"dif":-4913025.007330652,"accion":"LOS GASTOS CORRESPONDEN A REPARACIONES DE MANTENIMIENTO EN EL AREA, SE MANTIENEN EN COMPARACION AL MES ANTERIOR. LA DIFERENCIA ESTA EN LO PRESUPUESTADO","fecha":null,"resp":null},{"grupo":"SERVICIOS","presup":4379524.065553977,"real":2869000,"dif":1510524.0655539772,"accion":"El gasto en servicios corresponde al alquiler del clarck del deposito de insumos, el costo mensual de alquiler por precio historico y OC actual es e $1900 dolares.","fecha":null,"resp":null},{"grupo":"MO EVENTUAL","presup":30871694.613829665,"real":25292268.103424005,"dif":5579426.51040566,"accion":"Se mantiene respecto al mes anterior, la diferencia se encuentra en lo presupuesado.","fecha":null,"resp":null},{"grupo":"MO PROPIA","presup":32927999.999999996,"real":45361753.94318322,"dif":-12433753.943183225,"accion":"Se mantiene respecto al mes anterior, la diferencia se encuentra en lo presupuesado.","fecha":null,"resp":null}], ACC_MES='07/2026';
+  function accMoney(v){ return v==null?'—':'$ '+Math.round(v).toLocaleString('es-AR'); }
+  function accEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function renderAcciones(){
+    var cont=document.getElementById('acc-body'); if(!cont) return;
+    if(!ACC.length){ cont.innerHTML='<p class="psub">Este sector no tiene acciones correctivas cargadas para '+ACC_MES+'.</p>'; return; }
+    cont.innerHTML='<div class="accs">'+ACC.map(function(a){
+      var cls=a.dif==null?'':(a.dif<0?'pos':'neg');   // dif negativa = gastó más que lo presupuestado
+      var d=a.dif==null?'':'<span class="acc-d '+(a.dif<0?'pos':'neg')+'">'+(a.dif<0?'▲ ':'▼ ')+accMoney(Math.abs(a.dif))+'</span>';
+      return '<div class="acc '+cls+'"><div class="acc-h"><span class="acc-g">'+accEsc(a.grupo)+'</span>'+d+
+        '<span style="font-size:11px;color:var(--muted-2)">real '+accMoney(a.real)+' · ppto '+accMoney(a.presup)+'</span></div>'+
+        '<p>'+accEsc(a.accion)+'</p>'+
+        ((a.fecha||a.resp)?'<div class="acc-f">'+(a.fecha?'<span><b>Cumplimiento:</b> '+accEsc(a.fecha)+'</span>':'')+
+          (a.resp?'<span><b>Responsable:</b> '+accEsc(a.resp)+'</span>':'')+'</div>':'')+
+        '</div>';
+    }).join('')+'</div>';
+  }
+
+  renderAcciones();
 
   function postAlto(){ try{ parent.postMessage({tipo:'matriz-alto',alto:document.body.scrollHeight},'*'); }catch(e){} }
   if(window.parent!==window){ postAlto(); window.addEventListener('resize',postAlto); new MutationObserver(postAlto).observe(document.body,{subtree:true,childList:true}); }

@@ -503,3 +503,37 @@ body {
   .nav-ctx-chip.on { max-width: 18ch; }
 }
 @media (max-width: 560px) { .nav-ctx { display: none; } }
+
+/* ---------- Pestaña transversal "Objetivos" ---------- */
+/* El tablero de objetivos de la gerencia va embebido y trae su propio fondo,
+   así que sólo necesita el marco del panel. */
+.marco-objetivos {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* ---------- Ventanas dentro de una sub-pestaña ---------- */
+.ventanas { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 16px; }
+.ventana {
+  font: inherit; font-size: 12px; font-weight: 600; color: var(--muted);
+  background: linear-gradient(165deg, rgba(255,255,255,.028), rgba(255,255,255,0));
+  border: 1px solid var(--line); border-radius: 11px; padding: 8px 16px; cursor: pointer;
+  display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left;
+  transition: color .16s, background .16s, border-color .16s, transform .16s, box-shadow .16s;
+}
+.ventana small { font-size: 10.5px; font-weight: 500; color: var(--muted-2, #667d89); }
+.ventana:hover { color: var(--text); border-color: var(--info); transform: translateY(-1px); }
+.ventana.on {
+  color: #fff; border-color: var(--info);
+  background: linear-gradient(165deg, rgba(38,182,217,.20), rgba(38,182,217,.05));
+  box-shadow: inset 0 0 0 1px rgba(38,182,217,.28), 0 8px 20px -13px rgba(38,182,217,.5);
+}
+.ventana.on small { color: rgba(255,255,255,.72); }
+.ventana:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+/* Marco para los tableros embebidos que traen su propio fondo. */
+.marco-embebido {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden;
+}

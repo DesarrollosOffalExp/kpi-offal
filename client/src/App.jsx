@@ -15,14 +15,14 @@ import PresupuestoCompras from './components/PresupuestoCompras';
 import ComprasPendientes from './components/ComprasPendientes';
 import ComprasActividad from './components/ComprasActividad';
 import ComprasVencidas from './components/ComprasVencidas';
-import ComprasDemoradas from './components/ComprasDemoradas';
-import ComprasInforme from './components/ComprasInforme';
+import ComprasDemoradasSec from './components/ComprasDemoradasSec';
 import PresupuestoCongelado from './components/PresupuestoCongelado';
 import PresupuestoTaller from './components/PresupuestoTaller';
 import PresupuestoLavadero from './components/PresupuestoLavadero';
 import DisponibilidadFlota from './components/DisponibilidadFlota';
 import NecesidadTambores from './components/NecesidadTambores';
-import CuadroObjetivos from './components/CuadroObjetivos';
+import ObjetivoSector from './components/ObjetivoSector';
+import ObjetivosEstrategicos from './components/ObjetivosEstrategicos';
 import ProductividadBarras from './components/ProductividadBarras';
 import StockHiel from './components/StockHiel';
 import ConsumoGasoil from './components/ConsumoGasoil';
@@ -36,6 +36,9 @@ import KpiSistemas from './components/KpiSistemas';
 
 // Alto de la navbar sticky (.nav-inner en index.css).
 const ALTO_NAV = 64;
+
+// Clave de la pestaña transversal de objetivos (no es un sector del Excel de KPIs).
+const TAB_OBJETIVOS = '__objetivos';
 
 function formatearFecha(iso) {
   if (!iso) return '';
@@ -87,6 +90,8 @@ export default function App() {
   const [error, setError] = useState(null);
   const [expandido, setExpandido] = useState(null);
   const [subActivo, setSubActivo] = useState(null);
+  // Sección interna del tablero de Sistemas, que navega por su cuenta.
+  const [subSistemas, setSubSistemas] = useState(null);
 
   async function cargar({ forzar = false } = {}) {
     try {
@@ -136,7 +141,10 @@ export default function App() {
   if (cargando) return <div className="estado">Cargando indicadores…</div>;
   if (error) return <div className="estado error">{error}</div>;
 
-  const sector = data?.sectores?.find((s) => s.key === sectorActivo) || data?.sectores?.[0];
+  // "Objetivos" es una pestaña transversal, al mismo nivel que los sectores: no
+  // sale del Excel de KPIs sino del archivo de objetivos de la gerencia.
+  const enObjetivos = sectorActivo === TAB_OBJETIVOS;
+  const sector = enObjetivos ? null : (data?.sectores?.find((s) => s.key === sectorActivo) || data?.sectores?.[0]);
 
   // Orden de secciones dentro del sector (por `grupo`; null = sin sección).
   const grupos = [];
@@ -159,9 +167,13 @@ export default function App() {
   // Lo que muestra la navbar cuando las pestañas quedaron arriba. Sistemas trae
   // su propio tablero con navegación interna: el marco no dibuja sub-pestañas,
   // así que tampoco se anuncia una.
-  const contextoNav = compacto && sector
-    ? { sector: sector.nombre, sub: (conSub && sector.key !== 'sistemas') ? subActual : null }
-    : null;
+  const contextoNav = !compacto ? null
+    : enObjetivos ? { sector: 'Objetivos', sub: null }
+      : sector ? {
+        sector: sector.nombre,
+        sub: sector.key === 'sistemas' ? subSistemas : (conSub ? subActual : null),
+      }
+        : null;
 
   return (
     <>
@@ -194,7 +206,16 @@ export default function App() {
               {s.nombre}{s.estado === 'pendiente' && <span className="tab-dot">•</span>}
             </button>
           ))}
+          <button className={`tab ${enObjetivos ? 'on' : ''}`} onClick={() => setSectorActivo(TAB_OBJETIVOS)}>
+            Objetivos
+          </button>
         </nav>
+
+        {enObjetivos && (
+          <section className="sector">
+            <div className="marco-embebido"><ObjetivosEstrategicos modo="gerencia" /></div>
+          </section>
+        )}
 
         {sector && (sector.estado === 'pendiente' ? (
           <div className="vacio-sector">
@@ -206,7 +227,7 @@ export default function App() {
             {sector.key === 'sistemas' ? (
               // Sistemas: dashboard completo con sub-pestañas internas (Resumen, Por agente,
               // Tickets abiertos, Evolución, Objetivos).
-              <KpiSistemas />
+              <KpiSistemas onSub={setSubSistemas} />
             ) : (
             <>
             {sector.periodo && <div className="sector-periodo">Datos de la <b>{sector.periodo}</b></div>}
@@ -427,23 +448,15 @@ export default function App() {
                   </div>
                 );
               }
-              // Compras · Órdenes demoradas: tabla agrupada con detalle (hoja Demoradas).
+              // Compras · Órdenes demoradas: dos ventanas, la tabla agrupada de demoradas
+              // (hoja Demoradas) y el informe de recepción (hoja Reporte), que antes era
+              // una sub-pestaña aparte.
               const esComDem = sector.key === 'compras' && typeof g === 'string' && g.startsWith('Órdenes demoradas');
               if (esComDem) {
                 return (
                   <div className="grupo" key={g}>
                     {!conSub && <h2 className="grupo-titulo">{g}</h2>}
-                    <ComprasDemoradas />
-                  </div>
-                );
-              }
-              // Compras · Informe: recepción en tiempo vs. fuera de plazo (hoja Reporte).
-              const esComInf = sector.key === 'compras' && typeof g === 'string' && g.startsWith('Informe');
-              if (esComInf) {
-                return (
-                  <div className="grupo" key={g}>
-                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
-                    <ComprasInforme />
+                    <ComprasDemoradasSec />
                   </div>
                 );
               }
@@ -474,13 +487,14 @@ export default function App() {
                   </div>
                 );
               }
-              // Objetivo: cuadro de KPIs asignados del sector (hoja del archivo de objetivos).
-              const esObjetivo = g === 'Objetivo' && sector.objetivos;
-              if (esObjetivo) {
+              // Objetivo: se abre en ventanas. La primera es el cuadro de KPIs asignados
+              // del sector; siempre se suma la de objetivos estratégicos de la gerencia,
+              // y Compras agrega la de precios real vs. ajustado por inflación.
+              if (g === 'Objetivo') {
                 return (
                   <div className="grupo" key={g}>
                     {!conSub && <h2 className="grupo-titulo">{g}</h2>}
-                    <CuadroObjetivos data={sector.objetivos} />
+                    <ObjetivoSector sectorKey={sector.key} data={sector.objetivos} />
                   </div>
                 );
               }

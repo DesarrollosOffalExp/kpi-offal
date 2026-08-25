@@ -77,7 +77,7 @@
 
 <script>
 (function(){
-  const DATA = {"latestSem":33,"total":15,"weeks":[{"sem":17,"n":3},{"sem":18,"n":4},{"sem":21,"n":3},{"sem":23,"n":4},{"sem":30,"n":1}]};
+  const DATA = {"latestSem":34,"total":17,"weeks":[{"sem":17,"n":3},{"sem":18,"n":4},{"sem":23,"n":4},{"sem":30,"n":2},{"sem":32,"n":1},{"sem":33,"n":3}]};
   const W = DATA.weeks.slice().sort((a,b)=>a.sem-b.sem);
   const TOTAL = DATA.total, LATEST = DATA.latestSem;
   const maxAge = Math.max.apply(null, W.map(w=>LATEST-w.sem));

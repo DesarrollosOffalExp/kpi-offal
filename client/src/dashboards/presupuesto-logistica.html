@@ -84,6 +84,35 @@
   .idet .col .ch{font-size:11px;font-weight:800;color:var(--text);margin:0 0 6px;padding-bottom:4px;border-bottom:1px solid var(--line);}
   .idet .note{margin-top:8px;font-size:10.5px;color:var(--muted-2);}
   .idet .empty{color:var(--muted-2);font-size:12px;padding:8px 0;}
+  /* --- acciones correctivas y anexos del mes --- */
+  .accs{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px;}
+  .acc{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:13px 15px;
+    border-left:3px solid var(--info);min-width:0;}
+  .acc.pos{border-left-color:var(--bad);} .acc.neg{border-left-color:var(--good);}
+  .acc-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px;}
+  .acc-g{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--info);
+    background:rgba(38,182,217,.13);border-radius:999px;padding:3px 9px;}
+  .acc-d{font-size:11px;font-weight:700;} .acc-d.pos{color:var(--bad);} .acc-d.neg{color:var(--good);}
+  .acc p{margin:0;font-size:12.5px;line-height:1.6;color:var(--text);white-space:pre-line;}
+  .acc-f{margin-top:9px;padding-top:8px;border-top:1px solid var(--line);font-size:11px;color:var(--muted-2);
+    display:flex;gap:16px;flex-wrap:wrap;}
+  .acc-f b{color:var(--muted);font-weight:700;}
+  .anexo table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;}
+  .anexo th{position:sticky;top:0;z-index:2;background:var(--panel-2);color:var(--muted);font-size:10px;font-weight:700;
+    letter-spacing:.04em;text-transform:uppercase;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .anexo th.izq,.anexo td.izq{text-align:left;}
+  .anexo td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;}
+  .anexo td.wrap{white-space:normal;min-width:180px;}
+  .anexo tbody tr:hover td{background:rgba(255,255,255,.025);}
+  .anexo tr.tot td{background:var(--panel-3);font-weight:800;color:#fff;border-top:2px solid var(--line-2);}
+  .anexo .up{color:var(--bad);font-weight:700;} .anexo .dn{color:var(--good);font-weight:700;}
+  .anexo .cero{color:var(--muted-2);}
+  .anexo-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:11px;margin-bottom:14px;}
+  .anexo-kpi{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:13px 15px;}
+  .anexo-kpi .k{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);}
+  .anexo-kpi .v{font-size:21px;font-weight:800;color:#fff;margin-top:6px;letter-spacing:-.02em;}
+  .anexo-kpi .d{font-size:11px;color:var(--muted);margin-top:3px;}
+
 </style>
 
 <div class="wrap">
@@ -116,6 +145,18 @@
     </div>
     <div class="tscroll"><table id="detalle"><thead id="det-head"></thead><tbody id="det-body"></tbody></table></div>
     <p class="pie">Fuente: <b>Carpeta Presupuesto · GERENCIA DE OPERACIONES (archivos mensuales 01–07 2026)</b> (SharePoint · Gerencia de Operaciones / Presupuesto), hoja <b>Resumen Gerencia</b> — gasto real donde <b>Centro Costo Destino = LOGISTICA</b>. Vista general de la hoja <b>RESUMEN</b>; el detalle sale de la hoja de cada mes (Presupuestado vs. Gasto Real). <b>Desvío</b> = Real − Presupuestado · <b>Ejecución</b> = Real / Presupuestado.</p>
+  </section>
+
+  <section class="panel" id="acc-panel">
+    <div class="panel-head"><div><h3>Justificación del mes · acciones correctivas</h3>
+      <p class="psub">Lo que el sector cargó en la planilla de 07/2026 para explicar cada grupo de gasto. La flecha marca si el real quedó por encima o por debajo de lo presupuestado.</p></div></div>
+    <div id="acc-body"></div>
+  </section>
+
+  <section class="panel" id="anexo-panel">
+    <div class="panel-head"><div><h3>Fletes · detalle de viajes por frigorífico</h3>
+      <p class="psub">Comparativo de junio contra julio y el importe que explica la diferencia del grupo Fletes. Hoja «fletes logistica» del archivo del mes.</p></div></div>
+    <div id="anexo-body"></div>
   </section>
 </div>
 <div class="tip" id="tip" role="status" aria-live="polite"></div>
@@ -244,6 +285,56 @@
 
   function render(){ renderKpis(); renderResumen(); renderDetalle(); if(window.parent!==window)setTimeout(postAlto,30); }
   renderSeg(); render();
+
+
+  /* ----- acciones correctivas del mes (hoja Resumen Gerencia) ----- */
+  var ACC=[{"grupo":"MATERIAL","presup":54599032.11009128,"real":72413416.45296298,"dif":-17814384.342871703,"accion":"AGUA OXIGENADA Y CLORO CENTRO DE COSTO DE MENUCAR $ 4349892.5 / COMPRA DE TAMBORES $5600000","fecha":null,"resp":null},{"grupo":"SERVICIOS","presup":12303598.10888929,"real":10508952.51,"dif":1794645.5988892894,"accion":"2 FC DE FILIPI POR $1.47 MAL IMPUTADO ,EL CENTRO DE COSTO DEBE SER SUPERMERCADO","fecha":null,"resp":null},{"grupo":"FLETES","presup":729980705.2186178,"real":827134780,"dif":-97154074.7813822,"accion":"MES DE JULIO 38 VIAJES MAS $ 65974800.00 DETALLE EN LA SOLAPA DE FLETES","fecha":null,"resp":null},{"grupo":"MO PROPIA","presup":106002434.99999999,"real":135155275.99392205,"dif":-29152840.99392207,"accion":"DIFERENCIA DE 3,5% ( $4,689,458.00) CON EL MES ANTERIOR QUE DIO $130,465,817.89","fecha":null,"resp":null}], ACC_MES='07/2026';
+  function accMoney(v){ return v==null?'—':'$ '+Math.round(v).toLocaleString('es-AR'); }
+  function accEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function renderAcciones(){
+    var cont=document.getElementById('acc-body'); if(!cont) return;
+    if(!ACC.length){ cont.innerHTML='<p class="psub">Este sector no tiene acciones correctivas cargadas para '+ACC_MES+'.</p>'; return; }
+    cont.innerHTML='<div class="accs">'+ACC.map(function(a){
+      var cls=a.dif==null?'':(a.dif<0?'pos':'neg');   // dif negativa = gastó más que lo presupuestado
+      var d=a.dif==null?'':'<span class="acc-d '+(a.dif<0?'pos':'neg')+'">'+(a.dif<0?'▲ ':'▼ ')+accMoney(Math.abs(a.dif))+'</span>';
+      return '<div class="acc '+cls+'"><div class="acc-h"><span class="acc-g">'+accEsc(a.grupo)+'</span>'+d+
+        '<span style="font-size:11px;color:var(--muted-2)">real '+accMoney(a.real)+' · ppto '+accMoney(a.presup)+'</span></div>'+
+        '<p>'+accEsc(a.accion)+'</p>'+
+        ((a.fecha||a.resp)?'<div class="acc-f">'+(a.fecha?'<span><b>Cumplimiento:</b> '+accEsc(a.fecha)+'</span>':'')+
+          (a.resp?'<span><b>Responsable:</b> '+accEsc(a.resp)+'</span>':'')+'</div>':'')+
+        '</div>';
+    }).join('')+'</div>';
+  }
+
+  /* ----- anexo: fletes por frigorífico ----- */
+  var FL={"cab":["6","7"],"filas":[{"n":"Arre Beef S.A","jun":37,"jul":22,"tot":59,"dif":-15,"precio":1003800,"imp":-15057000},{"n":"Black Bamboo Enterprises S.A","jun":12,"jul":13,"tot":25,"dif":1,"precio":1745600,"imp":1745600},{"n":"Carnes Pampeanas S.A","jun":21,"jul":22,"tot":43,"dif":1,"precio":2282500,"imp":2282500},{"n":"Compañia Bernal S.A","jun":40,"jul":46,"tot":86,"dif":6,"precio":415700,"imp":2494200},{"n":"Ecocarnes S.A","jun":32,"jul":31,"tot":63,"dif":-1,"precio":448300,"imp":-448300},{"n":"EPC-CARCARAÑA","jun":20,"jul":22,"tot":42,"dif":2,"precio":1616000,"imp":3232000},{"n":"FRIAR S,A 1970","jun":23,"jul":26,"tot":49,"dif":3,"precio":3999300,"imp":11997900},{"n":"FRIAR S.A 249","jun":19,"jul":22,"tot":41,"dif":3,"precio":2155300,"imp":6465900},{"n":"Frigorifico Bermejo S.A","jun":27,"jul":30,"tot":57,"dif":3,"precio":6755000,"imp":20265000},{"n":"FRIGORIFICO GRAL PICO S.A.","jun":13,"jul":22,"tot":35,"dif":9,"precio":2282500,"imp":20542500},{"n":"Frigorifico Gral. Deheza S.A","jun":22,"jul":22,"tot":44,"dif":0,"precio":2899300,"imp":null},{"n":"Frigorifico Rioplatense SAICIF","jun":83,"jul":76,"tot":159,"dif":-7,"precio":448300,"imp":-3138100},{"n":"MATTIEVICH S.A.-ARROYO SECO","jun":10,"jul":13,"tot":23,"dif":3,"precio":1462600,"imp":4387800},{"n":"NAVARRO","jun":null,"jul":2,"tot":2,"dif":2,"precio":415700,"imp":831400},{"n":"Procesadora Ganadera Entrerriana S.A","jun":27,"jul":23,"tot":50,"dif":-4,"precio":2057000,"imp":-8228000},{"n":"Runfo S.A","jun":56,"jul":57,"tot":113,"dif":1,"precio":584600,"imp":584600},{"n":"SWIFT","jun":65,"jul":89,"tot":154,"dif":24,"precio":750700,"imp":18016800}],"total":{"jun":507,"jul":538,"tot":1045,"dif":31,"imp":65974800},"extra":[{"k":"importe transporte colgado / sebo","v":103445040},{"k":"kgs transportados colgados / sebo","v":3149900}]};
+  function renderAnexo(){
+    var c=document.getElementById('anexo-body'); if(!c) return;
+    var m=function(v){ return v==null?'—':'$ '+Math.round(v).toLocaleString('es-AR'); };
+    var n=function(v){ return v==null?'—':Number(v).toLocaleString('es-AR'); };
+    var imp=FL.extra.filter(function(x){return /importe/i.test(x.k);})[0];
+    var kgs=FL.extra.filter(function(x){return /kgs/i.test(x.k);})[0];
+    var kpis='<div class="anexo-kpis">'
+      +'<div class="anexo-kpi"><div class="k">Viajes de julio</div><div class="v">'+n(FL.total.jul)+'</div><div class="d">'+n(FL.total.jun)+' en junio · '+(FL.total.dif>0?'+':'')+n(FL.total.dif)+' viajes</div></div>'
+      +'<div class="anexo-kpi"><div class="k">Importe de la diferencia</div><div class="v">'+m(FL.total.imp)+'</div><div class="d">lo que explica el desvío del grupo Fletes</div></div>'
+      +(imp?'<div class="anexo-kpi"><div class="k">Transporte colgado / sebo</div><div class="v">'+m(imp.v)+'</div><div class="d">importe del mes</div></div>':'')
+      +(kgs?'<div class="anexo-kpi"><div class="k">Kilos transportados</div><div class="v">'+n(kgs.v)+'</div><div class="d">'+(imp?'$ '+(imp.v/kgs.v).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})+' por kg':'colgado / sebo')+'</div></div>':'')
+      +'</div>';
+    var filas=FL.filas.slice().sort(function(a,b){ return Math.abs(b.imp||0)-Math.abs(a.imp||0); }).map(function(f){
+      var d=f.dif||0;
+      return '<tr><td class="izq wrap">'+f.n+'</td><td>'+n(f.jun)+'</td><td>'+n(f.jul)+'</td><td>'+n(f.tot)+'</td>'
+        +'<td class="'+(d>0?'up':d<0?'dn':'cero')+'">'+(d>0?'+':'')+n(d)+'</td><td>'+m(f.precio)+'</td>'
+        +'<td class="'+((f.imp||0)>0?'up':(f.imp||0)<0?'dn':'cero')+'">'+m(f.imp)+'</td></tr>';
+    }).join('');
+    c.innerHTML=kpis+'<div class="tscroll anexo"><table><thead><tr><th class="izq">Frigorífico</th><th>Jun</th><th>Jul</th>'
+      +'<th>Total</th><th>Dif. viajes</th><th>Precio por viaje</th><th>Importe de la dif.</th></tr></thead><tbody>'+filas
+      +'<tr class="tot"><td class="izq">Total general</td><td>'+n(FL.total.jun)+'</td><td>'+n(FL.total.jul)+'</td><td>'+n(FL.total.tot)+'</td>'
+      +'<td>'+(FL.total.dif>0?'+':'')+n(FL.total.dif)+'</td><td>—</td><td>'+m(FL.total.imp)+'</td></tr></tbody></table></div>'
+      +'<p class="psub" style="margin-top:10px">Ordenado por el peso del importe. Un signo positivo son viajes de más respecto de junio; negativo, viajes de menos.</p>';
+  }
+
+  renderAcciones();
+  renderAnexo();
 
   function postAlto(){ try{ parent.postMessage({tipo:'matriz-alto',alto:document.body.scrollHeight},'*'); }catch(e){} }
   if(window.parent!==window){ postAlto(); window.addEventListener('resize',postAlto); new MutationObserver(postAlto).observe(document.body,{subtree:true,childList:true}); }
