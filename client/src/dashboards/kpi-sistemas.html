@@ -216,6 +216,55 @@
   #p-det .idet .col .ch{font-size:11px;font-weight:800;color:var(--text);margin:0 0 6px;padding-bottom:4px;border-bottom:1px solid var(--line);}
   #p-det .idet .note{margin-top:8px;font-size:10.5px;color:var(--muted-2);}
   #p-det .idet .empty{color:var(--muted-2);font-size:12px;padding:8px 0;}
+  /* --- Objetivos de Sistemas: ventanas, tarjetas de métrica y gráficos --- */
+  .oventanas{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px;}
+  .oventana{font:inherit;font-size:12px;font-weight:600;color:var(--muted);
+    background:linear-gradient(165deg,rgba(255,255,255,.028),rgba(255,255,255,0));
+    border:1px solid var(--line);border-radius:11px;padding:8px 16px;cursor:pointer;
+    display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;
+    transition:color .16s,background .16s,border-color .16s,transform .16s;}
+  .oventana small{font-size:10.5px;font-weight:500;color:var(--muted-2);}
+  .oventana:hover{color:var(--text);border-color:var(--info);transform:translateY(-1px);}
+  .oventana.on{color:#fff;border-color:var(--info);
+    background:linear-gradient(165deg,rgba(38,182,217,.20),rgba(38,182,217,.05));
+    box-shadow:inset 0 0 0 1px rgba(38,182,217,.28),0 8px 20px -13px rgba(38,182,217,.5);}
+  .oventana.on small{color:rgba(255,255,255,.72);}
+  .oventana:focus-visible{outline:2px solid var(--info);outline-offset:2px;}
+
+  .ohead{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px;}
+  .ohead>div{min-width:0;}
+  .obig{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+  .obig .olbl{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);}
+  .obig .oval{font-size:36px;font-weight:800;line-height:1;letter-spacing:-.03em;}
+  .obig .oval.ok{color:var(--good);} .obig .oval.bajo{color:var(--bad);}
+  .ocols{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;} .ocols>*{min-width:0;}
+  @media(max-width:900px){.ocols{grid-template-columns:1fr;}}
+  .ostep{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--info);margin:16px 0 7px;}
+  .ostep:first-child{margin-top:0;}
+  .ocalc{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.8px;line-height:1.95;overflow-x:auto;}
+  .ocalc .op{color:var(--muted-2);} .ocalc b{color:#fff;}
+  .opie{font-size:11px;color:var(--muted-2);margin:8px 0 0;line-height:1.5;}
+  .ochart{display:block;width:100%;min-width:290px;height:auto;}
+  .ohit{cursor:pointer;}
+  .ochart .ohit:hover{fill:rgba(255,255,255,.04);}
+  tr.osel td{background:rgba(38,182,217,.10);}
+
+  .ogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px;}
+  .ocard{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:14px 15px 12px;min-width:0;}
+  .ocard.vacia{border-style:dashed;}
+  .ocard-h{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+  .ocard-h>div:nth-child(2){flex:1;min-width:0;}
+  .ocard h4{margin:0;font-size:12.5px;font-weight:700;line-height:1.35;color:var(--text);
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .ocard-m{font-size:10.5px;color:var(--muted-2);margin-top:3px;}
+  .ocard-v{display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:19px;font-weight:800;color:#fff;white-space:nowrap;}
+  .osw{width:11px;height:11px;border-radius:3px;flex-shrink:0;margin-top:3px;}
+  .opill{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:999px;letter-spacing:.03em;}
+  .opill.ok{background:rgba(34,227,155,.14);color:var(--good);}
+  .opill.sd{background:var(--panel-3);color:var(--muted-2);}
+  .oobj{display:block;font-size:10.5px;color:var(--muted-2);font-weight:500;margin-top:2px;}
+
 </style>
 
 <div class="wrap">
@@ -677,35 +726,146 @@
   }
 
   // ---- Objetivos (KPI Gerencia de Operaciones 2026) ----
-  const OBJ={
-    agente:'Nicolás Gutiérrez', total:2, meses:['Ene','Feb','Mar','Abr','May','Jun','Jul'],
-    filas:[
-      {n:1, obj:'Respuesta de tickets en 24hs y 5 días hábiles para informar tratamiento; resolución en 90 días. (Informe que muestre la respuesta de cada pedido en 24hs y la finalización dentro de los 90 días.)', meta:94, vals:[92,96,98,97,100,97,98], prom:97, estado:'Logrado',
-       desglose:[{ok:1023,e:86,t:1109},{ok:836,e:36,t:872},{ok:1100,e:22,t:1122},{ok:1052,e:38,t:1090},{ok:606,e:0,t:606},{ok:329,e:9,t:338},{ok:314,e:10,t:324}]},
-      {n:2, obj:'Informe del jefe del sector con datos de la semana y estadísticos del área.', meta:94, vals:[99,100,100,100,100,100,100], prom:100, estado:'Logrado'},
-      {n:3, obj:'5 días hábiles para notificar estado.', meta:null, vals:[null,null,null,null,null,null,null], prom:null, estado:null},
-    ],
-    promedio:[96,98,99,99,100,99,99],
-  };
-  function celPct(v,f,k,mi){
-    if(v==null) return '<td class="cel-na">N/A</td>';
-    const meta=f.meta, base=meta==null?'':(v>=meta?'cel-ok':'cel-bajo');
-    if(meta==null) return '<td class="'+base+'">'+v+'%</td>';
-    return '<td class="'+base+' cel-clk" data-punto="1" data-fila="'+k+'" data-mes="'+mi+'" title="Ver detalle de '+OBJ.meses[mi]+'">'+v+'%</td>';
+  const OBJ={"agente":"Nicolas Gutierrez |","meses":["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],"hastaMes":6,"filas":[{"n":1,"obj":"Respuesta de tickets >24hs y 5 días hábiles para informar tratamiento, Resolución >90días.","kpi":"INFORME QUE MUESTRE LA RESPUESTA DE CADA PEDIDO EN 24 HS Y LA FINALIZACION DENTRO DE LOS 90 DIAS.","meta":94,"vals":[92,96,98,97,100,97,98,null,null,null,null,null],"prom":96.9,"estado":"Logrado"},{"n":2,"obj":null,"kpi":"INFORME DEL JEFE DEL SECTOR CON DATOS DE LA SEMANA Y ESTADISTICOS DEL AREA.","meta":94,"vals":[99.1,100,100,100,100,100,100,null,null,null,null,null],"prom":99.9,"estado":"Logrado"},{"n":3,"obj":null,"kpi":"5 DIAS HABILES PARA NOTIFICAR ESTADO.","meta":null,"vals":[null,null,null,null,null,null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"},{"n":4,"obj":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","meta":70,"vals":[null,null,null,null,null,null,null,null,null,null,null,null],"prom":null,"estado":"Sin datos"}],"promedio":[95.6,98,99,98.5,100,98.5,99,null,null,null,null,null],"base":[{"m":1,"ok":1023,"e":86,"t":1109},{"m":2,"ok":836,"e":36,"t":872},{"m":3,"ok":1100,"e":22,"t":1122},{"m":4,"ok":1052,"e":38,"t":1090},{"m":5,"ok":606,"e":0,"t":606},{"m":6,"ok":329,"e":9,"t":338},{"m":7,"ok":314,"e":10,"t":324},{"m":8,"ok":173,"e":2,"t":175},{"m":9,"ok":0,"e":0,"t":0},{"m":10,"ok":0,"e":0,"t":0},{"m":11,"ok":0,"e":0,"t":0},{"m":12,"ok":0,"e":0,"t":0}],"inf":[{"m":1,"ok":1098,"e":10,"t":1108},{"m":2,"ok":870,"e":2,"t":872},{"m":3,"ok":1121,"e":0,"t":1121},{"m":4,"ok":1082,"e":0,"t":1082},{"m":5,"ok":601,"e":0,"t":601},{"m":6,"ok":272,"e":0,"t":272},{"m":7,"ok":303,"e":0,"t":303}]};
+  // El número del área es el promedio simple de las métricas que ese mes tienen dato.
+  function metricasConDato(mi){ return OBJ.filas.filter(f=>f.vals[mi]!=null); }
+  function promMes(mi){ const c=metricasConDato(mi); return c.length? Math.round(c.reduce((a,f)=>a+f.vals[mi],0)/c.length*10)/10 : null; }
+  const O_META=94;                              // meta del objetivo estratégico de Sistemas
+  const O_MES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const O_SERIE=['var(--info)','var(--amber)','#8f6ad0','var(--good)'];
+  let oVent='estrategico', oMi=OBJ.hastaMes;
+
+  const oNum=v=>v==null?'—':String(v).replace('.',',')+'%';
+  const oEsc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  /* ---- gráfico de línea mensual, reutilizable ---- */
+  function oChart(serie, meta, color, alto){
+    const W=560,H=alto||190,ml=42,mr=14,mt=12,mb=26,iw=W-ml-mr,ih=H-mt-mb;
+    const pts=serie.map((v,i)=>({i,v})).filter(p=>p.v!=null);
+    const vs=pts.map(p=>p.v).concat(meta!=null?[meta]:[]);
+    let lo=vs.length?Math.min(...vs):0, hi=vs.length?Math.max(...vs):100;
+    if(hi===lo){hi=lo+2;lo=lo-2;} const pad=(hi-lo)*.25; lo=Math.max(0,lo-pad); hi=Math.min(100,hi+pad);
+    if(hi<=lo){lo=0;hi=100;}
+    const x=i=>ml+i*(iw/11), y=v=>mt+ih-(v-lo)/(hi-lo)*ih;
+    let g='',xs='';
+    for(let t=0;t<=3;t++){const vv=lo+(hi-lo)*t/3;
+      g+='<line x1="'+ml+'" x2="'+(W-mr)+'" y1="'+y(vv).toFixed(1)+'" y2="'+y(vv).toFixed(1)+'" stroke="var(--line)" stroke-width="1"/>'
+        +'<text x="'+(ml-6)+'" y="'+(y(vv)+4).toFixed(1)+'" text-anchor="end" fill="var(--muted-2)" font-size="10">'+Math.round(vv)+'%</text>';}
+    O_MES.forEach((m,i)=>{xs+='<text x="'+x(i)+'" y="'+(H-8)+'" text-anchor="middle" fill="var(--muted-2)" font-size="9.5">'+m+'</text>';});
+    const mLn=meta==null?'':'<line x1="'+ml+'" x2="'+(W-mr)+'" y1="'+y(meta).toFixed(1)+'" y2="'+y(meta).toFixed(1)+'" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="6 4"/>'
+      +'<text x="'+(W-mr)+'" y="'+(y(meta)-5).toFixed(1)+'" text-anchor="end" fill="var(--amber)" font-size="10" font-weight="700">meta '+meta+'%</text>';
+    if(!pts.length) return '<svg viewBox="0 0 '+W+' '+H+'" class="ochart">'+g+mLn+xs
+      +'<text x="'+(ml+iw/2)+'" y="'+(mt+ih/2)+'" text-anchor="middle" fill="var(--muted-2)" font-size="12" font-style="italic">Sin datos cargados todavía</text></svg>';
+    const d=pts.map((p,k)=>(k?'L':'M')+x(p.i)+','+y(p.v).toFixed(1)).join(' ');
+    const area='M'+x(pts[0].i)+','+(mt+ih)+' '+pts.map(p=>'L'+x(p.i)+','+y(p.v).toFixed(1)).join(' ')+' L'+x(pts[pts.length-1].i)+','+(mt+ih)+' Z';
+    const dots=pts.map(p=>'<circle cx="'+x(p.i)+'" cy="'+y(p.v).toFixed(1)+'" r="4.5" fill="'+
+      (meta==null?color:(p.v>=meta?'var(--good)':'var(--bad)'))+'" stroke="var(--panel)" stroke-width="2"/>').join('');
+    const hits=O_MES.map((m,i)=>'<rect class="ohit" x="'+(x(i)-iw/22)+'" y="'+mt+'" width="'+(iw/11)+'" height="'+ih+'" fill="transparent" data-mes="'+i+'"/>').join('');
+    return '<svg viewBox="0 0 '+W+' '+H+'" class="ochart">'+g
+      +'<path d="'+area+'" fill="'+color+'" opacity=".10"/>'+mLn
+      +'<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="2.5" stroke-linejoin="round"/>'+dots+xs+hits+'</svg>';
   }
-  function renderObjetivos(){
-    const th='<th>#</th><th class="izq">Objetivo / métrica</th><th>Meta</th>'+OBJ.meses.map(m=>'<th>'+m+'</th>').join('')+'<th>Prom.</th><th>Estado</th>';
+
+  /* ---- ventana 1: objetivo estratégico ---- */
+  function oEstrategico(){
+    const serie=O_MES.map((m,i)=>promMes(i));
+    const ult=serie[oMi], comp=metricasConDato(oMi);
+    const cuenta=comp.length
+      ? '<div>'+comp.map(f=>'<div><span class="op">métrica '+f.n+'</span>  '+oNum(f.vals[oMi])+'  <span class="op">· '+oEsc(f.kpi.slice(0,52))+(f.kpi.length>52?'…':'')+'</span></div>').join('')
+        +'<div><span class="op">(</span>'+comp.map(f=>String(f.vals[oMi]).replace('.',',')).join(' <span class="op">+</span> ')+'<span class="op">) ÷ '+comp.length+' =</span> <b>'+oNum(ult)+'</b></div></div>'
+      : '<div class="op">Ninguna métrica tiene dato en '+O_MES[oMi]+'.</div>';
+    const sinDato=OBJ.filas.length-comp.length;
+    const filasT=O_MES.map((m,i)=>{
+      const v=serie[i]; if(v==null&&i>OBJ.hastaMes) return '';
+      const ok=v==null?null:v>=O_META;
+      return '<tr'+(i===oMi?' class="osel"':'')+'><td class="izq">'+m+'</td>'
+        +OBJ.filas.map(f=>'<td>'+(f.vals[i]==null?'<span class="cel-na">N/A</span>':oNum(f.vals[i]))+'</td>').join('')
+        +'<td class="'+(ok===true?'cel-ok':ok===false?'cel-bajo':'')+'"><b>'+oNum(v)+'</b></td></tr>';
+    }).join('');
+    return '<div class="panel">'
+      +'<div class="ohead"><div><h3>Respuesta de tickets y notificación de tratamiento</h3>'
+      +'<p class="psub">Responsable: '+oEsc(OBJ.agente)+' · meta '+O_META+'% · el número del área es el promedio de las métricas que carga el sector.</p></div>'
+      +'<div class="obig"><span class="olbl">'+O_MES[oMi]+'</span><span class="oval '+(ult>=O_META?'ok':'bajo')+'">'+oNum(ult)+'</span>'
+      +'<span class="olbl">promedio del período '+oNum(Math.round(serie.filter(v=>v!=null).reduce((a,v)=>a+v,0)/serie.filter(v=>v!=null).length*10)/10)+'</span></div></div>'
+      +'<div class="ocols">'
+      +'<div><div class="ostep">Evolución del número del área</div>'+oChart(serie,O_META,'var(--info)',210)
+      +'<p class="opie">Clic en un mes para ver cómo se forma.</p></div>'
+      +'<div><div class="ostep">Cómo se forma el número de '+O_MES[oMi]+'</div><div class="ocalc">'+cuenta+'</div>'
+      +(sinDato?'<p class="opie">'+sinDato+' de las '+OBJ.filas.length+' métricas todavía no tienen carga, así que no entran en el promedio.</p>':'')
+      +'</div></div>'
+      +'<div class="ostep">Mes a mes</div>'
+      +'<div class="tscroll"><table class="tabla-obj"><thead><tr><th class="izq">Mes</th>'
+      +OBJ.filas.map(f=>'<th title="'+oEsc(f.kpi)+'">Métrica '+f.n+'</th>').join('')+'<th>Área</th></tr></thead><tbody>'+filasT+'</tbody></table></div>'
+      +'</div>';
+  }
+
+  /* ---- ventana 2: KPI del sector ---- */
+  function oCelda(v,f,k,mi){
+    if(v==null) return '<td class="cel-na">N/A</td>';
+    const base=f.meta==null?'':(v>=f.meta?'cel-ok':'cel-bajo');
+    if(f.meta==null) return '<td class="'+base+'">'+oNum(v)+'</td>';
+    return '<td class="'+base+' cel-clk" data-punto="1" data-fila="'+k+'" data-mes="'+mi+'" title="Ver detalle de '+O_MES[mi]+'">'+oNum(v)+'</td>';
+  }
+  function oKpis(){
+    const hasta=OBJ.hastaMes;
+    const ms=O_MES.slice(0,hasta+1);
+    const th='<th>#</th><th class="izq">KPI / métrica</th><th>Meta</th>'+ms.map(m=>'<th>'+m+'</th>').join('')+'<th>Prom.</th><th>Estado</th>';
     const rows=OBJ.filas.map((f,k)=>{
       const meta=f.meta==null?'N/A':f.meta+'%';
-      const prom=f.prom==null?'<td class="cel-na">-</td>':'<td class="meta">'+f.prom+'%</td>';
-      const est=f.estado?'<td class="ok">✅ '+f.estado+'</td>':'<td class="cel-na">-</td>';
-      const clickable=f.meta!=null?' class="obj-row" data-obj="'+k+'"':'';
-      return '<tr'+clickable+'><td>'+f.n+'</td><td class="obj">'+f.obj+'</td><td class="meta">'+meta+'</td>'+f.vals.map((v,mi)=>celPct(v,f,k,mi)).join('')+prom+est+'</tr>';
+      const prom=f.prom==null?'<td class="cel-na">—</td>':'<td class="meta">'+oNum(f.prom)+'</td>';
+      const est=f.estado==='Logrado'?'<td class="ok">✅ Logrado</td>':'<td class="cel-na">'+(f.estado||'—')+'</td>';
+      const clk=f.meta!=null&&f.vals.some(v=>v!=null)?' class="obj-row" data-obj="'+k+'"':'';
+      return '<tr'+clk+'><td>'+f.n+'</td><td class="obj">'+oEsc(f.kpi)+(f.obj?'<small class="oobj">'+oEsc(f.obj)+'</small>':'')+'</td>'
+        +'<td class="meta">'+meta+'</td>'+ms.map((m,mi)=>oCelda(f.vals[mi],f,k,mi)).join('')+prom+est+'</tr>';
     }).join('');
-    const promRow='<tr class="prom"><td></td><td class="obj">Promedio general del área</td><td></td>'+OBJ.promedio.map(v=>'<td>'+v+'%</td>').join('')+'<td></td><td></td></tr>';
+    const promRow='<tr class="prom"><td></td><td class="obj">Promedio general del área</td><td class="meta">'+O_META+'%</td>'
+      +ms.map((m,mi)=>'<td>'+oNum(promMes(mi))+'</td>').join('')+'<td></td><td></td></tr>';
+
+    const tarjetas=OBJ.filas.map((f,k)=>{
+      const color=O_SERIE[k%4], conDato=f.vals.some(v=>v!=null);
+      const est=f.estado==='Logrado'?'<span class="opill ok">Logrado</span>'
+        :'<span class="opill sd">Sin datos</span>';
+      let extra='';
+      if(k===0&&OBJ.base.length){
+        const b=OBJ.base.filter(x=>x.t>0);
+        extra='<p class="opie">Base: '+b.reduce((a,x)=>a+x.t,0).toLocaleString('es-AR')+' tickets cerrados, '
+          +b.reduce((a,x)=>a+x.e,0)+' excedieron los 90 días.'
+          +(b.length>OBJ.hastaMes+1?' Agosto ya tiene base cargada ('+b[b.length-1].ok+'/'+b[b.length-1].t+') pero todavía no está volcada al KPI.':'')+'</p>';
+      }
+      if(k===1&&OBJ.inf.length){
+        extra='<p class="opie">Base: '+OBJ.inf.reduce((a,x)=>a+x.t,0).toLocaleString('es-AR')+' informes, '
+          +OBJ.inf.reduce((a,x)=>a+x.e,0)+' fuera de plazo.</p>';
+      }
+      if(!conDato) extra='<p class="opie">La métrica está definida pero el sector todavía no cargó valores.</p>';
+      return '<div class="ocard'+(conDato?'':' vacia')+'">'
+        +'<div class="ocard-h"><span class="osw" style="background:'+color+'"></span>'
+        +'<div><h4 title="'+oEsc(f.kpi)+'">'+oEsc(f.kpi)+'</h4>'
+        +'<div class="ocard-m">Métrica '+f.n+' · meta '+(f.meta==null?'N/A':f.meta+'%')+'</div></div>'
+        +'<div class="ocard-v">'+(f.prom==null?'—':oNum(f.prom))+est+'</div></div>'
+        +oChart(f.vals,f.meta,color,170)+extra+'</div>';
+    }).join('');
+
+    return '<div class="panel"><h3>KPIs asignados · '+oEsc(OBJ.agente)+'</h3>'
+      +'<p class="psub">Las '+OBJ.filas.length+' métricas que carga el sector. Verde = cumple la meta, rojo = por debajo. '
+      +'<b>Clic en un mes</b> para el detalle de ese dato · <b>clic en la métrica</b> para la tendencia del año.</p>'
+      +'<div class="tscroll"><table class="tabla-obj"><thead><tr>'+th+'</tr></thead><tbody>'+rows+promRow+'</tbody></table></div></div>'
+      +'<div class="panel"><h3>Las '+OBJ.filas.length+' métricas, mes a mes</h3>'
+      +'<p class="psub">Una tarjeta por métrica, con su meta marcada. Las que todavía no tienen carga se muestran igual, con el eje y la meta.</p>'
+      +'<div class="ogrid">'+tarjetas+'</div></div>';
+  }
+
+  function renderObjetivos(){
+    const V=[['estrategico','Objetivo estratégico','El número del área, mes a mes'],
+             ['kpis','KPI del sector','Las '+OBJ.filas.length+' métricas que lo forman']];
     document.getElementById('objetivos').innerHTML=
-      '<div class="panel"><h3>KPIs asignados · '+OBJ.agente+'</h3><p class="psub">Seguimiento mensual 2026 · total objetivos asignados: '+OBJ.total+'. Verde = cumple la meta, rojo = por debajo. <b>Clic en un mes</b> para ver el detalle de ese dato · <b>clic en el objetivo</b> para la tendencia del año.</p>'
-      +'<div class="tscroll"><table class="tabla-obj"><thead><tr>'+th+'</tr></thead><tbody>'+rows+promRow+'</tbody></table></div></div>';
+      '<div class="oventanas">'+V.map(v=>'<button class="oventana'+(oVent===v[0]?' on':'')+'" data-vo="'+v[0]+'">'+v[1]+'<small>'+v[2]+'</small></button>').join('')+'</div>'
+      +(oVent==='estrategico'?oEstrategico():oKpis());
+
+    document.querySelectorAll('#objetivos .oventana').forEach(b=>b.onclick=()=>{
+      oVent=b.dataset.vo; renderObjetivos(); if(window.parent!==window) setTimeout(postAlto,40); });
+    document.querySelectorAll('#objetivos .ohit').forEach(h=>h.onclick=()=>{
+      const i=+h.dataset.mes; if(promMes(i)==null&&oVent==='estrategico') return;
+      oMi=i; if(oVent==='estrategico'){ renderObjetivos(); if(window.parent!==window) setTimeout(postAlto,40); } });
   }
 
   // ---- Desarrollo de Terceros (sub-secciones, vacías por ahora) ----
