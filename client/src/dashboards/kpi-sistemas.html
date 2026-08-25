@@ -283,6 +283,30 @@
   table.tabla-obj.mini th,table.tabla-obj.mini td{padding:4px 7px;}
   .delta-lbl{font-size:9.5px;color:var(--muted-2);}
 
+  /* --- justificación del presupuesto y anexo de servicios --- */
+  .accs{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px;}
+  .acc{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:13px 15px;border-left:3px solid var(--info);min-width:0;}
+  .acc.pos{border-left-color:var(--bad);} .acc.neg{border-left-color:var(--good);}
+  .acc-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px;}
+  .acc-g{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--info);
+    background:rgba(38,182,217,.13);border-radius:999px;padding:3px 9px;}
+  .acc-d{font-size:11px;font-weight:700;} .acc-d.pos{color:var(--bad);} .acc-d.neg{color:var(--good);}
+  .acc p{margin:0;font-size:12.5px;line-height:1.6;color:var(--text);white-space:pre-line;}
+  .anexo table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;}
+  .anexo th{position:sticky;top:0;z-index:2;background:var(--panel-2);color:var(--muted);font-size:10px;font-weight:700;
+    letter-spacing:.04em;text-transform:uppercase;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .anexo th.num,.anexo td.num{text-align:right;}
+  .anexo td{padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap;color:var(--text);}
+  .anexo td.wrap{white-space:normal;min-width:170px;}
+  .anexo tbody tr:hover td{background:rgba(255,255,255,.025);}
+  .anexo .falta{color:var(--bad);font-weight:700;}
+  .anexo .ok{color:var(--good);font-weight:700;}
+  .anexo-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:11px;margin-bottom:14px;}
+  .anexo-kpi{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:13px 15px;}
+  .anexo-kpi .k{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);}
+  .anexo-kpi .v{font-size:21px;font-weight:800;color:#fff;margin-top:6px;}
+  .anexo-kpi .d{font-size:11px;color:var(--muted);margin-top:3px;}
+
 </style>
 
 <div class="wrap">
@@ -1035,7 +1059,7 @@
     const tp=rows.reduce((a,r)=>a+r.presup,0),tr=rows.reduce((a,r)=>a+r.real,0),tdd=tr-tp,te=tp>0?tr/tp*100:null; const tdrr=pmi>0?(tr-rows.reduce((a,r)=>a+(pPrev[r.gk]||0),0)):null;
     html+='<tr class="total"><td>TOTAL</td><td>'+pmoney(tp)+'</td><td>'+pmoney(tr)+'</td>'+(tdrr==null?'<td class="zero">—</td>':'<td class="'+(tdrr>0?'dpos':tdrr<0?'dneg':'zero')+'">'+(tdrr>0?'+':'')+pmoney(tdrr)+'</td>')+'<td class="'+(tdd>0?'dpos':'dneg')+'">'+(tdd>0?'+':'')+pmoney(tdd)+'</td><td class="'+(te!=null&&te>100?'dpos':'dneg')+'">'+(te==null?'—':Math.round(te)+'%')+'</td><td>'+(tdd>0?'<span class="chip over">Sobre pres.</span>':'<span class="chip under">Bajo pres.</span>')+'</td></tr>';
     html+='</tbody></table></div>';
-    document.getElementById('presupuesto').innerHTML=html;
+    document.getElementById('presupuesto').innerHTML=html+bloqueAcciones()+bloqueServicios();
     document.querySelectorAll('#p-det td.pclk').forEach(td=>td.onclick=()=>{const gk=td.dataset.gk,act=td.dataset.act;pOpen=(pOpen&&pOpen.gk===gk&&pOpen.act===act)?null:{gk,act};renderPresupuesto();if(window.parent!==window)setTimeout(postAlto,30);});
     document.querySelectorAll('#pseg button').forEach(b=>b.onclick=()=>pSel(+b.dataset.m));
     document.querySelectorAll('#p-res th.mes').forEach(th=>th.onclick=()=>pSel(+th.dataset.m));
@@ -1062,7 +1086,48 @@
     if(bAct) [0,150,600].forEach(function(t){ setTimeout(function(){ postSub(bAct); }, t); });
   }
 
+  /* ----- justificación del mes y anexo de servicios (archivo de presupuesto 07/2026) ----- */
+  var ACC=[{"grupo":"SERVICIOS","presup":83074696.75599435,"real":32221211.634,"dif":50853485.12199435,"accion":"falta hipernet x 2 / rk elevaciones / physis / humman / tpm-pro / seres / intelektron.","fecha":null,"resp":null}], SERV={"cab":["EMPRESA","SERVICIO","UNIDAD","CANTIDADES","FORMA DE CARGA","MES CARGADO","Junio","Julio","Agosto","observacion"],"filas":[{"emp":"Jair","serv":"Servicio","un":"Unidad","cant":1,"forma":"UN","mes":"Mayo/Junio/Julio","jun":null,"jul":"10526-10525","ago":"11018-11019","obs":null},{"emp":"Inweb","serv":"Servicio","un":"Unidad","cant":1,"forma":"UN","mes":"Diciembre","jun":"9837","jul":"10442","ago":"10977","obs":null},{"emp":"Seres","serv":"Servicio","un":"Unidad","cant":1,"forma":"UN","mes":"Enero","jun":"9838","jul":"10444","ago":"10978","obs":null},{"emp":"RK Elevaciones","serv":"Servicio","un":"Unidad","cant":1,"forma":"UN","mes":"julio","jun":"9839","jul":"10445","ago":"10979","obs":null},{"emp":"Copiapel","serv":"Servicio","un":"Unidad","cant":1,"forma":"UN","mes":null,"jun":"10063","jul":"10803","ago":"11187","obs":null},{"emp":"Hipernet","serv":"Servicio","un":"Horas","cant":40,"forma":"HS","mes":null,"jun":"10065","jul":"10758","ago":"11090","obs":null},{"emp":"Hipernet","serv":"Servicio","un":"Unidad","cant":142,"forma":"UN","mes":null,"jun":"10066","jul":"10757","ago":"11089","obs":null},{"emp":"MAP","serv":"Servicio","un":"Unidad","cant":1,"forma":"UN","mes":null,"jun":"9840","jul":"10447","ago":"10980","obs":null},{"emp":"MAP","serv":"Servicio","un":"Unidad","cant":1,"forma":"UN","mes":null,"jun":"9841","jul":"10446","ago":"10672","obs":null},{"emp":"Humand","serv":"Servicio","un":"Unidad","cant":110,"forma":"UN","mes":"Exterior","jun":"9847","jul":"-","ago":"-","obs":null},{"emp":"Pump-control","serv":"Servicio","un":"Unidad","cant":1,"forma":"UN","mes":null,"jun":"9848","jul":"10533","ago":"10981","obs":null},{"emp":"Modula","serv":"Servicio","un":"Unidad","cant":null,"forma":"UN","mes":null,"jun":"9847","jul":"9858","ago":"9858","obs":null},{"emp":"Lsgps","serv":"Servicio","un":"Unidad","cant":110,"forma":"UN","mes":null,"jun":"10067","jul":"10614-10962","ago":"11091","obs":"Esto lo cargo Logistica son dos abono mensuales node porquer"},{"emp":"Tpm-Pro","serv":"Servicio","un":"Unidad","cant":1,"forma":"UN","mes":null,"jun":"13373","jul":"10982","ago":"11189","obs":null},{"emp":"Physis","serv":"Servicio","un":"Unidad","cant":1,"forma":"UN","mes":null,"jun":null,"jul":"10620","ago":"11186","obs":null},{"emp":"Twins","serv":"Servicio","un":"Unidad","cant":1,"forma":"UN","mes":null,"jun":"10061","jul":"10619","ago":"11131","obs":null},{"emp":"Drewolf","serv":"Servicio","un":"Horas","cant":40,"forma":"HS","mes":null,"jun":"10534","jul":"11185","ago":"11252","obs":null}]}, ACC_MES='07/2026';
+  function accEsc(x){ return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function accMoney(v){ return v==null?'—':'$ '+Math.round(v).toLocaleString('es-AR'); }
+  function bloqueAcciones(){
+    if(!ACC.length) return '';
+    return '<div class="panel" style="margin-top:16px"><h3>Justificación del mes · acciones correctivas</h3>'
+      +'<p class="psub">Lo que el sector cargó en la planilla de '+ACC_MES+' para explicar el gasto.</p>'
+      +'<div class="accs">'+ACC.map(function(a){
+        var d=a.dif==null?'':'<span class="acc-d '+(a.dif<0?'pos':'neg')+'">'+(a.dif<0?'▲ ':'▼ ')+accMoney(Math.abs(a.dif))+'</span>';
+        return '<div class="acc '+(a.dif==null?'':(a.dif<0?'pos':'neg'))+'"><div class="acc-h"><span class="acc-g">'+accEsc(a.grupo)+'</span>'+d
+          +'<span style="font-size:11px;color:var(--muted-2)">real '+accMoney(a.real)+' · ppto '+accMoney(a.presup)+'</span></div>'
+          +'<p>'+accEsc(a.accion)+'</p></div>';
+      }).join('')+'</div></div>';
+  }
+  function bloqueServicios(){
+    if(!SERV.filas.length) return '';
+    var f=SERV.filas;
+    var sinJul=f.filter(function(x){ return !x.jul||x.jul==='-'; }).length;
+    var conObs=f.filter(function(x){ return x.obs; });
+    var cel=function(v){ return (!v||v==='-')?'<span class="falta">sin cargar</span>':'<span class="ok">'+accEsc(v)+'</span>'; };
+    var filas=f.map(function(x){
+      return '<tr><td class="wrap"><b>'+accEsc(x.emp)+'</b></td><td>'+accEsc(x.serv||'—')+'</td>'
+        +'<td class="num">'+(x.cant==null?'—':x.cant)+' '+accEsc(x.un||'')+'</td>'
+        +'<td>'+accEsc(x.forma||'—')+'</td><td>'+accEsc(x.mes||'—')+'</td>'
+        +'<td>'+cel(x.jun)+'</td><td>'+cel(x.jul)+'</td><td>'+cel(x.ago)+'</td>'
+        +'<td class="wrap" style="color:var(--muted)">'+accEsc(x.obs||'')+'</td></tr>';
+    }).join('');
+    return '<div class="panel" style="margin-top:16px"><h3>Servicios de Sistemas · comprobantes por mes</h3>'
+      +'<p class="psub">Hoja «servicios sistemas» del archivo de presupuesto. Es el detalle que explica el desvío del grupo Servicios: qué proveedor tiene comprobante cargado en cada mes y cuál falta.</p>'
+      +'<div class="anexo-kpis">'
+      +'<div class="anexo-kpi"><div class="k">Proveedores</div><div class="v">'+f.length+'</div><div class="d">con servicio mensual</div></div>'
+      +'<div class="anexo-kpi"><div class="k">Sin cargar en julio</div><div class="v">'+sinJul+'</div><div class="d">de '+f.length+' proveedores</div></div>'
+      +'<div class="anexo-kpi"><div class="k">Con observación</div><div class="v">'+conObs.length+'</div><div class="d">'+(conObs.length?accEsc(conObs[0].emp):'—')+'</div></div>'
+      +'</div>'
+      +'<div class="tscroll anexo"><table><thead><tr><th>Empresa</th><th>Servicio</th><th class="num">Cantidad</th>'
+      +'<th>Forma de carga</th><th>Mes cargado</th><th>Junio</th><th>Julio</th><th>Agosto</th><th>Observación</th></tr></thead>'
+      +'<tbody>'+filas+'</tbody></table></div></div>';
+  }
+
   renderPrimary(); renderSections(); renderDonuts(); renderOperadores(); renderBlocks(); renderOpen(); renderObjetivos(); renderTerceros(); renderPresupuesto();
+
 
   function postAlto(){ try{ parent.postMessage({tipo:'matriz-alto',alto:document.body.scrollHeight},'*'); }catch(e){} }
   if(window.parent!==window){ postAlto(); window.addEventListener('resize',postAlto); new MutationObserver(postAlto).observe(document.body,{subtree:true,childList:true}); }
