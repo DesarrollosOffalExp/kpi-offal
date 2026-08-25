@@ -51,16 +51,39 @@ function leer(nombre) {
   };
 }
 
-/** Reemplaza `const <nombre>= …;` dentro de un tablero, conservando el resto. */
-function escribir(destino, nombre, valor, { re } = {}) {
+/** Ubica `const|var <nombre> = [ … ]` contando corchetes, no con un regex
+ *  no-greedy: si se corta en el primer `]` se lleva puesto lo que sigue en la
+ *  misma declaración. Devuelve {desde, hasta} sobre el literal, o null. */
+function ubicar(s, nombre, kw) {
+  const re = new RegExp('(?:^|[;{}\\n])\\s*' + kw + '\\s+' + nombre + '\\s*=\\s*');
+  const m = s.match(re);
+  if (!m) return null;
+  const desde = m.index + m[0].length;
+  const abre = s[desde];
+  if (abre !== '[' && abre !== '{') return null;
+  const cierra = abre === '[' ? ']' : '}';
+  let prof = 0, str = null;
+  for (let i = desde; i < s.length; i++) {
+    const c = s[i];
+    if (str) { if (c === '\\') i++; else if (c === str) str = null; continue; }
+    if (c === '"' || c === "'") { str = c; continue; }
+    if (c === abre) prof++;
+    else if (c === cierra) { prof--; if (!prof) return { desde, hasta: i + 1 }; }
+  }
+  return null;
+}
+
+/** Reemplaza el literal de `<nombre>` dentro de un tablero, sin tocar el resto
+ *  de la declaración (puede venir encadenada con comas). */
+function escribir(destino, nombre, valor, { decl } = {}) {
   const p = path.join(RAIZ, destino);
-  let s = fs.readFileSync(p, 'utf8');
-  const patron = re || new RegExp('const ' + nombre + '\\s*=\\s*[\\[{][\\s\\S]*?[\\]}]\\s*;');
-  const m = s.match(patron);
-  if (!m) throw new Error(destino + ': no encuentro la constante ' + nombre);
-  const nuevo = 'const ' + nombre + '=' + JSON.stringify(valor) + ';';
-  if (dry) { console.log('   [dry] ' + destino + ' · ' + nombre + ' quedaría en ' + nuevo.length + ' bytes'); return; }
-  fs.writeFileSync(p, s.replace(m[0], nuevo));
+  const s = fs.readFileSync(p, 'utf8');
+  const kw = decl || 'const';
+  const pos = ubicar(s, nombre, kw);
+  if (!pos) throw new Error(destino + ': no encuentro ' + kw + ' ' + nombre);
+  const json = JSON.stringify(valor);
+  if (dry) { console.log('   [dry] ' + destino + ' · ' + nombre + ' quedaría en ' + json.length + ' bytes'); return; }
+  fs.writeFileSync(p, s.slice(0, pos.desde) + json + s.slice(pos.hasta));
 }
 
 const log = (...a) => console.log(...a);
@@ -79,10 +102,10 @@ const util = {
     return v == null || v === '' ? '' : String(v);
   },
   /** Lee la constante que hoy tiene el tablero, para poder comparar. */
-  actual(destino, nombre) {
+  actual(destino, nombre, decl) {
     const s = fs.readFileSync(path.join(RAIZ, destino), 'utf8');
-    const m = s.match(new RegExp('const ' + nombre + '\\s*=\\s*([\\[{][\\s\\S]*?[\\]}])\\s*;'));
-    return m ? new Function('return ' + m[1])() : null;
+    const pos = ubicar(s, nombre, decl || 'const');
+    return pos ? new Function('return ' + s.slice(pos.desde, pos.hasta))() : null;
   },
   /** Avisa si algo que ya estaba cargado dejó de dar igual. */
   comparar(nombreCorto, viejo, nuevo, clave) {

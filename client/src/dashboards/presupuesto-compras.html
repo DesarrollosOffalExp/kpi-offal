@@ -282,7 +282,8 @@
 
 
   /* ----- acciones correctivas del mes (hoja Resumen Gerencia) ----- */
-  var ACC=[{"grupo":"MATERIAL","presup":221046.7513291293,"real":71668.271417,"dif":149378.4799121293,"accion":"No corresponde asignar el gasto de FER-0444-0068 en Materiales al CeCo de Compras por $4224,37; es una herramiena empleada en una OT pero que no queda en la oficina de Compras. Descontar del Gasto y notificar a quien ejecuto el consumo erroneo.","fecha":null,"resp":null}], ACC_MES='07/2026';
+  var ACC=[{"grupo":"MATERIAL","presup":221046.7513291293,"real":71668.271417,"dif":149378.4799121293,"accion":"No corresponde asignar el gasto de FER-0444-0068 en Materiales al CeCo de Compras por $4224,37; es una herramiena empleada en una OT pero que no queda en la oficina de Compras. Descontar del Gasto y notificar a quien ejecuto el consumo erroneo.","fecha":null,"resp":null}];
+  var ACC_MES='07/2026';
   function accMoney(v){ return v==null?'—':'$ '+Math.round(v).toLocaleString('es-AR'); }
   function accEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function renderAcciones(){

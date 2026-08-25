@@ -57,3 +57,31 @@ suposición se rompió.
    `async function actualizar({ leer, escribir, log, dry })`.
 3. Dejar la validación contra lo ya cargado: es lo que avisa cuando la planilla
    cambia de forma.
+
+## Una trampa que ya nos mordió
+
+Varios tableros declaran sus datos encadenados en una sola sentencia:
+
+```js
+var ACC=[…], ACC_MES='07/2026';
+```
+
+Reemplazar el literal con un regex no-greedy —cortando en el primer `]`— se
+lleva puesto lo que sigue y deja el archivo sin `ACC_MES`. Por eso `escribir()`
+**cuenta corchetes** en vez de usar un regex, y saltea comillas para no cortar
+dentro de un string. Aun así conviene dejar **una declaración por sentencia**:
+las que estaban encadenadas ya se separaron.
+
+Después de cada corrida vale la pena chequear que los tableros sigan siendo
+JavaScript válido:
+
+```bash
+node -e "const s=require('fs').readFileSync('client/src/dashboards/kpi-sistemas.html','utf8');new Function(s.match(/<script>\s*\(function\(\)\{([\s\S]*?)\}\)\(\);\s*<\/script>/)[1]);console.log('ok')"
+```
+
+## Qué falta
+
+`insumos` y `logistica` están en el manifiesto con su archivo de origen, pero
+**sin extractor**: falta abrir cada planilla y fijar hoja y columnas. Lo mismo
+`compras/demoradas-e-informe`, que sale de un `.xlsm` grande. El script avisa
+cuándo un grupo todavía no tiene extractor en lugar de fallar de cualquier modo.

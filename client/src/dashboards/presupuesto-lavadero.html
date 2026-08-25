@@ -282,7 +282,8 @@
 
 
   /* ----- acciones correctivas del mes (hoja Resumen Gerencia) ----- */
-  var ACC=[{"grupo":"MATERIAL","presup":59721.365297807184,"real":1063277.7890549998,"dif":-1003556.4237571927,"accion":"COMPRA DE ZORRA HIDRAULICA $ 399644.54 RESTO INDUMENTARIA AJUSTAR","fecha":null,"resp":null}], ACC_MES='07/2026';
+  var ACC=[{"grupo":"MATERIAL","presup":59721.365297807184,"real":1063277.7890549998,"dif":-1003556.4237571927,"accion":"COMPRA DE ZORRA HIDRAULICA $ 399644.54 RESTO INDUMENTARIA AJUSTAR","fecha":null,"resp":null}];
+  var ACC_MES='07/2026';
   function accMoney(v){ return v==null?'—':'$ '+Math.round(v).toLocaleString('es-AR'); }
   function accEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function renderAcciones(){

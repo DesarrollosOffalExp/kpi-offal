@@ -282,7 +282,8 @@
 
 
   /* ----- acciones correctivas del mes (hoja Resumen Gerencia) ----- */
-  var ACC=[], ACC_MES='07/2026';
+  var ACC=[];
+  var ACC_MES='07/2026';
   function accMoney(v){ return v==null?'—':'$ '+Math.round(v).toLocaleString('es-AR'); }
   function accEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function renderAcciones(){
