@@ -80,21 +80,33 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
     const etiqueta = f => (f.match(/DEL\s*(.+?)(?:\s+DEL\s+\d{4})?\s*\.xlsx$/i) || [, f])[1]
       .replace(/\s*\(\d+\)\s*$/, '').replace(/\s+/g, ' ').replace(/\.+$/, '').trim().toLowerCase();
     const yaEstan = new Set(SEM.map(s => s.label));
-    const ultima = SEM.length ? orden(SEM[SEM.length - 1].label) : -1;
     const carpeta = path.dirname(leer('MOVIMIENTO DE PALLETS.xlsx').ruta);
-    const nuevos = fs.readdirSync(carpeta)
-      .filter(f => /^MONITOREO DE BARRAS/i.test(f) && /\.xlsx$/i.test(f))
-      .filter(f => !yaEstan.has(etiqueta(f)) && orden(etiqueta(f)) > ultima)
-      .sort((a, b) => orden(etiqueta(a)) - orden(etiqueta(b)));
-    if (!nuevos.length) log('   sin semanas nuevas (' + SEM.length + ' cargadas, última: ' + (SEM.length ? SEM[SEM.length - 1].label : '—') + ')');
-    nuevos.forEach(f => {
-      const wb = leer(f);
-      const filas = wb.filas(wb.hojas[0]);
-      const data = [];
+    const archivos = fs.readdirSync(carpeta)
+      .filter(f => /^MONITOREO DE BARRAS/i.test(f) && /\.xlsx$/i.test(f));
+    // si hay varias copias de la misma semana ("… (1).xlsx"), vale la más nueva
+    const porEtiqueta = new Map();
+    archivos.forEach(f => {
+      const e = etiqueta(f); if (orden(e) < 0) return;
+      const t = fs.statSync(path.join(carpeta, f)).mtimeMs;
+      if (!porEtiqueta.has(e) || t > porEtiqueta.get(e).t) porEtiqueta.set(e, { f, t });
+    });
+
+    // Arma una semana a partir de su archivo. Es la misma cuenta para una semana
+    // nueva y para volver a revisar una que ya estaba cargada.
+    const armarSemana = f => {
+      // se abre por ruta y no con leer(): el nombre puede traer el sufijo "(1)"
+      // que le agrega el navegador, y leer() busca por nombre normalizado.
+      const XLSX = require('xlsx');
+      const wb = XLSX.readFile(path.join(carpeta, f), { cellDates: true });
+      const filas = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true, defval: null, blankrows: true });
+      const data = [], crudo = { kilos: 0, barrasEst: 0, barrasEnv: 0 };
+      let filaTotal = null;
       for (let i = 2; i < filas.length; i++) {
         const r = filas[i]; if (!r) continue;
         const prov = util.txt(r[3]);
-        if (!prov || num(r[4]) == null || /total/i.test(prov)) continue;
+        if (prov && /total/i.test(prov)) { filaTotal = r; continue; }
+        if (!prov || num(r[4]) == null) continue;
+        crudo.kilos += num(r[4]) || 0; crudo.barrasEst += num(r[9]) || 0; crudo.barrasEnv += num(r[11]) || 0;
         const barrasEst = Math.round(num(r[9]) || 0), barrasEnv = Math.round(num(r[11]) || 0);
         data.push({
           prov, kilos: Math.round(num(r[4])), viajes: num(r[2]) || 0, kgsTambor: r2(num(r[6])),
@@ -109,6 +121,9 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
         });
       }
       const suma = k => data.reduce((a, d) => a + (d[k] || 0), 0);
+      // El total es la suma de los valores que se ven en la tabla, no el redondeo
+      // de la suma cruda: si no, la columna no cierra en pantalla y la tarjeta
+      // "Dif. barras" deja de dar con "estimadas − usadas".
       const total = {
         kilos: suma('kilos'), viajes: suma('viajes'), kgsTambor: null,
         tachosEst: suma('tachosEst'), tachosEnv: suma('tachosEnv'), barrasEst: suma('barrasEst'),
@@ -118,12 +133,49 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
         costoKg: null, valorBarra: 0, barrasVend: suma('barrasVend'), devol: suma('devol'),
         stockAnt: suma('stockAnt'), enfriar: suma('enfriar'), stock: suma('stock'),
       };
+      // Control contra la fila TOTAL de la planilla. Se tolera el arrastre del
+      // redondeo por proveedor (unas pocas unidades); más que eso es otra cosa.
+      if (filaTotal) [['kilos', 4, total.kilos, 5], ['barrasEst', 9, total.barrasEst, 5], ['barrasEnv', 11, total.barrasEnv, 5]]
+        .forEach(([k, col, calc, tol]) => {
+          const v = num(filaTotal[col]);
+          if (v != null && Math.abs(Math.round(v) - calc) > tol)
+            log('   ! ' + etiqueta(f) + ': la fila TOTAL dice ' + k + ' = ' + Math.round(v).toLocaleString('es-AR') + ' y da ' + calc.toLocaleString('es-AR'));
+        });
       // la etiqueta sale del nombre del archivo: "… DEL 15 AL 21 DE AGOSTO"
-      const label = etiqueta(f);
-      SEM.push({ label, archivo: f.replace(/\s*\(\d+\)\.xlsx$/i, '.xlsx'), data, total });
-      log('   + ' + label + ' · ' + data.length + ' proveedores · ' + total.kilos.toLocaleString('es-AR') + ' kg');
+      return { label: etiqueta(f), archivo: f.replace(/\s*\(\d+\)\.xlsx$/i, '.xlsx'), data, total };
+    };
+
+    let cambios = 0;
+    // 1) las semanas ya cargadas se rehacen y se comparan: la planilla de una
+    //    semana se sigue corrigiendo después de cerrada.
+    SEM.forEach((vieja, i) => {
+      const cand = porEtiqueta.get(vieja.label);
+      if (!cand) return;
+      const rehecha = armarSemana(cand.f);
+      if (JSON.stringify(vieja) === JSON.stringify(rehecha)) return;
+      const dt = (a, b, k) => (a.total[k] || 0) !== (b.total[k] || 0)
+        ? k + ' ' + (a.total[k] || 0).toLocaleString('es-AR') + ' → ' + (b.total[k] || 0).toLocaleString('es-AR') : null;
+      const detalle = ['kilos', 'barrasEst', 'barrasEnv', 'barrasUsadas', 'stock', 'viajes']
+        .map(k => dt(vieja, rehecha, k)).filter(Boolean);
+      log('   ~ ' + vieja.label + ': cambió el archivo · ' +
+        (vieja.data.length !== rehecha.data.length ? vieja.data.length + ' → ' + rehecha.data.length + ' proveedores · ' : '') +
+        (detalle.length ? detalle.join(' · ') : 'sólo detalle por proveedor'));
+      SEM[i] = rehecha; cambios++;
     });
-    if (nuevos.length) escribir(destino, 'SEMANAS', SEM);
+
+    // 2) y se suman las semanas que todavía no estaban
+    const ultima = SEM.length ? orden(SEM[SEM.length - 1].label) : -1;
+    const nuevos = [...porEtiqueta.values()].map(v => v.f)
+      .filter(f => !yaEstan.has(etiqueta(f)) && orden(etiqueta(f)) > ultima)
+      .sort((a, b) => orden(etiqueta(a)) - orden(etiqueta(b)));
+    nuevos.forEach(f => {
+      const sem = armarSemana(f);
+      SEM.push(sem); cambios++;
+      log('   + ' + sem.label + ' · ' + sem.data.length + ' proveedores · ' + sem.total.kilos.toLocaleString('es-AR') + ' kg');
+    });
+    if (!cambios) log('   sin cambios (' + SEM.length + ' semanas, última: ' + (SEM.length ? SEM[SEM.length - 1].label : '—') + ')');
+    else log('   ' + SEM.length + ' semanas cargadas · última: ' + SEM[SEM.length - 1].label);
+    if (cambios) escribir(destino, 'SEMANAS', SEM);
   }
 
   /* ═══ consumo de sal (va dentro de RESUMEN del presupuesto) ═══ */

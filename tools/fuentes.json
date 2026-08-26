@@ -71,8 +71,8 @@
             "V": "valor barra",
             "X": "costo x kg"
           },
-          "cuenta": "difEnvEst = barras enviadas − barras estimadas (calculado). difBarras sale tal cual de la columna K. El total de la semana es la suma de los proveedores, salvo promEst y promEnv que se recalculan como barras/tachos del total. Ojo: varios archivos tienen DOBLE ESPACIO entre BARRAS y DEL.",
-          "acumula": "Cada archivo nuevo se agrega como una semana más; no reemplaza a las anteriores."
+          "cuenta": "difEnvEst = barras enviadas − barras estimadas (calculado). difBarras sale tal cual de la columna K. El total de la semana es la suma de los valores que se ven en la tabla —no el redondeo de la suma cruda—, para que la columna cierre en pantalla y la tarjeta \"Dif. barras\" dé con estimadas − usadas; eso lo deja unas 2 o 3 unidades abajo de la fila TOTAL de la planilla, que redondea la suma cruda. promEst y promEnv se recalculan como barras ÷ tachos del total. Cada corrida controla kilos, barras estimadas y enviadas contra la fila TOTAL de la planilla y avisa si la diferencia pasa de 5 unidades. Ojo: varios archivos tienen DOBLE ESPACIO entre BARRAS y DEL.",
+          "acumula": "Cada archivo nuevo se agrega como una semana más. Además, las semanas ya cargadas se rehacen y se comparan cada vez: la planilla de una semana se sigue corrigiendo después de cerrada (la del 15 al 21 de agosto se completó cuatro días después)."
         },
         {
           "id": "consumo-sal",
@@ -331,31 +331,69 @@
     "insumos": {
       "carpeta": "Gerencia de Operaciones/Insumos",
       "extractor": "insumos",
-      "pendiente": true,
       "fuentes": [
         {
           "id": "productividad-armado",
           "archivo": "Indicadores Insumos - 2026.xlsx",
           "destino": "client/src/dashboards/productividad-armado.html",
-          "cuenta": "PENDIENTE de mapear: falta abrir el archivo y fijar hoja y columnas."
-        },
-        {
-          "id": "merma-cajas",
-          "archivo": "Indicadores Insumos - 2026.xlsx",
-          "destino": "client/src/dashboards/merma-cajas.html",
-          "cuenta": "PENDIENTE de mapear."
-        },
-        {
-          "id": "eficiencia-materiales",
-          "archivo": "Indicadores Insumos - 2026.xlsx",
-          "destino": "client/src/dashboards/eficiencia-materiales.html",
-          "cuenta": "PENDIENTE de mapear."
+          "constante": "DATA.weeks",
+          "hojas": [
+            "Prod. Armado de Cajas"
+          ],
+          "columnas": {
+            "A": "fecha (número de serie de Excel)",
+            "B": "formadora (1 a 4)",
+            "C": "cantidad de cajas",
+            "D": "horas armando el pedido",
+            "E": "tiempo en falla durante el pedido",
+            "F": "total de tiempo = D − E · es la que se usa",
+            "G": "turno (dia / Noche)",
+            "H": "semana"
+          },
+          "cuenta": "Una fila por pedido. Se agrupa por semana × formadora × turno, y \"general\" es la suma de los dos turnos. horas = suma de F × 24 (F es una hora de Excel, o sea fracción de día). ch = cajas ÷ horas. real = ch ÷ 60 (cajas por minuto). ind = real ÷ ideal. El ideal por formadora (1=16, 2=25, 3=16, 4=19 cajas/min) NO está en la planilla: es una constante del extractor. La fila Total suma cajas, horas, ch y real sin redondear antes, y su ideal es siempre 76 (las cuatro formadoras, trabajen o no esa semana); por eso una formadora que no trabajó igual aparece con ceros. Sólo entran semanas ISO ya cerradas: la planilla carga la semana en curso."
         },
         {
           "id": "productividad-cerrado",
           "archivo": "Picos de empaque TPM x 10 Min.xlsx",
           "destino": "client/src/dashboards/productividad-cerrado.html",
-          "cuenta": "PENDIENTE de mapear."
+          "constante": "DATA",
+          "hojas": [
+            "Comparativo_Semanal",
+            "Datos_0"
+          ],
+          "columnas": {
+            "Comparativo_Semanal": "fila Inicio / fila Fin / fila Máquina (una columna por semana) y una fila por BESTPACK con el total de la semana",
+            "Datos_0": "Máquina, Período (fecha y hora del intervalo de 10 min), Unidades"
+          },
+          "cuenta": "total por máquina y semana = la celda de Comparativo_Semanal (se controla contra la fila TOTAL de la hoja). peak = el mayor valor de Unidades en un intervalo de 10 minutos de esa semana, con su fecha y hora, sacado de Datos_0. sumPeakMin = suma de los picos de las tres máquinas ÷ 10 (los picos son por 10 minutos, esto los pasa a cajas/min). kpi = sumPeakMin ÷ estandar, con estandar = 72 cajas/min. maxMes = lo mismo pero tomando el máximo por mes calendario dentro del período que cubren las semanas cargadas. La hoja deja armado todo el año con ceros: sólo entran las semanas cuyo Fin ya pasó."
+        },
+        {
+          "id": "eficiencia-materiales",
+          "archivo": "Indicadores Insumos - 2026.xlsx",
+          "destino": [
+            "client/src/dashboards/eficiencia-materiales.html",
+            "services/mockData.js"
+          ],
+          "constante": "R y E en el tablero · MESES, RECEPCION y ENTREGA en el mock",
+          "hojas": [
+            "KPIs"
+          ],
+          "columnas": {
+            "C": "nombre del KPI · se buscan \"Eficiencia en la recepcion\" (N° 5) y \"Eficiencia en la entrega\" (N° 7)",
+            "E..P": "Enero a Diciembre"
+          },
+          "cuenta": "El porcentaje mensual sale directo de la hoja KPIs: R.meses[i].efic de la fila de recepción y E.meses[i].efic de la de entrega. El extractor sólo corrige los meses ya cargados y avisa si la hoja tiene un mes nuevo, porque el detalle que acompaña a cada mes (horas, total, egresos) todavía no está mapeado y se carga a mano. Las mismas dos filas rehacen MESES, RECEPCION y ENTREGA en services/mockData.js, que son las que alimentan las tarjetas del sector."
+        },
+        {
+          "id": "merma-cajas",
+          "archivo": "Indicadores Insumos - 2026.xlsx",
+          "destino": "client/src/dashboards/merma-cajas.html",
+          "hojas": [
+            "KPIs",
+            "Consumos Deposito"
+          ],
+          "sinExtractor": true,
+          "cuenta": "SIN EXTRACTOR. El KPI mensual es la fila N° 2 \"Merma de cajas\" de la hoja KPIs, pero el detalle por tipo de caja (planchas D, producidas E, diferencia F, merma G) sale del cruce con Consumos Deposito y todavía no está mapeado. Al 25/08/2026 la hoja llega a julio, igual que el tablero: no hay nada nuevo para cargar."
         }
       ]
     },

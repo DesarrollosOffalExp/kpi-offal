@@ -15,7 +15,7 @@ node tools/actualizar.js fabrica-hielo
 ```
 
 Grupos disponibles: `fabrica-hielo`, `compras`, `sistemas`, `objetivos`,
-`presupuesto`. Sin argumentos lista todo lo que sabe hacer.
+`presupuesto`, `insumos`. Sin argumentos lista todo lo que sabe hacer.
 
 El script busca cada archivo por nombre en `Descargas`, tolerando los sufijos
 que agrega el navegador (`archivo (2).xlsx`) y quedándose con el más reciente.
@@ -46,6 +46,16 @@ suposición se rompió.
   semana es la fila `STOCK FINAL` de la planilla, no la suma de los frigoríficos.
 - **Las fechas pueden venir como número de serie** de Excel cuando la celda no
   está formateada como fecha.
+- **Hay hojas que dejan armado todo el año con ceros.** En `Picos de empaque
+  TPM` la hoja `Comparativo_Semanal` tiene las 53 semanas; sólo valen las que ya
+  cerraron. Lo mismo con la semana en curso en `Prod. Armado de Cajas`.
+- **En armado, las horas son la columna F** (`Total de tiempo` = horas armando −
+  tiempo en falla), no la D. Y el tablero lista siempre las cuatro formadoras:
+  la que no trabajó va en cero y el ideal del total sigue siendo 76 cajas/min.
+- **Una semana cerrada se sigue corrigiendo.** El archivo del 15 al 21 de
+  agosto de Monitoreo de Barras se completó cuatro días después (+5 % de kilos).
+  Por eso el extractor no sólo suma semanas nuevas: rehace las ya cargadas y
+  avisa qué cambió.
 - **Algunas hojas traen bloques viejos arriba del bueno.** En la hoja `KPI` de
   Compras hay tres versiones de la misma tabla; la que vale es la que tiene las
   columnas `Total REQ Tratadas` y `Observaciones`.
@@ -72,6 +82,12 @@ lleva puesto lo que sigue y deja el archivo sin `ACC_MES`. Por eso `escribir()`
 dentro de un string. Aun así conviene dejar **una declaración por sentencia**:
 las que estaban encadenadas ya se separaron.
 
+Y una segunda: **`escribir()` reemplaza el literal entero**. Si `DATA` tiene
+más claves que las que arma el extractor —en Productividad de Armado convivían
+`weeks`, `ultima`, `ideal` y `capacidad`— hay que escribir el objeto fusionado
+(`Object.assign({}, viejo, { … })`), no sólo la parte nueva, o el tablero se
+queda sin la mitad de sus datos y falla en silencio al renderizar.
+
 Después de cada corrida vale la pena chequear que los tableros sigan siendo
 JavaScript válido:
 
@@ -81,7 +97,10 @@ node -e "const s=require('fs').readFileSync('client/src/dashboards/kpi-sistemas.
 
 ## Qué falta
 
-`insumos` y `logistica` están en el manifiesto con su archivo de origen, pero
-**sin extractor**: falta abrir cada planilla y fijar hoja y columnas. Lo mismo
-`compras/demoradas-e-informe`, que sale de un `.xlsm` grande. El script avisa
-cuándo un grupo todavía no tiene extractor en lugar de fallar de cualquier modo.
+`logistica` está en el manifiesto con su archivo de origen, pero **sin
+extractor**: falta abrir cada planilla y fijar hoja y columnas. Lo mismo
+`compras/demoradas-e-informe`, que sale de un `.xlsm` grande, y dentro de
+`insumos` la `merma-cajas`: el KPI mensual está en la hoja `KPIs`, pero el
+detalle por tipo de caja sale de cruzar `Consumos Deposito` con producción y
+todavía no está mapeado. El script avisa cuándo un grupo no tiene extractor en
+lugar de fallar de cualquier modo.
