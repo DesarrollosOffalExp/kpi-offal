@@ -30,7 +30,8 @@ export default function Navbar({ usuario }) {
       <div className="nav-inner">
         <a className="brand" href={PORTAL_URL} title="Ir al portal Offal">
           <span className="brand-badge"><img src="/logo.png" alt="Offal" /></span>
-          <span className="brand-mark">Offal <span className="brand-sub">· Tablero KPI</span></span>
+          <img className="brand-wordmark" src="/logo-offal.svg" alt="Offal Exp S.A." />
+          <span className="brand-sub">Tablero de KPIs</span>
         </a>
 
         <div className="nav-right">
