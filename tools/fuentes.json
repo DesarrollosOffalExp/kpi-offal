@@ -1,0 +1,450 @@
+{
+  "_": "Trazabilidad de los tableros embebidos: de qué archivo de SharePoint sale cada dato, de qué hoja, de qué columnas y con qué cuenta. Lo lee tools/actualizar.js. Para agregar una fuente: sumá una entrada acá y su extractor en tools/extractores/.",
+  "sharepoint": "https://planoffalexp.sharepoint.com/Documentos compartidos",
+  "descargas": "C:/Users/admin/Downloads",
+  "grupos": {
+    "fabrica-hielo": {
+      "carpeta": "Gerencia de Operaciones/Fábrica de Hielo",
+      "extractor": "fabrica-hielo",
+      "fuentes": [
+        {
+          "id": "pallets",
+          "archivo": "MOVIMIENTO DE PALLETS.xlsx",
+          "destino": "client/src/dashboards/movimiento-pallets.html",
+          "constante": "WEEKS",
+          "hojas": "una por semana; el nombre de la hoja es la etiqueta de la semana",
+          "columnas": {
+            "A": "frigorífico",
+            "B": "deuda",
+            "C": "enviados",
+            "D": "recibidos",
+            "E": "no devueltos"
+          },
+          "cuenta": "Una fila por frigorífico. El total de la semana NO se suma: sale de la fila STOCK FINAL de la propia planilla. Se descartan las filas de encabezado y RESULTADO."
+        },
+        {
+          "id": "productividad",
+          "archivo": "PRODUCTIVIDAD BARRAS.xlsx",
+          "destino": "client/src/dashboards/productividad-barras.html",
+          "constante": "DATA",
+          "hojas": [
+            "RESUMEN",
+            "HISTORICO"
+          ],
+          "columnas": {
+            "A": "día",
+            "B": "fecha",
+            "C": "personal",
+            "D": "barras producidas",
+            "E": "hombre/barra día",
+            "F": "horas",
+            "G": "hom/barra hs",
+            "H": "consumo"
+          },
+          "cuenta": "Los días con dato arman la serie de la semana; la fila RESUMEN arma los KPI de cabecera. HISTORICO (semana, promedio) alimenta la tendencia anual."
+        },
+        {
+          "id": "monitoreo",
+          "archivo": "MONITOREO DE BARRAS  DEL <rango>.xlsx",
+          "destino": "client/src/dashboards/monitoreo-barras.html",
+          "constante": "SEMANAS",
+          "hojas": "la primera hoja del archivo (una por semana, un archivo por semana)",
+          "columnas": {
+            "C": "viajes",
+            "D": "proveedor",
+            "E": "kilos",
+            "F": "REMONTADO (texto)",
+            "G": "kgs x tambor",
+            "H": "tachos estimados",
+            "I": "tachos enviados",
+            "J": "barras estimadas",
+            "K": "dif de barras",
+            "L": "barras enviadas",
+            "M": "barras vendidas",
+            "N": "devolución",
+            "O": "barras usadas",
+            "P": "enfriar",
+            "Q": "stock anterior",
+            "R": "stock",
+            "S": "promedio estimado",
+            "T": "promedio enviados",
+            "V": "valor barra",
+            "X": "costo x kg"
+          },
+          "cuenta": "difEnvEst = barras enviadas − barras estimadas (calculado). difBarras sale tal cual de la columna K. El total de la semana es la suma de los valores que se ven en la tabla —no el redondeo de la suma cruda—, para que la columna cierre en pantalla y la tarjeta \"Dif. barras\" dé con estimadas − usadas; eso lo deja unas 2 o 3 unidades abajo de la fila TOTAL de la planilla, que redondea la suma cruda. promEst y promEnv se recalculan como barras ÷ tachos del total. Cada corrida controla kilos, barras estimadas y enviadas contra la fila TOTAL de la planilla y avisa si la diferencia pasa de 5 unidades. Ojo: varios archivos tienen DOBLE ESPACIO entre BARRAS y DEL.",
+          "acumula": "Cada archivo nuevo se agrega como una semana más. Además, las semanas ya cargadas se rehacen y se comparan cada vez: la planilla de una semana se sigue corrigiendo después de cerrada (la del 15 al 21 de agosto se completó cuatro días después)."
+        },
+        {
+          "id": "consumo-sal",
+          "archivo": "CONSUMO DE SAL.xlsx",
+          "destino": "client/src/dashboards/presupuesto.html",
+          "constante": "RESUMEN.consumoSal",
+          "hojas": [
+            "2026"
+          ],
+          "columnas": {
+            "A": "fecha",
+            "B": "stock anterior",
+            "C": "consumo",
+            "D": "ingreso",
+            "E": "stock final"
+          },
+          "cuenta": "Suma de la columna CONSUMO por mes, sólo filas con fecha de 2026. Se cargan únicamente los meses que ya existen en RESUMEN.meses, que los define el presupuesto."
+        }
+      ]
+    },
+    "compras": {
+      "carpeta": "Gerencia de Operaciones/Compras",
+      "extractor": "compras",
+      "fuentes": [
+        {
+          "id": "kpi-semanal",
+          "archivo": "Archivo a trabajar.xlsx",
+          "destino": [
+            "client/src/dashboards/compras-pendientes.html",
+            "client/src/dashboards/compras-actividad.html",
+            "services/mockData.js"
+          ],
+          "constante": "DATA.weeks",
+          "hojas": [
+            "KPI"
+          ],
+          "columnas": {
+            "A": "anteriores vencidas",
+            "B": "anteriores sin vencer",
+            "C": "requis de la semana",
+            "D": "tratadas",
+            "E": "rechazadas",
+            "F": "anuladas",
+            "G": "sin tratar de la semana",
+            "H": "total sin tratar",
+            "I": "semana",
+            "J": "total vencidas",
+            "K": "vencidas nuevas",
+            "L": "vencidas viejas",
+            "M": "por vencer",
+            "N": "en plazo",
+            "O": "total pendientes",
+            "P": "urgentes",
+            "Q": "total tratadas",
+            "R": "observaciones"
+          },
+          "cuenta": "Se usa el bloque que tiene las columnas Q y R (el completo), no los bloques de arriba que son versiones anteriores. La última fila con número de semana es la semana vigente y alimenta las tarjetas de mockData."
+        },
+        {
+          "id": "vencidas-por-semana",
+          "archivo": "Archivo a trabajar.xlsx",
+          "destino": "client/src/dashboards/compras-vencidas.html",
+          "constante": "DATA",
+          "hojas": [
+            "KPI"
+          ],
+          "cuenta": "Tabla dinámica que arranca bajo el rótulo 'Semana / Número / Cuenta de Cantidad' (Estado = Aprobada/o). Da el desglose de las vencidas por semana de origen; el Total general tiene que coincidir con las vencidas de la semana vigente."
+        },
+        {
+          "id": "sin-tratar-por-aprobacion",
+          "archivo": "Archivo a trabajar.xlsx",
+          "destino": "client/src/dashboards/compras-pendientes.html",
+          "constante": "ST",
+          "hojas": [
+            "BASE Req Vencidas"
+          ],
+          "columnas": {
+            "A": "número",
+            "B": "emisión",
+            "F": "rubros",
+            "K": "estado",
+            "L": "fecha aprobación",
+            "M": "comprador",
+            "O": "normal/urgente",
+            "U": "semana"
+          },
+          "cuenta": "Las 'sin tratar' de la semana son las requisiciones con Semana = la vigente y Estado = Aprobada/o (todas tienen OC = 0). Se agrupan por Fecha Aprobación y se cuentan los días hábiles que quedaban hasta el viernes, descontando feriados (ver FERIADOS en el extractor)."
+        },
+        {
+          "id": "precios",
+          "archivo": "OBJETIVOS RESUMEN DE INFORME.xlsx",
+          "destino": "client/src/dashboards/compras-precios.html",
+          "constante": "ds (JSON embebido)",
+          "hojas": [
+            "sifab",
+            "DATOS"
+          ],
+          "columnas": {
+            "Precio Al": "fecha",
+            "Nro.": "orden de compra",
+            "Codigo Material": "código",
+            "Cantidad": "cantidad",
+            "Precio": "precio unitario",
+            "Moneda": "Dolares/Pesos/Euros",
+            "Estado": "estado de la OC"
+          },
+          "cuenta": "Se descartan las OC Anuladas y Rechazadas. El precio del mes es el promedio ponderado por cantidad. Base = diciembre 2025 o la primera compra; todo se pasa a dólares al TC del mes de cada línea y se ajusta por la inflación de la hoja DATOS. Diferencia = real ÷ ajustado − 1."
+        },
+        {
+          "id": "demoradas-e-informe",
+          "archivo": "Ordenes de Compra actualizable (version 1).xlsm",
+          "destino": [
+            "client/src/dashboards/compras-demoradas.html",
+            "client/src/dashboards/compras-informe.html"
+          ],
+          "cuenta": "PENDIENTE de mapear: hoja Demoradas y hoja Reporte (Fecha de Entrega AX contra Fecha de Recepción BI)."
+        }
+      ]
+    },
+    "sistemas": {
+      "carpeta": "Gerencia de Operaciones/Sistemas",
+      "extractor": "sistemas",
+      "fuentes": [
+        {
+          "id": "serie-semanal",
+          "archivo": "KPI sistemas.xlsx",
+          "destino": "client/src/dashboards/kpi-sistemas.html",
+          "constante": "WK y D",
+          "hojas": [
+            "KPI"
+          ],
+          "columnas": {
+            "A": "anteriores vencidas",
+            "B": "anteriores sin vencer",
+            "C": "tickets en la semana",
+            "D": "tratados",
+            "G": "pendientes",
+            "H": "total de abiertos",
+            "I": "semana"
+          },
+          "cuenta": "Una fila por semana. Alimenta el resumen, los donuts y la evolución semanal. Todos los textos con número de semana salen de WK[CUR], no van escritos."
+        },
+        {
+          "id": "por-agente",
+          "archivo": "KPI sistemas.xlsx",
+          "destino": "client/src/dashboards/kpi-sistemas.html",
+          "constante": "OPERADORES",
+          "hojas": [
+            "resumen"
+          ],
+          "columnas": {
+            "A": "colaborador asignado (se repite hacia abajo)",
+            "B": "asunto",
+            "G": "cuenta de estado"
+          },
+          "cuenta": "Dinámica por colaborador: el nombre aparece sólo en la primera fila del grupo y arrastra hacia abajo; las filas 'Total <agente>' cierran cada grupo y sirven de control. El total tiene que dar igual que Total de Abiertos de la semana."
+        },
+        {
+          "id": "tickets-abiertos",
+          "archivo": "KPI sistemas.xlsx",
+          "destino": "client/src/dashboards/kpi-sistemas.html",
+          "constante": "OPEN",
+          "hojas": [
+            "Open"
+          ],
+          "columnas": {
+            "B": "ticket",
+            "C": "fecha creación",
+            "D": "vencimiento modificado",
+            "E": "vencimiento por defecto",
+            "F": "solicitante",
+            "I": "asunto",
+            "K": "colaborador asignado",
+            "AH": "sin movimiento (días)"
+          },
+          "cuenta": "Una fila por ticket abierto. Puede traer uno más que 'por agente' cuando hay tickets sin colaborador asignado: esos se muestran como 'Sin asignar'."
+        },
+        {
+          "id": "objetivos-sistemas",
+          "archivo": "KPI_GerencinadeOperaciones_2026.xlsx",
+          "carpetaPropia": "Gerencia de Operaciones/Objetivos",
+          "destino": "client/src/dashboards/kpi-sistemas.html",
+          "constante": "OBJ",
+          "hojas": [
+            "Sistemas"
+          ],
+          "cuenta": "Las cuatro métricas del sector con su meta y los valores mensuales, más la fila PROMEDIO del área. Las tablas de apoyo de abajo (OK/Excedido por mes) son la base con la que se calcula cada métrica."
+        }
+      ]
+    },
+    "objetivos": {
+      "carpeta": "Gerencia de Operaciones/Objetivos",
+      "extractor": "objetivos",
+      "fuentes": [
+        {
+          "id": "objetivos-estrategicos",
+          "archivo": "KPI_GerencinadeOperaciones_2026.xlsx",
+          "destino": "client/src/dashboards/objetivos-estrategicos.html",
+          "constante": "ds (JSON embebido)",
+          "hojas": [
+            "ObjetivosMensuales",
+            "Carga Mensual KPI"
+          ],
+          "columnas": {
+            "ObjetivosMensuales": "B objetivo, C área, D responsable, E meta, F-Q meses, R promedio, T estado",
+            "Carga Mensual KPI": "B objetivo, C KPI, D área, F peso, H-S meses, T promedio, V estado"
+          },
+          "cuenta": "Cada objetivo se cruza con sus KPI por texto de objetivo + área. El KPI del área TODOS es transversal y se asigna a ese objetivo en todas las áreas. El número compuesto es el promedio ponderado por peso, renormalizando sobre los KPI que ese mes tienen valor numérico."
+        }
+      ]
+    },
+    "presupuesto": {
+      "carpeta": "Gerencia de Operaciones/Presupuesto",
+      "extractor": "presupuesto",
+      "fuentes": [
+        {
+          "id": "acciones-correctivas",
+          "archivo": "Gerencia de Operaciones <MM><AAAA>.xlsx",
+          "destino": "client/src/dashboards/presupuesto*.html + kpi-sistemas.html",
+          "constante": "ACC",
+          "hojas": "la hoja de resumen, que cambia de nombre según el mes: DESVIOS ANALIZADOS, PARTIDA PRESUPUESTARIA, RESUMEN o Resumen Gerencia",
+          "columnas": {
+            "A": "gerencia",
+            "B": "centro de costo",
+            "C": "grupo",
+            "D": "presupuestado",
+            "E": "gasto real",
+            "I": "acciones correctivas",
+            "J": "fecha de cumplimiento",
+            "K": "responsable"
+          },
+          "cuenta": "La hoja se busca por contenido (fila con Gerencia + centro de costo + grupo), no por nombre, porque cambia todos los meses. Las fechas pueden venir como número de serie de Excel."
+        },
+        {
+          "id": "anexo-fletes",
+          "archivo": "Gerencia de Operaciones 072026.xlsx",
+          "destino": "client/src/dashboards/presupuesto-logistica.html",
+          "constante": "FL",
+          "hojas": [
+            "fletes logistica"
+          ],
+          "cuenta": "Dinámica de viajes por frigorífico entre dos meses, con precio por viaje y el importe que explica el desvío del grupo Fletes. Las dos últimas filas, sin etiqueta de fila, son el importe de transporte colgado/sebo y los kilos."
+        },
+        {
+          "id": "anexo-servicios",
+          "archivo": "Gerencia de Operaciones 072026.xlsx",
+          "destino": "client/src/dashboards/kpi-sistemas.html",
+          "constante": "SERV",
+          "hojas": [
+            "servicios sistemas"
+          ],
+          "cuenta": "Un proveedor por fila con el comprobante cargado en cada mes; los que dicen '-' o están vacíos son los que faltan."
+        }
+      ]
+    },
+    "insumos": {
+      "carpeta": "Gerencia de Operaciones/Insumos",
+      "extractor": "insumos",
+      "fuentes": [
+        {
+          "id": "productividad-armado",
+          "archivo": "Indicadores Insumos - 2026.xlsx",
+          "destino": "client/src/dashboards/productividad-armado.html",
+          "constante": "DATA.weeks",
+          "hojas": [
+            "Prod. Armado de Cajas"
+          ],
+          "columnas": {
+            "A": "fecha (número de serie de Excel)",
+            "B": "formadora (1 a 4)",
+            "C": "cantidad de cajas",
+            "D": "horas armando el pedido",
+            "E": "tiempo en falla durante el pedido",
+            "F": "total de tiempo = D − E · es la que se usa",
+            "G": "turno (dia / Noche)",
+            "H": "semana"
+          },
+          "cuenta": "Una fila por pedido. Se agrupa por semana × formadora × turno, y \"general\" es la suma de los dos turnos. horas = suma de F × 24 (F es una hora de Excel, o sea fracción de día). ch = cajas ÷ horas. real = ch ÷ 60 (cajas por minuto). ind = real ÷ ideal. El ideal por formadora (1=16, 2=25, 3=16, 4=19 cajas/min) NO está en la planilla: es una constante del extractor. La fila Total suma cajas, horas, ch y real sin redondear antes, y su ideal es siempre 76 (las cuatro formadoras, trabajen o no esa semana); por eso una formadora que no trabajó igual aparece con ceros. Sólo entran semanas ISO ya cerradas: la planilla carga la semana en curso."
+        },
+        {
+          "id": "productividad-cerrado",
+          "archivo": "Picos de empaque TPM x 10 Min.xlsx",
+          "destino": "client/src/dashboards/productividad-cerrado.html",
+          "constante": "DATA",
+          "hojas": [
+            "Comparativo_Semanal",
+            "Datos_0"
+          ],
+          "columnas": {
+            "Comparativo_Semanal": "fila Inicio / fila Fin / fila Máquina (una columna por semana) y una fila por BESTPACK con el total de la semana",
+            "Datos_0": "Máquina, Período (fecha y hora del intervalo de 10 min), Unidades"
+          },
+          "cuenta": "total por máquina y semana = la celda de Comparativo_Semanal (se controla contra la fila TOTAL de la hoja). peak = el mayor valor de Unidades en un intervalo de 10 minutos de esa semana, con su fecha y hora, sacado de Datos_0. sumPeakMin = suma de los picos de las tres máquinas ÷ 10 (los picos son por 10 minutos, esto los pasa a cajas/min). kpi = sumPeakMin ÷ estandar, con estandar = 72 cajas/min. maxMes = lo mismo pero tomando el máximo por mes calendario dentro del período que cubren las semanas cargadas. La hoja deja armado todo el año con ceros: sólo entran las semanas cuyo Fin ya pasó."
+        },
+        {
+          "id": "eficiencia-materiales",
+          "archivo": "Indicadores Insumos - 2026.xlsx",
+          "destino": [
+            "client/src/dashboards/eficiencia-materiales.html",
+            "services/mockData.js"
+          ],
+          "constante": "R y E en el tablero · MESES, RECEPCION y ENTREGA en el mock",
+          "hojas": [
+            "KPIs"
+          ],
+          "columnas": {
+            "C": "nombre del KPI · se buscan \"Eficiencia en la recepcion\" (N° 5) y \"Eficiencia en la entrega\" (N° 7)",
+            "E..P": "Enero a Diciembre"
+          },
+          "cuenta": "El porcentaje mensual sale directo de la hoja KPIs: R.meses[i].efic de la fila de recepción y E.meses[i].efic de la de entrega. El extractor sólo corrige los meses ya cargados y avisa si la hoja tiene un mes nuevo, porque el detalle que acompaña a cada mes (horas, total, egresos) todavía no está mapeado y se carga a mano. Las mismas dos filas rehacen MESES, RECEPCION y ENTREGA en services/mockData.js, que son las que alimentan las tarjetas del sector."
+        },
+        {
+          "id": "merma-cajas",
+          "archivo": "Indicadores Insumos - 2026.xlsx",
+          "destino": "client/src/dashboards/merma-cajas.html",
+          "hojas": [
+            "KPIs",
+            "Consumos Deposito"
+          ],
+          "sinExtractor": true,
+          "cuenta": "SIN EXTRACTOR. El KPI mensual es la fila N° 2 \"Merma de cajas\" de la hoja KPIs, pero el detalle por tipo de caja (planchas D, producidas E, diferencia F, merma G) sale del cruce con Consumos Deposito y todavía no está mapeado. Al 25/08/2026 la hoja llega a julio, igual que el tablero: no hay nada nuevo para cargar."
+        }
+      ]
+    },
+    "logistica": {
+      "carpeta": "Gerencia de Operaciones/Logistica",
+      "extractor": "logistica",
+      "pendiente": true,
+      "fuentes": [
+        {
+          "id": "matriz-costo",
+          "archivo": "2026 Consumo de combustible.xlsx",
+          "destino": "client/src/dashboards/matriz-costo-logistica.html",
+          "cuenta": "PENDIENTE de mapear."
+        },
+        {
+          "id": "metrica-costo",
+          "archivo": "2026 Consumo de combustible.xlsx",
+          "destino": "client/src/dashboards/metrica-costo.html",
+          "cuenta": "PENDIENTE de mapear."
+        },
+        {
+          "id": "consumo-gasoil",
+          "archivo": "2026 Consumo de combustible.xlsx",
+          "destino": "client/src/dashboards/consumo-gasoil.html",
+          "cuenta": "PENDIENTE de mapear."
+        },
+        {
+          "id": "costo-frigorifico",
+          "archivo": "2026 Consumo de combustible.xlsx",
+          "destino": "client/src/dashboards/costo-frigorifico.html",
+          "cuenta": "PENDIENTE de mapear."
+        },
+        {
+          "id": "disponibilidad-flota",
+          "archivo": "Indicador disponibilidad de flota 2026.xlsx",
+          "destino": "client/src/dashboards/disponibilidad-flota.html",
+          "cuenta": "PENDIENTE de mapear."
+        },
+        {
+          "id": "necesidad-tambores",
+          "archivo": "NECESIDAD DE TAMBORES PARA OPERAR 2026.xlsx",
+          "destino": "client/src/dashboards/necesidad-tambores.html",
+          "cuenta": "PENDIENTE de mapear."
+        },
+        {
+          "id": "stock-hiel",
+          "archivo": "STOCK HIEL <MES> 2026.xlsx",
+          "destino": "client/src/dashboards/stock-hiel.html",
+          "cuenta": "PENDIENTE de mapear."
+        }
+      ]
+    }
+  }
+}

@@ -3,22 +3,14 @@
 // las credenciales de Graph. La forma de estos objetos ES el contrato que consume
 // el frontend: cuando se conecte el Excel real, kpiSource devuelve esta estructura.
 
-const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
-const SEMANAS = ['S23', 'S24', 'S25', 'S26', 'S27', 'S28', 'S29', 'S30', 'S31'];
+const MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul"];
 const serie = (periodos, vals) => periodos.map((p, i) => ({ periodo: p, valor: vals[i] }));
 
 // Series base (reutilizadas por KPIs y gráficos).
-const RECEPCION = [100, 100, 100, 100, 100, 100];
-const ENTREGA = [99.74, 99.63, 97.82, 97.91, 99.47, 99.57];
-// Cerramiento por Bestpack (Cerradoras): KPI semanal vs. estándar (72) · fila 111.
-const CERRAMIENTO = [65, 70, 73, 78, 66, 73, 64, 67, 76];
-// Máximos de producción por semana, por máquina (Bestpack 1/2/3).
-const BP1 = [165, 184, 182, 199, 146, 198, 161, 187, 190];
-const BP2 = [149, 161, 179, 199, 165, 150, 151, 147, 195];
-const BP3 = [152, 168, 168, 164, 164, 177, 146, 145, 161];
-// Producción total por semana (comparativo semanal, todas las máquinas). Histórico.
-const PROD_HIST_SEM = ['S23', 'S24', 'S25', 'S26', 'S27', 'S28', 'S29'];
-const PROD_HIST = [131151, 104523, 108596, 124286, 125108, 105281, 100126];
+// Hoja KPIs de "Indicadores Insumos - 2026": N° 5 (recepción) y N° 7 (entrega).
+// Se actualizan con `node tools/actualizar.js insumos`.
+const RECEPCION = [100,100,100,100,100,100,100];
+const ENTREGA = [99.74,99.63,97.82,97.91,99.47,99.57,100];
 
 const INSUMOS = {
   key: 'insumos', nombre: 'Insumos', estado: 'ok', objetivoPendiente: true,
