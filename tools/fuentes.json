@@ -499,7 +499,7 @@
             "Gastos": "columna A el rótulo de cada fila, B a M enero a diciembre; arriba del rótulo ITEMS va la fila del dólar",
             "ResumenKgs": "A fecha, E kilos"
           },
-          "cuenta": "Cada serie es una fila rotulada de la hoja Gastos. OJO: la fila DESCARGA KG NETA es una tabla dinámica que hoy da #REF!, y con ella se rompen todas las que dependen de los kilos. El extractor detecta que está vacía y rehace los kilos sumando ResumenKgs por mes; después recalcula las derivadas con la misma cuenta que tienen las fórmulas de la hoja: por kg = total ÷ kilos, USD por tonelada = total ÷ kilos × 1000 ÷ dólar, $ por tonelada descargada = total general ÷ (kilos ÷ 1000). Un mes en cero se toma como mes sin cargar y no genera ratio. El índice INDEC no está en este libro: se conserva el que ya tiene el tablero. Todos los textos con mes salen de CUR, que es el último mes con total general."
+          "cuenta": "Cada serie es una fila rotulada de la hoja Gastos. OJO: la fila DESCARGA KG NETA es una tabla dinámica que se rompe seguido (#REF!), y con ella se caen todas las que dependen de los kilos. Si el extractor la encuentra vacía, rehace los kilos sumando ResumenKgs por mes y avisa; si la fila anda, la usa tal cual. Las derivadas se recalculan con la misma cuenta que tienen las fórmulas de la hoja: por kg = total ÷ kilos, USD por tonelada = total ÷ kilos × 1000 ÷ dólar, $ por tonelada descargada = total general ÷ (kilos ÷ 1000). Un mes en cero se toma como mes sin cargar y no genera ratio. El índice INDEC no está en este libro: se conserva el que ya tiene el tablero. Todos los textos con mes salen de CUR, que es el último mes con total general."
         },
         {
           "id": "metrica-costo",
