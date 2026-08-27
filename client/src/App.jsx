@@ -230,7 +230,6 @@ export default function App() {
               <KpiSistemas onSub={setSubSistemas} />
             ) : (
             <>
-            {sector.periodo && <div className="sector-periodo">Datos de la <b>{sector.periodo}</b></div>}
             {conSub && (
               <nav className="subtabs">
                 {grupos.map((g) => (

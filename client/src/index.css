@@ -1,6 +1,6 @@
 :root {
   /* Identidad visual unificada Offal (compartida con portal, proveedores,
-     etiquetas y lavados): teal oscuro + rojo de marca. */
+     etiquetas y lavados): teal oscuro + dorado de marca. */
   --bg: #0c1c26;
   --bg-2: #0a171f;
   --panel: #12242f;
@@ -8,10 +8,13 @@
   --line: #23353f;
   --text: #eef2f5;
   --muted: #8ba0ab;
-  /* Rojo de marca (primario) + cian (info) */
-  --primary: #c7163a;
-  --primary-bright: #e11f46;
-  --primary-dark: #9e1130;
+  /* Dorado de marca (el mismo del wordmark, public/logo-offal.svg) + cian (info) */
+  --primary: #b27746;
+  --primary-bright: #d19a63;
+  --primary-dark: #8a5a33;
+  /* Texto que va encima del dorado lleno: en oscuro llega a 4,96:1; en blanco
+     se quedaba en 3,7:1 y la etiqueta del botón elegido no se leía bien. */
+  --sobre-primary: #1a1208;
   --info: #26b6d9;
   --success: #2f9e6e;
   --warn: #f5a623;
@@ -64,8 +67,12 @@ body {
   flex-shrink: 0;
 }
 .brand-badge img { width: 64%; height: 64%; object-fit: contain; display: block; }
-.brand-mark { font-weight: 800; letter-spacing: 0.02em; font-size: 17px; white-space: nowrap; }
-.brand-sub { color: var(--muted); font-weight: 600; }
+/* Mismo wordmark que el portal (public/logo-offal.svg), para que la marca se
+   lea igual en las dos aplicaciones. Después va el nombre del portal activo. */
+.brand-wordmark { height: clamp(16px, 2.2vw, 24px); width: auto; display: block; flex-shrink: 0; }
+.brand-sep { color: var(--muted-2, var(--muted)); font-weight: 400; }
+.brand-sub { color: var(--muted); font-weight: 600; font-size: 15px; white-space: nowrap;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
 .nav-right { display: flex; align-items: center; gap: 10px; }
 .nav-btn {
@@ -79,7 +86,7 @@ body {
   transition: border-color 0.15s, background 0.15s;
 }
 .nav-btn svg { width: 16px; height: 16px; }
-.nav-btn:hover { border-color: var(--primary); background: rgba(199, 22, 58, 0.12); }
+.nav-btn:hover { border-color: var(--primary); background: rgba(178, 119, 70, 0.12); }
 
 .user-wrap { position: relative; }
 .user {
@@ -92,7 +99,7 @@ body {
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
 }
-.user:hover { border-color: var(--primary); background: rgba(199, 22, 58, 0.10); }
+.user:hover { border-color: var(--primary); background: rgba(178, 119, 70, 0.10); }
 .avatar {
   width: 32px; height: 32px;
   display: grid; place-items: center;
@@ -123,7 +130,7 @@ body {
   text-decoration: none; color: var(--primary-bright);
   font-size: 13px; font-weight: 600;
 }
-.user-menu-item:hover { background: rgba(199, 22, 58, 0.12); }
+.user-menu-item:hover { background: rgba(178, 119, 70, 0.12); }
 
 /* ---------- Layout ---------- */
 .wrap {
@@ -165,7 +172,7 @@ body {
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
 }
-.btn-refresh:hover:not(:disabled) { border-color: var(--primary); background: rgba(199, 22, 58, 0.10); }
+.btn-refresh:hover:not(:disabled) { border-color: var(--primary); background: rgba(178, 119, 70, 0.10); }
 .btn-refresh:disabled { opacity: 0.55; cursor: default; }
 
 .aviso {
@@ -191,7 +198,7 @@ body {
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 .tab:hover { color: var(--text); border-color: var(--primary); }
-.tab.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+.tab.on { background: var(--primary); color: var(--sobre-primary); border-color: var(--primary); }
 
 /* ---------- KPI cards ---------- */
 .kpi-grid {
@@ -216,8 +223,8 @@ body {
 /* Dato-héroe: tarjeta protagonista de un sector (ej. Costo General del mes) */
 .kpi.destacada {
   border-top-width: 3px;
-  background: linear-gradient(160deg, rgba(199, 22, 58, .14) 0%, var(--panel) 60%, var(--bg) 150%);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 10px 26px -12px rgba(199, 22, 58, .45);
+  background: linear-gradient(160deg, rgba(178, 119, 70, .14) 0%, var(--panel) 60%, var(--bg) 150%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 10px 26px -12px rgba(178, 119, 70, .45);
 }
 .kpi.destacada .kpi-valor { font-size: 38px; color: #ffffff; }
 .kpi.destacada .kpi-titulo { color: var(--text); font-weight: 700; }
@@ -268,6 +275,10 @@ body {
 
 @media (max-width: 820px) {
   .charts-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  /* en pantallas chicas la marca queda sola: el wordmark ya dice quién es */
+  .brand-sep, .brand-sub { display: none; }
 }
 @media (max-width: 520px) {
   .head { align-items: flex-start; }
@@ -323,7 +334,7 @@ body {
   color: var(--muted); cursor: pointer; transition: color .15s, border-color .15s, background .15s;
 }
 .expand-btn svg { width: 15px; height: 15px; }
-.expand-btn:hover { color: var(--primary-bright); border-color: var(--primary); background: rgba(199, 22, 58, .1); }
+.expand-btn:hover { color: var(--primary-bright); border-color: var(--primary); background: rgba(178, 119, 70, .1); }
 .panel-head .expand-btn { flex-shrink: 0; }
 
 /* ---------- Modal (ver en grande) ---------- */
@@ -347,7 +358,7 @@ body {
   width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line);
   background: transparent; color: var(--muted); font-size: 15px; cursor: pointer;
 }
-.modal-x:hover { color: var(--text); border-color: var(--primary); background: rgba(199, 22, 58, .1); }
+.modal-x:hover { color: var(--text); border-color: var(--primary); background: rgba(178, 119, 70, .1); }
 .modal-body { padding: 22px; }
 
 .detalle-kpi { display: flex; flex-direction: column; gap: 16px; }
@@ -362,11 +373,6 @@ body {
 @media (prefers-reduced-motion: reduce) { .modal-backdrop { animation: none; } }
 
 /* ---------- Período del sector (ej. "Semana 31") ---------- */
-.sector-periodo {
-  display: inline-block; margin-bottom: 16px; font-size: 12px; color: var(--muted);
-  background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px;
-}
-.sector-periodo b { color: var(--primary-bright); font-weight: 700; }
 
 /* ---------- Sub-pestañas (secciones navegables de un sector) ---------- */
 .subtabs {
@@ -386,7 +392,7 @@ body {
 .subtab:hover { color: var(--text); border-color: var(--primary); transform: translateY(-1px); box-shadow: 0 8px 18px -12px rgba(0,0,0,.65); }
 .subtab.on {
   color: var(--primary-bright); border-color: var(--primary);
-  background: linear-gradient(165deg, rgba(199,22,58,.18), rgba(199,22,58,.05));
+  background: linear-gradient(165deg, rgba(178, 119, 70,.18), rgba(178, 119, 70,.05));
   box-shadow: inset 0 0 0 1px rgba(225,31,70,.28), 0 8px 20px -13px rgba(225,31,70,.5);
 }
 
@@ -411,7 +417,7 @@ body {
 }
 .tabla-kpi th.num, .tabla-kpi td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .tabla-kpi tbody td { padding: 8px 12px; border-bottom: 1px solid var(--line); }
-.tabla-kpi tbody tr:hover { background: rgba(199, 22, 58, .06); }
+.tabla-kpi tbody tr:hover { background: rgba(178, 119, 70, .06); }
 .tabla-kpi tbody tr.tot td { font-weight: 800; color: var(--text); border-top: 2px solid var(--line); background: var(--panel-2); }
 .tabla-kpi.wrap, .tabla-kpi.wrap td, .tabla-kpi.wrap th { white-space: normal; }
 .tabla-kpi.wrap td:last-child { min-width: 320px; line-height: 1.4; }
@@ -446,10 +452,10 @@ body {
 .cat-taller       td:first-child { border-left-color: #e08a6a; }
 .cat-taller       { background: rgba(224,138,106,.06); }
 .cat-taller.sec-head td       { color: #eaa284; }
-.cat-totalgeneral td:first-child { border-left-color: #c7163a; }
-.cat-totalgeneral { background: rgba(199,22,58,.09); }
-.cat-totalgeneral.sec-head td { color: #e85d78; }
-.tabla-kpi tbody tr.cat-totalgeneral.tot td { background: rgba(199,22,58,.13); border-top-color: rgba(199,22,58,.4); }
+.cat-totalgeneral td:first-child { border-left-color: var(--primary); }
+.cat-totalgeneral { background: rgba(178, 119, 70,.09); }
+.cat-totalgeneral.sec-head td { color: var(--primary-bright); }
+.tabla-kpi tbody tr.cat-totalgeneral.tot td { background: rgba(178, 119, 70,.13); border-top-color: rgba(178, 119, 70,.4); }
 
 /* ---------- Secciones dentro de un sector (grupos) ---------- */
 .grupo { margin-bottom: 8px; }
@@ -494,7 +500,7 @@ body {
   transition: color .15s, background .15s, border-color .15s;
 }
 .nav-ctx-chip:hover { color: var(--text); border-color: var(--primary); }
-.nav-ctx-chip.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+.nav-ctx-chip.on { background: var(--primary); color: var(--sobre-primary); border-color: var(--primary); }
 .nav-ctx-chip.on:hover { background: var(--primary-bright); border-color: var(--primary-bright); }
 .nav-ctx-sep { color: var(--muted); font-size: 14px; flex-shrink: 0; }
 /* en pantallas chicas alcanza con el sector */

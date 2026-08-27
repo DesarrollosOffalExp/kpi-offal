@@ -46,7 +46,7 @@ const INSUMOS = {
 // COMPRAS: foto de la última semana cargada (Semana 31). Valores tomados de la
 // fila de la semana 34, columnas A→R de la hoja KPI.
 const COMPRAS = {
-  key: 'compras', nombre: 'Compras', estado: 'ok', periodo: 'semana 34', objetivoPendiente: true,
+  key: 'compras', nombre: 'Compras', estado: 'ok', objetivoPendiente: true,
   // Cuadro de KPIs asignados (hoja "Compras" del archivo KPI Gerencia de Operaciones 2026).
   objetivos: {"persona":"Juan Retamero","total":5,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"Mejorar un 10% el costo por tonelada mediante la mejora de costos de compras","kpi":"SE DEBE SACAR EL INFORME \"IMFORME DE PRECIOS PROMEDIO PONDERADO\" (ES EL UNICO QUE ENCONTRAMOS QUE TIRABA LOS PRECIOS DE LOS MATERIALES) MES A MES Y SE LO DEBE CALCULAR CON LA INFLACION MENSUAL.","area":"Compras","meta":"4%","vals":["-6%","-5%","-4%","-6%","-2%","",""]},{"n":"2","objetivo":"","kpi":"INDICADOR DE NUEVOS PROVEEDORES EN EL PERIODO MEDIDO","area":"Compras","meta":"2%","vals":["","","","","3%","6%","7%"]},{"n":"3","objetivo":"","kpi":"LICITACIONES","area":"Compras","meta":"2%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"4","objetivo":"Asegurar el proyecto de transformación antes del fin del 1er semestre","kpi":"MATRIZ","area":"Compras","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"5","objetivo":"","kpi":"MATRIZ DE HABILIDADES","area":"Compras","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"6","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Compras","meta":"70%","vals":["","","","","","",""]}],"promedio":null},
   kpis: [
@@ -155,8 +155,10 @@ const SISTEMAS = {
 };
 
 // LOGÍSTICA: hoja con muchos bloques distintos (períodos mixtos) → sub-pestañas.
-const G = { costo: 'Matriz de Costo · Julio', metrica: 'Métrica de Costo', flota: 'Disponibilidad de Flota',
-  lavado: 'Lavado de Camiones · Sem 30', tambores: 'Necesidad de Tambores',
+// Los nombres de las ventanas no llevan mes ni semana: el período lo muestra
+// cada tablero a partir de sus propios datos.
+const G = { costo: 'Matriz de Costo', metrica: 'Métrica de Costo', flota: 'Disponibilidad de Flota',
+  lavado: 'Lavado de Camiones', tambores: 'Necesidad de Tambores',
   gasoil: 'Consumo de Gasoil', frig: 'Costo por Frigorífico', hiel: 'Stock de Hiel' };
 // Rendimiento KG/LT semana a semana (S1–S31) para el histórico de gasoil.
 const KGLT = [9.07, 6.19, 6.38, 6.79, 5.71, 3.75, 4.12, 5.15, 6.17, 6.30, 5.89, 6.31, 6.29, 7.90, 5.48, 6.11, 6.09, 5.16, 6.63, 6.11, 5.52, 5.66, 5.71, 6.16, 4.63, 5.32, 6.84, 6.61, 6.59, 6.67, 6.21];
@@ -166,7 +168,7 @@ const LOGISTICA = {
   // Cuadro de KPIs asignados (hoja "Logistica" del archivo KPI Gerencia de Operaciones 2026).
   objetivos: {"persona":"Dario Pisano","total":2,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"Mejorar un 15% el costo por tonelada transportado (interno y externo)","kpi":"REEMPLAZAR LOS VIAJES DE COLGADO PARA HACER CON FLOTA PROPIA UNA VEZ REPARADOS LOS EQUIPOS DE FRIO.","area":"Logistica","meta":"","vals":["0%","0%","0%","0%","0%","",""]},{"n":"2","objetivo":"Mejorar un 15% el costo por tonelada transportado (interno y externo)","kpi":"PRESENTAREMOS ALTERNATIVAS PARA REALIZAR VIAJES CON FLOTA PROPIA EN RUTAS QUE PODAMOS CUMPLIR Y ELIMINAREMOS EL FLETE DE ESA RUTA.","area":"Logistica","meta":"","vals":["","","","","","",""]},{"n":"3","objetivo":"Mejorar un 15% el costo por tonelada transportado (interno y externo)","kpi":"SE TOMARAN LOS GASTOS DEL AÑO ANTERIOR MAS LA INFLACION DEL AÑO Y SE LO VA A COMPRARAR POR LO PAGADO AL TRANSPORTISTA.","area":"Logistica","meta":"","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"4","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Logistica","meta":"70","vals":["","","","","","",""]}],"promedio":null},
   kpis: [
-    // Matriz de Costo (mensual, Junio) · datos-héroe del mes en curso.
+    // Matriz de Costo (mensual) · datos-héroe del último mes cargado.
     { id: 'costo_general', grupo: G.costo, titulo: 'Costo General del mes', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 1176272936, destacado: true,
       info: 'Costo general de Junio: propios + fletes + lavado + taller. Es el TOTALIZADO del mes. (MATRIZ DE COSTO)' },
     { id: 'costo_ton_prod', grupo: G.costo, titulo: 'Costo por tonelada producida', unidad: '', formato: 'moneda', sentido: 'down', meta: null, valor: 193767, destacado: true,

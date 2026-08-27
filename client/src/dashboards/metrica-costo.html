@@ -4,7 +4,7 @@
     --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
     --line:#23353f; --line-2:#2c414d;
     --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
-    --brand:#e11f46; --brand-dim:rgba(225,31,70,.13); --brand-line:rgba(225,31,70,.45);
+    --brand:#b27746; --brand-dim:rgba(178,119,70,.13); --brand-line:rgba(178,119,70,.45);
     --info:#26b6d9; --info-dim:rgba(38,182,217,.14); --good:#22e39b; --bad:#ff4d67; --amber:#f5a623;
     --radius:12px;
     font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -57,7 +57,7 @@
     <div>
       <p class="overline">Offal · Logística</p>
       <h1>Métrica de Costo — $ / ton descargada</h1>
-      <p class="sub">Análisis <b>mes a mes</b>: cada mes se compara el costo real por tonelada descargada contra el del <b>mes anterior ajustado por la inflación</b> (% del INDEC del mes). Así se ve si el costo subió más o menos que los precios. Serie desde <b>febrero</b> (enero es la referencia inicial).</p>
+      <p class="sub">Análisis <b>mes a mes</b>: cada mes se compara el costo real por tonelada descargada contra el del <b>mes anterior ajustado por la inflación</b> (% del INDEC del mes). Así se ve si el costo subió más o menos que los precios. Serie desde <b id="mesDesde"></b> (<span id="mesRef"></span> es la referencia inicial).</p>
     </div>
     <span class="fuente" id="fuente">Datos reales · 2026 Consumo de combustible (hoja Gastos)</span>
   </header>
@@ -87,7 +87,15 @@
 
 <script>
 (function(){
-  const DATA = {"generado":"21/08/2026","unidad":"$ / ton descargada","hoja":"Gastos · TOTAL $ X TONS DESC","modo":"mes-a-mes","janReal":81633,"indecByMonth":{"1":0.029,"2":0.029,"3":0.034,"4":0.026,"5":0.021,"6":0.019,"7":0.021},"data":[{"mes":"Febrero","mNum":2,"real":98047,"prevReal":81633,"proy":84001,"indec":0.029,"gapPct":14.3},{"mes":"Marzo","mNum":3,"real":108027,"prevReal":98047,"proy":101381,"indec":0.034,"gapPct":6.2},{"mes":"Abril","mNum":4,"real":91895,"prevReal":108027,"proy":110835,"indec":0.026,"gapPct":-20.6},{"mes":"Mayo","mNum":5,"real":97645,"prevReal":91895,"proy":93825,"indec":0.021,"gapPct":3.9},{"mes":"Junio","mNum":6,"real":98647,"prevReal":97645,"proy":99500,"indec":0.019,"gapPct":-0.9},{"mes":"Julio","mNum":7,"real":101987,"prevReal":98647,"proy":100718,"indec":0.021,"gapPct":1.2}],"resumen":{"ultimoMes":"Julio","ultimoReal":101987,"ultimoProy":100718,"ultimoGap":1.2,"gapProm":0.7,"mesesSobre":4,"mesesBajo":2,"mesesEnLinea":0,"nMeses":6}};
+  const DATA = {"generado":"21/08/2026","unidad":"$ / ton descargada","hoja":"Gastos · TOTAL $ X TONS DESC","modo":"mes-a-mes","janReal":81521,"indecByMonth":{"1":0.029,"2":0.029,"3":0.034,"4":0.026,"5":0.021,"6":0.019,"7":0.021},"data":[{"mes":"Febrero","mNum":2,"real":98047,"prevReal":81521,"proy":83885,"indec":0.029,"gapPct":16.9},{"mes":"Marzo","mNum":3,"real":102127,"prevReal":98047,"proy":101381,"indec":0.034,"gapPct":0.7},{"mes":"Abril","mNum":4,"real":97795,"prevReal":102127,"proy":104782,"indec":0.026,"gapPct":-6.7},{"mes":"Mayo","mNum":5,"real":97645,"prevReal":97795,"proy":99849,"indec":0.021,"gapPct":-2.2},{"mes":"Junio","mNum":6,"real":98396,"prevReal":97645,"proy":99500,"indec":0.019,"gapPct":-1.1},{"mes":"Julio","mNum":7,"real":101986,"prevReal":98396,"proy":100462,"indec":0.021,"gapPct":1.5}],"resumen":{"ultimoMes":"Julio","ultimoReal":101986,"ultimoProy":100462,"ultimoGap":1.5,"gapProm":1.5,"mesesSobre":3,"mesesBajo":3,"mesesEnLinea":0,"nMeses":6}};
+  // el mes en que arranca la serie y su referencia salen de los datos
+  (function(){
+    var M=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    var d=(DATA.data||[])[0]; if(!d) return;
+    var poner=function(id,t){var el=document.getElementById(id);if(el)el.textContent=t;};
+    poner("mesDesde", d.mes.toLowerCase());
+    poner("mesRef", M[d.mNum-2].toLowerCase());
+  })();
   const D = DATA.data, R=DATA.resumen, nf=new Intl.NumberFormat('es-AR');
   const money=v=>'$'+nf.format(Math.round(v));
   const last=D[D.length-1];
