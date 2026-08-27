@@ -400,49 +400,132 @@
     "logistica": {
       "carpeta": "Gerencia de Operaciones/Logistica",
       "extractor": "logistica",
-      "pendiente": true,
       "fuentes": [
         {
-          "id": "matriz-costo",
-          "archivo": "2026 Consumo de combustible.xlsx",
-          "destino": "client/src/dashboards/matriz-costo-logistica.html",
-          "cuenta": "PENDIENTE de mapear."
-        },
-        {
-          "id": "metrica-costo",
-          "archivo": "2026 Consumo de combustible.xlsx",
-          "destino": "client/src/dashboards/metrica-costo.html",
-          "cuenta": "PENDIENTE de mapear."
+          "id": "necesidad-tambores",
+          "archivo": "NECESIDAD DE TAMBORES PARA OPERAR 2026.xlsx",
+          "destino": "client/src/dashboards/necesidad-tambores.html",
+          "constante": "DATA",
+          "hojas": [
+            "01..NN (una por semana)",
+            "Consolidado",
+            "RECLAMO DEUDA"
+          ],
+          "columnas": {
+            "hoja de semana": "matadero en la B; después un bloque de cuatro columnas por día (ENV / REC / MARC / S.MARC), tantos como días cargados",
+            "Consolidado": "B matadero (con la localidad entre paréntesis), C lugar, y la columna rotulada \"Stock en Frigorifico\"",
+            "RECLAMO DEUDA": "A frigorífico, B a debitar, C precio unitario, D monto"
+          },
+          "cuenta": "Por semana: env = suma de todas las columnas ENV del matadero, rec = suma de las REC, dif = env − rec; el matadero que no movió nada esa semana no entra. totEnv/totRec/totDif son las sumas de la semana. El stock por frigorífico sale de la columna \"Stock en Frigorifico\" de Consolidado, con el nombre sin el paréntesis, y deudaTotal es su suma. A debitar sale del PRIMER bloque de RECLAMO DEUDA (la hoja guarda reclamos viejos más abajo), ordenado de mayor a menor, y se controla contra la fila \"total\" de ese bloque.",
+          "acumula": "Cada semana nueva es una hoja más. Las ya cargadas se rehacen y se comparan: la planilla de una semana se sigue corrigiendo después de cerrada."
         },
         {
           "id": "consumo-gasoil",
           "archivo": "2026 Consumo de combustible.xlsx",
           "destino": "client/src/dashboards/consumo-gasoil.html",
-          "cuenta": "PENDIENTE de mapear."
+          "constante": "DATA",
+          "hojas": [
+            "GasOil 2026",
+            "KM  X  KPI"
+          ],
+          "columnas": {
+            "GasOil 2026": "C Fecha/Hora, T Volumen (litros), AG Año, AH Semana, AM Tipo Unidad",
+            "KM  X  KPI": "A Nº SEM, B suma de distancia recorrida (tabla dinámica)"
+          },
+          "cuenta": "consTot = suma de Volumen de la semana (sólo año 2026). consMant = la parte cuya Tipo Unidad es \"Maestro\", que es la patente de mantenimiento/taller. consCam = consTot − consMant. km sale del pivot KM X KPI. lt100 = consCam ÷ km × 100 (los litros de mantenimiento no recorren km). El rango \"desde/hasta\" es la semana ISO completa, recortada al 1 de enero."
         },
         {
           "id": "costo-frigorifico",
           "archivo": "2026 Consumo de combustible.xlsx",
           "destino": "client/src/dashboards/costo-frigorifico.html",
-          "cuenta": "PENDIENTE de mapear."
+          "constante": "DATA",
+          "hojas": [
+            "Costo Frigo"
+          ],
+          "columnas": {
+            "B1": "número de semana (la hoja guarda UNA sola semana por vez)",
+            "A": "proveedor",
+            "B": "kms",
+            "D": "hs recorrido (hora de Excel)",
+            "F": "excedente total (puede pasar de 24 h)",
+            "H": "valor por viaje",
+            "I": "viajes",
+            "J": "kgs",
+            "K": "multiplicación = valor de los viajes"
+          },
+          "cuenta": "xkg = valor de los viajes ÷ kgs (no es la columna N, que es el $ del excedente). Las horas se leen crudas y se pasan a h:mm y h:mm:ss, contando cada día entero como 24 h.",
+          "acumula": "La hoja se pisa cada semana, así que el tablero acumula: la semana que trae la hoja se agrega, y si ya estaba se rehace. NO se pueden revalidar las semanas viejas contra el archivo."
         },
         {
           "id": "disponibilidad-flota",
           "archivo": "Indicador disponibilidad de flota 2026.xlsx",
           "destino": "client/src/dashboards/disponibilidad-flota.html",
-          "cuenta": "PENDIENTE de mapear."
-        },
-        {
-          "id": "necesidad-tambores",
-          "archivo": "NECESIDAD DE TAMBORES PARA OPERAR 2026.xlsx",
-          "destino": "client/src/dashboards/necesidad-tambores.html",
-          "cuenta": "PENDIENTE de mapear."
+          "constante": "DATA",
+          "hojas": [
+            "Disponibilidad de flota",
+            "BASE DE DATOS"
+          ],
+          "columnas": {
+            "Disponibilidad de flota": "debajo del encabezado Dominio: B dominio, C modelo, D marca, E tipo de unidad, F asignación",
+            "BASE DE DATOS": "A fecha, B dominio, C tipo de unidad, D observación, E destino"
+          },
+          "cuenta": "El padrón viene en bloques separados por filas en blanco. El bloque de \"vender\" se descarta; el último de los que quedan son las unidades FUERA DE SERVICIO y todos los anteriores son las disponibles, cuyo total es el \"total\" del tablero. El detalle semanal sale de BASE DE DATOS, que tiene una fila por unidad y día parado: dias = cantidad de filas de esa unidad en la semana ISO, paradas = unidades distintas, disponibles = total − paradas, dispPct = disponibles ÷ total. El rango de fechas es el primero y el último día con registro."
         },
         {
           "id": "stock-hiel",
           "archivo": "STOCK HIEL <MES> 2026.xlsx",
           "destino": "client/src/dashboards/stock-hiel.html",
-          "cuenta": "PENDIENTE de mapear."
+          "constante": "DATA",
+          "hojas": [
+            "ING-MOV",
+            "SALIDAS"
+          ],
+          "columnas": {
+            "ING-MOV": "C fecha de carga, J hiel, L aditivo (una fila por bin recibido)",
+            "SALIDAS": "B fecha, E salidas, I suma salidas [kg] (una fila por bin despachado)"
+          },
+          "cuenta": "Una fila por día, desde el último día del mes anterior (que trae el sobrante) hasta el fin de mes. ingreso y aditivo son las sumas de ING-MOV del día; salidas la suma de SALIDAS; saldo es el acumulado (saldo anterior + ingreso + aditivo − salidas). totIng y totSal cuentan sólo los días del mes. El mes sale de los propios movimientos, y el nombre del archivo lo lleva adentro: se toma el más nuevo que empiece con \"STOCK HIEL\"."
+        },
+        {
+          "id": "matriz-costo",
+          "archivo": "2026 Consumo de combustible.xlsx",
+          "destino": "client/src/dashboards/matriz-costo-logistica.html",
+          "constante": "D_RAW",
+          "hojas": [
+            "Gastos",
+            "ResumenKgs"
+          ],
+          "columnas": {
+            "Gastos": "columna A el rótulo de cada fila, B a M enero a diciembre; arriba del rótulo ITEMS va la fila del dólar",
+            "ResumenKgs": "A fecha, E kilos"
+          },
+          "cuenta": "Cada serie es una fila rotulada de la hoja Gastos. OJO: la fila DESCARGA KG NETA es una tabla dinámica que hoy da #REF!, y con ella se rompen todas las que dependen de los kilos. El extractor detecta que está vacía y rehace los kilos sumando ResumenKgs por mes; después recalcula las derivadas con la misma cuenta que tienen las fórmulas de la hoja: por kg = total ÷ kilos, USD por tonelada = total ÷ kilos × 1000 ÷ dólar, $ por tonelada descargada = total general ÷ (kilos ÷ 1000). Un mes en cero se toma como mes sin cargar y no genera ratio. El índice INDEC no está en este libro: se conserva el que ya tiene el tablero. Todos los textos con mes salen de CUR, que es el último mes con total general."
+        },
+        {
+          "id": "metrica-costo",
+          "archivo": "2026 Consumo de combustible.xlsx",
+          "destino": "client/src/dashboards/metrica-costo.html",
+          "constante": "DATA",
+          "hojas": [
+            "Gastos"
+          ],
+          "cuenta": "Sale de la misma serie que la matriz: real = $ por tonelada descargada del mes, prevReal = el del mes anterior, proy = prevReal × (1 + INDEC del mes) y gapPct = (real − proy) ÷ proy. El índice INDEC (indecByMonth) no está en este libro y se conserva. El mes en que arranca la serie y su referencia salen de data[0], no van escritos."
+        },
+        {
+          "id": "presupuesto-resumen",
+          "archivo": "PRESUPUESTO LOGISTICA.xlsx",
+          "destino": "client/src/dashboards/presupuesto-logistica.html",
+          "constante": "RESUMEN",
+          "hojas": [
+            "RESUMEN"
+          ],
+          "columnas": {
+            "A": "gerencia",
+            "B": "descripción del centro",
+            "C": "grupo",
+            "D en adelante": "un mes por columna, con la fecha en el encabezado"
+          },
+          "cuenta": "Una fila por grupo de gasto con el real de cada mes. Los meses salen de las fechas del encabezado. Las acciones correctivas (ACC) y el anexo de fletes (FL) de este mismo tablero NO salen de acá: los carga el grupo \"presupuesto\" desde el archivo mensual de la Gerencia."
         }
       ]
     }

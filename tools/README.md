@@ -15,7 +15,7 @@ node tools/actualizar.js fabrica-hielo
 ```
 
 Grupos disponibles: `fabrica-hielo`, `compras`, `sistemas`, `objetivos`,
-`presupuesto`, `insumos`. Sin argumentos lista todo lo que sabe hacer.
+`presupuesto`, `insumos`, `logistica`. Sin argumentos lista todo lo que sabe hacer.
 
 El script busca cada archivo por nombre en `Descargas`, tolerando los sufijos
 que agrega el navegador (`archivo (2).xlsx`) y quedándose con el más reciente.
@@ -56,6 +56,12 @@ suposición se rompió.
   agosto de Monitoreo de Barras se completó cuatro días después (+5 % de kilos).
   Por eso el extractor no sólo suma semanas nuevas: rehace las ya cargadas y
   avisa qué cambió.
+- **Hay fórmulas rotas que hay que rehacer.** En `2026 Consumo de
+  combustible` la fila `DESCARGA KG NETA` de la hoja `Gastos` es una tabla
+  dinámica que da #REF!, y con ella se caen todas las series por kilo. El
+  extractor lo detecta y rehace los kilos sumando `ResumenKgs`.
+- **Hay hojas que se pisan cada semana.** `Costo Frigo` guarda una sola semana
+  por vez: el tablero acumula y no se puede revalidar el histórico.
 - **Algunas hojas traen bloques viejos arriba del bueno.** En la hoja `KPI` de
   Compras hay tres versiones de la misma tabla; la que vale es la que tiene las
   columnas `Total REQ Tratadas` y `Observaciones`.
@@ -97,9 +103,7 @@ node -e "const s=require('fs').readFileSync('client/src/dashboards/kpi-sistemas.
 
 ## Qué falta
 
-`logistica` está en el manifiesto con su archivo de origen, pero **sin
-extractor**: falta abrir cada planilla y fijar hoja y columnas. Lo mismo
-`compras/demoradas-e-informe`, que sale de un `.xlsm` grande, y dentro de
+Falta mapear `compras/demoradas-e-informe`, que sale de un `.xlsm` grande, y dentro de
 `insumos` la `merma-cajas`: el KPI mensual está en la hoja `KPIs`, pero el
 detalle por tipo de caja sale de cruzar `Consumos Deposito` con producción y
 todavía no está mapeado. El script avisa cuándo un grupo no tiene extractor en

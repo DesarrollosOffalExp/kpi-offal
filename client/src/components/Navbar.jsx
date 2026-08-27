@@ -31,7 +31,9 @@ export default function Navbar({ usuario, contexto }) {
       <div className="nav-inner">
         <a className="brand" href={PORTAL_URL} title="Ir al portal Offal">
           <span className="brand-badge"><img src="/logo.png" alt="Offal" /></span>
-          <span className="brand-mark">Offal <span className="brand-sub">· Tablero KPI</span></span>
+          <img className="brand-wordmark" src="/logo-offal.svg" alt="Offal Exp S.A." />
+          <span className="brand-sep" aria-hidden="true">–</span>
+          <span className="brand-sub">Tablero KPI</span>
         </a>
 
         {/* Dónde estás parado. Sólo aparece cuando las pestañas quedaron

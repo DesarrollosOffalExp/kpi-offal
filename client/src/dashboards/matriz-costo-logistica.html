@@ -4,7 +4,7 @@
     --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
     --line:#23353f; --line-2:#2c414d;
     --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
-    --brand:#e11f46; --brand-dim:rgba(225,31,70,.13); --brand-line:rgba(225,31,70,.45);
+    --brand:#b27746; --brand-dim:rgba(178,119,70,.13); --brand-line:rgba(178,119,70,.45);
     --info:#26b6d9; --good:#22e39b; --bad:#ff4d67; --amber:#f5a623;
     --c-propios:#2f9e6e; --c-fletes:#d99a2b; --c-lava:#7d93a0; --c-taller:#e08a6a;
     --radius:12px;
@@ -26,7 +26,7 @@
   .seg{display:inline-flex;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:3px;gap:2px;}
   .seg button{appearance:none;border:none;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:700;padding:6px 13px;border-radius:6px;cursor:pointer;transition:.15s;}
   .seg button:hover{color:var(--text);}
-  .seg button.on{background:var(--brand);color:#fff;}
+  .seg button.on{background:var(--brand);color:#1a1208;}
   .seg button:focus-visible{outline:2px solid var(--info);outline-offset:2px;}
 
   /* Card protagonista */
@@ -135,7 +135,7 @@
       <p class="sub">Costo logístico mes a mes · hoja <b>Gastos</b>. Variaciones vs. mes anterior.</p>
     </div>
     <div class="head-right">
-      <span class="fuente">Datos reales · Enero a Julio</span>
+      <span class="fuente" id="rangoMeses">Datos reales</span>
       <div class="seg" id="seg" role="tablist" aria-label="Vista">
         <button data-v="anio" role="tab">Año completo</button>
         <button data-v="sem1" class="on" role="tab" aria-selected="true">1.º semestre</button>
@@ -150,48 +150,28 @@
 
   <div class="blocks" id="blocks"></div>
   <div class="tip" id="tip" role="status" aria-live="polite"></div>
-  <p class="pie">Fuente: <b>2026 Consumo de combustible.xlsx</b> · hoja <b>Gastos</b> (filas 7–47). Agosto a Diciembre aún sin datos en el original · se muestran vacíos (-). LED en USD/ton: verde &lt;70 · ámbar 70–100 · rojo &gt;100. Celdas coloreadas por intensidad de costo dentro de cada fila (verde=menor, rojo=mayor).</p>
+  <p class="pie">Fuente: <b>2026 Consumo de combustible.xlsx</b> · hoja <b>Gastos</b> (filas 7–47). <span id="mesesSinDato"></span> LED en USD/ton: verde &lt;70 · ámbar 70–100 · rojo &gt;100. Celdas coloreadas por intensidad de costo dentro de cada fila (verde=menor, rojo=mayor).</p>
 </div>
 
 <script>
 (function(){
   const ABBR=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  const CUR=6;
   const N=a=>a.concat(Array(12-a.length).fill(null));
-  const D={
-    dolar:N([1465,1420,1405,1415,1430,1500,1510]),
-    indec:N([0.029,0.029,0.034,0.026,0.021,0.019,0.021]),
-    descProd:N([6374977,5388443,5297767,4846034,5983368,6070550,6386183]),
-    descNeta:N([10212865,8830780,9663137,8802345,10222863,11283260,11103409]),
-    descProp:N([4615842,4474926,5058980,4660439,5841572,6354686,6890343]),
-    descFlet:N([5814556,4071645,5031885,3443994,4282503,4928574,4213066]),
-    propTotal:N([170311650,135284531,225726369,147618376,174169228,251927671,226645202]),
-    propKg:N([36.9,30.23,44.62,31.67,29.82,39.64,32.89,22.55,28.09,21.63,22.73,19.41]),
-    propUsd:N([25.19,21.29,31.76,22.39,20.85,26.43,21.78,16.58,20.07,14.66,15.41,13.12]),
-    fletTotal:N([556192701,604028315,701667920,516434800,637802650,736698500,723689740]),
-    fletKg:N([95.66,148.35,139.44,149.95,148.93,149.47,171.77,109.15,107.95,113.4,122.77,107.56]),
-    fletUsd:N([65.29,104.47,99.25,105.97,104.15,99.65,113.76,80.26,77.11,76.88,83.23,72.67]),
-    logTotal:N([726504350,739312846,927394289,664053176,811971878,988626171,950334942,0,0,0,0,0]),
-    logKg:N([71.14,83.72,95.97,75.44,79.43,87.62,85.59]),
-    logUsd:N([48.56,58.96,68.31,53.31,55.54,58.41,56.68]),
-    lavTotal:N([65894989,61665571,69857126,70342932,73344283,78540283,69437561]),
-    lavPor:N([79487,81568,82185,82756,86287,92400,81691]),
-    lavUsdLav:N([54.26,57.44,58.49,58.49,60.34,61.6,54.1]),
-    lavCant:N([829,756,850,850,850,850,850]),
-    lavUsdTon:N([4.4,4.92,5.15,5.65,5.02,4.64,4.14]),
-    tallTotal:N([41309801,64853812,46625124,74493537,112892410,45890383,112625551]),
-    tallUsd:N([2.76,5.17,3.43,5.98,7.72,2.71,6.72]),
-    genTotal:N([833709140,865832229,1043876539,808889645,998208572,1113056836,1132398054]),
-    genSinFlet:N([277516440,261803914,342208619,292454845,360405922,376358336,408708314]),
-    usdSinFlet:N([18.55,20.88,25.21,23.48,24.65,22.24,24.38]),
-    usdTonDesc:N([55.72,66.93,73.74,62.73,66.65,67.34,67.54]),
-    pesoTonDesc:N([81633,98047,108027,91895,97645,98647,101987]),
-    pesoTonProd:N([130778,160683,197041,166918,166831,183354,177320]),
-    pctPropios:N([0.452,0.507,0.524,0.529,0.571,0.556,0.621]),
-    pctFletes:N([0.569,0.461,0.521,0.391,0.419,0.412,0.379]),
-    ajusteIndec:N([0,84001,101381,110835,93825,99500,100718]),
-    pctIndec:N([null,0.1433,0.0615,-0.2061,0.0391,-0.0086,0.0124]),
-  };
+  // Los datos salen del libro "2026 Consumo de combustible" (hoja Gastos).
+  // Se guardan como JSON plano para que tools/actualizar.js los pueda reescribir.
+  const D_RAW={"dolar":[1465,1420,1405,1415,1430,1500,1510],"indec":[0.029,0.029,0.034,0.026,0.021,0.019,0.021],"descProd":[6374977.469999999,5388442.99,5297767.360000003,4846033.510000004,5983367.600000001,6070549.5699999975,6386183],"descNeta":[10226917,8830778,10221354,8271259,10222863,11311987,11103412,7480507],"descProp":[4615842.400000001,4474926,5058979.800000001,4660439,5841572],"descFlet":[5814556.4,4071645.2,5031885.399999999,3443994.1999999997,4282502.7,4928574,4213066],"propTotal":[170311649.65218282,135284530.7268628,225726368.77946496,147618375.9528635,174169228.189345,251927670.6660862,226645201.89571],"propKg":[36.89719771458895,30.231679971213556,44.618950401712404,31.674779125499445,29.815472305972605,null,null,22.54937998142085,28.093506681235382,21.626087786499806,22.732656027909925,19.411794535859467],"propUsd":[25.185800487774024,21.289915472685603,31.757260072393173,22.38500291554731,20.849980633547275,null,null,16.580426456927093,20.0667904865967,14.661754431525294,15.411970188413509,13.116077389094233],"fletTotal":[556192700.64,604028315,701667920,516434800,637802650,736698500,723689740],"fletKg":[95.65522498672469,148.34993849660574,139.4443363117928,149.95228505320947,148.93222367378775,149.47497998406843,171.77270424911455,109.15115344430585,107.95134648023691,113.39873331284213,122.76796091598868,107.55792749150567],"fletUsd":[65.29366893291787,104.47178767366603,99.24863794433652,105.97334632735651,104.14840816348794,99.64998665604561,113.75675778087057,80.2582010619896,77.10810462874065,76.8804971612489,83.23251587524656,72.67427533209842],"logTotal":[726504350.2921828,739312845.7268628,927394288.779465,664053175.9528635,811971878.189345,988626170.6660862,950334941.89571,0,0,0,0,0],"logKg":[71.04,83.72,90.73,80.28,79.43,87.4,85.59],"logUsd":[48.49,58.96,64.58,56.74,55.54,58.26,56.68],"lavTotal":[65894989.055258535,61665571.287432015,69857125.91764201,70342931.85921249,73344283.1150418,78540282.90738484,69437560.8803789],"lavPor":[79487.32093517315,81568.21598866669,82184.8540207553,82756.39042260293,86287.39190004919,92400.33283221746,81691.24809456342],"lavUsdLav":[54.25755695233662,57.442405625821614,58.494558021889894,58.485081570744114,60.3408334965379,61.60022188814498,54.10016430103538],"lavCant":[829,756,850,850,850,850,850],"lavUsdTon":[4.4,4.92,4.86,6.01,5.02,4.63,4.14],"tallTotal":[41309800.89842813,64853811.54376009,46625124.015671566,74493536.72397138,112892410.231197,45890382.76548662,112625551.129325],"tallUsd":[2.76,5.17,3.25,6.36,7.72,2.7,6.72],"genTotal":[833709140.2458694,865832228.5580549,1043876538.7127786,808889644.5360473,998208571.5355837,1113056836.3389578,1132398053.9054139],"genSinFlet":[277516439.6058695,261803913.5580549,342208618.71277857,292454844.5360474,360405921.5355838,376358336.33895767,408708313.90541387],"usdSinFlet":[18.52,20.88,23.83,24.99,24.65,22.18,24.38],"usdTonDesc":[55.65,69.05,72.69,69.11,68.28,65.6,67.54],"pesoTonDesc":[81521,98047,102127,97795,97645,98396,101986],"pesoTonProd":[130778.3665384263,160683.19367299363,197040.84150512374,166917.8809570482,166830.56069220678,183353.55366169233,177320.01320748465],"pctPropios":[0.4519635185621274,0.5067418733113043,0.5235339000161129,0.5294542533836154,0.5714223109514429,0.5631959203279903,0.6205610367050336],"pctFletes":[0.5693364594557943,0.4610742425923871,0.5207300072429895,0.39125871571723214,0.418914221974803,0.4368040796720097,0.37943896329496646],"ajusteIndec":[0,83885,101381,104782,99849,99500,100462],"pctIndec":[null,0.1688,0.0074,-0.0667,-0.0221,-0.0111,0.0152]};
+  const D=(function(){const o={};Object.keys(D_RAW).forEach(k=>{o[k]=N(D_RAW[k].slice(0,12));});return o;})();
+  // el último mes cargado sale de los datos, no va escrito
+  const CUR=(function(){let u=0;(D.genTotal||[]).forEach((v,i)=>{if(v)u=i;});return u;})();
+  const MES_LARGO=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  // el rango y el aviso de meses sin dato salen de CUR, no van escritos
+  (function(){
+    var poner=function(id,t){var el=document.getElementById(id);if(el)el.textContent=t;};
+    poner('rangoMeses','Datos reales · '+MES_LARGO[0]+' a '+MES_LARGO[CUR]);
+    poner('mesesSinDato', CUR>=11 ? 'El año está completo.'
+      : (CUR===10 ? MES_LARGO[11] : MES_LARGO[CUR+1]+' a '+MES_LARGO[11])+' aún sin datos en el original · se muestran vacíos (-).');
+  })();
+
 
   const nf=new Intl.NumberFormat('es-AR');
   function fmt(v,f){
@@ -226,7 +206,7 @@
   /* ---------- Card protagonista ---------- */
   function renderPrimary(){
     document.getElementById('primary').innerHTML=
-      '<div class="pcard"><div class="phead"><span class="peyebrow">Dato principal · Julio</span>'
+      '<div class="pcard"><div class="phead"><span class="peyebrow">Dato principal · '+MES_LARGO[CUR]+'</span>'
       +'<span class="ptitle">Costo por tonelada descargada</span></div><div class="pstats">'
       +'<div class="pstat"><span class="pv">'+fmt(D.pesoTonDesc[CUR],'money')+'</span><span class="pl">$ / ton descargada</span></div><div class="pdiv"></div>'
       +'<div class="pstat"><span class="pv">USD '+fmt(D.usdTonDesc[CUR],'dec')+led(D.usdTonDesc[CUR])+'</span><span class="pl">USD / ton descargada</span></div>'
@@ -234,7 +214,7 @@
   }
 
   /* ---------- Secciones (scorecards + línea) ---------- */
-  const VS = ' La flecha y el % son la variación respecto al mes anterior (Junio a Julio).';
+  const VS = ' La flecha y el % son la variación respecto al mes anterior (' + MES_LARGO[CUR - 1] + ' a ' + MES_LARGO[CUR] + ').';
   const SEMAF = ' El punto es un semáforo: verde por debajo de 70, ámbar entre 70 y 100, rojo por encima de 100.';
   const SECTIONS=[
     { title:'Costo por Tonelada', sub:'descargada vs. producida',
@@ -335,13 +315,13 @@
   }
   function renderDonuts(){
     document.getElementById('donuts').innerHTML=
-      donutPanel('Costo General por componente','Julio · participación en el costo total',[
+      donutPanel('Costo General por componente',MES_LARGO[CUR]+' · participación en el costo total',[
         {name:'Fletes',v:D.fletTotal[CUR],c:'#d99a2b'},
         {name:'Propios',v:D.propTotal[CUR],c:'#2f9e6e'},
         {name:'Lavatachos',v:D.lavTotal[CUR],c:'#7d93a0'},
         {name:'Taller',v:D.tallTotal[CUR],c:'#e08a6a'},
       ])
-      +donutPanel('Kg descargados por origen','Julio · propios vs. fletes',[
+      +donutPanel('Kg descargados por origen',MES_LARGO[CUR]+' · propios vs. fletes',[
         {name:'Propios',v:D.descProp[CUR],c:'#2f9e6e'},
         {name:'Fletes',v:D.descFlet[CUR],c:'#d99a2b'},
       ]);

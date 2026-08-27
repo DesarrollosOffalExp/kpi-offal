@@ -4,7 +4,7 @@
     --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
     --line:#23353f; --line-2:#2c414d;
     --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
-    --brand:#e11f46; --brand-dim:rgba(225,31,70,.13); --brand-line:rgba(225,31,70,.45);
+    --brand:#b27746; --brand-dim:rgba(178,119,70,.13); --brand-line:rgba(178,119,70,.45);
     --info:#26b6d9; --good:#22e39b; --bad:#ff4d67; --amber:#f5a623;
     --radius:12px;
     font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -22,7 +22,7 @@
   .seg{display:inline-flex;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:3px;gap:2px;}
   .seg button{appearance:none;border:none;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:700;padding:6px 13px;border-radius:6px;cursor:pointer;transition:.15s;}
   .seg button:hover{color:var(--text);}
-  .seg button.on{background:var(--brand);color:#fff;}
+  .seg button.on{background:var(--brand);color:#1a1208;}
   .seg button:focus-visible{outline:2px solid var(--info);outline-offset:2px;}
   .pcard{background:linear-gradient(135deg,var(--brand-dim) 0%,var(--panel) 55%,var(--panel-2) 130%);border:1px solid var(--brand-line);border-top:3px solid var(--brand);border-radius:var(--radius);padding:18px 24px;margin-bottom:8px;display:flex;flex-wrap:wrap;align-items:center;gap:16px 40px;box-shadow:0 2px 4px rgba(0,0,0,.3),0 16px 40px -20px rgba(225,31,70,.5);}
   .phead{display:flex;flex-direction:column;gap:3px;min-width:180px;}
@@ -111,7 +111,7 @@
   .subnav{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0;}
   .subnav button{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--muted);font:inherit;font-size:12.5px;font-weight:700;padding:8px 15px;border-radius:999px;cursor:pointer;transition:.15s;}
   .subnav button:hover{color:var(--text);border-color:var(--brand);}
-  .subnav button.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .subnav button.on{background:var(--brand);color:#1a1208;border-color:var(--brand);}
   .view{display:none;} .view.on{display:block;}
   /* Sub-navegación anidada (Desarrollo de Terceros) */
   .subnav2{margin:14px 0 4px;gap:7px;}
@@ -173,7 +173,7 @@
   /* Presupuesto (Sistemas) */
   #presupuesto .pseg{display:inline-flex;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:3px;gap:2px;flex-wrap:wrap;margin:6px 0 16px;}
   #presupuesto .pseg button{appearance:none;border:none;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:700;padding:6px 13px;border-radius:6px;cursor:pointer;}
-  #presupuesto .pseg button.on{background:var(--brand);color:#fff;}
+  #presupuesto .pseg button.on{background:var(--brand);color:#1a1208;}
   #presupuesto .pkpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
   #presupuesto .pkpi{background:linear-gradient(160deg,var(--panel) 0%,var(--panel-2) 135%);border:1px solid var(--line);border-radius:11px;padding:13px 15px;}
   #presupuesto .pkpi.hero{border-color:var(--brand-line);background:linear-gradient(135deg,var(--brand-dim) 0%,var(--panel) 60%,var(--panel-2) 130%);border-top:3px solid var(--brand);}
