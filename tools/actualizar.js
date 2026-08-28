@@ -19,10 +19,10 @@ const norm = s => s.replace(/\s+/g, ' ').trim().toLowerCase();
 /** Busca un archivo en la carpeta de descargas tolerando los sufijos del
  *  navegador —"archivo (2).xlsx"— y los espacios de más. Devuelve el más nuevo. */
 function buscar(nombre) {
-  const base = norm(nombre).replace(/\.xlsx?$/, '');
+  const base = norm(nombre).replace(/\.xls[xm]$/, '');
   const cand = fs.readdirSync(DESCARGAS)
-    .filter(f => /\.xlsx?$/i.test(f))
-    .filter(f => norm(f).replace(/\.xlsx?$/, '').replace(/\s*\(\d+\)$/, '') === base)
+    .filter(f => /\.xls[xm]$/i.test(f))
+    .filter(f => norm(f).replace(/\.xls[xm]$/, '').replace(/\s*\(\d+\)$/, '') === base)
     .map(f => ({ f, t: fs.statSync(path.join(DESCARGAS, f)).mtimeMs }))
     .sort((a, b) => b.t - a.t);
   if (!cand.length) throw new Error('no encuentro "' + nombre + '" en ' + DESCARGAS);

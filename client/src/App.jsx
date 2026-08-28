@@ -16,6 +16,7 @@ import ComprasPendientes from './components/ComprasPendientes';
 import ComprasActividad from './components/ComprasActividad';
 import ComprasVencidas from './components/ComprasVencidas';
 import ComprasDemoradasSec from './components/ComprasDemoradasSec';
+import ComprasSinEntrega from './components/ComprasSinEntrega';
 import PresupuestoCongelado from './components/PresupuestoCongelado';
 import PresupuestoTaller from './components/PresupuestoTaller';
 import PresupuestoLavadero from './components/PresupuestoLavadero';
@@ -444,6 +445,16 @@ export default function App() {
                   <div className="grupo" key={g}>
                     {!conSub && <h2 className="grupo-titulo">{g}</h2>}
                     <ComprasVencidas />
+                  </div>
+                );
+              }
+              // Compras · Sin entrega: OC vivas con ítems pendientes de entrega.
+              const esSinEntrega = sector.key === 'compras' && typeof g === 'string' && g.startsWith('Sin entrega');
+              if (esSinEntrega) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <ComprasSinEntrega />
                   </div>
                 );
               }

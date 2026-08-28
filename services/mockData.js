@@ -78,8 +78,10 @@ const COMPRAS = {
     // Vencidas por semana: gráfico embebido (ComprasVencidas.jsx) con el desglose de la
     // tabla A112 (composición de las vencidas por semana de origen). Solo registra el grupo/subtab.
     { tipo: 'tabla', grupo: 'Vencidas por semana', titulo: 'Vencidas por semana', info: 'Desglose de cómo se componen las vencidas por semana de origen (hoja KPI · A112).', columnas: [], filas: [] },
-    // Órdenes demoradas (embebido; ComprasDemoradas.jsx): tabla agrupada de la hoja Demoradas con detalle.
-    { tipo: 'tabla', grupo: 'Órdenes demoradas', titulo: 'Órdenes demoradas', info: 'Ítems de OC vencidos y pendientes de recepción, por proveedor y rubro (hoja Demoradas).', columnas: [], filas: [] },
+    // Órdenes demoradas (embebido; ComprasDemoradasSec.jsx): tabla agrupada con detalle + el informe.
+    { tipo: 'tabla', grupo: 'Órdenes demoradas', titulo: 'Órdenes demoradas', info: 'Ítems de OC del año en curso, vencidos y pendientes de recepción, por proveedor y rubro (hoja Reporte).', columnas: [], filas: [] },
+    // Sin entrega (embebido; ComprasSinEntrega.jsx). Solo registra el grupo/subtab.
+    { tipo: 'tabla', grupo: 'Sin entrega', titulo: 'Sin entrega', info: 'Órdenes de compra vivas con ítems todavía pendientes de entrega, vencidos o no, por proveedor y rubro (hoja Reporte).', columnas: [], filas: [] },
     // Presupuesto (embebido; PresupuestoCompras.jsx). Solo registra el grupo/subtab, va
     // último para que Presupuesto y Objetivo queden como los dos últimos de la ventana.
     { tipo: 'tabla', grupo: 'Presupuesto', titulo: 'Presupuesto', info: 'Presupuestado vs. gasto real por grupo de costo, mes a mes (Compras).', columnas: [], filas: [] },

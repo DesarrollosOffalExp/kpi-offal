@@ -1,0 +1,38 @@
+{
+  "_comentario": "Una foto por corrida de las vencidas que trae la hoja Vencidas. Lo escribe tools/extractores/compras.js; no se edita a mano.",
+  "fotos": [
+    {
+      "semana": 34,
+      "tomada": "2026-08-28",
+      "total": 18,
+      "porSemanaOrigen": {
+        "17": 4,
+        "18": 4,
+        "23": 4,
+        "30": 2,
+        "32": 1,
+        "33": 3
+      },
+      "numeros": [
+        "30082",
+        "30084",
+        "30086",
+        "30478",
+        "30481",
+        "30483",
+        "30484",
+        "31760",
+        "31766",
+        "31771",
+        "31811",
+        "33514",
+        "33515",
+        "33912",
+        "34092",
+        "34093",
+        "34094",
+        "Total"
+      ]
+    }
+  ]
+}

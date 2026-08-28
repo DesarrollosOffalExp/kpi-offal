@@ -4,6 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const RAIZ = path.resolve(__dirname, '..', '..');
+const NL_ = String.fromCharCode(10);
 
 // Feriados que caen en día hábil y acortan la semana de Compras.
 const FERIADOS = ['2026-08-17'];
@@ -73,7 +74,73 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
     }
     log('   ' + venc.length + ' semanas de origen · total ' + total +
       (total === W.totalVenc ? ' (= vencidas de la semana ' + W.sem + ')' : ' ! no coincide con las ' + W.totalVenc + ' vencidas de la semana'));
-    escribir('client/src/dashboards/compras-vencidas.html', 'DATA', { latestSem: W.sem, total, weeks: venc });
+
+    // El detalle sale de la hoja "Vencidas", que es la tabla que arma Power
+    // Query. La dinámica de la hoja KPI puede haber quedado de una corrida
+    // anterior: si los totales no dan, mandan las filas de la tabla.
+    const hv = wb.filas('Vencidas');
+    const fEnc = hv.findIndex(r => r && txt(r[0]) === 'Número');
+    if (fEnc < 0) throw new Error('hoja Vencidas: no encuentro el encabezado');
+    const ev = (hv[fEnc] || []).map(v => txt(v) || '');
+    const cv = n => ev.findIndex(x => x.toLowerCase() === n.toLowerCase());
+    const V = {
+      num: cv('Número'), emi: cv('Emision'), ent: cv('Entrega'), cod: cv('Código'),
+      mat: cv('Descripción Material Ampliada'), rub: cv('Rubros'), saldo: cv('Saldo'),
+      cant: cv('Cantidad'), usr: cv('Usuario'), est: cv('Estado'), apr: cv('Fecha Aprobación'),
+      comp: cv('Comprador Asignado'), sem: cv('Semana'), sinOc: cv('s/ OC'),
+    };
+    const dmy2 = f => f instanceof Date
+      ? String(f.getUTCDate()).padStart(2, '0') + '/' + String(f.getUTCMonth() + 1).padStart(2, '0') + '/' + f.getUTCFullYear() : '';
+    const reqs = [];
+    for (let i = fEnc + 1; i < hv.length; i++) {
+      const r = hv[i]; if (!r || r[V.num] == null) continue;
+      reqs.push({
+        num: String(r[V.num]).trim(),
+        sem: num(r[V.sem]),
+        emision: dmy2(r[V.emi]), entrega: dmy2(r[V.ent]), aprob: dmy2(r[V.apr]),
+        cod: txt(r[V.cod]) || '', mat: txt(r[V.mat]) || '', rubro: txt(r[V.rub]) || '(sin rubro)',
+        saldo: num(r[V.saldo]), cant: num(r[V.cant]),
+        usuario: txt(r[V.usr]) || '', estado: txt(r[V.est]) || '',
+        comprador: txt(r[V.comp]) || '', diasSinOc: num(r[V.sinOc]),
+      });
+    }
+    // las semanas y el total salen de la tabla, no de la dinámica
+    const porSem = {};
+    reqs.forEach(x => { if (x.sem != null) porSem[x.sem] = (porSem[x.sem] || 0) + 1; });
+    const weeks = Object.keys(porSem).map(Number).sort((a, b) => a - b)
+      .map(sem => ({ sem, n: porSem[sem], reqs: reqs.filter(x => x.sem === sem) }));
+    const totalTabla = reqs.length;
+    if (total !== totalTabla)
+      log('   ! la dinámica de la hoja KPI dice ' + total + ' y la tabla Vencidas trae ' + totalTabla +
+        ' requisiciones: mandan las de la tabla');
+    log('   detalle: ' + totalTabla + ' requisiciones en ' + weeks.length + ' semanas de origen');
+
+    /* histórico: se guarda una foto por corrida, para poder mirar la evolución */
+    const fh = path.join(RAIZ, 'tools', 'historico-vencidas.json');
+    let hist = { _comentario: 'Una foto por corrida de las vencidas que trae la hoja Vencidas. Lo escribe tools/extractores/compras.js; no se edita a mano.', fotos: [] };
+    try { hist = JSON.parse(fs.readFileSync(fh, 'utf8')); } catch (e) { }
+    const clave = 'S' + W.sem;
+    const foto = {
+      semana: W.sem, tomada: new Date().toISOString().slice(0, 10),
+      total: totalTabla, porSemanaOrigen: porSem, numeros: reqs.map(x => x.num),
+    };
+    const iy = hist.fotos.findIndex(f => f.semana === W.sem);
+    if (iy >= 0) {
+      const antes = hist.fotos[iy];
+      if (antes.total !== foto.total || JSON.stringify(antes.numeros) !== JSON.stringify(foto.numeros))
+        log('   histórico: se rehace la foto de la ' + clave + ' (' + antes.total + ' → ' + foto.total + ')');
+      hist.fotos[iy] = foto;
+    } else {
+      hist.fotos.push(foto);
+      log('   histórico: nueva foto ' + clave + ' · ' + hist.fotos.length + ' semanas guardadas');
+    }
+    hist.fotos.sort((a, b) => a.semana - b.semana);
+    if (!dry) fs.writeFileSync(fh, JSON.stringify(hist, null, 2) + NL_);
+
+    escribir('client/src/dashboards/compras-vencidas.html', 'DATA', {
+      latestSem: W.sem, total: totalTabla, totalDinamica: total, weeks,
+      historico: hist.fotos.map(f => ({ semana: f.semana, total: f.total })),
+    });
   }
 
   /* ═══ sin tratar de la semana, por fecha de aprobación ═══ */
@@ -155,5 +222,144 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
     b = b.replace(/periodo: '[^']*'/, "periodo: 'semana " + W.sem + "'");
     log('   periodo: semana ' + W.sem);
     if (!dry) fs.writeFileSync(p, s.slice(0, ini) + b + s.slice(fin));
+  }
+
+  /* ═════════ Órdenes de compra · demoradas, informe y sin entrega ═════════ */
+  // Todo sale de la hoja Reporte, que es la consulta cruda a Sifab. La hoja
+  // "Demoradas" del mismo libro NO se usa: quedó desactualizada y no trae las
+  // órdenes nuevas.
+  log('· Órdenes de compra');
+  {
+    const XLSX = require('xlsx');
+    const oc = leer('Ordenes de Compra actualizable (version 1).xlsm');
+    const R = XLSX.utils.sheet_to_json(
+      XLSX.readFile(oc.ruta, { cellDates: true, sheets: ['Reporte'] }).Sheets['Reporte'],
+      { header: 1, raw: true, defval: null, blankrows: false });
+    const enc = (R[0] || []).map(v => String(v == null ? '' : v).replace(/\s+/g, ' ').trim());
+    const col = n => {
+      const i = enc.findIndex(v => v.toLowerCase() === n.toLowerCase());
+      if (i < 0) throw new Error('hoja Reporte: falta la columna "' + n + '"');
+      return i;
+    };
+    const K = {
+      oc: col('Número OC'), prov: col('Razón Social Proveedor'), rubro: col('Rubro'),
+      item: col('Item Nro'), mat: col('Descripción del Material'), req: col('Nro. de Requisición'),
+      cant: col('Cantidad Solicitada'), pend: col('Cantidad Pendiente'),
+      est: col('Estado'), estIt: col('Estado del Item'), comp: col('Comprador Asignado'),
+      ent: col('Fecha Entrega'), rec: col('Fecha Recepción VE'), obs: col('Texto Variable Observaciones'),
+    };
+    const hoy = new Date(); hoy.setUTCHours(0, 0, 0, 0);
+    const ene1 = new Date(Date.UTC(hoy.getUTCFullYear(), 0, 1));
+    const dmy = f => String(f.getUTCDate()).padStart(2, '0') + '/' + String(f.getUTCMonth() + 1).padStart(2, '0') + '/' + f.getUTCFullYear();
+    const limpio = v => String(v == null ? '' : v).replace(/\r/g, '').replace(/\n+/g, ' · ').replace(/\s+/g, ' ').trim();
+    const viva = e => /aprobad|emitid/i.test(String(e || ''));
+
+    /* --- 1) demoradas: pendiente, sin recibir, vencida y del año en curso --- */
+    const dem = [], sinEnt = [];
+    let recibidos = 0, pendientes = 0, totalOt = 0, totalLate = 0;
+    const byYear = {}, mesesAll = {}, rubrosAll = {}, provAll = {};
+    for (let i = 1; i < R.length; i++) {
+      const r = R[i]; if (!r) continue;
+      const ent = r[K.ent], rec = r[K.rec];
+      const pend = typeof r[K.pend] === 'number' ? r[K.pend] : 0;
+      const fila = {
+        prov: limpio(r[K.prov]), rubro: limpio(r[K.rubro]) || '(sin rubro)',
+        oc: limpio(r[K.oc]), item: limpio(r[K.item]), mat: limpio(r[K.mat]),
+        req: limpio(r[K.req]), cant: typeof r[K.cant] === 'number' ? r[K.cant] : null,
+        pend, estItem: limpio(r[K.estIt]), comprador: limpio(r[K.comp]),
+        obs: limpio(r[K.obs]),
+      };
+      // informe de puntualidad: sólo las que ya se recibieron
+      if (ent instanceof Date && rec instanceof Date) {
+        recibidos++;
+        const tarde = rec > ent;
+        const a = rec.getUTCFullYear(), m = rec.getUTCMonth() + 1;
+        const ym = a + '-' + String(m).padStart(2, '0');
+        if (tarde) totalLate++; else totalOt++;
+        const y = byYear[a] = byYear[a] || { ot: 0, late: 0, meses: Array.from({ length: 12 }, (_, k) => ({ m: k + 1, ot: 0, late: 0 })) };
+        y[tarde ? 'late' : 'ot']++; y.meses[m - 1][tarde ? 'late' : 'ot']++;
+        const mm = mesesAll[ym] = mesesAll[ym] || { ym, ot: 0, late: 0 }; mm[tarde ? 'late' : 'ot']++;
+        const ru = rubrosAll[fila.rubro] = rubrosAll[fila.rubro] || { k: fila.rubro, ot: 0, late: 0 }; ru[tarde ? 'late' : 'ot']++;
+        const pv = provAll[fila.prov] = provAll[fila.prov] || { k: fila.prov, ot: 0, late: 0 }; pv[tarde ? 'late' : 'ot']++;
+        continue;
+      }
+      if (!(ent instanceof Date) || rec instanceof Date || pend <= 0 || !viva(r[K.est])) continue;
+      pendientes++;
+      const dias = Math.round((ent - hoy) / 86400000);
+      const f = Object.assign({ fEntrega: dmy(ent), fRecep: '', dias }, fila);
+      sinEnt.push(f);                                  // toda OC pendiente de entrega
+      if (ent < hoy && ent >= ene1) dem.push(f);        // vencida y del año en curso
+    }
+
+    /* --- demoradas, agrupadas por proveedor y rubro --- */
+    const gr = {};
+    dem.forEach(it => {
+      const k = it.prov + '||' + it.rubro;
+      const a = gr[k] = gr[k] || { prov: it.prov, rubro: it.rubro, totalItems: 0, dias: 0, items: [] };
+      a.totalItems++; a.items.push(it);
+    });
+    const groups = Object.keys(gr).map(k => {
+      const a = gr[k];
+      a.items.sort((x, y) => x.dias - y.dias);
+      a.dias = a.items[0].dias; a.itemsReconstruidos = a.items.length;
+      return a;
+    }).sort((a, b) => a.dias - b.dias);
+    const dDem = 'client/src/dashboards/compras-demoradas.html';
+    const vDem = util.actual(dDem, 'DATA');
+    if (vDem) log('   demoradas: ' + vDem.totalItems + ' → ' + dem.length + ' ítems · ' +
+      vDem.totalGrupos + ' → ' + groups.length + ' grupos · peor ' + (groups[0] ? groups[0].dias : 0) + ' días');
+    escribir(dDem, 'DATA', {
+      generado: dmy(hoy), totalItems: dem.length, totalGrupos: groups.length,
+      peorDias: groups.length ? groups[0].dias : 0,
+      totalProveedores: new Set(dem.map(i => i.prov)).size,
+      detalleReconstruido: dem.length, groups,
+    });
+
+    /* --- 2) informe de puntualidad --- */
+    const ordena = o => Object.values(o).map(x => Object.assign({}, x, { total: x.ot + x.late }))
+      .sort((a, b) => b.total - a.total);
+    const dInf = 'client/src/dashboards/compras-informe.html';
+    const vInf = util.actual(dInf, 'DATA');
+    if (vInf) log('   informe: ' + vInf.recibidos + ' → ' + recibidos + ' recibidos · ' +
+      vInf.pendientes + ' → ' + pendientes + ' pendientes · a tiempo ' + vInf.totalOt + ' → ' + totalOt);
+    escribir(dInf, 'DATA', {
+      generado: dmy(hoy), hoy: hoy.toISOString().slice(0, 10),
+      recibidos, pendientes, totalOt, totalLate,
+      years: Object.keys(byYear).map(Number).sort((a, b) => a - b), byYear,
+      mesesAll: Object.values(mesesAll).sort((a, b) => a.ym < b.ym ? -1 : 1),
+      rubrosAll: ordena(rubrosAll).slice(0, 20), provAll: ordena(provAll).slice(0, 20),
+    });
+
+    /* --- 3) sin entrega: todo lo pendiente, vencido o no --- */
+    const gs = {};
+    sinEnt.forEach(it => {
+      const k = it.prov + '||' + it.rubro;
+      const a = gs[k] = gs[k] || { prov: it.prov, rubro: it.rubro, items: [], totalItems: 0, promDias: 0 };
+      a.items.push(it); a.totalItems++;
+    });
+    const grupos = Object.keys(gs).map(k => {
+      const a = gs[k];
+      a.items.sort((x, y) => x.dias - y.dias);
+      a.promDias = Math.round(a.items.reduce((s, x) => s + x.dias, 0) / a.items.length);
+      a.vencidos = a.items.filter(x => x.dias < 0).length;
+      return a;
+    }).sort((a, b) => b.totalItems - a.totalItems || a.promDias - b.promDias);
+    const dSin = 'client/src/dashboards/compras-sin-entrega.html';
+    const vSin = util.actual(dSin, 'DATA');
+    // la hoja "sin entrega" trae su propio total, para control
+    const hs = oc.filas('sin entrega');
+    const fTot = hs.find(r => r && /^total$/i.test(String(r[0] || '').trim()));
+    const totalHoja = fTot ? (typeof fTot[2] === 'number' ? fTot[2] : null) : null;
+    if (totalHoja != null && totalHoja !== sinEnt.length)
+      log('   ! la hoja "sin entrega" totaliza ' + totalHoja + ' ítems y de Reporte salen ' + sinEnt.length);
+    log('   sin entrega: ' + sinEnt.length + ' ítems en ' + grupos.length + ' grupos · ' +
+      sinEnt.filter(x => x.dias < 0).length + ' ya vencidos' + (vSin ? ' (antes ' + vSin.totalItems + ')' : ''));
+    escribir(dSin, 'DATA', {
+      generado: dmy(hoy), totalItems: sinEnt.length, totalGrupos: grupos.length,
+      totalProveedores: new Set(sinEnt.map(i => i.prov)).size,
+      vencidos: sinEnt.filter(x => x.dias < 0).length,
+      porVencer: sinEnt.filter(x => x.dias >= 0).length,
+      totalHoja, grupos,
+    });
   }
 };
