@@ -94,6 +94,8 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
     const reqs = [];
     for (let i = fEnc + 1; i < hv.length; i++) {
       const r = hv[i]; if (!r || r[V.num] == null) continue;
+      // la tabla cierra con una fila Total que trae número de semana: no es una requisición
+      if (num(r[V.num]) == null) continue;
       reqs.push({
         num: String(r[V.num]).trim(),
         sem: num(r[V.sem]),
@@ -137,10 +139,11 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
     hist.fotos.sort((a, b) => a.semana - b.semana);
     if (!dry) fs.writeFileSync(fh, JSON.stringify(hist, null, 2) + NL_);
 
-    escribir('client/src/dashboards/compras-vencidas.html', 'DATA', {
+    const datosVenc = {
       latestSem: W.sem, total: totalTabla, totalDinamica: total, weeks,
       historico: hist.fotos.map(f => ({ semana: f.semana, total: f.total })),
-    });
+    };
+    escribir('client/src/dashboards/compras-vencidas.html', 'DATA', datosVenc);
   }
 
   /* ═══ sin tratar de la semana, por fecha de aprobación ═══ */
