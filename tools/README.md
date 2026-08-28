@@ -65,6 +65,22 @@ suposición se rompió.
 - **Algunas hojas traen bloques viejos arriba del bueno.** En la hoja `KPI` de
   Compras hay tres versiones de la misma tabla; la que vale es la que tiene las
   columnas `Total REQ Tratadas` y `Observaciones`.
+- **Y otras repiten los encabezados dos veces en la misma fila.** En `STOCK HIEL`
+  la hoja `STOCK` tiene el detalle por bin despachado y, más a la derecha, un
+  resumen por día con los mismos títulos (`PESADA`, `N° TICKET`, `REMITO`).
+  Mapear las columnas por nombre dejando ganar la última match daba el resumen,
+  que se carga a mano y no siempre coincide: el 6 de agosto el detalle tiene
+  3.920 kg de balanza y el resumen 3.751,5. Vale el detalle, y la corrida avisa
+  cuando los dos no dan igual.
+- **Hay tableros cuya única memoria es nuestra.** La tabla de vencidas de Compras
+  se recalcula sola y pierde las requisiciones que se destrabaron. Cada corrida
+  guarda una foto en `tools/historico-vencidas.json`: si se borra, el histórico
+  no se puede reconstruir desde la planilla.
+- **Una cuenta puede estar partida en tramos.** El `Consolidado` de tambores no
+  corre de enero a hoy: se cerró en cero dos veces (hasta la S20 y en la S33,
+  que fue un arqueo). El saldo es la suma de la S21 a la S32 y `Año 2026` la de
+  la S34 en adelante. Los cortes están en la constante `TRAMOS` del extractor y
+  cada corrida controla que las dos columnas den la suma de sus semanas.
 
 ## Agregar una fuente nueva
 
@@ -103,8 +119,12 @@ node -e "const s=require('fs').readFileSync('client/src/dashboards/kpi-sistemas.
 
 ## Qué falta
 
-Falta mapear `compras/demoradas-e-informe`, que sale de un `.xlsm` grande, y dentro de
-`insumos` la `merma-cajas`: el KPI mensual está en la hoja `KPIs`, pero el
-detalle por tipo de caja sale de cruzar `Consumos Deposito` con producción y
-todavía no está mapeado. El script avisa cuándo un grupo no tiene extractor en
-lugar de fallar de cualquier modo.
+Dentro de `insumos`, la `merma-cajas`: el KPI mensual está en la hoja `KPIs`,
+pero el detalle por tipo de caja sale de cruzar `Consumos Deposito` con
+producción y todavía no está mapeado. El script avisa cuándo un grupo no tiene
+extractor en lugar de fallar de cualquier modo.
+
+Todo lo demás está cubierto: los 32 tableros de `client/src/dashboards` tienen
+su fuente declarada en `fuentes.json` y su extractor, y los siete grupos corren
+de punta a punta. Se puede comprobar con `--dry`, que muestra qué quedaría
+escrito sin tocar nada.

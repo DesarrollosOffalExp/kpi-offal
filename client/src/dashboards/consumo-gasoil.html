@@ -30,7 +30,10 @@
   .kpi .kv{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.05;color:#fff;margin-top:7px;}
   .kpi .kv .ku{font-size:12px;font-weight:700;color:var(--muted);margin-left:3px;}
   .kpi .kd{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:4px;}
-  .kpi .kd .up{color:var(--bad);} .kpi .kd .down{color:var(--good);}
+  .kpi .kprom{margin-top:9px;padding-top:8px;border-top:1px solid var(--line);font-size:12.5px;
+    font-weight:600;color:var(--muted);}
+  .kpi .kprom b{font-size:16px;font-weight:800;color:var(--brand);letter-spacing:-.02em;}
+  .kpi .kd .up{color:var(--bad);} .kpi .kd .down{color:var(--good);} .kpi .kd .neu{color:var(--muted);}
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 18px;margin-bottom:16px;}
   .panel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;}
   .panel h3{font-size:15px;font-weight:800;margin:0;}
@@ -88,19 +91,39 @@
   const W = DATA.semanas;
   const nf=new Intl.NumberFormat('es-AR',{maximumFractionDigits:0});
   const d2=v=>v==null?'—':v.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const d1=v=>v==null?'—':v.toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1});
   let wi = W.length-1, sortK='semN', sortD=1;
+
+  // Promedio del período: no es el promedio de los porcentajes semanales, es el
+  // total de litros de camiones sobre el total de kilómetros. Lo comparten la
+  // tarjeta y la línea del gráfico, así que el número es siempre el mismo.
+  const SEM_CON_KM = W.filter(x=>x.km>0);
+  const PROM = (function(){
+    const lt=SEM_CON_KM.reduce((a,x)=>a+x.consCam,0), km=SEM_CON_KM.reduce((a,x)=>a+x.km,0);
+    return km?lt/km*100:0;
+  })();
+
+  // La comparación contra la semana anterior, en valor y en porcentaje.
+  // neutro=1 para los kilómetros: recorrer más no es mejor ni peor.
+  function comp(v,prev,k,neutro){
+    if(!prev||!prev[k]) return '';
+    const d=v-prev[k], up=d>0, cl=neutro?'neu':(up?'up':'down');
+    return '<span class="'+cl+'">'+(up?'▲ +':'▼ ')+nf.format(Math.abs(d))
+      +' · '+(up?'+':'−')+d1(Math.abs(d/prev[k]*100))+'% vs '+prev.sem+'</span>';
+  }
 
   function renderKpis(){
     const w=W[wi], prev=wi>0?W[wi-1]:null;
-    let dl=''; if(prev&&prev.lt100){ const d=Math.round((w.lt100-prev.lt100)*100)/100, up=d>0; dl='<span class="'+(up?'up':'down')+'">'+(up?'▲ +':'▼ ')+Math.abs(d)+' vs '+prev.sem+'</span>'; }
+    let dl=''; if(prev&&prev.lt100){ const d=Math.round((w.lt100-prev.lt100)*100)/100, up=d>0; dl='<span class="'+(up?'up':'down')+'">'+(up?'▲ +':'▼ ')+d2(Math.abs(d))+' Lt/100km · '+(up?'+':'−')+d1(Math.abs(d/prev.lt100*100))+'% vs '+prev.sem+'</span>'; }
     const cards=[
-      {hero:1,l:'Litros / 100 km',v:d2(w.lt100),d:dl||(w.sem+' · '+w.desde+'–'+w.hasta)},
-      {l:'Consumo total',v:nf.format(w.consTot),u:'Lt',d:'Camiones + mantenimiento'},
-      {l:'Consumo camiones',v:nf.format(w.consCam),u:'Lt',d:w.sem},
-      {l:'Mant. / taller',v:nf.format(w.consMant),u:'Lt',d:'Gasoil mantenimiento'},
-      {l:'Km recorridos',v:nf.format(w.km),u:'',d:'Flota propia'},
+      {hero:1,l:'Litros / 100 km',v:d2(w.lt100),d:dl||(w.sem+' · '+w.desde+'–'+w.hasta),
+        prom:'Promedio del período <b>'+d2(PROM)+'</b> Lt/100km · '+SEM_CON_KM.length+' semanas'},
+      {l:'Consumo total',v:nf.format(w.consTot),u:'Lt',d:comp(w.consTot,prev,'consTot')||'Camiones + mantenimiento'},
+      {l:'Consumo camiones',v:nf.format(w.consCam),u:'Lt',d:comp(w.consCam,prev,'consCam')||w.sem},
+      {l:'Mant. / taller',v:nf.format(w.consMant),u:'Lt',d:comp(w.consMant,prev,'consMant')||'Gasoil mantenimiento'},
+      {l:'Km recorridos',v:nf.format(w.km),u:'',d:comp(w.km,prev,'km',1)||'Flota propia'},
     ];
-    document.getElementById('kpis').innerHTML=cards.map(c=>'<div class="kpi'+(c.hero?' hero':'')+'"><div class="kl">'+c.l+'</div><div class="kv">'+c.v+(c.u?'<span class="ku">'+c.u+'</span>':'')+'</div><div class="kd">'+(c.d||'')+'</div></div>').join('');
+    document.getElementById('kpis').innerHTML=cards.map(c=>'<div class="kpi'+(c.hero?' hero':'')+'"><div class="kl">'+c.l+'</div><div class="kv">'+c.v+(c.u?'<span class="ku">'+c.u+'</span>':'')+'</div><div class="kd">'+(c.d||'')+'</div>'+(c.prom?'<div class="kprom">'+c.prom+'</div>':'')+'</div>').join('');
   }
 
   function renderChart(){
@@ -108,7 +131,7 @@
     const Wd=980,H=250,padL=32,padR=16,padT=18,padB=30, iw=Wd-padL-padR, ih=H-padT-padB;
     const nz=vals.filter(v=>v>0); const min=Math.floor(Math.min(...nz)-2), max=Math.ceil(Math.max(...nz)+2);
     const x=i=>padL+iw*i/(W.length-1), y=v=>padT+ih-((v-min)/((max-min)||1))*ih;
-    const avg=nz.reduce((a,b)=>a+b,0)/nz.length;
+    const avg=PROM;   // el mismo número que muestra la tarjeta
     let s='<svg viewBox="0 0 '+Wd+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
     s+='<defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(245,166,35,.30)"/><stop offset="1" stop-color="rgba(245,166,35,0)"/></linearGradient></defs>';
     for(let t=0;t<=4;t++){ const yy=padT+ih*t/4, val=Math.round((max-(max-min)*t/4)*10)/10; s+='<line x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(Wd-padR)+'" y2="'+yy.toFixed(1)+'" stroke="#23353f" stroke-dasharray="3 3"/><text x="'+(padL-6)+'" y="'+(yy+3).toFixed(1)+'" font-size="9" fill="#667d89" text-anchor="end">'+val+'</text>'; }

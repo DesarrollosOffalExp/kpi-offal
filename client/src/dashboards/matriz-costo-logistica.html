@@ -125,6 +125,11 @@
   .tip.show{opacity:1;transform:none;}
   @media(max-width:860px){ .sections{grid-template-columns:1fr;} .section{border-left:none;border-top:1px solid var(--line);} .section:first-child{border-top:none;} .donuts{grid-template-columns:1fr;} }
   @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
+  /* la fila del costo en dólares es la que se compara entre sectores: va destacada */
+  tbody tr.usd td{background:linear-gradient(90deg,rgba(178,119,70,.16),rgba(178,119,70,.07));
+    color:#f0cfae;font-weight:700;border-top:1px solid var(--brand-line);border-bottom:1px solid var(--brand-line);}
+  tbody tr.usd td:first-child{color:var(--brand);font-weight:800;letter-spacing:.01em;}
+  tbody tr.usd td.cur{background:linear-gradient(90deg,rgba(178,119,70,.3),rgba(178,119,70,.18));color:#fff;}
 </style>
 
 <div class="wrap">
@@ -145,7 +150,6 @@
   </header>
 
   <section id="primary"></section>
-  <section class="sections" id="sections"></section>
   <section class="donuts" id="donuts"></section>
 
   <div class="blocks" id="blocks"></div>
@@ -179,6 +183,7 @@
     if(f==='money') return '$ '+nf.format(Math.round(v));
     if(f==='num') return nf.format(Math.round(v));
     if(f==='dec') return nf.format(Math.round(v*100)/100);
+    if(f==='usd') return 'USD '+nf.format(Math.round(v*100)/100);
     if(f==='pct') return (Math.round(v*1000)/10).toLocaleString('es-AR')+'%';
     if(f==='signpct'){ const p=Math.round(v*1000)/10; return (p>0?'+':'')+p.toLocaleString('es-AR')+'%'; }
     return String(v);
@@ -327,28 +332,47 @@
       ]);
   }
 
-  /* ---------- Acordeones con heat-map ---------- */
+  /* ---------- Acordeones ---------- */
+  // participación de una serie sobre otra, mes a mes
+  const pctDe = (parte, total) => (parte || []).map((v, i) => {
+    const t = (total || [])[i];
+    return (v == null || !t) ? null : v / t;
+  });
   const BLOCKS=[
     { id:'descarga', name:'Descarga (kg)', color:'var(--c-lava)', open:true, extraOrigen:true, rows:[
       {l:'Descarga producción', d:D.descProd, f:'num'},{l:'Descarga kg neta', d:D.descNeta, f:'num'},
       {l:'Descarga propios', d:D.descProp, f:'num'},{l:'Descarga fletes', d:D.descFlet, f:'num'},
       {l:'% Kg propios', d:D.pctPropios, f:'pct'},{l:'% Kg fletes', d:D.pctFletes, f:'pct'}]},
     { id:'propios', name:'Propios', color:'var(--c-propios)', open:true, rows:[
-      {l:'Total del mes', d:D.propTotal, f:'money', strong:true, heat:true},{l:'Costo $ / kg', d:D.propKg, f:'dec', heat:true},{l:'Costo USD / ton', d:D.propUsd, f:'dec', led:true, heat:true}]},
+      {l:'Total del mes', d:D.propTotal, f:'money', strong:true},
+      {l:'% del Costo General', d:pctDe(D.propTotal, D.genTotal), f:'pct'},
+      {l:'Costo $ / kg', d:D.propKg, f:'dec'},
+      {l:'Costo USD / ton', d:D.propUsd, f:'usd', led:true, usd:true}]},
     { id:'fletes', name:'Fletes', color:'var(--c-fletes)', open:true, rows:[
-      {l:'Total del mes', d:D.fletTotal, f:'money', strong:true, heat:true},{l:'Costo $ / kg', d:D.fletKg, f:'dec', heat:true},{l:'Costo USD / ton', d:D.fletUsd, f:'dec', led:true, heat:true}]},
+      {l:'Total del mes', d:D.fletTotal, f:'money', strong:true},
+      {l:'% del Costo General', d:pctDe(D.fletTotal, D.genTotal), f:'pct'},
+      {l:'Costo $ / kg', d:D.fletKg, f:'dec'},
+      {l:'Costo USD / ton', d:D.fletUsd, f:'usd', led:true, usd:true}]},
     { id:'total', name:'Costo Logística  ( = Propios + Fletes )', color:'#26b6d9', open:true, rows:[
-      {l:'Total del mes Logística', d:D.logTotal, f:'money', strong:true, heat:true},{l:'Costo Logística $ / kg', d:D.logKg, f:'dec', heat:true},{l:'Logística USD / ton', d:D.logUsd, f:'dec', led:true, heat:true}]},
-    { id:'lava', name:'Lavatachos', color:'var(--c-lava)', chart:true, chex:'#7d93a0',
-      chartRow:{l:'Total del mes lavado', d:D.lavTotal, f:'money'},
-      stats:[{l:'Costo $/lavado', d:D.lavPor, f:'money'},{l:'USD/lavado', d:D.lavUsdLav, f:'dec'},{l:'Cantidad', d:D.lavCant, f:'num'},{l:'USD/ton', d:D.lavUsdTon, f:'dec', led:true}]},
-    { id:'taller', name:'Taller', color:'var(--c-taller)', chart:true, chex:'#e08a6a',
-      chartRow:{l:'Total del mes taller', d:D.tallTotal, f:'money'},
-      stats:[{l:'Costo USD/ton', d:D.tallUsd, f:'dec', led:true}]},
+      {l:'Total del mes Logística', d:D.logTotal, f:'money', strong:true},
+      {l:'% del Costo General', d:pctDe(D.logTotal, D.genTotal), f:'pct'},
+      {l:'Costo Logística $ / kg', d:D.logKg, f:'dec'},
+      {l:'Logística USD / ton', d:D.logUsd, f:'usd', led:true, usd:true}]},
+    { id:'lava', name:'Lavatachos', color:'var(--c-lava)', open:true, rows:[
+      {l:'Total del mes lavado', d:D.lavTotal, f:'money', strong:true},
+      {l:'% del Costo General', d:pctDe(D.lavTotal, D.genTotal), f:'pct'},
+      {l:'Costo $ / lavado', d:D.lavPor, f:'money'},
+      {l:'Cantidad de lavados', d:D.lavCant, f:'num'},
+      {l:'USD / lavado', d:D.lavUsdLav, f:'usd', usd:true},
+      {l:'Costo USD / ton', d:D.lavUsdTon, f:'usd', led:true, usd:true}]},
+    { id:'taller', name:'Taller', color:'var(--c-taller)', open:true, rows:[
+      {l:'Total del mes taller', d:D.tallTotal, f:'money', strong:true},
+      {l:'% del Costo General', d:pctDe(D.tallTotal, D.genTotal), f:'pct'},
+      {l:'Costo USD / ton', d:D.tallUsd, f:'usd', led:true, usd:true}]},
     { id:'general', name:'Total General (Costo General)', color:'var(--brand)', open:true, rows:[
-      {l:'TOTAL del mes · Costo General', d:D.genTotal, f:'money', strong:true, heat:true},{l:'Total del mes sin fletes', d:D.genSinFlet, f:'money', heat:true},
-      {l:'USD / ton sin fletes', d:D.usdSinFlet, f:'dec', led:true, heat:true},{l:'Total USD / ton descargada', d:D.usdTonDesc, f:'dec', led:true, heat:true},
-      {l:'Total $ / ton descargada', d:D.pesoTonDesc, f:'money', heat:true},{l:'Total $ / ton producida', d:D.pesoTonProd, f:'money', heat:true}]},
+      {l:'TOTAL del mes · Costo General', d:D.genTotal, f:'money', strong:true},{l:'Total del mes sin fletes', d:D.genSinFlet, f:'money'},
+      {l:'USD / ton sin fletes', d:D.usdSinFlet, f:'usd', led:true, usd:true},{l:'Total USD / ton descargada', d:D.usdTonDesc, f:'usd', led:true, usd:true},
+      {l:'Total $ / ton descargada', d:D.pesoTonDesc, f:'money'},{l:'Total $ / ton producida', d:D.pesoTonProd, f:'money'}]},
     { id:'indec', name:'Ajustado por INDEC (costo real)', color:'#f5a623', open:true, rows:[
       {l:'Índice INDEC del mes', d:D.indec, f:'pct'},{l:'Ajustado por INDEC ($/ton)', d:D.ajusteIndec, f:'money', strong:true},{l:'Variación real (%)', d:D.pctIndec, f:'signpct'}]},
   ];
@@ -368,12 +392,9 @@
     const th=cols.map(i=>'<th class="'+(i===CUR?'cur':'')+'">'+ABBR[i]+'</th>').join('');
     const body=b.rows.map(r=>{
       const vis=cols.map(i=>r.d[i]).filter(v=>v!=null);
-      const mn=Math.min(...vis), mx=Math.max(...vis);
-      const tds=cols.map(i=>{
-        const bg=r.heat?heatBg(r.d[i],mn,mx):'';
-        return '<td class="'+(i===CUR?'cur':'')+'" style="'+bg+'">'+fmt(r.d[i],r.f)+(r.led?led(r.d[i]):'')+'</td>';
-      }).join('');
-      return '<tr class="'+(r.strong?'strong':'')+'"><td>'+r.l+'</td>'+tds+'</tr>';
+      const tds=cols.map(i=>
+        '<td class="'+(i===CUR?'cur':'')+'">'+fmt(r.d[i],r.f)+(r.led?led(r.d[i]):'')+'</td>').join('');
+      return '<tr class="'+(r.strong?'strong ':'')+(r.usd?'usd':'')+'"><td>'+r.l+'</td>'+tds+'</tr>';
     }).join('');
     return '<div class="tscroll"><table><thead><tr><th>Ítem</th>'+th+'</tr></thead><tbody>'+body+'</tbody></table></div>';
   }
@@ -439,7 +460,7 @@
     view=b.dataset.v;
     document.querySelectorAll('#seg button').forEach(x=>{x.classList.remove('on');x.removeAttribute('aria-selected');});
     b.classList.add('on'); b.setAttribute('aria-selected','true');
-    renderSections(); renderBlocks();
+    renderBlocks();
   });
 
   // ---- Tooltip interactivo (hover sobre puntos, barras y donas) ----
@@ -453,7 +474,7 @@
     else if(tip.classList.contains('show')) tip.classList.remove('show');
   });
 
-  renderPrimary(); renderSections(); renderDonuts(); renderBlocks();
+  renderPrimary(); renderDonuts(); renderBlocks();
 
   // Cuando se embebe en un iframe (dentro del tablero), avisar el alto real
   // para que el contenedor lo ajuste · así no hay scroll interno ni recortes.

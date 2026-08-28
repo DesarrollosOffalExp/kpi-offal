@@ -28,6 +28,17 @@
   .kpi.hero{border-color:var(--brand-line);background:linear-gradient(135deg,var(--brand-dim) 0%,var(--panel) 60%,var(--panel-2) 130%);border-top:3px solid var(--brand);}
   .kpi .kl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;position:relative;z-index:1;}
   .kpi .kv{font-size:29px;font-weight:800;letter-spacing:-.03em;line-height:1;color:#fff;margin-top:8px;position:relative;z-index:1;}
+  .kpi .kdesg{margin-top:9px;padding-top:9px;border-top:1px solid var(--line);}
+  .kpi .kdbar{display:flex;height:6px;border-radius:4px;overflow:hidden;background:var(--panel-2);}
+  .kpi .kdbar i{display:block;height:100%;}
+  .kpi .kdbar i.ant{background:var(--amber);}
+  .kpi .kdbar i.sem{background:var(--good);}
+  .kpi .kdl{display:flex;justify-content:space-between;gap:10px;margin-top:7px;font-size:10.5px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.03em;color:var(--muted);}
+  .kpi .kdl b{display:block;font-size:15px;font-weight:800;letter-spacing:-.02em;text-transform:none;}
+  .kpi .kdl b.ant{color:var(--amber);}
+  .kpi .kdl b.sem{color:var(--good);}
+  .kpi .kdl span:last-child{text-align:right;}
   .kpi .kd{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:5px;position:relative;z-index:1;}
   .kpi .kd .up{color:var(--bad);} .kpi .kd .down{color:var(--good);}
   .kpi .spark{position:absolute;right:0;bottom:0;width:50%;height:42%;opacity:.45;}
@@ -154,6 +165,26 @@
     const x=i=>pad+(Wd-2*pad)*i/(vals.length-1), y=v=>H-pad-((v-mn)/sp)*(H-2*pad);
     return '<svg class="spark" viewBox="0 0 '+Wd+' '+H+'" preserveAspectRatio="none"><polyline points="'+vals.map((v,i)=>x(i).toFixed(1)+','+y(v).toFixed(1)).join(' ')+'" fill="none" stroke="'+color+'" stroke-width="2"/></svg>';
   }
+  // El total de tratadas no es sólo lo de la semana: la hoja lo calcula como
+  //   pendientes de la semana anterior − las que siguen pendientes + tratadas + rechazadas + anuladas
+  // Las dos mitades son entonces: las que venían de antes y se destrabaron, y
+  // las que entraron y se resolvieron en la propia semana.
+  function desgloseTratadas(w,prev){
+    if(w.totalTratadas==null||!prev) return '';
+    const ant=prev.totalPend-w.antVenc-w.antSinVenc;
+    const sem=w.tratadas+w.rechazadas+w.anuladas;
+    const tot=ant+sem, pa=tot>0?Math.min(100,Math.max(0,ant/tot*100)):0;
+    const t='De las '+nf.format(prev.totalPend)+' pendientes que dejó la Sem '+prev.sem+' siguen sin resolverse '
+      +nf.format(w.antVenc+w.antSinVenc)+' ('+nf.format(w.antVenc)+' vencidas y '+nf.format(w.antSinVenc)
+      +' sin vencer), así que se trataron '+nf.format(ant)+'.'
+      +' De la semana se resolvieron '+nf.format(sem)+': '+nf.format(w.tratadas)+' tratadas, '
+      +nf.format(w.rechazadas)+' rechazadas y '+nf.format(w.anuladas)+' anuladas.'
+      +(tot===w.totalTratadas?'':' Ojo: las dos partes suman '+nf.format(tot)+' y la hoja informa '+nf.format(w.totalTratadas)+'.');
+    return '<div class="kdesg" title="'+t.split('"').join('&quot;')+'">'
+      +'<div class="kdbar"><i class="ant" style="width:'+pa.toFixed(1)+'%"></i><i class="sem" style="width:'+(100-pa).toFixed(1)+'%"></i></div>'
+      +'<div class="kdl"><span><b class="ant">'+nf.format(ant)+'</b>anteriores</span>'
+      +'<span><b class="sem">'+nf.format(sem)+'</b>de la semana</span></div></div>';
+  }
   function renderKpis(){
     const w=W[wi], prev=wi>0?W[wi-1]:null;
     function d(cur,pv,down){ if(pv==null) return ''; const df=cur-pv; if(df===0) return 'sin cambio vs sem. ant.'; const up=df>0; const bad=down?up:!up; return '<span class="'+(bad?'up':'down')+'">'+(up?'▲ +':'▼ ')+Math.abs(df)+' vs Sem '+prev.sem+'</span>'; }
@@ -162,9 +193,11 @@
       {l:'Anteriores vencidas',v:w.antVenc,d:d(w.antVenc,prev&&prev.antVenc,true),sp:spark(W.map(x=>x.antVenc),'var(--bad)')},
       {l:'Anteriores sin vencer',v:w.antSinVenc,d:d(w.antSinVenc,prev&&prev.antSinVenc,true),sp:spark(W.map(x=>x.antSinVenc),'var(--amber)')},
       {l:'Sin tratar de la semana',v:w.sinTratarSem,d:d(w.sinTratarSem,prev&&prev.sinTratarSem,true),sp:spark(W.map(x=>x.sinTratarSem),'var(--info)')},
-      {l:'Total requis tratadas',v:w.totalTratadas==null?'—':nf.format(w.totalTratadas),d:'Acumulado tratadas',sp:spark(W.map(x=>x.totalTratadas||0),'var(--good)')},
+      {l:'Total requis tratadas',v:w.totalTratadas==null?'—':nf.format(w.totalTratadas),d:'Anteriores + de la semana',
+        // sin sparkline: el desglose ocupa ese lugar y la evolución ya está en el gráfico
+        desg:desgloseTratadas(w,prev)},
     ];
-    document.getElementById('kpis').innerHTML=cards.map(c=>'<div class="kpi'+(c.hero?' hero':'')+'"><div class="kl">'+c.l+'</div><div class="kv">'+c.v+'</div><div class="kd">'+(c.d||'')+'</div>'+(c.sp||'')+'</div>').join('');
+    document.getElementById('kpis').innerHTML=cards.map(c=>'<div class="kpi'+(c.hero?' hero':'')+'"><div class="kl">'+c.l+'</div><div class="kv">'+c.v+'</div><div class="kd">'+(c.d||'')+'</div>'+(c.desg||'')+(c.sp||'')+'</div>').join('');
   }
 
   function renderChart(){

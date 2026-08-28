@@ -5,6 +5,14 @@ const fs = require('fs');
 const path = require('path');
 
 const MES_AB = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+// "Tractores" → "Tractor", "Bateas" → "Batea"
+function singular(n) {
+  const x = String(n).trim();
+  if (/^bateas$/i.test(x)) return 'Batea';
+  if (/^chasis$/i.test(x)) return 'Chasis';
+  return x.replace(/es$/i, '').replace(/s$/i, '');
+}
+
 const MES_LG = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 // semana ISO de una fecha, y el lunes/domingo de una semana ISO
@@ -52,7 +60,7 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
         cols.forEach(j => { env += num(r[j]) || 0; rec += num(r[j + 1]) || 0; });
         // el que no movió nada esa semana no entra
         if (!env && !rec) continue;
-        frigos.push({ f: n, env, rec, dif: env - rec });
+        frigos.push({ f: n, env, rec, dif: rec - env });
       }
       const suma = k => frigos.reduce((a, x) => a + x[k], 0);
       return { wk: hoja, num: +hoja, frigos, totEnv: suma('env'), totRec: suma('rec'), totDif: suma('dif') };
@@ -113,6 +121,88 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
         log('   a debitar: ' + viejo.debito.reduce((a, x) => a + x.debito, 0) + ' → ' + sumaDeb + ' tambores en ' + debito.length + ' frigoríficos');
     }
     escribir(destino, 'DATA', { deudaTotal, stock, debito, weeks });
+
+    /* --- 4) el consolidado: la matriz de frigorífico × semana --- */
+    // Cada celda es la diferencia de esa semana (recibidos − enviados). La hoja
+    // la trae calculada; acá se rehace desde las hojas semanales y se controla
+    // contra la hoja, que puede haber quedado de una corrida anterior.
+    {
+      const encC = con[fEnc] || [];
+      const colsSem = [];
+      encC.forEach((v, j) => {
+        const m = String(v == null ? '' : v).trim().match(/^s\.?\s*(\d+)$/i);
+        if (m) colsSem.push({ j, sem: +m[1] });
+      });
+      const colDe = re => encC.findIndex(v => re.test(String(v == null ? '' : v).replace(/\s+/g, ' ').trim()));
+      const cAnt = colDe(/^Año\s*\d{4}$/i);                      // arrastre del año anterior
+      const cSaldo = colDe(/^saldo$/i);
+      const cAct = encC.reduce((a, v, j) => /^Año\s*\d{4}$/i.test(String(v == null ? '' : v).trim()) ? j : a, -1);
+      const colsDeb = []; encC.forEach((v, j) => { if (/^debito$/i.test(String(v == null ? '' : v).trim())) colsDeb.push(j); });
+
+      // Los cortes del consolidado. Si cambian, se tocan acá y en fuentes.json.
+      const TRAMOS = { cierre1: 20, segDesde: 21, segHasta: 32, arqueo: 33, actDesde: 34 };
+      const porSem = {}; weeks.forEach(w => { porSem[+w.wk] = w; });
+      const clave = n => limpio(n).toUpperCase();
+      let iguales = 0, distintas = 0;
+      const filasC = [];
+      for (let i = fEnc + 1; i < con.length; i++) {
+        const r = con[i]; if (!r) continue;
+        const nom = txt(r[1]); if (!nom) continue;
+        const n = limpio(nom);
+        const celdas = colsSem.map(c => {
+          const hoja = num(r[c.j]);
+          const w = porSem[c.sem];
+          const f = w && w.frigos.find(x => clave(x.f) === clave(n));
+          const calc = f ? f.dif : null;
+          if (hoja != null && calc != null) { if (hoja === calc) iguales++; else distintas++; }
+          return {
+            sem: c.sem, v: calc != null ? calc : hoja,
+            env: f ? f.env : null, rec: f ? f.rec : null,
+            hoja, difHoja: (hoja != null && calc != null && hoja !== calc) ? hoja : null,
+          };
+        });
+        const sumaEntre = (a, b) => celdas.reduce((t, c) => (c.sem >= a && c.sem <= b && c.v != null) ? t + c.v : t, 0);
+        const conDato = (a, b) => celdas.filter(c => c.sem >= a && c.sem <= b && c.v != null).length;
+        const stockFrig = num(r[colStock]);
+        const anio = cAct >= 0 && cAct !== cAnt ? num(r[cAct]) : null;
+        filasC.push({
+          f: n, nombreHoja: nom, lugar: txt(r[2]) || '',
+          anterior: cAnt >= 0 ? num(r[cAnt]) : null,
+          debitos: colsDeb.map((j, k) => ({ n: k + 1, v: num(r[j]) })).filter(x => x.v != null),
+          // tramo 1: hasta el primer débito, la cuenta se cerró en cero
+          cerrado1: { hasta: TRAMOS.cierre1, suma: sumaEntre(1, TRAMOS.cierre1), semanas: conDato(1, TRAMOS.cierre1),
+            debito: (num(r[colsDeb[0]]) != null ? num(r[colsDeb[0]]) : null) },
+          // tramo 2: seguimiento, es la columna saldo
+          saldo: cSaldo >= 0 ? num(r[cSaldo]) : null,
+          saldoCalc: sumaEntre(TRAMOS.segDesde, TRAMOS.segHasta),
+          semanasSeg: conDato(TRAMOS.segDesde, TRAMOS.segHasta),
+          // tramo 3: el arqueo, que no se cuenta
+          arqueo: { sem: TRAMOS.arqueo, v: (celdas.find(c => c.sem === TRAMOS.arqueo) || {}).v,
+            debito: (colsDeb[1] != null && num(r[colsDeb[1]]) != null ? num(r[colsDeb[1]]) : null) },
+          // tramo 4: de la semana siguiente al arqueo en adelante, es Año 2026
+          anio, anioCalc: sumaEntre(TRAMOS.actDesde, 99), semanasAct: conDato(TRAMOS.actDesde, 99),
+          stock: stockFrig,
+          // lo que el frigorífico tiene más lo que quedó a favor o en contra
+          stockFinal: (stockFrig == null && anio == null) ? null : (stockFrig || 0) + (anio || 0),
+          celdas,
+        });
+      }
+      const malSaldo = filasC.filter(x => x.saldo != null && x.saldo !== x.saldoCalc).length;
+      const malAnio = filasC.filter(x => x.anio != null && x.anio !== x.anioCalc).length;
+      log('   consolidado: ' + filasC.length + ' frigoríficos × ' + colsSem.length + ' semanas · ' +
+        iguales + ' celdas dan igual que la hoja' + (distintas ? ' · ! ' + distintas + ' no' : ''));
+      log('   saldo = suma S' + TRAMOS.segDesde + '–S' + TRAMOS.segHasta + ': ' +
+        (malSaldo ? '! no cierra en ' + malSaldo : 'cierra en los ' + filasC.filter(x => x.saldo != null).length) +
+        ' · Año en curso = suma S' + TRAMOS.actDesde + '+: ' +
+        (malAnio ? '! no cierra en ' + malAnio : 'cierra en los ' + filasC.filter(x => x.anio != null).length));
+      escribir('client/src/dashboards/consolidado-tambores.html', 'DATA', {
+        generado: hoy.toISOString().slice(0, 10),
+        semanas: colsSem.map(c => c.sem),
+        tramos: TRAMOS,
+        filas: filasC, iguales, distintas,
+        deudaTotal, stock,
+      });
+    }
   }
 
   /* ═════════════ consumo de gasoil ═════════════ */
@@ -227,6 +317,15 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
     const d = wb.filas('Disponibilidad de flota');
     const fEnc = d.findIndex(r => r && /^dominio$/i.test(String(r[1] || '').trim()));
     if (fEnc < 0) throw new Error('Disponibilidad de flota: no encuentro el encabezado Dominio');
+    // La tabla de arriba del padrón dice cuántas unidades hay de cada tipo:
+    // "Tractores (17)", "Toritos (5)"… Los bloques del padrón vienen en ese
+    // mismo orden, y de ahí sale el tipo de cada unidad.
+    const tipos = [];
+    for (let i = 0; i < fEnc; i++) {
+      const r = d[i] || [];
+      const m = String(txt(r[1]) || '').match(/^(.+?)\s*\((\d+)\)\s*$/);
+      if (m && num(r[5]) != null) tipos.push({ nombre: singular(m[1]), n: +m[2] });
+    }
     const bloques = []; let act = null;
     for (let i = fEnc + 1; i < d.length; i++) {
       const r = d[i] || [];
@@ -234,9 +333,27 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
       if (!dom) { if (act && act.length) { bloques.push(act); act = null; } continue; }
       if (/^dominio|^domio/i.test(dom)) break;      // empieza otra tabla más abajo
       act = act || [];
-      act.push({ dom, modelo: txt(r[2]) || '', marca: txt(r[3]) || '', tipo: txt(r[4]) || '', asig: r[5] == null ? '' : String(r[5]).trim() });
+      // la columna "Tipo Unidad" en realidad trae una observación cuando no es
+      // ni tractor ni batea: se guarda como obs y el tipo sale del bloque
+      act.push({ dom, modelo: txt(r[2]) || '', marca: txt(r[3]) || '', tipo: '',
+        obs: txt(r[4]) || '', asig: r[5] == null ? '' : String(r[5]).trim() });
     }
     if (act && act.length) bloques.push(act);
+    // a cada bloque se le pone el tipo cuyo total coincide con su tamaño
+    const libres = tipos.slice();
+    bloques.forEach(b => {
+      const k = libres.findIndex(t => t.n === b.length);
+      if (k < 0) return;
+      const t = libres.splice(k, 1)[0];
+      b.forEach(u => { u.tipo = t.nombre; });
+    });
+    // en la columna "Tipo Unidad" a veces escribieron el tipo y no una
+    // observación: en ese caso no aporta nada y se descarta
+    const nombresTipo = tipos.map(t => t.nombre.toLowerCase());
+    [].concat.apply([], bloques).forEach(u => {
+      const o = (u.obs || '').toLowerCase().replace(/es$/, '').replace(/s$/, '');
+      if (!u.obs || nombresTipo.indexOf(o) >= 0 || o === u.tipo.toLowerCase()) u.obs = '';
+    });
     const utiles = bloques.filter(b => !b.every(u => /vender/i.test(u.modelo)));
     if (utiles.length < 2) throw new Error('Disponibilidad de flota: no distingo el bloque de fuera de servicio');
     const fueraServicio = utiles[utiles.length - 1];
@@ -268,7 +385,11 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
     });
     if (viejo) {
       if (viejo.total !== total) log('   el padrón pasó de ' + viejo.total + ' a ' + total + ' unidades disponibles');
-      if (viejo.fueraServicio.length !== fueraServicio.length) log('   fuera de servicio: ' + viejo.fueraServicio.length + ' → ' + fueraServicio.length);
+      if (viejo.fueraServicio.length !== fueraServicio.length) log('   dados de baja: ' + viejo.fueraServicio.length + ' → ' + fueraServicio.length);
+      const tiposHallados = [...new Set(disponibles.map(u => u.tipo).filter(Boolean))];
+      const faltan = disponibles.filter(u => !u.tipo).length;
+      log('   tipos de unidad: ' + tiposHallados.map(t => t + ' ' + disponibles.filter(u => u.tipo === t).length).join(' · ') +
+        (faltan ? ' · ! ' + faltan + ' sin tipo' : ''));
       const dif = viejo.weeks.filter(v => JSON.stringify(v) !== JSON.stringify(weeks.find(x => x.week === v.week)));
       log('   ' + (dif.length ? '~ cambiaron en la planilla ' + dif.length + ' semana(s): S' + dif.map(x => x.week).join(', S')
         : '✓ las ' + viejo.weeks.length + ' semanas ya cargadas dan igual'));
@@ -311,11 +432,61 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
     const sal = {};
     for (let i = fSal + 1; i < sa.length; i++) {
       const r = sa[i]; if (!r || !(r[1] instanceof Date)) continue;
-      const a = sal[clave(r[1])] = sal[clave(r[1])] || { s: 0, pes: 0, ticket: '', remito: '' };
+      const a = sal[clave(r[1])] = sal[clave(r[1])] || { s: 0 };
       a.s += num(r[4]) || 0;          // E = SALIDAS
-      if (num(r[8]) != null) a.pes += num(r[8]);   // I = SUMA SALIDAS [KG] (lo pesado)
-      if (txt(r[9])) a.ticket = txt(r[9]);
-      if (txt(r[10])) a.remito = txt(r[10]);
+    }
+
+    // El despacho en sí está en la hoja STOCK, en el bloque de la derecha: ahí
+    // van la pesada de balanza, el número de ticket y el remito, cargados una
+    // sola vez por despacho (en la fila del primer bin que sale). La hoja
+    // SALIDAS no los tiene: termina en la columna I, que es el subtotal del día.
+    const st = wb.filas('STOCK');
+    const norm = v => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().toUpperCase();
+    const fSt = st.findIndex(r => r && r.some(v => norm(v) === 'PESADA'));
+    if (fSt < 0) throw new Error('STOCK: no encuentro el encabezado con PESADA');
+    // Ojo: la fila de encabezado trae los mismos títulos dos veces. Primero el
+    // detalle (una fila por bin despachado) y más a la derecha un resumen por
+    // día que se carga a mano. Nos quedamos con el primero, que es el original.
+    const COLS_ST = { FECHA: 'fecha', SALIDAS: 'sal', PESADA: 'pes', REMITO: 'remito' };
+    const cSt = {}, cRes = {};
+    st[fSt].forEach((v, j) => {
+      const n = norm(v);
+      const k = COLS_ST[n] || (/^N.? ?TICKET$/.test(n) ? 'ticket' : null);
+      if (!k) return;
+      if (cSt[k] == null) cSt[k] = j; else if (cRes[k] == null) cRes[k] = j;
+    });
+    ['fecha', 'sal', 'pes', 'ticket', 'remito'].forEach(k => {
+      if (cSt[k] == null) throw new Error('STOCK: falta la columna ' + k + ' en el encabezado de despachos');
+    });
+    const desp = {};
+    for (let i = fSt + 1; i < st.length; i++) {
+      const r = st[i];
+      if (!r || !(r[cSt.fecha] instanceof Date) || num(r[cSt.sal]) == null) continue;
+      const a = desp[clave(r[cSt.fecha])] = desp[clave(r[cSt.fecha])] || { s: 0, pes: 0, ticket: '', remito: '' };
+      a.s += num(r[cSt.sal]) || 0;
+      a.pes += num(r[cSt.pes]) || 0;
+      if (txt(r[cSt.ticket])) a.ticket = txt(r[cSt.ticket]);
+      if (txt(r[cSt.remito])) a.remito = txt(r[cSt.remito]);
+    }
+    // las dos hojas tienen que contar las mismas salidas
+    const desacuerdo = Object.keys(sal).filter(k => Math.abs((sal[k].s || 0) - ((desp[k] || {}).s || 0)) > 0.5);
+    if (desacuerdo.length) log('   ! SALIDAS y STOCK no coinciden en ' + desacuerdo.join(', '));
+
+    // El resumen por día de la derecha repite pesada, ticket y remito. Está
+    // cargado a mano, así que puede diferir del detalle: mostramos el detalle y
+    // avisamos de la diferencia en vez de elegir en silencio.
+    if (cRes.fecha != null && cRes.pes != null) {
+      const dif = [];
+      for (let i = fSt + 1; i < st.length; i++) {
+        const r = st[i]; if (!r || !(r[cRes.fecha] instanceof Date)) continue;
+        const k = clave(r[cRes.fecha]), d0 = desp[k]; if (!d0) continue;
+        const pr = num(r[cRes.pes]);
+        if (pr != null && Math.abs(pr - d0.pes) > 0.5) dif.push(k.slice(5) + ' detalle ' + d0.pes + ' vs resumen ' + pr);
+        const tr = txt(r[cRes.ticket]), rr = txt(r[cRes.remito]);
+        if (tr && d0.ticket && tr !== d0.ticket) dif.push(k.slice(5) + ' ticket ' + d0.ticket + ' vs ' + tr);
+        if (rr && d0.remito && rr !== d0.remito) dif.push(k.slice(5) + ' remito ' + d0.remito + ' vs ' + rr);
+      }
+      if (dif.length) log('   ! el resumen de la hoja no coincide con el detalle: ' + dif.join(' · '));
     }
 
     // el mes del tablero es el de la mayoría de los movimientos
@@ -330,12 +501,13 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
     const hasta = new Date(Date.UTC(anio, mes, 0));
     const rows = []; let saldo = 0;
     for (let d = new Date(desde); d <= hasta; d = new Date(d.getTime() + 86400000)) {
-      const k = clave(d), i = ing[k] || { h: 0, ad: 0 }, o = sal[k] || { s: 0, pes: 0, ticket: '', remito: '' };
+      const k = clave(d), i = ing[k] || { h: 0, ad: 0 }, o = sal[k] || { s: 0 };
+      const p = desp[k] || { pes: 0, ticket: '', remito: '' };
       saldo += i.h + i.ad - o.s;
       rows.push({
         fecha: k, fl: fl(d), semana: isoSem(d), dow: d.getUTCDay(),
-        ingreso: r1(i.h), aditivo: r1(i.ad), salidas: r1(o.s), pesada: r1(o.pes),
-        ticket: o.ticket || '', remito: o.remito || '', saldo,
+        ingreso: r1(i.h), aditivo: r1(i.ad), salidas: r1(o.s), pesada: r1(p.pes),
+        ticket: p.ticket || '', remito: p.remito || '', saldo,
       });
     }
     const delMes = rows.filter(r => +r.fecha.slice(5, 7) === mes);
