@@ -50,14 +50,96 @@
   .concl .verdict{font-weight:700;color:#fff;}
   .pie{margin-top:12px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
   @media(max-width:820px){ .kpis{grid-template-columns:repeat(2,1fr);} }
+  /* Análisis del mes que más se despega */
+  #analisis .psub b{color:var(--text);}
+  .pasos{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin:4px 0 18px;}
+  .paso{flex:1 1 150px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:13px 15px;min-width:0;}
+  .paso.fin{border-color:var(--brand-line);background:linear-gradient(135deg,var(--brand-dim),var(--panel-2));}
+  .paso .pl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  .paso .pv{font-size:21px;font-weight:800;letter-spacing:-.03em;color:#fff;margin-top:6px;}
+  .paso .pd{font-size:11px;font-weight:600;color:var(--muted);margin-top:5px;line-height:1.45;}
+  .flecha{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;padding:0 2px;min-width:78px;}
+  .flecha .fv{font-size:13px;font-weight:800;letter-spacing:-.02em;}
+  .flecha .fl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted-2);text-align:center;line-height:1.3;}
+  .flecha .fa{color:var(--muted-2);font-size:15px;line-height:1;}
+  .ejemplo{background:var(--panel-2);border:1px solid var(--brand-line);border-left:3px solid var(--brand);
+    border-radius:10px;padding:13px 16px;margin:0 0 18px;font-size:13px;line-height:1.65;}
+  .ejemplo b{color:#fff;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:860px){ .grid2{grid-template-columns:1fr;} }
+  .mini{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;}
+  .mini caption{text-align:left;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--muted);padding:0 0 7px 2px;}
+  .mini th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted-2);
+    text-align:right;padding:6px 9px;border-bottom:1px solid var(--line);}
+  .mini th:first-child{text-align:left;}
+  .mini td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;}
+  .mini td:first-child{text-align:left;color:var(--text);font-weight:600;}
+  .mini tr:last-child td{border-bottom:none;}
+  .mini .v-up{color:var(--bad);font-weight:700;} .mini .v-down{color:var(--good);font-weight:700;}
+  .mini .v-neu{color:var(--muted);font-weight:600;}
+  .mini tr.ref td{background:rgba(38,182,217,.07);}
+  .mini tr.ref td:first-child{color:var(--info);}
+  .nota-lim{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:11.5px;
+    color:var(--muted-2);line-height:1.65;}
+  .nota-lim b{color:var(--muted);}
+  /* selector de base */
+  .seg2{display:inline-flex;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:3px;gap:2px;}
+  .seg2 button{appearance:none;background:transparent;border:none;color:var(--muted);font:inherit;font-size:11.5px;
+    font-weight:700;padding:6px 13px;border-radius:7px;cursor:pointer;transition:background .12s ease,color .12s ease;}
+  .seg2 button:hover:not(:disabled){color:var(--text);}
+  .seg2 button.on{background:var(--brand);color:#1a1208;}
+  .seg2 button:disabled{opacity:.4;cursor:not-allowed;}
+  /* rubros */
+  .rubros{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px;}
+  @media(max-width:900px){ .rubros{grid-template-columns:1fr;} }
+  .rub{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px 16px;}
+  .rub-h{display:flex;align-items:center;gap:8px;font-size:14px;}
+  .rub-h .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .rub-s{font-size:11.5px;color:var(--muted);margin:6px 0 12px;line-height:1.55;}
+  .rub .mini{margin-bottom:10px;}
+  /* barras enfrentadas */
+  .bb{margin:2px 0 10px;}
+  .bb-r{display:flex;align-items:center;gap:9px;margin-bottom:5px;font-size:11.5px;}
+  .bb-l{flex:0 0 78px;color:var(--muted);font-weight:600;}
+  .bb-t{position:relative;flex:1;height:11px;background:var(--panel-3,#0e1e28);border-radius:3px;overflow:hidden;}
+  .bb-t i{position:absolute;top:0;height:100%;display:block;}
+  .bb-t i.p{background:var(--bad);border-radius:0 3px 3px 0;}
+  .bb-t i.n{background:var(--good);border-radius:3px 0 0 3px;}
+  .bb-c{position:absolute;left:50%;top:0;width:1px;height:100%;background:var(--line-2,#2c414d);}
+  .bb-v{flex:0 0 58px;text-align:right;font-weight:800;font-size:12px;}
+  .bb-v.v-up{color:var(--bad);} .bb-v.v-down{color:var(--good);} .bb-v.v-neu{color:var(--muted);}
+  /* veredicto */
+  .vd{font-size:11.5px;line-height:1.6;color:var(--muted);padding:10px 12px;border-radius:9px;
+    background:var(--panel);border:1px solid var(--line);}
+  .vd b{color:var(--text);}
+  .vd .vp{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+  .vd.ok{border-left:3px solid var(--good);} .vd.ok .vp{color:var(--good);}
+  .vd.no{border-left:3px solid var(--bad);} .vd.no .vp{color:var(--bad);}
+  .vd.av{border-left:3px solid var(--amber);} .vd.av .vp{color:var(--amber);}
+  /* serie chica del taller */
+  .spark2{display:flex;align-items:flex-end;gap:5px;height:74px;margin:4px 0 10px;}
+  .spark2 .sb{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:4px;}
+  .spark2 .sb i{display:block;width:100%;background:var(--bad);opacity:.75;border-radius:3px 3px 0 0;min-height:2px;}
+  .spark2 .sb em{font-size:9.5px;font-style:normal;font-weight:700;color:var(--muted-2);}
+  /* sub panel del desfasaje */
+  .sub-panel{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
+  .sub-panel h4{font-size:13.5px;font-weight:800;margin:0 0 4px;}
+  .cuentas2{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:14px;}
+  .cuentas2 .cj{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:9px 13px;}
+  .cuentas2 .cj .cl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  .cuentas2 .cj .cv{font-size:15px;font-weight:800;color:#fff;margin-top:3px;}
+  .cuentas2 .op{font-size:15px;font-weight:800;color:var(--muted-2);}
+  .cuentas2 .cj.res{border-color:var(--brand-line);} .cuentas2 .cj.res .cv{color:var(--brand);}
+  #analisis .panel-head{align-items:flex-start;}
 </style>
 
 <div class="wrap">
   <header class="head">
     <div>
       <p class="overline">Offal · Logística</p>
-      <h1>Métrica de Costo — $ / ton descargada</h1>
-      <p class="sub">Análisis <b>mes a mes</b>: cada mes se compara el costo real por tonelada descargada contra el del <b>mes anterior ajustado por la inflación</b> (% del INDEC del mes). Así se ve si el costo subió más o menos que los precios. Serie desde <b id="mesDesde"></b> (<span id="mesRef"></span> es la referencia inicial).</p>
+      <h1>Métrica de Costo — USD / ton descargada</h1>
+      <p class="sub">Análisis <b>mes a mes</b>: cada mes se compara el costo real por tonelada descargada <b>medido en dólares</b> contra el del <b>mes anterior ajustado por la inflación</b> (% del INDEC del mes). Así se ve si el costo subió más o menos que los precios. Serie desde <b id="mesDesde"></b> (<span id="mesRef"></span> es la referencia inicial).</p>
     </div>
     <span class="fuente" id="fuente">Datos reales · 2026 Consumo de combustible (hoja Gastos)</span>
   </header>
@@ -74,12 +156,15 @@
   </section>
 
   <section class="panel">
-    <div class="panel-head"><div><h3>Detalle mensual</h3><p class="psub">Costo real, valor ajustado por INDEC (mes anterior × inflación) y la brecha entre ambos.</p></div></div>
+    <div class="panel-head"><div><h3>Detalle mensual</h3><p class="psub">Costo real en dólares, valor ajustado por INDEC (mes anterior × inflación) y la brecha entre ambos.</p></div></div>
     <div class="tscroll"><table id="tab"><thead><tr>
-      <th>Mes</th><th>Real $/ton</th><th>Ajustado INDEC</th><th>Var. INDEC mes</th><th>Brecha vs. inflación</th></tr></thead>
+      <th>Mes</th><th>Real USD/ton</th><th>Ajustado INDEC</th><th>Var. INDEC mes</th><th>Dólar</th><th>Var. dólar</th><th>Brecha vs. inflación</th></tr></thead>
       <tbody id="tbody"></tbody></table></div>
-    <p class="pie">Fuente: <b>2026 Consumo de combustible.xlsx</b> (SharePoint · Logística), hoja <b>Gastos</b>, fila <b>TOTAL $ X TONS DESC</b>. Ajustado = costo del mes anterior × (1 + INDEC del mes); brecha = (real − ajustado) / real (misma lógica que la fila "AJUSTADO POR INDEC" de la hoja). Datos hasta el último mes cerrado.</p>
+    <p class="pie">Fuente: <b>2026 Consumo de combustible.xlsx</b> (SharePoint · Logística), hoja <b>Gastos</b>, fila <b>TOTAL $ X TONS DESC</b>, dividida por el dólar de referencia de cada mes. Ajustado = costo en USD del mes anterior × (1 + INDEC del mes); brecha = (real − ajustado) / ajustado. Datos hasta el último mes cerrado.
+      <br><b>Cómo leerlo:</b> el INDEC es un índice en pesos, así que medir el costo en dólares y compararlo contra él mezcla dos movimientos: cuánto cambió el costo y cuánto se movió el tipo de cambio. La columna <b>Var. dólar</b> muestra el segundo, para que la brecha se pueda leer entera. <span id="notaPeso"></span></p>
   </section>
+
+  <section class="panel" id="analisis"></section>
 
   <section class="concl" id="concl"></section>
 </div>
@@ -87,7 +172,7 @@
 
 <script>
 (function(){
-  const DATA = {"generado":"21/08/2026","unidad":"$ / ton descargada","hoja":"Gastos · TOTAL $ X TONS DESC","modo":"mes-a-mes","janReal":81655,"indecByMonth":{"1":0.029,"2":0.029,"3":0.034,"4":0.026,"5":0.021,"6":0.019,"7":0.021},"data":[{"mes":"Febrero","mNum":2,"real":98193,"prevReal":81655,"proy":84023,"indec":0.029,"gapPct":16.9},{"mes":"Marzo","mNum":3,"real":102276,"prevReal":98193,"proy":101532,"indec":0.034,"gapPct":0.7},{"mes":"Abril","mNum":4,"real":97849,"prevReal":102276,"proy":104935,"indec":0.026,"gapPct":-6.8},{"mes":"Mayo","mNum":5,"real":97689,"prevReal":97849,"proy":99904,"indec":0.021,"gapPct":-2.2},{"mes":"Junio","mNum":6,"real":98457,"prevReal":97689,"proy":99545,"indec":0.019,"gapPct":-1.1},{"mes":"Julio","mNum":7,"real":102182,"prevReal":98457,"proy":100525,"indec":0.021,"gapPct":1.6}],"resumen":{"ultimoMes":"Julio","ultimoReal":102182,"ultimoProy":100525,"ultimoGap":1.6,"gapProm":1.5,"mesesSobre":3,"mesesBajo":3,"mesesEnLinea":0,"nMeses":6}};
+  const DATA = {"generado":"21/08/2026","unidad":"USD / ton descargada","hoja":"Gastos · TOTAL $ X TONS DESC","modo":"mes-a-mes","janReal":81655,"indecByMonth":{"1":0.029,"2":0.029,"3":0.034,"4":0.026,"5":0.021,"6":0.019,"7":0.021},"data":[{"mes":"Febrero","mNum":2,"real":98193,"prevReal":81655,"proy":84023,"indec":0.029,"gapPct":16.9,"dolar":1420,"dolarPrev":1465,"varDolar":-3.1,"realUsd":69.15,"prevRealUsd":55.74,"proyUsd":57.36,"gapUsd":20.6,"ton":8818,"tonPrev":10210,"costo":865832229,"costoPrev":833709140,"diasMes":28,"diasMesPrev":31,"diasOp":19,"diasOpPrev":21,"comp":[{"l":"Propios","v":135284531,"p":170311650},{"l":"Fletes","v":604028315,"p":556192701},{"l":"Lavadero","v":61665571,"p":65894989},{"l":"Taller","v":64853812,"p":41309801}],"gasoil":{"precio":754.3,"prev":931.8,"varPct":-19},"gasoilOf":{"precio":976.2,"prev":969.22,"varPct":0.7},"tarifaRuta":1.5,"fadeeac":{"general":2.3,"combustible":2.8},"viajes":{"prop":364,"flet":441,"propPrev":433,"fletPrev":489,"tonProp":3778,"tonFlet":5040,"tonPropPrev":4437,"tonFletPrev":5773},"valorViaje":{"medio":1390382,"total":494976050,"viajes":356},"valorViajePrev":{"medio":1375011,"total":588504750,"viajes":428},"km":53762,"kmPrev":68098,"litros":20603,"litrosPrev":29300,"lavados":756,"lavadosPrev":829,"desfase":{"hayDetalle":true,"hayDetallePrev":false,"deOtros":35887200,"sale":28573800,"detalle":[{"mes":0,"imp":10099800,"prov":"1427-TRANSPORTE FERMOSELLE S.R.L.","glosa":"ENTRE RIOS MES ENERO"},{"mes":0,"imp":11783100,"prov":"1427-TRANSPORTE FERMOSELLE S.R.L.","glosa":"ENTRE RIOS MES ENERO"},{"mes":0,"imp":10099800,"prov":"1427-TRANSPORTE FERMOSELLE S.R.L.","glosa":"ENTRE RIOS MES ENERO"},{"mes":0,"imp":1301500,"prov":"1528-ABRAHAM GUSTAVO MARTIN","glosa":"INTERFARMA MES ENERO"},{"mes":0,"imp":1301500,"prov":"1528-ABRAHAM GUSTAVO MARTIN","glosa":"INTERFARMA MES ENERO"},{"mes":0,"imp":1301500,"prov":"1528-ABRAHAM GUSTAVO MARTIN","glosa":"INTERFARMA MES ENERO"}],"ajuste":-7313400,"ajustePrev":35887200,"parcial":true,"mesSinDetalle":["Enero"]},"dev":{"costo":858518829,"costoPrev":869596340,"fletes":596714915,"fletesPrev":592079901,"realUsd":68.56,"prevRealUsd":58.14,"proyUsd":59.82,"gapUsd":14.6}},{"mes":"Marzo","mNum":3,"real":102276,"prevReal":98193,"proy":101532,"indec":0.034,"gapPct":0.7,"dolar":1405,"dolarPrev":1420,"varDolar":-1.1,"realUsd":72.79,"prevRealUsd":69.15,"proyUsd":71.5,"gapUsd":1.8,"ton":10206,"tonPrev":8818,"costo":1043876539,"costoPrev":865832229,"diasMes":31,"diasMesPrev":28,"diasOp":21,"diasOpPrev":19,"comp":[{"l":"Propios","v":225726369,"p":135284531},{"l":"Fletes","v":701667920,"p":604028315},{"l":"Lavadero","v":69857126,"p":61665571},{"l":"Taller","v":46625124,"p":64853812}],"gasoil":{"precio":1150.8,"prev":754.3,"varPct":52.6},"gasoilOf":{"precio":1118.54,"prev":976.2,"varPct":14.6},"tarifaRuta":2.1,"fadeeac":{"general":10.2,"combustible":24.7},"viajes":{"prop":479,"flet":458,"propPrev":364,"fletPrev":441,"tonProp":4838,"tonFlet":5368,"tonPropPrev":3778,"tonFletPrev":5040},"valorViaje":{"medio":1482619,"total":547086450,"viajes":369},"valorViajePrev":{"medio":1390382,"total":494976050,"viajes":356},"km":82030,"kmPrev":53762,"litros":32130,"litrosPrev":20603,"lavados":850,"lavadosPrev":756,"desfase":{"hayDetalle":true,"hayDetallePrev":true,"deOtros":28573800,"sale":0,"detalle":[{"mes":1,"imp":12028450,"prov":"1427-TRANSPORTE FERMOSELLE S.R.L.","glosa":"entre rios mes febrero"},{"mes":1,"imp":12028450,"prov":"1427-TRANSPORTE FERMOSELLE S.R.L.","glosa":"entre rios mes febrero"},{"mes":1,"imp":1062800,"prov":"1528-ABRAHAM GUSTAVO MARTIN","glosa":"interfama mes febrero"},{"mes":1,"imp":1328500,"prov":"1528-ABRAHAM GUSTAVO MARTIN","glosa":"interfama mes febrero"},{"mes":1,"imp":1062800,"prov":"1528-ABRAHAM GUSTAVO MARTIN","glosa":"interfama mes febrero"},{"mes":1,"imp":1062800,"prov":"1528-ABRAHAM GUSTAVO MARTIN","glosa":"interfama mes febrero"}],"ajuste":-28573800,"ajustePrev":-7313400,"parcial":false,"mesSinDetalle":[]},"dev":{"costo":1015302739,"costoPrev":858518829,"fletes":673094120,"fletesPrev":596714915,"realUsd":70.8,"prevRealUsd":68.56,"proyUsd":70.89,"gapUsd":-0.1}},{"mes":"Abril","mNum":4,"real":97849,"prevReal":102276,"proy":104935,"indec":0.026,"gapPct":-6.8,"dolar":1415,"dolarPrev":1405,"varDolar":0.7,"realUsd":69.15,"prevRealUsd":72.79,"proyUsd":74.68,"gapUsd":-7.4,"ton":8267,"tonPrev":10206,"costo":808889645,"costoPrev":1043876539,"diasMes":30,"diasMesPrev":31,"diasOp":20,"diasOpPrev":21,"comp":[{"l":"Propios","v":147618376,"p":225726369},{"l":"Fletes","v":516434800,"p":701667920},{"l":"Lavadero","v":70342932,"p":69857126},{"l":"Taller","v":74493537,"p":46625124}],"gasoil":{"precio":1230.2,"prev":1150.8,"varPct":6.9},"gasoilOf":{"precio":1334.44,"prev":1118.54,"varPct":19.3},"tarifaRuta":1.4,"fadeeac":{"general":2.4,"combustible":1.3},"viajes":{"prop":414,"flet":349,"propPrev":479,"fletPrev":458,"tonProp":4394,"tonFlet":3873,"tonPropPrev":4838,"tonFletPrev":5368},"valorViaje":{"medio":1518317,"total":478269950,"viajes":315},"valorViajePrev":{"medio":1482619,"total":547086450,"viajes":369},"km":73428,"kmPrev":82030,"litros":28190,"litrosPrev":32130,"lavados":850,"lavadosPrev":850,"desfase":{"hayDetalle":true,"hayDetallePrev":true,"deOtros":0,"sale":0,"detalle":[],"ajuste":0,"ajustePrev":-28573800,"parcial":false,"mesSinDetalle":[]},"dev":{"costo":808889645,"costoPrev":1015302739,"fletes":516434800,"fletesPrev":673094120,"realUsd":69.15,"prevRealUsd":70.8,"proyUsd":72.65,"gapUsd":-4.8}},{"mes":"Mayo","mNum":5,"real":97689,"prevReal":97849,"proy":99904,"indec":0.021,"gapPct":-2.2,"dolar":1430,"dolarPrev":1415,"varDolar":1.1,"realUsd":68.31,"prevRealUsd":69.15,"proyUsd":70.6,"gapUsd":-3.2,"ton":10218,"tonPrev":8267,"costo":998208572,"costoPrev":808889645,"diasMes":31,"diasMesPrev":30,"diasOp":21,"diasOpPrev":20,"comp":[{"l":"Propios","v":174169228,"p":147618376},{"l":"Fletes","v":637802650,"p":516434800},{"l":"Lavadero","v":73344283,"p":70342932},{"l":"Taller","v":112892410,"p":74493537}],"gasoil":{"precio":1194.6,"prev":1230.2,"varPct":-2.9},"gasoilOf":{"precio":1327.52,"prev":1334.44,"varPct":-0.5},"tarifaRuta":5.9,"fadeeac":{"general":1.9,"combustible":1.7},"viajes":{"prop":510,"flet":360,"propPrev":414,"fletPrev":349,"tonProp":5644,"tonFlet":4574,"tonPropPrev":4394,"tonFletPrev":3873},"valorViaje":{"medio":1535548,"total":535906100,"viajes":349},"valorViajePrev":{"medio":1518317,"total":478269950,"viajes":315},"km":87711,"kmPrev":73428,"litros":35270,"litrosPrev":28190,"lavados":850,"lavadosPrev":850,"desfase":{"hayDetalle":true,"hayDetallePrev":true,"deOtros":0,"sale":0,"detalle":[],"ajuste":0,"ajustePrev":0,"parcial":false,"mesSinDetalle":[]},"dev":{"costo":998208572,"costoPrev":808889645,"fletes":637802650,"fletesPrev":516434800,"realUsd":68.32,"prevRealUsd":69.15,"proyUsd":70.6,"gapUsd":-3.2}},{"mes":"Junio","mNum":6,"real":98457,"prevReal":97689,"proy":99545,"indec":0.019,"gapPct":-1.1,"dolar":1500,"dolarPrev":1430,"varDolar":4.9,"realUsd":65.64,"prevRealUsd":68.31,"proyUsd":69.61,"gapUsd":-5.7,"ton":11305,"tonPrev":10218,"costo":1113056836,"costoPrev":998208572,"diasMes":30,"diasMesPrev":31,"diasOp":21,"diasOpPrev":21,"comp":[{"l":"Propios","v":251927671,"p":174169228},{"l":"Fletes","v":736698500,"p":637802650},{"l":"Lavadero","v":78540283,"p":73344283},{"l":"Taller","v":45890383,"p":112892410}],"gasoil":{"precio":1157.1,"prev":1194.6,"varPct":-3.1},"gasoilOf":{"precio":1348.43,"prev":1327.52,"varPct":1.6},"tarifaRuta":7.5,"fadeeac":{"general":1.8,"combustible":0.5},"viajes":{"prop":567,"flet":412,"propPrev":510,"fletPrev":360,"tonProp":6064,"tonFlet":5241,"tonPropPrev":5644,"tonFletPrev":4574},"valorViaje":{"medio":1390729,"total":625828100,"viajes":450},"valorViajePrev":{"medio":1535548,"total":535906100,"viajes":349},"km":111357,"kmPrev":87711,"litros":40249,"litrosPrev":35270,"lavados":850,"lavadosPrev":850,"desfase":{"hayDetalle":true,"hayDetallePrev":true,"deOtros":0,"sale":0,"detalle":[],"ajuste":0,"ajustePrev":0,"parcial":false,"mesSinDetalle":[]},"dev":{"costo":1113056836,"costoPrev":998208572,"fletes":736698500,"fletesPrev":637802650,"realUsd":65.64,"prevRealUsd":68.32,"proyUsd":69.61,"gapUsd":-5.7}},{"mes":"Julio","mNum":7,"real":102182,"prevReal":98457,"proy":100525,"indec":0.021,"gapPct":1.6,"dolar":1510,"dolarPrev":1500,"varDolar":0.7,"realUsd":67.67,"prevRealUsd":65.64,"proyUsd":67.02,"gapUsd":1,"ton":11082,"tonPrev":11305,"costo":1132398054,"costoPrev":1113056836,"diasMes":31,"diasMesPrev":30,"diasOp":22,"diasOpPrev":21,"comp":[{"l":"Propios","v":226645202,"p":251927671},{"l":"Fletes","v":723689740,"p":736698500},{"l":"Lavadero","v":69437561,"p":78540283},{"l":"Taller","v":112625551,"p":45890383}],"gasoil":{"precio":1160.4,"prev":1157.1,"varPct":0.3},"gasoilOf":{"precio":1318.07,"prev":1348.43,"varPct":-2.3},"tarifaRuta":1.7,"fadeeac":{"general":2.3,"combustible":0},"viajes":{"prop":609,"flet":407,"propPrev":567,"fletPrev":412,"tonProp":6327,"tonFlet":4755,"tonPropPrev":6064,"tonFletPrev":5241},"valorViaje":{"medio":1272428,"total":688383600,"viajes":541},"valorViajePrev":{"medio":1390729,"total":625828100,"viajes":450},"km":87003,"kmPrev":111357,"litros":31301,"litrosPrev":40249,"lavados":850,"lavadosPrev":850,"desfase":{"hayDetalle":false,"hayDetallePrev":true,"deOtros":null,"sale":0,"detalle":[],"ajuste":null,"ajustePrev":0,"parcial":false,"mesSinDetalle":["Julio"]},"dev":null}],"resumen":{"ultimoMes":"Julio","ultimoReal":67.67,"ultimoProy":67.02,"ultimoGap":1,"gapProm":1.2,"mesesSobre":3,"mesesBajo":3,"mesesEnLinea":0,"nMeses":6,"ultimoRealPeso":102182,"ultimoProyPeso":100525,"ultimoGapPeso":1.6,"gapPromPeso":1.5},"janRealUsd":55.74,"dolar":[1465,1420,1405,1415,1430,1500,1510]};
   // el mes en que arranca la serie y su referencia salen de los datos
   (function(){
     var M=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -98,14 +183,17 @@
   })();
   const D = DATA.data, R=DATA.resumen, nf=new Intl.NumberFormat('es-AR');
   const money=v=>'$'+nf.format(Math.round(v));
+  // la métrica se mide en dólares: dos decimales, con el símbolo adelante
+  const usd=v=>v==null?'—':'US$ '+v.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const pc=v=>(v>0?'+':'')+v.toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
   const last=D[D.length-1];
 
   // ---- KPIs ----
   const kpis=[
-    {l:'Último mes real', v:money(last.real)+'/t', d:last.mes+' · $/ton descargada', cls:'hero'},
-    {l:'Ajustado por INDEC', v:money(last.proy)+'/t', d:last.mes+' · mes ant. × inflación', cls:'info'},
-    {l:'Brecha en '+last.mes, v:(last.gapPct>0?'+':'')+last.gapPct+'%', d:'real por '+(last.gapPct>=0?'encima':'debajo')+' de la inflación', cls:''},
-    {l:'Balance feb→'+last.mes, v:(R.gapProm>0?'+':'')+R.gapProm+'%', d:R.mesesSobre+' meses sobre · '+R.mesesBajo+' bajo inflación', cls:''}
+    {l:'Último mes real', v:usd(last.realUsd), d:last.mes+' · USD/ton descargada ('+money(last.real)+')', cls:'hero'},
+    {l:'Ajustado por INDEC', v:usd(last.proyUsd), d:last.mes+' · mes ant. en USD × inflación', cls:'info'},
+    {l:'Brecha en '+last.mes, v:pc(last.gapUsd), d:'real por '+(last.gapUsd>=0?'encima':'debajo')+' de la inflación', cls:''},
+    {l:'Balance feb→'+last.mes, v:pc(R.gapProm), d:R.mesesSobre+' meses sobre · '+R.mesesBajo+' bajo inflación', cls:''}
   ];
   document.getElementById('kpis').innerHTML=kpis.map(k=>'<div class="kpi '+k.cls+'"><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kd">'+k.d+'</div></div>').join('');
 
@@ -119,7 +207,7 @@
   function draw(){
     const el=document.getElementById('chart'); const wpx=el.clientWidth||900, H=320, padL=46,padR=16,padT=26,padB=34;
     const iw=wpx-padL-padR, ih=H-padT-padB, n=D.length, slot=iw/n, bw=Math.min(58, slot*0.5);
-    const maxAbs=Math.max(5, ...D.map(d=>Math.abs(d.gapPct)))*1.15;
+    const maxAbs=Math.max(5, ...D.map(d=>Math.abs(d.gapUsd)))*1.15;
     const y0=padT+ih/2;                 // línea cero al medio
     const y=v=> y0 - (v/maxAbs)*(ih/2);
     const cx=i=>padL+slot*i+slot/2;
@@ -127,48 +215,308 @@
     // guías horizontales
     [maxAbs/2, 0, -maxAbs/2].forEach(val=>{ const yy=y(val); g+='<line x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(wpx-padR)+'" y2="'+yy.toFixed(1)+'" stroke="var(--line)" '+(val===0?'stroke-width="1.5"':'stroke-dasharray="3 4"')+'/>';
       g+='<text x="'+(padL-8)+'" y="'+(yy+3.5).toFixed(1)+'" text-anchor="end" font-size="9.5" fill="var(--muted-2)">'+(val>0?'+':'')+Math.round(val)+'%</text>'; });
-    D.forEach((d,i)=>{ const up=d.gapPct>=0; const col=up?'var(--bad)':'var(--good)';
-      const yv=y(d.gapPct); const top=Math.min(yv,y0), h=Math.abs(yv-y0);
+    D.forEach((d,i)=>{ const up=d.gapUsd>=0; const col=up?'var(--bad)':'var(--good)';
+      const yv=y(d.gapUsd); const top=Math.min(yv,y0), h=Math.abs(yv-y0);
       g+='<rect x="'+(cx(i)-bw/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(h,1).toFixed(1)+'" rx="4" fill="'+col+'" fill-opacity=".9"/>';
-      g+='<text x="'+cx(i).toFixed(1)+'" y="'+((up?top-7:top+h+15)).toFixed(1)+'" text-anchor="middle" font-size="12" font-weight="800" fill="'+col+'">'+(up?'+':'')+d.gapPct+'%</text>';
+      g+='<text x="'+cx(i).toFixed(1)+'" y="'+((up?top-7:top+h+15)).toFixed(1)+'" text-anchor="middle" font-size="12" font-weight="800" fill="'+col+'">'+pc(d.gapUsd)+'</text>';
       g+='<text x="'+cx(i).toFixed(1)+'" y="'+(H-12)+'" text-anchor="middle" font-size="11" font-weight="600" fill="var(--muted)">'+d.mes.slice(0,3)+'</text>';
       g+='<rect x="'+(padL+slot*i).toFixed(1)+'" y="'+padT+'" width="'+slot.toFixed(1)+'" height="'+ih+'" fill="transparent" style="cursor:pointer" data-i="'+i+'"/>';
     });
     el.innerHTML='<svg viewBox="0 0 '+wpx+' '+H+'" width="100%" height="'+H+'">'+g+'</svg>';
     el.querySelectorAll('rect[data-i]').forEach(r=>{ const d=D[+r.getAttribute('data-i')];
-      const t='<b>'+d.mes+'</b>\nReal: '+money(d.real)+'/ton\nAjustado INDEC: '+money(d.proy)+'/ton  ('+money(d.prevReal)+' × '+(1+d.indec).toFixed(3)+')\nVar. INDEC del mes: '+(d.indec*100).toFixed(1)+'%\nBrecha: '+(d.gapPct>0?'+':'')+d.gapPct+'% '+(d.gapPct>0?'por encima':'por debajo')+' de la inflación';
+      const t='<b>'+d.mes+'</b>\nReal: '+usd(d.realUsd)+'/ton  ('+money(d.real)+' ÷ '+nf.format(d.dolar)+')'
+        +'\nAjustado INDEC: '+usd(d.proyUsd)+'/ton  ('+usd(d.prevRealUsd)+' × '+(1+d.indec).toFixed(3)+')'
+        +'\nVar. INDEC del mes: '+(d.indec*100).toFixed(1)+'%'
+        +'\nVar. del dólar: '+pc(d.varDolar)+'  ('+nf.format(d.dolarPrev)+' → '+nf.format(d.dolar)+')'
+        +'\nBrecha: '+pc(d.gapUsd)+' '+(d.gapUsd>0?'por encima':'por debajo')+' de la inflación'
+        +'\nEn pesos la brecha es '+pc(d.gapPct)+': la diferencia es el tipo de cambio';
       r.addEventListener('mouseenter',e=>showTip(t,e)); r.addEventListener('mousemove',moveTip); r.addEventListener('mouseleave',hideTip); });
   }
 
   // ---- tabla ----
   document.getElementById('tbody').innerHTML=D.map(d=>{
-    const up=d.gapPct>0;
-    return '<tr><td>'+d.mes+'</td><td style="color:#fff;font-weight:700">'+money(d.real)+'</td><td style="color:var(--info)">'+money(d.proy)+'</td>'
+    const up=d.gapUsd>0, sube=d.varDolar>0;
+    return '<tr><td>'+d.mes+'</td><td style="color:#fff;font-weight:700">'+usd(d.realUsd)+'</td><td style="color:var(--info)">'+usd(d.proyUsd)+'</td>'
       +'<td>'+(d.indec*100).toFixed(1)+'%</td>'
-      +'<td class="gap '+(up?'up':'down')+'">'+(up?'+':'')+d.gapPct+'%</td></tr>';
+      +'<td style="color:var(--muted)">$'+nf.format(d.dolar)+'</td>'
+      +'<td style="color:var(--muted)">'+(sube?'▲ ':'▼ ')+pc(d.varDolar).replace('+','').replace('-','')+'</td>'
+      +'<td class="gap '+(up?'up':'down')+'">'+pc(d.gapUsd)+'</td></tr>';
   }).join('');
+  // cuánto de la brecha es el dólar y no el costo
+  (function(){
+    const el=document.getElementById('notaPeso'); if(!el||R.gapPromPeso==null) return;
+    el.innerHTML='Medido en pesos, el balance del período da <b>'+pc(R.gapPromPeso)+'</b> contra el <b>'+pc(R.gapProm)+'</b> en dólares: esa distancia es, entera, el movimiento del tipo de cambio.';
+  })();
 
   // ---- conclusión (abajo de todo) ----
   function conclusion(){
-    const worst=D.reduce((a,b)=>b.gapPct>a.gapPct?b:a);      // mayor por encima
-    const best=D.reduce((a,b)=>b.gapPct<a.gapPct?b:a);       // mayor por debajo
+    const worst=D.reduce((a,b)=>b.gapUsd>a.gapUsd?b:a);      // mayor por encima
+    const best=D.reduce((a,b)=>b.gapUsd<a.gapUsd?b:a);       // mayor por debajo
     // racha de meses por debajo (consecutivos)
-    let bestStreak=[],cur=[]; D.forEach(d=>{ if(d.gapPct<1){cur.push(d);} else {if(cur.length>bestStreak.length)bestStreak=cur;cur=[];} }); if(cur.length>bestStreak.length)bestStreak=cur;
-    const p1='Arranque alto: en <b>'+worst.mes+'</b> el costo real saltó <b class="up">+'+worst.gapPct+'%</b> por encima de lo que marcaba la inflación (real '+money(worst.real)+' vs. ajustado '+money(worst.proy)+').';
+    let bestStreak=[],cur=[]; D.forEach(d=>{ if(d.gapUsd<1){cur.push(d);} else {if(cur.length>bestStreak.length)bestStreak=cur;cur=[];} }); if(cur.length>bestStreak.length)bestStreak=cur;
+    const p1='Arranque alto: en <b>'+worst.mes+'</b> el costo en dólares saltó <b class="up">'+pc(worst.gapUsd)+'</b> por encima de lo que marcaba la inflación (real '+usd(worst.realUsd)+' vs. ajustado '+usd(worst.proyUsd)+').';
     let p2;
-    if(bestStreak.length>=2){ p2='Después vino una racha de contención: <b>'+bestStreak.map(d=>d.mes).join(', ')+'</b> quedaron <b class="down">por debajo de la inflación</b> (hasta '+best.gapPct+'% en '+best.mes+') — el costo real creció menos que los precios, incluso bajando en términos nominales.'; }
-    else { p2='El resto de los meses se movió cerca de la inflación, con '+best.mes+' como el mejor ('+best.gapPct+'%).'; }
-    const rep = last.gapPct>1;
-    const p3='En <b>'+last.mes+'</b> '+(rep?('volvió a despegarse: <b class="up">+'+last.gapPct+'%</b> por encima de la inflación.'):('cerró en '+(last.gapPct>0?'+':'')+last.gapPct+'%, en línea con la inflación.'));
-    const verd='En el balance del período el $/ton descargada quedó en promedio <b class="hl">'+(R.gapProm>0?'+':'')+R.gapProm+'%</b> respecto de la inflación mes a mes ('+R.mesesSobre+' meses por encima y '+R.mesesBajo+' por debajo). '
+    if(bestStreak.length>=2){ p2='Después vino una racha de contención: <b>'+bestStreak.map(d=>d.mes).join(', ')+'</b> quedaron <b class="down">por debajo de la inflación</b> (hasta '+pc(best.gapUsd)+' en '+best.mes+') — el costo en dólares creció menos que los precios.'; }
+    else { p2='El resto de los meses se movió cerca de la inflación, con '+best.mes+' como el mejor ('+pc(best.gapUsd)+').'; }
+    const rep = last.gapUsd>1;
+    const p3='En <b>'+last.mes+'</b> '+(rep?('volvió a despegarse: <b class="up">'+pc(last.gapUsd)+'</b> por encima de la inflación.'):('cerró en '+pc(last.gapUsd)+', en línea con la inflación.'));
+    const verd='En el balance del período el USD/ton descargada quedó en promedio <b class="hl">'+pc(R.gapProm)+'</b> respecto de la inflación mes a mes ('+R.mesesSobre+' meses por encima y '+R.mesesBajo+' por debajo). '
       +(bestStreak.length>=2 ? ('Descontando el salto inicial de '+worst.mes+', la gestión logró contener el costo por debajo de la inflación durante '+bestStreak.length+' meses seguidos; ') : '')
       +(rep ? ('el repunte de '+last.mes+' es la señal a vigilar de cara al segundo semestre.') : ('el costo cierra el período controlado respecto de la inflación.'));
     document.getElementById('concl').innerHTML='<h3>🧭 Conclusión de la evolución</h3><p>'+p1+'</p><p>'+p2+'</p><p>'+p3+'</p><p class="verdict">'+verd+'</p>';
   }
 
+  // ---- el informe del mes que más se despega ----
+  // Logística no se evalúa gasto contra gasto: cada rubro tiene su propia
+  // lógica. Fletes es plano —cada viaje vale lo mismo lleve lo que lleve—, así
+  // que más viajes tienen que dar más gasto; propios mezcla un fijo (el sueldo)
+  // con un variable (el gasoil según los km); lavatachos es sólo personal; y
+  // taller son las reparaciones del mes, que sin preventivos no tienen patrón.
+  // Todo se mira por tonelada y por viaje, y el informe se puede leer sobre lo
+  // imputado o sobre lo devengado (cada factura en el mes que le corresponde).
+  var BASE='imputado';
+  var MESES_L=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  function elMes(){ return D.reduce(function(a,b){ return Math.abs(b.gapUsd)>Math.abs(a.gapUsd)?b:a; }); }
+  function base(d){
+    if(BASE==='devengado'&&d.dev) return {real:d.dev.realUsd,prev:d.dev.prevRealUsd,proy:d.dev.proyUsd,gap:d.dev.gapUsd,
+      costo:d.dev.costo,costoPrev:d.dev.costoPrev,fletes:d.dev.fletes,fletesPrev:d.dev.fletesPrev};
+    return {real:d.realUsd,prev:d.prevRealUsd,proy:d.proyUsd,gap:d.gapUsd,costo:d.costo,costoPrev:d.costoPrev,
+      fletes:(d.comp&&d.comp[1])?d.comp[1].v:null,fletesPrev:(d.comp&&d.comp[1])?d.comp[1].p:null};
+  }
+  var sig=function(v){ return v==null?'—':(v>0?'+':'')+(Math.round(v*1000)/10).toLocaleString('es-AR')+'%'; };
+  var cl=function(v){ return v==null?'v-neu':(v>0.5?'v-up':(v<-0.5?'v-down':'v-neu')); };
+  var ent=function(v){ return v==null?'—':Math.round(v).toLocaleString('es-AR'); };
+
+  // Dos variaciones enfrentadas: el driver de volumen y el gasto. Si el rubro es
+  // plano las dos barras tienen que ir para el mismo lado y parecido.
+  function barras(items){
+    var mx=Math.max.apply(null,items.map(function(x){ return Math.abs(x.v||0); }).concat([5]));
+    return '<div class="bb">'+items.map(function(x){
+      var w=Math.min(50,Math.abs(x.v||0)/mx*50), pos=(x.v||0)>=0;
+      return '<div class="bb-r"><span class="bb-l">'+x.l+'</span>'
+        +'<span class="bb-t"><i class="'+(pos?'p':'n')+'" style="'+(pos?'left:50%':'right:50%')+';width:'+w.toFixed(1)+'%"></i>'
+        +'<b class="bb-c"></b></span>'
+        +'<span class="bb-v '+cl(x.v)+'">'+sig(x.v==null?null:x.v/100)+'</span></div>';
+    }).join('')+'</div>';
+  }
+  function verdicto(ok,txt){ return '<div class="vd '+(ok?'ok':'no')+'"><span class="vp">'+(ok?'✓ se verifica':'✕ no se verifica')+'</span>'+txt+'</div>'; }
+
+  function analisis(){
+    var el=document.getElementById('analisis'); if(!el) return;
+    var d=elMes();
+    if(d.ton==null||d.tonPrev==null){ el.style.display='none'; return; }
+    var mesPrev=MESES_L[d.mNum-2]||'el mes anterior';
+    var b=base(d);
+    var cf=b.costo/(d.tonPrev*d.dolar);
+    var efPre=cf/b.proy-1, efVol=b.real/cf-1;
+    var hayDev=!!d.dev;
+
+    /* selector de base */
+    var seg='<div class="seg2" id="seg-base">'
+      +'<button data-b="imputado"'+(BASE==='imputado'?' class="on"':'')+'>Como está imputado</button>'
+      +'<button data-b="devengado"'+(BASE==='devengado'?' class="on"':'')+(hayDev?'':' disabled title="No hay detalle de facturas para los dos meses"')+'>Por devengado</button>'
+      +'</div>';
+
+    /* la cuenta partida en dos */
+    var pasos='<div class="pasos">'
+      +'<div class="paso"><div class="pl">Ajustado por INDEC</div><div class="pv">'+usd(b.proy)+'</div>'
+      +'<div class="pd">'+mesPrev+' en USD × '+(d.indec*100).toFixed(1)+'%</div></div>'
+      +'<div class="flecha"><span class="fv '+cl(efPre*100)+'">'+sig(efPre)+'</span><span class="fa">→</span>'
+      +'<span class="fl">gasto sobre<br>la inflación</span></div>'
+      +'<div class="paso"><div class="pl">Con el volumen de '+mesPrev+'</div><div class="pv">'+usd(Math.round(cf*100)/100)+'</div>'
+      +'<div class="pd">el gasto de '+d.mes+' repartido en '+ent(d.tonPrev)+' ton</div></div>'
+      +'<div class="flecha"><span class="fv '+cl(efVol*100)+'">'+sig(efVol)+'</span><span class="fa">→</span>'
+      +'<span class="fl">menos toneladas<br>descargadas</span></div>'
+      +'<div class="paso fin"><div class="pl">'+d.mes+' real</div><div class="pv">'+usd(b.real)+'</div>'
+      +'<div class="pd">'+ent(d.ton)+' ton · brecha '+sig(b.gap/100)+'</div></div></div>';
+
+    var comparo='';
+    if(hayDev){
+      var bi=base(d), bd={real:d.dev.realUsd,proy:d.dev.proyUsd,gap:d.dev.gapUsd};
+      comparo='<div class="ejemplo" style="border-left-color:var(--info);border-color:rgba(38,182,217,.4)">'
+        +'<b>Imputado contra devengado.</b> Como está cargado, la brecha de '+d.mes+' es <b>'+sig(d.gapUsd/100)+'</b>. '
+        +'Poniendo cada factura en el mes que le corresponde, queda en <b>'+sig(d.dev.gapUsd/100)+'</b>. '
+        +'La diferencia son '+money(Math.abs(d.desfase.deOtros||0))+' de '+MESES_L[(d.desfase.detalle[0]||{}).mes||0].toLowerCase()
+        +' que están cargados en '+d.mes.toLowerCase()+'.'
+        +(d.desfase.parcial?' <b>Ojo:</b> '+d.desfase.mesSinDetalle.join(' y ')+' no tiene detalle de facturas, así que su base no se pudo corregir: el número devengado es provisorio.':'')
+        +'</div>';
+    }
+
+    var ejemplo='<p class="ejemplo">De los <b>'+sig(b.gap/100)+'</b> de brecha, <b>'+sig(efVol)+'</b> son sólo el denominador: '
+      +d.mes+' descargó <b>'+ent(d.ton)+' ton</b> contra <b>'+ent(d.tonPrev)+'</b> de '+mesPrev.toLowerCase()+'. '
+      +'Con esas mismas toneladas, el gasto de '+d.mes+' —'+money(b.costo)+', '
+      +sig(b.costo/b.costoPrev-1)+' sobre '+mesPrev.toLowerCase()+'— daba <b>'+usd(Math.round(cf*100)/100)+'/ton</b> '
+      +'y la brecha habría sido <b>'+sig(efPre)+'</b>.</p>';
+
+    /* ── rubro por rubro, cada uno con su lógica ── */
+    var vj=d.viajes||{};
+    var rub=[];
+
+    // FLETES: plano por viaje
+    var vFl=vj.flet, vFlP=vj.fletPrev;
+    var gFl=b.fletes, gFlP=b.fletesPrev;
+    var dVi=vFl&&vFlP?(vFl/vFlP-1)*100:null, dGa=gFl&&gFlP?(gFl/gFlP-1)*100:null;
+    var vvA=d.valorViaje?d.valorViaje.medio:null, vvP=d.valorViajePrev?d.valorViajePrev.medio:null;
+    // Lo que el gasto tendría que haber hecho: los viajes por la tarifa. Lo que
+    // sobra de ahí no lo explica ni el volumen ni el precio del viaje.
+    var esperado=(dVi!=null&&vvA&&vvP)?((1+dVi/100)*(vvA/vvP)-1)*100:null;
+    var residual=(esperado!=null&&dGa!=null)?dGa-esperado:null;
+    rub.push({
+      t:'Fletes', c:'#d99a2b',
+      sub:'El análisis es plano: cada viaje vale lo mismo lleve las toneladas que lleve. Más viajes tienen que dar más gasto.',
+      tabla:[['Viajes de fleteros',ent(vFlP),ent(vFl),dVi],
+        ['Toneladas por fleteros',ent(vj.tonFletPrev),ent(vj.tonFlet),vj.tonFlet&&vj.tonFletPrev?(vj.tonFlet/vj.tonFletPrev-1)*100:null],
+        ['Gasto de fletes',money(gFlP),money(gFl),dGa],
+        ['Gasto por viaje',money(gFlP/vFlP),money(gFl/vFl),(gFl/vFl)/(gFlP/vFlP)*100-100],
+        ['Valor real del viaje',money(vvP),money(vvA),vvA&&vvP?(vvA/vvP-1)*100:null]],
+      vis:barras([{l:'Viajes',v:dVi},{l:'Tarifa',v:vvA&&vvP?(vvA/vvP-1)*100:null},{l:'Esperado',v:esperado},{l:'Gasto real',v:dGa}]),
+      vd:verdicto(Math.abs(residual)<3,
+        'Si cada viaje vale lo que vale, el gasto tendría que haberse movido <b>'+sig(esperado/100)+'</b>: '
+        +sig(dVi/100)+' de viajes por '+sig(vvA&&vvP?(vvA/vvP-1):null)+' de tarifa. Se movió <b>'+sig(dGa/100)+'</b>, '
+        +(Math.abs(residual)<3
+          ? 'que es lo mismo dentro del ruido: la relación cierra.'
+          : 'o sea <b>'+sig(residual/100)+'</b> por encima de lo explicable. '
+            +(BASE==='devengado'
+              ? 'Esto ya es con las facturas puestas en su mes, así que lo que queda apunta a la base de '+mesPrev.toLowerCase()
+                +(d.desfase&&d.desfase.parcial?', que no se pudo corregir por falta de detalle.':'.')
+              : 'Antes de buscar explicaciones de precio conviene mirar la registración: probá la vista <b>por devengado</b>.')))
+    });
+
+    // PROPIOS: fijo + variable
+    var vPr=vj.prop, vPrP=vj.propPrev;
+    var gPr=(d.comp&&d.comp[0])?d.comp[0].v:null, gPrP=(d.comp&&d.comp[0])?d.comp[0].p:null;
+    rub.push({
+      t:'Propios', c:'#2f9e6e',
+      sub:'Tiene un fijo —el sueldo del personal— y un variable, el gasoil según los kilómetros. Un mes con menos viajes no baja el gasto en la misma proporción.',
+      tabla:[['Viajes propios',ent(vPrP),ent(vPr),vPr&&vPrP?(vPr/vPrP-1)*100:null],
+        ['Toneladas propias',ent(vj.tonPropPrev),ent(vj.tonProp),vj.tonProp&&vj.tonPropPrev?(vj.tonProp/vj.tonPropPrev-1)*100:null],
+        ['Kilómetros recorridos',ent(d.kmPrev),ent(d.km),d.km&&d.kmPrev?(d.km/d.kmPrev-1)*100:null],
+        ['Litros de gasoil consumidos',ent(d.litrosPrev),ent(d.litros),d.litros&&d.litrosPrev?(d.litros/d.litrosPrev-1)*100:null],
+        ['Gasto de propios',money(gPrP),money(gPr),gPr&&gPrP?(gPr/gPrP-1)*100:null],
+        ['Gasto por viaje propio',money(gPrP/vPrP),money(gPr/vPr),vPr&&vPrP?((gPr/vPr)/(gPrP/vPrP)-1)*100:null],
+        ['Km por viaje',ent(d.kmPrev/vPrP),ent(d.km/vPr),d.km&&d.kmPrev?((d.km/vPr)/(d.kmPrev/vPrP)-1)*100:null]],
+      vis:barras([{l:'Viajes',v:vPr&&vPrP?(vPr/vPrP-1)*100:null},
+        {l:'Kilómetros',v:d.km&&d.kmPrev?(d.km/d.kmPrev-1)*100:null},
+        {l:'Litros',v:d.litros&&d.litrosPrev?(d.litros/d.litrosPrev-1)*100:null},
+        {l:'Gasto',v:gPr&&gPrP?(gPr/gPrP-1)*100:null}]),
+      vd:'<div class="vd av"><span class="vp">⚠ mirar cómo se imputa</span>El combustible entra al gasto <b>por compra, no por consumo</b>: el rubro se mueve con la decisión de stockear y no con los kilómetros. Para leer el variable hay que valorizar los litros consumidos, no los comprados.</div>'
+    });
+
+    // LAVATACHOS
+    var gLa=(d.comp&&d.comp[2])?d.comp[2].v:null, gLaP=(d.comp&&d.comp[2])?d.comp[2].p:null;
+    rub.push({
+      t:'Lavatachos', c:'#26b6d9',
+      sub:'El gasto es sólo personal. Varía cuando hay días extraordinarios, que son feriados que se trabajaron.',
+      tabla:[['Lavados',ent(d.lavadosPrev),ent(d.lavados),d.lavados&&d.lavadosPrev?(d.lavados/d.lavadosPrev-1)*100:null],
+        ['Gasto de lavadero',money(gLaP),money(gLa),gLa&&gLaP?(gLa/gLaP-1)*100:null],
+        ['Costo por lavado',money(gLaP/d.lavadosPrev),money(gLa/d.lavados),d.lavados&&d.lavadosPrev?((gLa/d.lavados)/(gLaP/d.lavadosPrev)-1)*100:null]],
+      vis:barras([{l:'Lavados',v:d.lavados&&d.lavadosPrev?(d.lavados/d.lavadosPrev-1)*100:null},
+        {l:'Gasto',v:gLa&&gLaP?(gLa/gLaP-1)*100:null}]),
+      vd:''
+    });
+
+    // TALLER
+    var gTa=(d.comp&&d.comp[3])?d.comp[3].v:null, gTaP=(d.comp&&d.comp[3])?d.comp[3].p:null;
+    var serie=D.map(function(x){ return {m:x.mes.slice(0,3),v:(x.comp&&x.comp[3])?x.comp[3].v:0}; });
+    var mxT=Math.max.apply(null,serie.map(function(x){return x.v;}));
+    var spark='<div class="spark2">'+serie.map(function(x,ix){
+      return '<span class="sb" title="'+x.m+': '+money(x.v)+'"><i style="height:'+(x.v/mxT*100).toFixed(1)+'%"></i><em>'+x.m+'</em></span>';
+    }).join('')+'</div>';
+    rub.push({
+      t:'Taller', c:'#ff4d67',
+      sub:'Depende de las reparaciones del mes. Sin un sistema de mantenimiento preventivo no hay con qué anticiparlo: no se le busca tendencia.',
+      tabla:[['Gasto de taller',money(gTaP),money(gTa),gTa&&gTaP?(gTa/gTaP-1)*100:null]],
+      vis:spark, vd:''
+    });
+
+    var rubHTML='<div class="rubros">'+rub.map(function(r){
+      return '<div class="rub"><div class="rub-h"><span class="dot" style="background:'+r.c+'"></span><b>'+r.t+'</b></div>'
+        +'<p class="rub-s">'+r.sub+'</p>'
+        +'<table class="mini"><thead><tr><th>&nbsp;</th><th>'+mesPrev+'</th><th>'+d.mes+'</th><th>Var.</th></tr></thead><tbody>'
+        +r.tabla.map(function(f){ return '<tr><td>'+f[0]+'</td><td>'+f[1]+'</td><td>'+f[2]+'</td><td class="'+cl(f[3])+'">'+sig(f[3]==null?null:f[3]/100)+'</td></tr>'; }).join('')
+        +'</tbody></table>'+r.vis+r.vd+'</div>';
+    }).join('')+'</div>';
+
+    /* ── el desfasaje de facturación ── */
+    var desf='';
+    if(d.desfase&&d.desfase.hayDetalle){
+      var det=d.desfase.detalle.slice().sort(function(a,b){ return b.imp-a.imp; });
+      var porProv={}; det.forEach(function(x){ porProv[x.prov]=(porProv[x.prov]||0)+x.imp; });
+      desf='<div class="sub-panel"><h4>Facturas cargadas fuera de su mes</h4>'
+        +'<p class="psub">De los '+money(d.desfase.deOtros+0)+' que están en '+d.mes.toLowerCase()+' pero corresponden a otro mes, '
+        +'y los '+money(d.desfase.sale)+' de '+d.mes.toLowerCase()+' que quedaron cargados más adelante.</p>'
+        +'<table class="mini"><thead><tr><th>Proveedor</th><th>Corresponde a</th><th>Importe</th></tr></thead><tbody>'
+        +Object.keys(porProv).map(function(p){
+          var m=det.filter(function(x){return x.prov===p;})[0];
+          return '<tr><td>'+p+'</td><td style="text-align:left;color:var(--muted)">'+MESES_L[m.mes]+'</td><td>'+money(porProv[p])+'</td></tr>';
+        }).join('')
+        +'<tr class="ref"><td>Total corrido</td><td></td><td>'+money(d.desfase.deOtros)+'</td></tr></tbody></table>'
+        +'<div class="cuentas2">'
+        +'<div class="cj"><div class="cl">Fletes imputados</div><div class="cv">'+money((d.comp&&d.comp[1])?d.comp[1].v:0)+'</div></div>'
+        +'<span class="op">−</span><div class="cj"><div class="cl">De otro mes</div><div class="cv">'+money(d.desfase.deOtros)+'</div></div>'
+        +'<span class="op">+</span><div class="cj"><div class="cl">Lo suyo cargado después</div><div class="cv">'+money(d.desfase.sale)+'</div></div>'
+        +'<span class="op">=</span><div class="cj res"><div class="cl">Fletes devengados</div><div class="cv">'+money(d.dev?d.dev.fletes:((d.comp[1].v)-(d.desfase.deOtros)+(d.desfase.sale)))+'</div></div>'
+        +'</div></div>';
+    }
+
+    /* ── índices de afuera ── */
+    var ind=[];
+    ind.push(['INDEC · nivel general', d.indec*100, 'el ajuste que se le exige al costo']);
+    if(d.fadeeac) ind.push(['FADEEAC · costo general', d.fadeeac.general, 'costo del transporte de carga']);
+    if(d.fadeeac) ind.push(['FADEEAC · combustible', d.fadeeac.combustible, 'el rubro que suele disparar']);
+    if(d.gasoilOf) ind.push(['Gasoil oficial', d.gasoilOf.varPct, 'Secretaría de Energía · Buenos Aires']);
+    if(d.gasoil) ind.push(['Gasoil que compramos', d.gasoil.varPct, '$'+nf.format(Math.round(d.gasoil.prev))+' → $'+nf.format(Math.round(d.gasoil.precio))+' por litro']);
+    if(d.tarifaRuta!=null) ind.push(['Tarifa de fletes a ruta constante', d.tarifaRuta, 'mismas rutas en los dos meses']);
+    var tInd='<table class="mini"><caption>Qué hicieron los precios de afuera en '+d.mes+'</caption>'
+      +'<thead><tr><th>&nbsp;</th><th>Var. del mes</th><th>&nbsp;</th></tr></thead><tbody>'
+      +ind.map(function(x){ return '<tr><td>'+x[0]+'</td><td class="'+cl(x[1])+'">'+sig(x[1]/100)+'</td>'
+        +'<td style="text-align:left;color:var(--muted-2);font-weight:500;font-size:11px">'+x[2]+'</td></tr>'; }).join('')
+      +'</tbody></table>';
+
+    /* ── por qué se movieron menos toneladas ── */
+    var dias=[['Días de calendario',d.diasMesPrev,d.diasMes,0],['Días con descarga',d.diasOpPrev,d.diasOp,0],
+      ['Toneladas',d.tonPrev,d.ton,0]];
+    if(d.diasOp&&d.diasOpPrev) dias.push(['Toneladas por día con descarga',Math.round(d.tonPrev/d.diasOpPrev),Math.round(d.ton/d.diasOp),1]);
+    var tVol='<table class="mini"><caption>Por qué se movieron menos toneladas</caption>'
+      +'<thead><tr><th>&nbsp;</th><th>'+mesPrev+'</th><th>'+d.mes+'</th><th>Var.</th></tr></thead><tbody>'
+      +dias.map(function(x){ var v=(x[2]/x[1]-1)*100;
+        return '<tr'+(x[3]?' class="ref"':'')+'><td>'+x[0]+'</td><td>'+ent(x[1])+'</td><td>'+ent(x[2])+'</td>'
+        +'<td class="'+cl(-v)+'">'+sig(v/100)+'</td></tr>'; }).join('')+'</tbody></table>';
+
+    /* ── conclusión ── */
+    var nada=ind.filter(function(x){ return x[1]>d.indec*100; }).length===0;
+    var ver='<p class="ejemplo" style="border-left-color:var(--good);border-color:rgba(34,227,155,.4)">'
+      +'<b>Conclusión.</b> '+d.mes+' no se despega por un salto de precios. '
+      +(nada?'Ninguno de los índices de afuera superó la inflación del mes':'')
+      +', la tarifa a ruta constante subió '+(d.tarifaRuta!=null?sig(d.tarifaRuta/100):'—')
+      +' y el gasoil que compramos '+(d.gasoil?(d.gasoil.varPct<0?'bajó ':'subió ')+sig(Math.abs(d.gasoil.varPct)/100).slice(1):'no se movió')+'. '
+      +'Lo que se despega es el denominador: <b>'+sig(efVol)+'</b> de la brecha son toneladas, con '+d.diasOp+' días de descarga contra '+d.diasOpPrev+'. '
+      +(hayDev?('Y del resto, buena parte es registración: puesta cada factura en su mes, la brecha baja de '+sig(d.gapUsd/100)+' a <b>'+sig(d.dev.gapUsd/100)+'</b>'
+        +(d.desfase.parcial?', con la salvedad de que '+d.desfase.mesSinDetalle.join(' y ')+' no tiene detalle de facturas para corregir su base.':'.')):'')
+      +'</p>';
+
+    var lim='<p class="nota-lim"><b>Hasta dónde llega esto.</b> Los viajes salen de <b>ResumenKgs</b>, el valor del viaje de '
+      +'<b>KG-FLETES-DESCRIMINADO</b> y las facturas de los archivos mensuales de <b>Presupuesto</b>. '
+      +'Las filas de gasto de la hoja <b>Gastos</b> están cargadas a mano, así que el reparto entre rubros se muestra como lo '
+      +'informa la planilla. El corte entre volumen y precio, en cambio, es aritmética: el mismo gasto dividido por las '
+      +'toneladas de un mes y del otro.</p>';
+
+    el.innerHTML='<div class="panel-head"><div><h3>Por qué '+d.mes+' se despega tanto del ajustado</h3>'
+      +'<p class="psub">El mes con la brecha más grande: <b>'+sig(b.gap/100)+'</b> sobre el ajustado por inflación. '
+      +'Abierto por rubro, porque cada uno se comporta distinto.</p></div>'+seg+'</div>'
+      +pasos+ejemplo+comparo
+      +rubHTML
+      +'<div class="grid2" style="margin-top:16px">'+tVol+tInd+'</div>'
+      +desf+ver+lim;
+
+    var sb=document.getElementById('seg-base');
+    if(sb) sb.querySelectorAll('button').forEach(function(x){ x.onclick=function(){
+      if(x.disabled) return; BASE=x.dataset.b; analisis(); postH(); }; });
+  }
+
   // ---- alto del iframe (robusto: reintenta hasta capturar la conclusión) ----
   function postH(){ try{ parent.postMessage({tipo:'matriz-alto', alto:document.body.scrollHeight}, '*'); }catch(e){} }
-  draw(); conclusion();
+  draw(); analisis(); conclusion();
   postH();
   if(window.ResizeObserver){ new ResizeObserver(postH).observe(document.body); }
   [80,250,600,1200].forEach(t=>setTimeout(postH,t));

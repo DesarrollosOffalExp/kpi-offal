@@ -129,7 +129,8 @@
             "Q": "total tratadas",
             "R": "observaciones"
           },
-          "cuenta": "Se usa el bloque que tiene las columnas Q y R (el completo), no los bloques de arriba que son versiones anteriores. La última fila con número de semana es la semana vigente y alimenta las tarjetas de mockData."
+          "cuenta": "Se usa el bloque que tiene las columnas Q y R (el completo), no los bloques de arriba que son versiones anteriores. La última fila con número de semana es la semana vigente y alimenta las tarjetas de mockData.",
+          "formulas": "Q (total tratadas) = O de la semana anterior − A − B + D + E + F: de lo que venía pendiente, lo que dejó de estarlo, más lo que entró y se resolvió en la semana. El tablero muestra ese desglose en la tarjeta. Q está cargada desde la semana 15; antes viene vacía."
         },
         {
           "id": "vencidas-por-semana",
@@ -139,7 +140,8 @@
           "hojas": [
             "KPI"
           ],
-          "cuenta": "Tabla dinámica que arranca bajo el rótulo 'Semana / Número / Cuenta de Cantidad' (Estado = Aprobada/o). Da el desglose de las vencidas por semana de origen; el Total general tiene que coincidir con las vencidas de la semana vigente."
+          "cuenta": "Tabla dinámica que arranca bajo el rótulo 'Semana / Número / Cuenta de Cantidad' (Estado = Aprobada/o). Da el desglose de las vencidas por semana de origen; el Total general tiene que coincidir con las vencidas de la semana vigente.",
+          "historico": "Cada corrida guarda una foto de la tabla en tools/historico-vencidas.json (una entrada por corrida, con la fecha y las requisiciones). La tabla de la planilla se recalcula sola y pierde las que se destrabaron: el histórico es la única memoria de qué requisición estuvo vencida y cuándo."
         },
         {
           "id": "sin-tratar-por-aprobacion",
@@ -182,13 +184,21 @@
           "cuenta": "Se descartan las OC Anuladas y Rechazadas. El precio del mes es el promedio ponderado por cantidad. Base = diciembre 2025 o la primera compra; todo se pasa a dólares al TC del mes de cada línea y se ajusta por la inflación de la hoja DATOS. Diferencia = real ÷ ajustado − 1."
         },
         {
-          "id": "demoradas-e-informe",
+          "id": "ordenes-de-compra",
           "archivo": "Ordenes de Compra actualizable (version 1).xlsm",
           "destino": [
             "client/src/dashboards/compras-demoradas.html",
-            "client/src/dashboards/compras-informe.html"
+            "client/src/dashboards/compras-informe.html",
+            "client/src/dashboards/compras-sin-entrega.html"
           ],
-          "cuenta": "PENDIENTE de mapear: hoja Demoradas y hoja Reporte (Fecha de Entrega AX contra Fecha de Recepción BI)."
+          "cuenta": "La base es la hoja Reporte, no la hoja Demoradas: esa quedó congelada y trae un solo registro de 2026. Informe de puntualidad: los ítems que tienen fecha de entrega y de recepción; llega tarde el que se recibió después de la fecha de entrega, y se agrupa por año, mes, rubro y proveedor. Sin entrega: los ítems con fecha de entrega, sin recepción, con cantidad pendiente mayor a cero y con la OC viva (estado aprobada o emitida). Demoradas: de esas, las que tienen la fecha de entrega vencida y dentro del año en curso, agrupadas por proveedor y rubro. La columna Observaciones sale de \"Texto Variable Observaciones\" y se muestra tal cual, con los saltos de línea pasados a \" · \".",
+          "constante": "DATA",
+          "hojas": [
+            "Reporte"
+          ],
+          "columnas": {
+            "Reporte": "una fila por ítem de OC. Se buscan por título: Proveedor, Rubro, Orden de Compra, Item, Material, Requisición, Cantidad Solicitada, Cantidad Pendiente, Estado, Estado del Item, Comprador Asignado, Fecha Entrega, Fecha Recepción VE, Texto Variable Observaciones."
+          }
         }
       ]
     },
@@ -291,7 +301,15 @@
         {
           "id": "acciones-correctivas",
           "archivo": "Gerencia de Operaciones <MM><AAAA>.xlsx",
-          "destino": "client/src/dashboards/presupuesto*.html + kpi-sistemas.html",
+          "destino": [
+            "client/src/dashboards/presupuesto-insumos.html",
+            "client/src/dashboards/presupuesto-compras.html",
+            "client/src/dashboards/presupuesto-congelado.html",
+            "client/src/dashboards/presupuesto-lavadero.html",
+            "client/src/dashboards/presupuesto-logistica.html",
+            "client/src/dashboards/presupuesto-taller.html",
+            "client/src/dashboards/kpi-sistemas.html"
+          ],
           "constante": "ACC",
           "hojas": "la hoja de resumen, que cambia de nombre según el mes: DESVIOS ANALIZADOS, PARTIDA PRESUPUESTARIA, RESUMEN o Resumen Gerencia",
           "columnas": {
@@ -404,8 +422,11 @@
         {
           "id": "necesidad-tambores",
           "archivo": "NECESIDAD DE TAMBORES PARA OPERAR 2026.xlsx",
-          "destino": "client/src/dashboards/necesidad-tambores.html",
-          "constante": "DATA",
+          "destino": [
+            "client/src/dashboards/necesidad-tambores.html",
+            "client/src/dashboards/consolidado-tambores.html"
+          ],
+          "constante": "DATA (necesidad-tambores) y DATA (consolidado-tambores)",
           "hojas": [
             "01..NN (una por semana)",
             "Consolidado",
@@ -413,11 +434,12 @@
           ],
           "columnas": {
             "hoja de semana": "matadero en la B; después un bloque de cuatro columnas por día (ENV / REC / MARC / S.MARC), tantos como días cargados",
-            "Consolidado": "B matadero (con la localidad entre paréntesis), C lugar, y la columna rotulada \"Stock en Frigorifico\"",
+            "Consolidado": "B matadero (con la localidad entre paréntesis), C lugar, un bloque de columnas \"S.N\" una por semana, las columnas rotuladas \"Debito\", \"saldo\", \"Año 2025\", \"Año 2026\" y \"Stock en Frigorifico\"",
             "RECLAMO DEUDA": "A frigorífico, B a debitar, C precio unitario, D monto"
           },
-          "cuenta": "Por semana: env = suma de todas las columnas ENV del matadero, rec = suma de las REC, dif = env − rec; el matadero que no movió nada esa semana no entra. totEnv/totRec/totDif son las sumas de la semana. El stock por frigorífico sale de la columna \"Stock en Frigorifico\" de Consolidado, con el nombre sin el paréntesis, y deudaTotal es su suma. A debitar sale del PRIMER bloque de RECLAMO DEUDA (la hoja guarda reclamos viejos más abajo), ordenado de mayor a menor, y se controla contra la fila \"total\" de ese bloque.",
-          "acumula": "Cada semana nueva es una hoja más. Las ya cargadas se rehacen y se comparan: la planilla de una semana se sigue corrigiendo después de cerrada."
+          "cuenta": "Por semana: env = suma de todas las columnas ENV del matadero, rec = suma de las REC, dif = rec − env; el matadero que no movió nada esa semana no entra. totEnv/totRec/totDif son las sumas de la semana. El stock por frigorífico sale de la columna \"Stock en Frigorifico\" de Consolidado, con el nombre sin el paréntesis, y deudaTotal es su suma. A debitar sale del PRIMER bloque de RECLAMO DEUDA (la hoja guarda reclamos viejos más abajo), ordenado de mayor a menor, y se controla contra la fila \"total\" de ese bloque.",
+          "acumula": "Cada semana nueva es una hoja más. Las ya cargadas se rehacen y se comparan: la planilla de una semana se sigue corrigiendo después de cerrada.",
+          "consolidado": "La cuenta del consolidado no corre de enero a hoy: se cerró dos veces en el año. Hasta la S20 se cerró la cuenta en cero (al que daba negativo se le debitó, al que daba positivo se le puso cero porque el stock anterior estaba mal). De la S21 a la S32 se hizo seguimiento, y esa suma es la columna saldo. La S33 se trajo para hacer un arqueo, así que no se cuenta y se volvió a cerrar en cero. De la S34 en adelante es la columna Año 2026. Stock en Frigorifico son los tambores que el frigorífico tiene en su planta, y el stock final es Año 2026 + ese stock. Los cortes están en la constante TRAMOS del extractor; cada corrida controla que saldo y Año 2026 den la suma de sus semanas y avisa si no. La diferencia de cada celda es recibidos − enviados: positiva quiere decir que recibimos de más."
         },
         {
           "id": "consumo-gasoil",
@@ -478,13 +500,16 @@
           "constante": "DATA",
           "hojas": [
             "ING-MOV",
-            "SALIDAS"
+            "SALIDAS",
+            "STOCK"
           ],
           "columnas": {
             "ING-MOV": "C fecha de carga, J hiel, L aditivo (una fila por bin recibido)",
-            "SALIDAS": "B fecha, E salidas, I suma salidas [kg] (una fila por bin despachado)"
+            "SALIDAS": "B fecha, E salidas (una fila por bin despachado)",
+            "STOCK": "bloque de detalle: L fecha, P salidas, R pesada de balanza, S nº ticket, T remito (una fila por bin despachado; pesada, ticket y remito van sólo en la fila del primer bin del despacho)"
           },
-          "cuenta": "Una fila por día, desde el último día del mes anterior (que trae el sobrante) hasta el fin de mes. ingreso y aditivo son las sumas de ING-MOV del día; salidas la suma de SALIDAS; saldo es el acumulado (saldo anterior + ingreso + aditivo − salidas). totIng y totSal cuentan sólo los días del mes. El mes sale de los propios movimientos, y el nombre del archivo lo lleva adentro: se toma el más nuevo que empiece con \"STOCK HIEL\"."
+          "cuenta": "Una fila por día, desde el último día del mes anterior (que trae el sobrante) hasta el fin de mes. ingreso y aditivo son las sumas de ING-MOV del día; salidas la suma de SALIDAS; pesada, ticket y remito salen del detalle de la hoja STOCK; saldo es el acumulado (saldo anterior + ingreso + aditivo − salidas). totIng y totSal cuentan sólo los días del mes. El mes sale de los propios movimientos, y el nombre del archivo lo lleva adentro: se toma el más nuevo que empiece con \"STOCK HIEL\".",
+          "avisos": "La fila de encabezado de STOCK repite los mismos títulos dos veces: primero el detalle y después un resumen por día cargado a mano. Se usa el detalle. Si el resumen no coincide, la corrida lo avisa."
         },
         {
           "id": "matriz-costo",
@@ -526,6 +551,49 @@
             "D en adelante": "un mes por columna, con la fecha en el encabezado"
           },
           "cuenta": "Una fila por grupo de gasto con el real de cada mes. Los meses salen de las fechas del encabezado. Las acciones correctivas (ACC) y el anexo de fletes (FL) de este mismo tablero NO salen de acá: los carga el grupo \"presupuesto\" desde el archivo mensual de la Gerencia."
+        },
+        {
+          "id": "metrica-fletes",
+          "archivo": "2026 Consumo de combustible.xlsx + tools/indices-externos.json",
+          "destino": "client/src/dashboards/metrica-fletes.html",
+          "constante": "DATA",
+          "hojas": [
+            "ResumenKgs",
+            "KG-FLETES-DESCRIMINADO 2026",
+            "PRECIO GASOIL",
+            "GasOil 2026",
+            "Gastos"
+          ],
+          "columnas": {
+            "ResumenKgs": "A fecha, C proveedor, E kilos, G razón social del transporte, H TRANSPORTE (PROPIO / FLETES). Una fila = un ingreso = un viaje.",
+            "KG-FLETES-DESCRIMINADO 2026": "B día, C transportista, D origen/destino, F tarifa sin IVA, G kilos, K tipo de flete. Una fila = un viaje facturado.",
+            "PRECIO GASOIL": "B fecha de la compra, F litros, J precio por litro",
+            "GasOil 2026": "C fecha, T volumen (litros cargados)",
+            "Gastos": "fila TOTAL DEL MES FLETES, sólo para control"
+          },
+          "cuenta": "Volumen: kilos y viajes por mes partidos por la columna TRANSPORTE, y la diferencia contra el mes anterior abierta por proveedor. Economía: gasto = suma de tarifas, $/kg = tarifas ÷ kilos, $/viaje = tarifas ÷ viajes. Índice de tarifas A RUTA CONSTANTE: para las rutas (transportista + destino) que están en los dos meses, promedio de la variación del precio por viaje ponderado por los viajes del mes; es lo único comparable contra un índice de costos, porque saca de encima el cambio de mezcla de rutas. Gasoil: nuestro precio ponderado por litros contra el oficial, y el gasto partido en efecto volumen (litros de más × precio viejo) y efecto precio (precio de más × litros nuevos). El mes en curso se marca como parcial y queda afuera de los acumulados.",
+          "externo": "Los índices de FADEEAC, el precio oficial del gasoil y el INDEC NO salen de ningún Excel: están en tools/indices-externos.json y se cargan a mano. Ahí está la URL de cada fuente y el corte exacto que se tomó.",
+          "avisos": "Cargado a mano: no tiene extractor todavía."
+        },
+        {
+          "id": "cierre-ene-feb",
+          "archivo": "presupuesto enero 2026 detallado.xlsx + 2026 Consumo de combustible.xlsx",
+          "destino": "client/src/dashboards/cierre-ene-feb.html",
+          "constante": "DATA, FAC (cargadas a mano)",
+          "hojas": [
+            "mano de obra",
+            "materiales",
+            "no transaccionables",
+            "ResumenKgs",
+            "KG-FLETES-DESCRIMINADO 2026"
+          ],
+          "columnas": {
+            "mano de obra": "columna L «Importe Neto Ítem», con centro de costo, subrubro y período devengado; trae todos los meses. Las notas de crédito vienen en POSITIVO: hay que restarlas.",
+            "materiales": "columna «Precio Total Pesos», sólo el período 01/2026, por centro de costo destino",
+            "no transaccionables": "la glosa dice a qué mes corresponde el servicio facturado"
+          },
+          "cuenta": "Enero con su mano de obra propia (02.487.281), que la hoja Gastos no tiene cargada: la matriz deja implícitos 9.347.047 y faltan 3.140.234. Con esa base corregida y cada factura de fletes en el mes de su servicio, la comparación contra febrero se abre por drivers: fletes en cantidad de viajes y precio por viaje, propios en fijo (mano de obra) y variable, lavadero en cantidad y costo unitario, taller en reparaciones, y por último el efecto de las toneladas. La diferencia de viajes se valoriza por destino y tipo de equipo a la tarifa del mes anterior.",
+          "avisos": "Cargado a mano: no tiene extractor. Los importes son de enero y febrero de 2026 y no se recalculan solos. Ningún fletero factura por mes: todos facturan a semana vencida, así que el gasto de un mes nunca coincide con sus viajes."
         }
       ]
     }

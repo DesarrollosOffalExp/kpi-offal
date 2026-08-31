@@ -29,6 +29,8 @@ import StockHiel from './components/StockHiel';
 import ConsumoGasoil from './components/ConsumoGasoil';
 import CostoFrigorifico from './components/CostoFrigorifico';
 import MetricaCosto from './components/MetricaCosto';
+import MetricaFletes from './components/MetricaFletes';
+import CierreEneFeb from './components/CierreEneFeb';
 import ProductividadArmado from './components/ProductividadArmado';
 import MermaCajas from './components/MermaCajas';
 import EficienciaMateriales from './components/EficienciaMateriales';
@@ -256,6 +258,26 @@ export default function App() {
                   <div className="grupo" key={g}>
                     {!conSub && <h2 className="grupo-titulo">{g}</h2>}
                     <MetricaCosto />
+                  </div>
+                );
+              }
+              // Cierre Enero–Febrero (Logística): enero con su mano de obra y el desglose por drivers.
+              const esCierre = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Cierre Enero');
+              if (esCierre) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <CierreEneFeb />
+                  </div>
+                );
+              }
+              // Métrica de Fletes (Logística): propios vs fleteros, tarifas contra FADEEAC y gasoil.
+              const esMetricaFletes = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Métrica de Fletes');
+              if (esMetricaFletes) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <MetricaFletes />
                   </div>
                 );
               }

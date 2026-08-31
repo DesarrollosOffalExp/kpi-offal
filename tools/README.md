@@ -65,6 +65,51 @@ suposición se rompió.
 - **Algunas hojas traen bloques viejos arriba del bueno.** En la hoja `KPI` de
   Compras hay tres versiones de la misma tabla; la que vale es la que tiene las
   columnas `Total REQ Tratadas` y `Observaciones`.
+- **Y otras repiten los encabezados dos veces en la misma fila.** En `STOCK HIEL`
+  la hoja `STOCK` tiene el detalle por bin despachado y, más a la derecha, un
+  resumen por día con los mismos títulos (`PESADA`, `N° TICKET`, `REMITO`).
+  Mapear las columnas por nombre dejando ganar la última match daba el resumen,
+  que se carga a mano y no siempre coincide: el 6 de agosto el detalle tiene
+  3.920 kg de balanza y el resumen 3.751,5. Vale el detalle, y la corrida avisa
+  cuando los dos no dan igual.
+- **Hay tableros cuya única memoria es nuestra.** La tabla de vencidas de Compras
+  se recalcula sola y pierde las requisiciones que se destrabaron. Cada corrida
+  guarda una foto en `tools/historico-vencidas.json`: si se borra, el histórico
+  no se puede reconstruir desde la planilla.
+- **Una cuenta puede estar partida en tramos.** El `Consolidado` de tambores no
+  corre de enero a hoy: se cerró en cero dos veces (hasta la S20 y en la S33,
+  que fue un arqueo). El saldo es la suma de la S21 a la S32 y `Año 2026` la de
+  la S34 en adelante. Los cortes están en la constante `TRAMOS` del extractor y
+  cada corrida controla que las dos columnas den la suma de sus semanas.
+
+## Cómo se analiza el costo de Logística
+
+No se evalúa gasto contra gasto: cada rubro tiene su propia lógica y todo se mide
+**por toneladas transportadas y por cantidad de viajes**.
+
+- **Propios**: un fijo, el sueldo del personal, y un variable, el gasoil según los
+  kilómetros. Ojo que el combustible se imputa **por compra y no por consumo**, así
+  que el rubro se mueve con la decisión de stockear.
+- **Fletes**: plano, cada viaje vale lo mismo lleve lo que lleve. Si hay más viajes
+  tiene que haber más gasto; si no se verifica, mirar la registración de las
+  facturas. **Ningún fletero factura por mes: todos facturan a semana vencida**, así
+  que el gasto de un mes nunca coincide con los viajes de ese mes.
+- **Lavatachos**: sólo personal; varía con los días extraordinarios (feriados
+  trabajados).
+- **Taller**: reparaciones del mes. Sin preventivos no hay tendencia que buscarle.
+
+El promedio del valor del viaje **no sirve** para comparar meses: mezcla un equipo
+completo de ~ M con un tractorista externo de ~60 k, y se mueve solo con el
+cambio de mezcla. Hay que abrirlo por tipo de equipo.
+
+## Índices que no salen de SharePoint
+
+La ventana **Métrica de Fletes** compara contra tres índices que no están en
+ningún Excel de la empresa: el ICT de FADEEAC, el precio oficial del gasoil de
+la Secretaría de Energía y el IPC del INDEC. Viven en `tools/indices-externos.json`
+con la URL y el corte exacto de cada uno, y **se actualizan a mano** cuando sale
+el informe del mes. El PDF de FADEEAC es una imagen: el texto se saca
+descomprimiendo los streams del PDF, no con un lector común.
 
 ## Agregar una fuente nueva
 
@@ -103,8 +148,14 @@ node -e "const s=require('fs').readFileSync('client/src/dashboards/kpi-sistemas.
 
 ## Qué falta
 
-Falta mapear `compras/demoradas-e-informe`, que sale de un `.xlsm` grande, y dentro de
-`insumos` la `merma-cajas`: el KPI mensual está en la hoja `KPIs`, pero el
-detalle por tipo de caja sale de cruzar `Consumos Deposito` con producción y
-todavía no está mapeado. El script avisa cuándo un grupo no tiene extractor en
-lugar de fallar de cualquier modo.
+Dentro de `insumos`, la `merma-cajas`: el KPI mensual está en la hoja `KPIs`,
+pero el detalle por tipo de caja sale de cruzar `Consumos Deposito` con
+producción y todavía no está mapeado. **Métrica de Fletes** y **Cierre Enero–Febrero** todavía no tienen
+extractor: los tableros están armados pero sus datos se cargaron a mano, así que
+pedir "actualizá logística" no los toca. El script avisa cuándo un grupo no tiene
+extractor en lugar de fallar de cualquier modo.
+
+Todo lo demás está cubierto: los 32 tableros de `client/src/dashboards` tienen
+su fuente declarada en `fuentes.json` y su extractor, y los siete grupos corren
+de punta a punta. Se puede comprobar con `--dry`, que muestra qué quedaría
+escrito sin tocar nada.
