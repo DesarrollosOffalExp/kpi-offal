@@ -551,6 +551,49 @@
             "D en adelante": "un mes por columna, con la fecha en el encabezado"
           },
           "cuenta": "Una fila por grupo de gasto con el real de cada mes. Los meses salen de las fechas del encabezado. Las acciones correctivas (ACC) y el anexo de fletes (FL) de este mismo tablero NO salen de acá: los carga el grupo \"presupuesto\" desde el archivo mensual de la Gerencia."
+        },
+        {
+          "id": "metrica-fletes",
+          "archivo": "2026 Consumo de combustible.xlsx + tools/indices-externos.json",
+          "destino": "client/src/dashboards/metrica-fletes.html",
+          "constante": "DATA",
+          "hojas": [
+            "ResumenKgs",
+            "KG-FLETES-DESCRIMINADO 2026",
+            "PRECIO GASOIL",
+            "GasOil 2026",
+            "Gastos"
+          ],
+          "columnas": {
+            "ResumenKgs": "A fecha, C proveedor, E kilos, G razón social del transporte, H TRANSPORTE (PROPIO / FLETES). Una fila = un ingreso = un viaje.",
+            "KG-FLETES-DESCRIMINADO 2026": "B día, C transportista, D origen/destino, F tarifa sin IVA, G kilos, K tipo de flete. Una fila = un viaje facturado.",
+            "PRECIO GASOIL": "B fecha de la compra, F litros, J precio por litro",
+            "GasOil 2026": "C fecha, T volumen (litros cargados)",
+            "Gastos": "fila TOTAL DEL MES FLETES, sólo para control"
+          },
+          "cuenta": "Volumen: kilos y viajes por mes partidos por la columna TRANSPORTE, y la diferencia contra el mes anterior abierta por proveedor. Economía: gasto = suma de tarifas, $/kg = tarifas ÷ kilos, $/viaje = tarifas ÷ viajes. Índice de tarifas A RUTA CONSTANTE: para las rutas (transportista + destino) que están en los dos meses, promedio de la variación del precio por viaje ponderado por los viajes del mes; es lo único comparable contra un índice de costos, porque saca de encima el cambio de mezcla de rutas. Gasoil: nuestro precio ponderado por litros contra el oficial, y el gasto partido en efecto volumen (litros de más × precio viejo) y efecto precio (precio de más × litros nuevos). El mes en curso se marca como parcial y queda afuera de los acumulados.",
+          "externo": "Los índices de FADEEAC, el precio oficial del gasoil y el INDEC NO salen de ningún Excel: están en tools/indices-externos.json y se cargan a mano. Ahí está la URL de cada fuente y el corte exacto que se tomó.",
+          "avisos": "Cargado a mano: no tiene extractor todavía."
+        },
+        {
+          "id": "cierre-ene-feb",
+          "archivo": "presupuesto enero 2026 detallado.xlsx + 2026 Consumo de combustible.xlsx",
+          "destino": "client/src/dashboards/cierre-ene-feb.html",
+          "constante": "DATA, FAC (cargadas a mano)",
+          "hojas": [
+            "mano de obra",
+            "materiales",
+            "no transaccionables",
+            "ResumenKgs",
+            "KG-FLETES-DESCRIMINADO 2026"
+          ],
+          "columnas": {
+            "mano de obra": "columna L «Importe Neto Ítem», con centro de costo, subrubro y período devengado; trae todos los meses. Las notas de crédito vienen en POSITIVO: hay que restarlas.",
+            "materiales": "columna «Precio Total Pesos», sólo el período 01/2026, por centro de costo destino",
+            "no transaccionables": "la glosa dice a qué mes corresponde el servicio facturado"
+          },
+          "cuenta": "Enero con su mano de obra propia (02.487.281), que la hoja Gastos no tiene cargada: la matriz deja implícitos 9.347.047 y faltan 3.140.234. Con esa base corregida y cada factura de fletes en el mes de su servicio, la comparación contra febrero se abre por drivers: fletes en cantidad de viajes y precio por viaje, propios en fijo (mano de obra) y variable, lavadero en cantidad y costo unitario, taller en reparaciones, y por último el efecto de las toneladas. La diferencia de viajes se valoriza por destino y tipo de equipo a la tarifa del mes anterior.",
+          "avisos": "Cargado a mano: no tiene extractor. Los importes son de enero y febrero de 2026 y no se recalculan solos. Ningún fletero factura por mes: todos facturan a semana vencida, así que el gasto de un mes nunca coincide con sus viajes."
         }
       ]
     }

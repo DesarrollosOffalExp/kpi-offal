@@ -142,8 +142,8 @@
     <div class="head-right">
       <span class="fuente" id="rangoMeses">Datos reales</span>
       <div class="seg" id="seg" role="tablist" aria-label="Vista">
-        <button data-v="anio" role="tab">Año completo</button>
-        <button data-v="sem1" class="on" role="tab" aria-selected="true">1.º semestre</button>
+        <button data-v="anio" class="on" role="tab" aria-selected="true">Año completo</button>
+        <button data-v="sem1" role="tab">1.º semestre</button>
         <button data-v="sem2" role="tab">2.º semestre</button>
       </div>
     </div>
@@ -157,13 +157,23 @@
   <p class="pie">Fuente: <b>2026 Consumo de combustible.xlsx</b> · hoja <b>Gastos</b> (filas 7–47). <span id="mesesSinDato"></span> LED en USD/ton: verde &lt;70 · ámbar 70–100 · rojo &gt;100. Celdas coloreadas por intensidad de costo dentro de cada fila (verde=menor, rojo=mayor).</p>
 </div>
 
+<style>
+  .dual{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+  .dual > div + div{border-left:1px solid var(--line);padding-left:22px;}
+  @media(max-width:900px){ .dual{grid-template-columns:1fr;} .dual > div + div{border-left:none;padding-left:0;border-top:1px solid var(--line);padding-top:16px;} }
+  .resumen-per{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin-top:12px;padding-top:11px;
+    border-top:1px solid var(--line);}
+  .resumen-per .rl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  .resumen-per .rv{font-size:20px;font-weight:800;letter-spacing:-.02em;color:#7b5cd6;}
+  .resumen-per .rd{font-size:11px;font-weight:600;color:var(--muted-2);flex:1 1 100%;}
+</style>
 <script>
 (function(){
   const ABBR=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const N=a=>a.concat(Array(12-a.length).fill(null));
   // Los datos salen del libro "2026 Consumo de combustible" (hoja Gastos).
   // Se guardan como JSON plano para que tools/actualizar.js los pueda reescribir.
-  const D_RAW={"dolar":[1465,1420,1405,1415,1430,1500,1510],"indec":[0.029,0.029,0.034,0.026,0.021,0.019,0.021],"descProd":[6374977.469999999,5388442.99,5297767.360000003,4846033.510000004,5983367.600000001,6070549.5699999975,6386183],"descNeta":[10210115,8817645,10206426,8266704,10218250.05,11304978.6,11082189],"descProp":[4436994,3778077,4838391,4394013,5644299.950000001,6063926.699999999,6326835],"descFlet":[5773121,5039568,5368035,3872691,4573950.1,5241051.9,4755354],"propTotal":[170311649.65218282,135284530.7268628,225726368.77946496,147618375.9528635,174169228.189345,251927670.6660862,226645201.89571],"propKg":[38.38446697295124,35.80777488835267,46.65318879343669,33.5953434714152,30.857542960548184,41.54530276002284,35.82284062974773,22.54937998142085,28.093506681235382,21.626087786499806,22.732656027909925,19.411794535859467],"propUsd":[26.201001346724397,25.216742879121597,33.205116578958496,23.742292205947134,21.578701371012716,27.6968685066819,23.72373551638923,16.580426456927093,20.0667904865967,14.661754431525294,15.411970188413509,13.116077389094233],"fletTotal":[556192700.64,604028315,701667920,516434800,637802650,736698500,723689740],"fletKg":[96.34177087921766,119.85716136779978,130.71224759153023,133.35295793028672,139.4424154299366,140.56309955640774,152.18419911535503,109.15115344430585,107.95134648023691,113.39873331284213,122.76796091598868,107.55792749150567],"fletUsd":[65.7623009414455,84.40645166746464,93.03362817902507,94.24237309560898,97.5121786223333,93.70873303760516,100.78423782473843,80.2582010619896,77.10810462874065,76.8804971612489,83.23251587524656,72.67427533209842],"logTotal":[726504350.2921828,739312845.7268628,927394288.779465,664053175.9528635,811971878.189345,988626170.6660862,950334941.89571,0,0,0,0,0],"logKg":[71.16,83.84,90.86,80.33,79.46,87.45,85.75],"logUsd":[48.57,59.05,64.67,56.77,55.57,58.3,56.79],"lavTotal":[65894989.055258535,61665571.287432015,69857125.91764201,70342931.85921249,73344283.1150418,78540282.90738484,69437560.8803789],"lavPor":[79487.32093517315,81568.21598866669,82184.8540207553,82756.39042260293,86287.39190004919,92400.33283221746,81691.24809456342],"lavUsdLav":[54.25755695233662,57.442405625821614,58.494558021889894,58.485081570744114,60.3408334965379,61.60022188814498,54.10016430103538],"lavCant":[829,756,850,850,850,850,850],"lavUsdTon":[4.41,4.92,4.87,6.01,5.02,4.63,4.15],"tallTotal":[41309800.89842813,64853811.54376009,46625124.015671566,74493536.72397138,112892410.231197,45890382.76548662,112625551.129325],"tallUsd":[2.76,5.18,3.25,6.37,7.73,2.71,6.73],"genTotal":[833709140.2458694,865832228.5580549,1043876538.7127786,808889644.5360473,998208571.5355837,1113056836.3389578,1132398053.9054139],"genSinFlet":[277516439.6058695,261803913.5580549,342208618.71277857,292454844.5360474,360405921.5355838,376358336.33895767,408708313.90541387],"usdSinFlet":[18.55,20.91,23.86,25,24.66,22.19,24.42],"usdTonDesc":[55.74,69.15,72.79,69.15,68.31,65.64,67.67],"pesoTonDesc":[81655,98193,102276,97849,97689,98457,102182],"pesoTonProd":[130778.3665384263,160683.19367299363,197040.84150512374,166917.8809570482,166830.56069220678,183353.55366169233,177320.01320748465],"pctPropios":[0.4519635185621274,0.5067418733113043,0.5235339000161129,0.5294542533836154,0.5714223109514429,0.5631959203279903,0.6205610367050336],"pctFletes":[0.5693364594557943,0.4610742425923871,0.5207300072429895,0.39125871571723214,0.418914221974803,0.4368040796720097,0.37943896329496646],"ajusteIndec":[0,84023,101532,104935,99904,99545,100525],"pctIndec":[null,0.1686,0.0073,-0.0675,-0.0222,-0.0109,0.0165]};
+  const D_RAW={"dolar":[1465,1420,1405,1415,1430,1500,1510],"indec":[0.029,0.029,0.034,0.026,0.021,0.019,0.021],"descProd":[6374977.469999999,5388442.99,5297767.360000003,4846033.510000004,5983367.600000001,6070549.5699999975,6386183],"descNeta":[10210115,8817645,10206426,8266704,10218250.05,11304978.6,11082189],"descProp":[4436994,3778077,4838391,4394013,5644299.950000001,6063926.699999999,6326835],"descFlet":[5773121,5039568,5368035,3872691,4573950.1,5241051.9,4755354],"propTotal":[170311649.65218282,135284530.7268628,225726368.77946496,147618375.9528635,174169228.189345,251927670.6660862,226645201.89571],"propKg":[38.38446697295124,35.80777488835267,46.65318879343669,33.5953434714152,30.857542960548184,41.54530276002284,35.82284062974773,22.54937998142085,28.093506681235382,21.626087786499806,22.732656027909925,19.411794535859467],"propUsd":[26.201001346724397,25.216742879121597,33.205116578958496,23.742292205947134,21.578701371012716,27.6968685066819,23.72373551638923,16.580426456927093,20.0667904865967,14.661754431525294,15.411970188413509,13.116077389094233],"fletTotal":[556192700.64,604028315,701667920,516434800,637802650,736698500,723689740],"fletKg":[96.34177087921766,119.85716136779978,130.71224759153023,133.35295793028672,139.4424154299366,140.56309955640774,152.18419911535503,109.15115344430585,107.95134648023691,113.39873331284213,122.76796091598868,107.55792749150567],"fletUsd":[65.7623009414455,84.40645166746464,93.03362817902507,94.24237309560898,97.5121786223333,93.70873303760516,100.78423782473843,80.2582010619896,77.10810462874065,76.8804971612489,83.23251587524656,72.67427533209842],"logTotal":[726504350.2921828,739312845.7268628,927394288.779465,664053175.9528635,811971878.189345,988626170.6660862,950334941.89571,0,0,0,0,0],"logKg":[71.16,83.84,90.86,80.33,79.46,87.45,85.75],"logUsd":[48.57,59.05,64.67,56.77,55.57,58.3,56.79],"lavTotal":[65894989.055258535,61665571.287432015,69857125.91764201,70342931.85921249,73344283.1150418,78540282.90738484,69437560.8803789],"lavPor":[79487.32093517315,81568.21598866669,82184.8540207553,82756.39042260293,86287.39190004919,92400.33283221746,81691.24809456342],"lavUsdLav":[54.25755695233662,57.442405625821614,58.494558021889894,58.485081570744114,60.3408334965379,61.60022188814498,54.10016430103538],"lavCant":[829,756,850,850,850,850,850],"lavUsdTon":[4.41,4.92,4.87,6.01,5.02,4.63,4.15],"tallTotal":[41309800.89842813,64853811.54376009,46625124.015671566,74493536.72397138,112892410.231197,45890382.76548662,112625551.129325],"tallUsd":[2.76,5.18,3.25,6.37,7.73,2.71,6.73],"genTotal":[833709140.2458694,865832228.5580549,1043876538.7127786,808889644.5360473,998208571.5355837,1113056836.3389578,1132398053.9054139],"genSinFlet":[277516439.6058695,261803913.5580549,342208618.71277857,292454844.5360474,360405921.5355838,376358336.33895767,408708313.90541387],"usdSinFlet":[18.55,20.91,23.86,25,24.66,22.19,24.42],"usdTonDesc":[55.74,69.15,72.79,69.15,68.31,65.64,67.67],"pesoTonDesc":[81655,98193,102276,97849,97689,98457,102182],"pesoTonProd":[130778.3665384263,160683.19367299363,197040.84150512374,166917.8809570482,166830.56069220678,183353.55366169233,177320.01320748465],"ajusteIndec":[0,84023,101532,104935,99904,99545,100525],"pctIndec":[null,0.1686,0.0073,-0.0675,-0.0222,-0.0109,0.0165],"pctPropios":[0.43456846470387456,0.4284678051792741,0.4740534051782671,0.5315314301806379,0.5523744205104866,0.5363943546076239,0.5709012001148871],"pctFletes":[0.5654315352961254,0.5715321948207259,0.5259465948217329,0.4684685698193621,0.4476255794895134,0.4636056453923761,0.42909879988511296]};
   const D=(function(){const o={};Object.keys(D_RAW).forEach(k=>{o[k]=N(D_RAW[k].slice(0,12));});return o;})();
   // el último mes cargado sale de los datos, no va escrito
   const CUR=(function(){let u=0;(D.genTotal||[]).forEach((v,i)=>{if(v)u=i;});return u;})();
@@ -173,7 +183,7 @@
     var poner=function(id,t){var el=document.getElementById(id);if(el)el.textContent=t;};
     poner('rangoMeses','Datos reales · '+MES_LARGO[0]+' a '+MES_LARGO[CUR]);
     poner('mesesSinDato', CUR>=11 ? 'El año está completo.'
-      : (CUR===10 ? MES_LARGO[11] : MES_LARGO[CUR+1]+' a '+MES_LARGO[11])+' aún sin datos en el original · se muestran vacíos (-).');
+      : (CUR===10 ? MES_LARGO[11] : MES_LARGO[CUR+1]+' a '+MES_LARGO[11])+' aún sin datos en el original · no se muestran.');
   })();
 
 
@@ -205,8 +215,11 @@
   }
   const chev='<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
 
-  let view='sem1';
-  const range=()=> view==='anio'?[0,12]:view==='sem1'?[0,6]:[6,12];
+  let view='anio';
+  // Las columnas vacías no aportan: el rango se corta en el último mes con datos,
+  // igual que hacen los gráficos.
+  const range=()=>{ const r= view==='anio'?[0,12]:view==='sem1'?[0,6]:[6,12];
+    return [r[0], Math.min(r[1], Math.max(r[0]+1, CUR+1))]; };
 
   /* ---------- Card protagonista ---------- */
   function renderPrimary(){
@@ -341,6 +354,7 @@
   const BLOCKS=[
     { id:'descarga', name:'Descarga (kg)', color:'var(--c-lava)', open:true, extraOrigen:true, rows:[
       {l:'Descarga producción', d:D.descProd, f:'num'},{l:'Descarga kg neta', d:D.descNeta, f:'num'},
+      {l:'% Producción / Neta', d:pctDe(D.descProd, D.descNeta), f:'pct'},
       {l:'Descarga propios', d:D.descProp, f:'num'},{l:'Descarga fletes', d:D.descFlet, f:'num'},
       {l:'% Kg propios', d:D.pctPropios, f:'pct'},{l:'% Kg fletes', d:D.pctFletes, f:'pct'}]},
     { id:'propios', name:'Propios', color:'var(--c-propios)', open:true, rows:[
@@ -432,13 +446,48 @@
     });
     return s+'</svg>';
   }
+  // Qué parte de la descarga neta es producción, mes a mes. La barra completa es
+  // la descarga neta; lo pintado, la producción. Abajo, el total del período.
+  function prodPctSVG(cols){
+    const W=680, barH=15, groupGap=18, padL=48, padR=54, padT=10, padB=6, iw=W-padL-padR;
+    const H=padT+padB+Math.max(0,cols.length*(barH+groupGap)-groupGap);
+    let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
+    cols.forEach((idx,k)=>{
+      const y=padT+k*(barH+groupGap), cur=idx===CUR;
+      const p=D.descProd[idx], n=D.descNeta[idx];
+      s+='<text x="'+(padL-8)+'" y="'+(y+barH-3)+'" font-size="11" font-weight="'+(cur?'700':'400')+'" fill="'+(cur?'#eef2f5':'#8ba0ab')+'" text-anchor="end">'+ABBR[idx]+'</text>';
+      if(p==null||!n) return;
+      const r=p/n, w=Math.min(1,r)*iw;
+      const tip=ABBR[idx]+'\nProducción: '+Math.round(p).toLocaleString("es-AR")+' kg'
+        +'\nDescarga neta: '+Math.round(n).toLocaleString("es-AR")+' kg'
+        +'\nProducción sobre la neta: '+(Math.round(r*1000)/10).toLocaleString("es-AR")+'%';
+      s+='<rect x="'+padL+'" y="'+y+'" width="'+iw+'" height="'+barH+'" rx="3" fill="#162b37"/>';
+      s+='<rect class="hot" data-tip="'+tip+'" x="'+padL+'" y="'+y+'" width="'+w.toFixed(1)+'" height="'+barH+'" rx="3" fill="#7b5cd6" opacity="'+(cur?'1':'.85')+'"/>';
+      s+='<text x="'+(padL+w+6).toFixed(1)+'" y="'+(y+barH-3)+'" font-size="10" font-weight="700" fill="#eef2f5">'+Math.round(r*100)+'%</text>';
+    });
+    return s+'</svg>';
+  }
+  function prodChartHTML(cols){
+    if(cols.every(i=>D.descProd[i]==null||!D.descNeta[i])) return '';
+    const con=cols.filter(i=>D.descProd[i]!=null&&D.descNeta[i]);
+    const tp=con.reduce((a,i)=>a+D.descProd[i],0), tn=con.reduce((a,i)=>a+D.descNeta[i],0);
+    const leg='<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:11px;height:11px;border-radius:3px;background:#7b5cd6"></span>Producción</span>'
+      +'<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:11px;height:11px;border-radius:3px;background:#162b37;border:1px solid var(--line)"></span>Resto de la descarga neta</span>';
+    return '<div><div class="chart-t">Producción sobre la descarga neta (%) · mes a mes</div>'
+      +'<div class="leyenda" style="margin-bottom:8px">'+leg+'</div>'+prodPctSVG(cols)
+      +'<div class="resumen-per"><span class="rl">Del período</span>'
+      +'<span class="rv">'+(Math.round(tp/tn*1000)/10).toLocaleString("es-AR")+'%</span>'
+      +'<span class="rd">'+Math.round(tp).toLocaleString("es-AR")+' kg de producción sobre '
+      +Math.round(tn).toLocaleString("es-AR")+' kg descargados</span></div></div>';
+  }
   function origenChartHTML(){
     const [a,z]=range(); const cols=[]; for(let i=a;i<z;i++) cols.push(i);
     if(cols.every(i=>D.pctPropios[i]==null)) return '';
     const leg=[['Propios','#2f9e6e'],['Fletes','#d99a2b']].map(x=>'<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:11px;height:11px;border-radius:3px;background:'+x[1]+'"></span>'+x[0]+'</span>').join('');
-    return '<div style="padding:16px 16px 18px;border-top:1px solid var(--line)">'
-      +'<div class="chart-t">Composición de kg descargados por origen (%) · mes a mes</div>'
+    const izq='<div><div class="chart-t">Composición de kg descargados por origen (%) · mes a mes</div>'
       +'<div class="leyenda" style="margin-bottom:8px">'+leg+'</div>'+origenPctSVG(cols)+'</div>';
+    return '<div class="dual" style="padding:16px 16px 18px;border-top:1px solid var(--line)">'
+      +izq+prodChartHTML(cols)+'</div>';
   }
   function chartBody(b){
     const [a,z]=range(); const cols=[]; for(let i=a;i<z;i++) cols.push(i);

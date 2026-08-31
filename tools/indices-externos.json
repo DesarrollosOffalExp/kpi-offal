@@ -1,0 +1,49 @@
+{
+  "_comentario": "Índices de afuera del ERP que usa la ventana Métrica de Fletes. No salen de ningún Excel de SharePoint: se cargan a mano desde las fuentes que están acá abajo. Actualizar cuando salga el informe del mes.",
+  "fadeeac": {
+    "fuente": "FADEEAC · Índice de Costos del Transporte (ICT), Departamento de Estudios Económicos y Costos",
+    "url": "https://www.fadeeac.org.ar/wp-content/uploads/2026/08/Julio-2026.pdf",
+    "urlPatron": "https://www.fadeeac.org.ar/wp-content/uploads/<AAAA>/<MM>/<Mes>-<AAAA>.pdf (el mes del nombre es el del informe, la carpeta es el mes siguiente)",
+    "informe": "31-jul-26",
+    "meses": [1, 2, 3, 4, 5, 6, 7],
+    "variacionMensual": {
+      "combustible": [0.0085, 0.0277, 0.2469, 0.0133, 0.0167, 0.0055, 0.0],
+      "lubricantes": [0.03, 0.0, 0.0367, 0.0699, 0.0, 0.04, 0.0484],
+      "neumaticos": [0.0171, 0.0, 0.0213, 0.0105, 0.0054, 0.0296, 0.0183],
+      "reparaciones": [0.0231, 0.0042, 0.0169, 0.0181, 0.0179, 0.0302, 0.0128],
+      "materialRodante": [0.0, 0.0, 0.0, 0.0, 0.0223, 0.0169, 0.0029],
+      "personal": [0.0419, 0.01, 0.0457, 0.0614, 0.017, 0.0261, 0.0323],
+      "seguros": [0.0105, 0.0032, 0.0, 0.0, 0.0, 0.01, 0.0062],
+      "patentesYTasas": [0.2859, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+      "costoFinanciero": [-0.0108, 0.0079, 0.0646, 0.0082, 0.0018, 0.0176, 0.0216],
+      "gastosGenerales": [0.0207, 0.0683, 0.0158, 0.0335, 0.1101, 0.0206, 0.0414],
+      "peaje": [0.0054, 0.1331, 0.0826, 0.0052, 0.0018, 0.0309, 0.1832],
+      "costoGeneral": [0.0208, 0.0228, 0.1015, 0.0242, 0.0191, 0.0181, 0.0225]
+    },
+    "indiceAcumulado": {
+      "combustible": [100.85, 103.65, 129.24, 130.96, 133.15, 133.88, 133.88],
+      "costoGeneral": [102.08, 104.41, 115.0, 117.79, 120.05, 122.23, 124.98]
+    }
+  },
+  "gasoilOficial": {
+    "fuente": "Secretaría de Energía · precios en planta (Res. SE 606/2003), reventa a estaciones de servicio",
+    "url": "https://apps.energia.gob.ar/reportes/rep.php?ir=NTE",
+    "corte": "Producto GAS OIL GRADO 2 · provincia BUENOS AIRES · zona no exenta · promedio ponderado por volumen (4 empresas, ~130.000 m³ por mes)",
+    "unidad": "$/litro sin IVA",
+    "serie": [
+      { "mes": "2025-12", "precio": 960.47, "m3": 183389 },
+      { "mes": "2026-01", "precio": 969.22, "m3": 131642 },
+      { "mes": "2026-02", "precio": 976.2, "m3": 117118 },
+      { "mes": "2026-03", "precio": 1118.54, "m3": 140355 },
+      { "mes": "2026-04", "precio": 1334.44, "m3": 125310 },
+      { "mes": "2026-05", "precio": 1327.52, "m3": 141122 },
+      { "mes": "2026-06", "precio": 1348.43, "m3": 72688 },
+      { "mes": "2026-07", "precio": 1318.07, "m3": 131157 }
+    ]
+  },
+  "indec": {
+    "fuente": "INDEC · IPC nivel general, el mismo que ya usa la matriz de costo",
+    "meses": [1, 2, 3, 4, 5, 6, 7],
+    "variacionMensual": [0.029, 0.029, 0.034, 0.026, 0.021, 0.019, 0.021]
+  }
+}

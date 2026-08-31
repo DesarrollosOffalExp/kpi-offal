@@ -32,7 +32,7 @@
   .kpi .kd{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:4px;}
   .kpi .kprom{margin-top:9px;padding-top:8px;border-top:1px solid var(--line);font-size:12.5px;
     font-weight:600;color:var(--muted);}
-  .kpi .kprom b{font-size:16px;font-weight:800;color:var(--brand);letter-spacing:-.02em;}
+  .kpi .kprom b{font-size:16px;font-weight:800;color:var(--info);letter-spacing:-.02em;}
   .kpi .kd .up{color:var(--bad);} .kpi .kd .down{color:var(--good);} .kpi .kd .neu{color:var(--muted);}
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 18px;margin-bottom:16px;}
   .panel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;}
@@ -135,7 +135,13 @@
     let s='<svg viewBox="0 0 '+Wd+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
     s+='<defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(245,166,35,.30)"/><stop offset="1" stop-color="rgba(245,166,35,0)"/></linearGradient></defs>';
     for(let t=0;t<=4;t++){ const yy=padT+ih*t/4, val=Math.round((max-(max-min)*t/4)*10)/10; s+='<line x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(Wd-padR)+'" y2="'+yy.toFixed(1)+'" stroke="#23353f" stroke-dasharray="3 3"/><text x="'+(padL-6)+'" y="'+(yy+3).toFixed(1)+'" font-size="9" fill="#667d89" text-anchor="end">'+val+'</text>'; }
-    const ay=y(avg); s+='<line x1="'+padL+'" y1="'+ay.toFixed(1)+'" x2="'+(Wd-padR)+'" y2="'+ay.toFixed(1)+'" stroke="var(--amber)" stroke-width="1.2" stroke-dasharray="5 3" opacity=".7"/><text x="'+(Wd-padR)+'" y="'+(ay-5).toFixed(1)+'" font-size="9.5" font-weight="700" fill="var(--amber)" text-anchor="end">prom '+d2(Math.round(avg*100)/100)+'</text>';
+    // la serie va en ámbar, así que el promedio va en cian: dos colores distintos
+    // para dos cosas distintas, y la etiqueta sobre una pastilla para que se lea
+    // aunque le pase la línea por detrás.
+    const ay=y(avg), et='prom '+d2(Math.round(avg*100)/100), ew=et.length*5.6+12;
+    s+='<line x1="'+padL+'" y1="'+ay.toFixed(1)+'" x2="'+(Wd-padR)+'" y2="'+ay.toFixed(1)+'" stroke="var(--info)" stroke-width="1.4" stroke-dasharray="6 4"/>';
+    s+='<rect x="'+(Wd-padR-ew).toFixed(1)+'" y="'+(ay-15).toFixed(1)+'" width="'+ew.toFixed(1)+'" height="13" rx="6.5" fill="#0c1c26" stroke="var(--info)" stroke-opacity=".55"/>';
+    s+='<text x="'+(Wd-padR-6).toFixed(1)+'" y="'+(ay-5.5).toFixed(1)+'" font-size="9.5" font-weight="800" fill="var(--info)" text-anchor="end">'+et+'</text>';
     const pts=vals.map((v,i)=>[x(i),y(v)]);
     s+='<path d="M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L')+' L'+x(W.length-1).toFixed(1)+','+(padT+ih)+' L'+padL+','+(padT+ih)+' Z" fill="url(#gg)"/>';
     s+='<polyline points="'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="none" stroke="var(--amber)" stroke-width="2.4" stroke-linejoin="round"/>';

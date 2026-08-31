@@ -58,6 +58,14 @@
   .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:8px 11px;font-size:12px;line-height:1.5;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s ease;max-width:280px;}
   .tip.show{opacity:1;transform:none;}
   .pie{margin-top:14px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
+  #par td.desde{color:var(--muted);font-weight:700;font-size:11.5px;white-space:nowrap;}
+  #par td.desde .dd{display:block;font-weight:600;font-size:10.5px;color:var(--muted-2);}
+  #par .sem{display:inline-block;margin-left:7px;font-size:10px;font-weight:700;color:var(--muted-2);
+    text-transform:uppercase;letter-spacing:.03em;vertical-align:1px;}
+  #disp thead th.ord,#fs thead th.ord{cursor:pointer;user-select:none;}
+  #disp thead th.ord:hover,#fs thead th.ord:hover{color:var(--text);}
+  #disp thead th.sorted,#fs thead th.sorted{color:var(--text);}
+  #disp thead th .ar,#fs thead th .ar{color:var(--brand);margin-left:4px;font-size:9px;}
   /* Unidades paradas — formato elegante */
   #par thead th{background:linear-gradient(180deg,var(--panel-3),var(--panel-2));border-bottom:2px solid var(--line-2);}
   #par tbody tr:nth-child(even) td{background:rgba(255,255,255,.015);}
@@ -105,18 +113,18 @@
 
   <section class="panel">
     <div class="panel-head"><div><h3 id="par-title">Unidades paradas</h3></div><p class="psub" id="par-sub"></p></div>
-    <div class="tscroll"><table id="par"><thead><tr><th>Dominio</th><th>Tipo</th><th>Observación</th><th>Destino</th><th class="num">Días</th></tr></thead><tbody id="par-body"></tbody></table></div>
+    <div class="tscroll"><table id="par"><thead><tr><th>Dominio</th><th>Tipo</th><th>Observación</th><th>Destino</th><th class="num">Parada desde</th><th class="num">Días acum.</th></tr></thead><tbody id="par-body"></tbody></table></div>
   </section>
 
   <div class="cols2">
     <section class="panel">
       <div class="panel-head"><div><h3>Unidades disponibles <span id="disp-n" style="color:var(--muted);font-weight:600"></span></h3></div>
         <div class="search"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="q-disp" type="search" placeholder="Buscar…" autocomplete="off"></div></div>
-      <div class="tscroll vh"><table id="disp"><thead><tr><th>Dominio</th><th>Modelo</th><th>Marca</th><th>Tipo</th></tr></thead><tbody id="disp-body"></tbody></table></div>
+      <div class="tscroll vh"><table id="disp"><thead id="disp-head"></thead><tbody id="disp-body"></tbody></table></div>
     </section>
     <section class="panel">
       <div class="panel-head"><div><h3>Dados de Baja <span id="fs-n" style="color:var(--muted);font-weight:600"></span></h3></div><p class="psub">Bloque aparte del roster</p></div>
-      <div class="tscroll vh"><table id="fs"><thead><tr><th>Dominio</th><th>Modelo</th><th>Marca</th><th>Tipo</th></tr></thead><tbody id="fs-body"></tbody></table></div>
+      <div class="tscroll vh"><table id="fs"><thead id="fs-head"></thead><tbody id="fs-body"></tbody></table></div>
     </section>
   </div>
 
@@ -131,6 +139,8 @@
   const nf = new Intl.NumberFormat('es-AR');
   let wi = W.length-1;
   let dq='', sortK='week', sortD=1;
+  // cada roster ordena por su cuenta; arrancan por dominio
+  let rK={disp:'dom', fs:'dom'}, rD={disp:1, fs:1};
 
   // Umbral: < 80% de disponibilidad = mal (rojo). >= 80% = bien (verde).
   const META=80;
@@ -192,23 +202,71 @@
     document.querySelectorAll('#wk-head th').forEach(th=>th.onclick=(e)=>{e.stopPropagation();const k=th.dataset.k;if(k===sortK)sortD=-sortD;else{sortK=k;sortD=(k==='week'||k==='fechas')?1:-1;}renderWk();});
   }
 
+  // Cuánto lleva parada cada unidad, no cuánto estuvo parada esta semana.
+  // Se camina hacia atrás mientras la unidad siga apareciendo en la lista de
+  // paradas, semana por semana, y se suman los días que la planilla informa en
+  // cada una. La racha se corta en la primera semana en la que no figura.
+  function racha(dom, hasta){
+    let dias=0, semanas=0, primera=null;
+    for(let i=hasta;i>=0;i--){
+      const u=(W[i].unidades||[]).find(x=>x.dom===dom);
+      if(!u) break;
+      dias+=(+u.dias||0); semanas++; primera=W[i];
+    }
+    return {dias, semanas, primera};
+  }
+
   function renderParadas(){
     const w=W[wi];
     document.getElementById('par-title').textContent='Unidades paradas · '+w.label;
-    document.getElementById('par-sub').textContent=w.paradas+' unidades ('+w.desde+'–'+w.hasta+') · desde BASE DE DATOS';
+    const arrastre=w.unidades.filter(u=>racha(u.dom,wi).semanas>1).length;
+    document.getElementById('par-sub').textContent=w.paradas+' unidades ('+w.desde+'–'+w.hasta+')'
+      +(arrastre?' · '+arrastre+' vienen paradas de semanas anteriores':'')+' · días acumulados de toda la parada';
     const tipoPill=t=>{const u=(t||'').toUpperCase();const c=u.indexOf('TRACTOR')>=0?'tractor':(u.indexOf('SEMI')>=0?'semi':'otro');return '<span class="tp '+c+'">'+(t||'—')+'</span>';};
     const destTag=v=>{if(!v)return '<span class="tag"><span class="tdot"></span>—</span>';const t=v.toUpperCase();let c='';if(t.indexOf('TALLER')>=0)c='taller';else if(t.indexOf('ZUCARS')>=0)c='zucars';else if(t.indexOf('HIELO')>=0)c='hielo';return '<span class="tag '+c+'"><span class="tdot"></span>'+v+'</span>';};
-    const diasBadge=d=>{d=+d||0;const c=d>=8?'hi':(d>=5?'mid':'lo');return '<span class="dnum '+c+'">'+d+'</span>';};
-    document.getElementById('par-body').innerHTML=w.unidades.map(u=>'<tr><td><span class="plate">'+u.dom+'</span></td><td style="text-align:left">'+tipoPill(u.tipo)+'</td><td class="wrap obsc">'+(u.obs||'—')+'</td><td class="wrap" style="text-align:right">'+destTag(u.destino)+'</td><td>'+diasBadge(u.dias)+'</td></tr>').join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:14px">Sin paradas.</td></tr>';
+    // el corte del semáforo se corre: acá los días son de toda la parada, no de una semana
+    const diasBadge=d=>{d=+d||0;const c=d>=20?'hi':(d>=8?'mid':'lo');return '<span class="dnum '+c+'">'+d+'</span>';};
+    const filas=w.unidades.map(u=>Object.assign({}, u, {r:racha(u.dom, wi)}))
+      .sort((a,b)=>b.r.dias-a.r.dias);
+    document.getElementById('par-body').innerHTML=filas.map(u=>
+      '<tr title="'+('En '+w.label+' la planilla informa '+u.dias+' día(s); la parada viene de '+u.r.semanas+' semana(s) seguidas.').split('"').join('&quot;')+'">'
+      +'<td><span class="plate">'+u.dom+'</span></td><td style="text-align:left">'+tipoPill(u.tipo)+'</td>'
+      +'<td class="wrap obsc">'+(u.obs||'—')+'</td><td class="wrap" style="text-align:right">'+destTag(u.destino)+'</td>'
+      +'<td class="desde">'+(u.r.primera?u.r.primera.label+'<span class="dd">'+u.r.primera.desde+'</span>':'—')+'</td>'
+      +'<td>'+diasBadge(u.r.dias)+(u.r.semanas>1?'<span class="sem">'+u.r.semanas+' sem</span>':'')+'</td></tr>').join('')
+      ||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:14px">Sin paradas.</td></tr>';
   }
 
+  const RCOLS=[{k:'dom',l:'Dominio'},{k:'modelo',l:'Modelo'},{k:'marca',l:'Marca'},{k:'tipo',l:'Tipo'}];
+  // ordena por cualquier columna, alfabético y con los números bien puestos
+  function ordenar(rows,k,d){
+    return rows.slice().sort((a,b)=>String(a[k]==null?'':a[k])
+      .localeCompare(String(b[k]==null?'':b[k]),'es',{numeric:true,sensitivity:'base'})*d);
+  }
+  function pintaRoster(id,rows){
+    document.getElementById(id+'-head').innerHTML='<tr>'+RCOLS.map(c=>{
+      const on=rK[id]===c.k;
+      return '<th data-k="'+c.k+'" class="ord'+(on?' sorted':'')+'"'+(c.k==='dom'?'':' style="text-align:left"')+'>'
+        +c.l+'<span class="ar">'+(on?(rD[id]>0?'▲':'▼'):'')+'</span></th>';
+    }).join('')+'</tr>';
+    document.getElementById(id+'-head').querySelectorAll('th').forEach(th=>th.onclick=()=>{
+      const k=th.dataset.k;
+      if(rK[id]===k) rD[id]=-rD[id]; else { rK[id]=k; rD[id]=1; }
+      renderRoster();
+    });
+    document.getElementById(id+'-body').innerHTML=ordenar(rows,rK[id],rD[id]).map(u=>'<tr><td>'+u.dom
+      +'</td><td style="text-align:left;color:var(--muted);font-weight:500">'+(u.modelo||'—')
+      +'</td><td style="text-align:left;color:var(--muted);font-weight:500">'+(u.marca||'—')
+      +'</td><td style="text-align:left">'+(u.tipo||'—')+'</td></tr>').join('')
+      ||'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px">Sin resultados.</td></tr>';
+  }
   function renderRoster(){
-    document.getElementById('disp-n').textContent='('+DATA.disponibles.length+')';
-    document.getElementById('fs-n').textContent='('+DATA.fueraServicio.length+')';
     const q=dq.toLowerCase();
     const rows=DATA.disponibles.filter(u=>!q||(u.dom+' '+u.modelo+' '+u.marca+' '+u.tipo).toLowerCase().includes(q));
-    document.getElementById('disp-body').innerHTML=rows.map(u=>'<tr><td>'+u.dom+'</td><td style="text-align:left;color:var(--muted);font-weight:500">'+u.modelo+'</td><td style="text-align:left;color:var(--muted);font-weight:500">'+u.marca+'</td><td style="text-align:left">'+u.tipo+'</td></tr>').join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px">Sin resultados.</td></tr>';
-    document.getElementById('fs-body').innerHTML=DATA.fueraServicio.map(u=>'<tr><td>'+u.dom+'</td><td style="text-align:left;color:var(--muted);font-weight:500">'+u.modelo+'</td><td style="text-align:left;color:var(--muted);font-weight:500">'+u.marca+'</td><td style="text-align:left">'+(u.tipo||'—')+'</td></tr>').join('');
+    document.getElementById('disp-n').textContent='('+(q?rows.length+' de '+DATA.disponibles.length:DATA.disponibles.length)+')';
+    document.getElementById('fs-n').textContent='('+DATA.fueraServicio.length+')';
+    pintaRoster('disp',rows);
+    pintaRoster('fs',DATA.fueraServicio);
   }
 
   function sel(i){ wi=i; renderKpis(); renderChart(); renderWk(); renderParadas(); if(window.parent!==window)setTimeout(postAlto,30); }

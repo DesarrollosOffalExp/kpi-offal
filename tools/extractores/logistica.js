@@ -3,6 +3,7 @@
 // del presupuesto. La cuenta de cada dato está en tools/fuentes.json.
 const fs = require('fs');
 const path = require('path');
+const RAIZ = path.resolve(__dirname, '..', '..');
 
 const MES_AB = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 // "Tractores" → "Tractor", "Bateas" → "Batea"
@@ -600,8 +601,12 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
       usdTonDesc: usdTon(genTotal),
       pesoTonDesc: pesoTon(genTotal),
       pesoTonProd: doce(rotulo(/^TOTAL \$ X TONS PROD/i)),
-      pctPropios: doce(rotulo(/^% Kgs Poropios/i)),
-      pctFletes: doce(rotulo(/^% Kgs Fletes/i)),
+      // Las filas «% Kgs Propios» y «% Kgs Fletes» de la hoja dividen por un
+      // segundo bloque de descargas que no cierra consigo mismo: propios más
+      // fletes no da la neta, y los dos porcentajes no suman 100 %. Se calculan
+      // acá sobre el bloque principal, que es el que alimenta todo lo demás.
+      pctPropiosHoja: doce(rotulo(/^% Kgs Poropios/i)),
+      pctFletesHoja: doce(rotulo(/^% Kgs Fletes/i)),
       ajusteIndec: viejoD.ajusteIndec || [],
       pctIndec: viejoD.pctIndec || [],
     };
@@ -612,6 +617,18 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
       let u = -1; a.forEach((v, i) => { if (v != null) u = i; });
       RAW[k] = a.slice(0, u + 1);
     });
+    // el porcentaje se calcula, no se lee
+    RAW.pctPropios = RAW.descProp.map((v, i) => (v == null || !RAW.descNeta[i]) ? null : v / RAW.descNeta[i]);
+    RAW.pctFletes = RAW.descFlet.map((v, i) => (v == null || !RAW.descNeta[i]) ? null : v / RAW.descNeta[i]);
+    {
+      const malos = [];
+      RAW.pctPropios.forEach((v, i) => {
+        const h = (RAW.pctPropiosHoja || [])[i];
+        if (v != null && h != null && Math.abs(v - h) > 0.005) malos.push(MES_LG[i] + ' ' + r1(h * 100) + '% → ' + r1(v * 100) + '%');
+      });
+      if (malos.length) log('   % de kilos propios: la hoja divide por un bloque que no cierra · corregido en ' + malos.join(', '));
+    }
+    delete RAW.pctPropiosHoja; delete RAW.pctFletesHoja;
     const cur = RAW.genTotal.length - 1;
 
     // ajuste por INDEC: proyección del mes anterior y diferencia contra el real
@@ -637,29 +654,274 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
       const destino = 'client/src/dashboards/metrica-costo.html';
       const M = util.actual(destino, 'DATA');
       if (M) {
-        const serie = RAW.pesoTonDesc;
+        // La métrica se mide en dólares: el $/ton se pasa a USD con el dólar del
+        // mes y la comparación se hace sobre esa serie. El ajustado sigue siendo
+        // el mes anterior por la inflación del INDEC, sólo que en USD.
+        const serie = RAW.pesoTonDesc, usd = RAW.dolar;
         const ib = M.indecByMonth || {};
         const data = [];
+        const r2 = v => Math.round(v * 100) / 100;
         for (let i = 1; i < serie.length; i++) {
           const real = serie[i], prev = serie[i - 1], ind = ib[i + 1];
-          if (real == null || prev == null || ind == null) continue;
+          const dol = usd[i], dolPrev = usd[i - 1];
+          if (real == null || prev == null || ind == null || !dol || !dolPrev) continue;
           const proy = Math.round(prev * (1 + ind));
-          data.push({ mes: MES_LG[i], mNum: i + 1, real, prevReal: prev, proy, indec: ind, gapPct: r1((real - proy) / proy * 100) });
+          const realUsd = r2(real / dol), prevUsd = r2(prev / dolPrev);
+          const proyUsd = r2(prevUsd * (1 + ind));
+          data.push({
+            mes: MES_LG[i], mNum: i + 1,
+            real, prevReal: prev, proy, indec: ind, gapPct: r1((real - proy) / proy * 100),
+            dolar: dol, dolarPrev: dolPrev, varDolar: r1((dol - dolPrev) / dolPrev * 100),
+            realUsd, prevRealUsd: prevUsd, proyUsd, gapUsd: r1((realUsd - proyUsd) / proyUsd * 100),
+          });
         }
+        // Con qué explicar cada mes: el volumen movido, los días en que se
+        // descargó, de qué está hecho el gasto, y qué hicieron los índices de
+        // afuera. Con eso el tablero puede abrir la brecha en volumen y precio.
+        const diasMes = m => new Date(Date.UTC(2026, m, 0)).getUTCDate();
+        const opPorMes = (function () {
+          // días distintos con al menos una descarga, de la hoja ResumenKgs
+          const rk = wb.filas('ResumenKgs'), dias = {};
+          for (let i = 1; i < rk.length; i++) {
+            const r = rk[i]; if (!r || !(r[0] instanceof Date)) continue;
+            const m = r[0].getUTCMonth();
+            (dias[m] = dias[m] || {})[r[0].toISOString().slice(0, 10)] = 1;
+          }
+          const o = {}; Object.keys(dias).forEach(m => { o[m] = Object.keys(dias[m]).length; });
+          return o;
+        })();
+        const gasoilPorMes = (function () {
+          // nuestro precio por litro, ponderado por los litros de cada compra
+          const g = wb.filas('PRECIO GASOIL'), o = {};
+          for (let i = 1; i < g.length; i++) {
+            const r = g[i]; if (!r || !(r[1] instanceof Date)) continue;
+            const lt = num(r[5]), pr = num(r[9]);
+            if (!lt || pr == null) continue;
+            const m = r[1].getUTCMonth();
+            const a = o[m] = o[m] || { lt: 0, imp: 0 };
+            a.lt += lt; a.imp += lt * pr;
+          }
+          const p = {}; Object.keys(o).forEach(m => { p[m] = r1(o[m].imp / o[m].lt); });
+          return p;
+        })();
+        const tarifaConstante = (function () {
+          // variación de tarifa a ruta constante: sólo las rutas (transportista +
+          // destino) que aparecen en los dos meses, ponderadas por sus viajes.
+          // Es lo único comparable contra un índice: saca el cambio de mezcla.
+          const kf = wb.filas('KG-FLETES-DESCRIMINADO 2026'), porMes = {};
+          for (let i = 2; i < kf.length; i++) {
+            const r = kf[i]; if (!r || !(r[1] instanceof Date)) continue;
+            const tar = num(r[5]); if (tar == null) continue;
+            const m = r[1].getUTCMonth(), k = txt(r[2]) + ' || ' + txt(r[3]);
+            const a = porMes[m] = porMes[m] || {};
+            const ru = a[k] = a[k] || { v: 0, t: 0 };
+            ru.v++; ru.t += tar;
+          }
+          const o = {};
+          Object.keys(porMes).forEach(m => {
+            const A = porMes[m - 1], B = porMes[m]; if (!A) return;
+            let peso = 0, acum = 0;
+            Object.keys(B).forEach(k => {
+              if (!A[k] || !A[k].t) return;
+              acum += ((B[k].t / B[k].v) / (A[k].t / A[k].v)) * B[k].v; peso += B[k].v;
+            });
+            if (peso) o[m] = r1((acum / peso - 1) * 100) / 100;
+          });
+          return o;
+        })();
+        // los índices de afuera (FADEEAC, gasoil oficial) no salen de ningún Excel
+        const EXT = (function () {
+          try { return JSON.parse(fs.readFileSync(path.join(RAIZ, 'tools', 'indices-externos.json'), 'utf8')); }
+          catch (e) { log('   (sin tools/indices-externos.json: la métrica va sin FADEEAC ni gasoil oficial)'); return null; }
+        })();
+        const ofByMes = {};
+        if (EXT) (EXT.gasoilOficial.serie || []).forEach(x => {
+          const p = String(x.mes).split('-'); if (p[0] === '2026') ofByMes[+p[1] - 1] = x.precio;
+        });
+        // ── viajes: de ResumenKgs, que es la fuente de viajes ──
+        const viajesPorMes = (function () {
+          const rk = wb.filas('ResumenKgs'), o = {};
+          for (let i = 1; i < rk.length; i++) {
+            const r = rk[i]; if (!r || !(r[0] instanceof Date)) continue;
+            const m = r[0].getUTCMonth();
+            const prop = /propio/i.test(String(r[7] || ''));
+            const a = o[m] = o[m] || { prop: 0, flet: 0, kgProp: 0, kgFlet: 0 };
+            a[prop ? 'prop' : 'flet']++;
+            a[prop ? 'kgProp' : 'kgFlet'] += (num(r[4]) || 0);
+          }
+          return o;
+        })();
+        // ── valor del viaje: de KG-FLETES, y sólo para eso ──
+        const valorViaje = (function () {
+          const kf = wb.filas('KG-FLETES-DESCRIMINADO 2026'), o = {};
+          for (let i = 2; i < kf.length; i++) {
+            const r = kf[i]; if (!r || !(r[1] instanceof Date)) continue;
+            const m = r[1].getUTCMonth(), a = o[m] = o[m] || { v: 0, t: 0 };
+            a.v++; a.t += (num(r[5]) || 0);
+          }
+          const p = {}; Object.keys(o).forEach(m => { p[m] = { viajes: o[m].v, total: Math.round(o[m].t), medio: Math.round(o[m].t / o[m].v) }; });
+          return p;
+        })();
+        // ── kilómetros y litros consumidos, para el variable de propios ──
+        const kmLt = (function () {
+          const g = util.actual('client/src/dashboards/consumo-gasoil.html', 'DATA');
+          const o = {};
+          if (!g || !g.semanas) return o;
+          g.semanas.forEach(w => {
+            const ab = String(w.desde || '').split(' ')[1];
+            const m = MES_AB.indexOf(ab); if (m < 0) return;
+            const a = o[m] = o[m] || { km: 0, lt: 0 };
+            a.km += (w.km || 0); a.lt += (w.consCam || 0);
+          });
+          return o;
+        })();
+        // ── el desfasaje de facturación ──
+        // Cada archivo mensual de Presupuesto trae el detalle de facturas de
+        // fletes. Si la glosa nombra un mes distinto al del archivo, ese importe
+        // está cargado fuera de su mes. Con eso se puede pasar a devengado.
+        const desfase = (function () {
+          const norm = v => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().toLowerCase();
+          const MESES = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+          const o = {};
+          for (let m = 0; m < 12; m++) {
+            let w;
+            try { w = leer('GERENCIA DE OPERACIONES ' + String(m + 1).padStart(2, '0') + '2026.xlsx'); }
+            catch (e) { continue; }
+            const hoja = w.hojas.find(x => /flete/i.test(x));
+            if (!hoja) { o[m] = { hayDetalle: false }; continue; }
+            const d = w.filas(hoja);
+            const fh = d.findIndex(r => r && r.some(v => norm(v) === 'código centro costo'));
+            if (fh < 0) { o[m] = { hayDetalle: false }; continue; }
+            const col = re => d[fh].findIndex(v => re.test(norm(v)));
+            const cImp = col(/^neto item moneda pesos$/), cGl = col(/^descripc[oó]n material$/),
+              cPr = col(/^proveedor$/), cCe = col(/^código centro costo$/);
+            if (cImp < 0) { o[m] = { hayDetalle: false }; continue; }
+            const a = o[m] = { hayDetalle: true, total: 0, deOtros: 0, porMes: {}, detalle: [] };
+            for (let i = fh + 1; i < d.length; i++) {
+              const r = d[i]; if (!r || typeof r[cImp] !== 'number') continue;
+              if (cCe >= 0 && txt(r[cCe]) && !/^log$/i.test(txt(r[cCe]))) continue;   // sólo logística
+              const imp = -r[cImp];
+              a.total += imp;
+              const gl = String(cGl >= 0 ? (r[cGl] || '') : '').trim();
+              const k = MESES.findIndex(y => gl.toUpperCase().indexOf(y) >= 0);
+              if (k >= 0 && k !== m) {
+                a.deOtros += imp;
+                a.porMes[k] = (a.porMes[k] || 0) + imp;
+                a.detalle.push({ mes: k, imp: Math.round(imp), prov: String(cPr >= 0 ? (r[cPr] || '') : '').trim(), glosa: gl });
+              }
+            }
+            a.total = Math.round(a.total); a.deOtros = Math.round(a.deOtros);
+            Object.keys(a.porMes).forEach(k => { a.porMes[k] = Math.round(a.porMes[k]); });
+          }
+          return o;
+        })();
+        // lo que sale de un mes: lo suyo que quedó cargado en otro
+        const saleDe = {};
+        Object.keys(desfase).forEach(m => {
+          const a = desfase[m]; if (!a.hayDetalle) return;
+          Object.keys(a.porMes).forEach(k => { saleDe[k] = (saleDe[k] || 0) + a.porMes[k]; });
+        });
+        // Un mes se puede corregir del todo si tiene su propio detalle; si no lo
+        // tiene, lo único que se sabe es lo suyo que apareció cargado en otro mes.
+        // Eso alcanza para una corrección parcial, que hay que mostrar como tal.
+        const ajusteMes = m => {
+          const a = desfase[m];
+          const entra = (a && a.hayDetalle) ? (a.deOtros || 0) : 0;
+          const sale = saleDe[m] || 0;
+          if (!a || !a.hayDetalle) return sale ? { v: sale, parcial: true } : null;
+          return { v: -entra + sale, parcial: false };
+        };
+        const nDesf = Object.keys(desfase).filter(m => desfase[m].hayDetalle).length;
+        log('   facturas de fletes: detalle en ' + nDesf + ' mes(es) · corridas de mes ' +
+          Object.keys(desfase).filter(m => desfase[m].deOtros).map(m => MES_LG[m] + ' ' + Math.round(desfase[m].deOtros / 1e6) + 'M').join(', '));
+
+        data.forEach((d, k) => {
+          const i = d.mNum - 1, j = i - 1;
+          const ton = RAW.genTotal[i] / RAW.pesoTonDesc[i], tonPrev = RAW.genTotal[j] / RAW.pesoTonDesc[j];
+          d.ton = Math.round(ton); d.tonPrev = Math.round(tonPrev);
+          d.costo = Math.round(RAW.genTotal[i]); d.costoPrev = Math.round(RAW.genTotal[j]);
+          d.diasMes = diasMes(d.mNum); d.diasMesPrev = diasMes(d.mNum - 1);
+          d.diasOp = opPorMes[i] || null; d.diasOpPrev = opPorMes[j] || null;
+          d.comp = [
+            { l: 'Propios', v: Math.round(RAW.propTotal[i]), p: Math.round(RAW.propTotal[j]) },
+            { l: 'Fletes', v: Math.round(RAW.fletTotal[i]), p: Math.round(RAW.fletTotal[j]) },
+            { l: 'Lavadero', v: Math.round(RAW.lavTotal[i]), p: Math.round(RAW.lavTotal[j]) },
+            { l: 'Taller', v: Math.round(RAW.tallTotal[i]), p: Math.round(RAW.tallTotal[j]) },
+          ];
+          d.gasoil = gasoilPorMes[i] != null && gasoilPorMes[j] != null
+            ? { precio: gasoilPorMes[i], prev: gasoilPorMes[j], varPct: r1((gasoilPorMes[i] / gasoilPorMes[j] - 1) * 100) } : null;
+          d.gasoilOf = ofByMes[i] != null && ofByMes[j] != null
+            ? { precio: ofByMes[i], prev: ofByMes[j], varPct: r1((ofByMes[i] / ofByMes[j] - 1) * 100) } : null;
+          d.tarifaRuta = tarifaConstante[i] != null ? r1(tarifaConstante[i] * 100) : null;
+          d.fadeeac = EXT ? {
+            general: r1((EXT.fadeeac.variacionMensual.costoGeneral[i] || 0) * 100),
+            combustible: r1((EXT.fadeeac.variacionMensual.combustible[i] || 0) * 100),
+          } : null;
+
+          // el volumen, abierto en viajes: propios y fleteros se analizan distinto
+          const vj = viajesPorMes[i] || {}, vjP = viajesPorMes[j] || {};
+          d.viajes = {
+            prop: vj.prop || null, flet: vj.flet || null,
+            propPrev: vjP.prop || null, fletPrev: vjP.flet || null,
+            tonProp: vj.kgProp ? Math.round(vj.kgProp / 1000) : null,
+            tonFlet: vj.kgFlet ? Math.round(vj.kgFlet / 1000) : null,
+            tonPropPrev: vjP.kgProp ? Math.round(vjP.kgProp / 1000) : null,
+            tonFletPrev: vjP.kgFlet ? Math.round(vjP.kgFlet / 1000) : null,
+          };
+          d.valorViaje = valorViaje[i] ? { medio: valorViaje[i].medio, total: valorViaje[i].total, viajes: valorViaje[i].viajes } : null;
+          d.valorViajePrev = valorViaje[j] ? { medio: valorViaje[j].medio, total: valorViaje[j].total, viajes: valorViaje[j].viajes } : null;
+          d.km = kmLt[i] ? Math.round(kmLt[i].km) : null; d.kmPrev = kmLt[j] ? Math.round(kmLt[j].km) : null;
+          d.litros = kmLt[i] ? Math.round(kmLt[i].lt) : null; d.litrosPrev = kmLt[j] ? Math.round(kmLt[j].lt) : null;
+          d.lavados = RAW.lavCant ? RAW.lavCant[i] : null; d.lavadosPrev = RAW.lavCant ? RAW.lavCant[j] : null;
+
+          // el devengado: cada factura en el mes que le corresponde
+          const ajO = ajusteMes(i), ajPrevO = ajusteMes(j);
+          const aj = ajO ? ajO.v : null, ajPrev = ajPrevO ? ajPrevO.v : null;
+          d.desfase = {
+            hayDetalle: !!(desfase[i] && desfase[i].hayDetalle),
+            hayDetallePrev: !!(desfase[j] && desfase[j].hayDetalle),
+            deOtros: desfase[i] && desfase[i].hayDetalle ? desfase[i].deOtros : null,
+            sale: saleDe[i] || 0,
+            detalle: desfase[i] && desfase[i].hayDetalle ? desfase[i].detalle : [],
+            ajuste: aj, ajustePrev: ajPrev,
+            parcial: !!(ajO && ajO.parcial) || !!(ajPrevO && ajPrevO.parcial),
+            mesSinDetalle: [(desfase[i] && desfase[i].hayDetalle) ? null : MES_LG[i],
+              (desfase[j] && desfase[j].hayDetalle) ? null : MES_LG[j]].filter(Boolean),
+          };
+          if (aj != null && ajPrev != null) {
+            const cDev = d.costo + aj, cDevPrev = d.costoPrev + ajPrev;
+            const uDev = cDev / d.ton / d.dolar, uDevPrev = cDevPrev / d.tonPrev / d.dolarPrev;
+            const proyDev = uDevPrev * (1 + d.indec);
+            d.dev = {
+              costo: Math.round(cDev), costoPrev: Math.round(cDevPrev),
+              fletes: Math.round(((RAW.fletTotal || [])[i] || 0) + aj),
+              fletesPrev: Math.round(((RAW.fletTotal || [])[j] || 0) + ajPrev),
+              realUsd: Math.round(uDev * 100) / 100, prevRealUsd: Math.round(uDevPrev * 100) / 100,
+              proyUsd: Math.round(proyDev * 100) / 100,
+              gapUsd: r1((uDev / proyDev - 1) * 100),
+            };
+          } else d.dev = null;
+        });
+
         const u = data[data.length - 1];
         const nuevo = Object.assign({}, M, {
-          janReal: serie[0], data,
+          unidad: 'USD / ton descargada',
+          janReal: serie[0], janRealUsd: usd[0] ? Math.round(serie[0] / usd[0] * 100) / 100 : null,
+          dolar: usd.slice(0, serie.length), data,
           resumen: Object.assign({}, M.resumen, { meses: undefined, arriba: undefined, abajo: undefined, promGap: undefined,
-            ultimoMes: u.mes, ultimoReal: u.real, ultimoProy: u.proy, ultimoGap: u.gapPct,
+            ultimoMes: u.mes, ultimoReal: u.realUsd, ultimoProy: u.proyUsd, ultimoGap: u.gapUsd,
+            ultimoRealPeso: u.real, ultimoProyPeso: u.proy, ultimoGapPeso: u.gapPct,
             nMeses: data.length,
-            mesesSobre: data.filter(d => d.gapPct > 0.5).length,
-            mesesBajo: data.filter(d => d.gapPct < -0.5).length,
-            mesesEnLinea: data.filter(d => Math.abs(d.gapPct) <= 0.5).length,
-            gapProm: r1(data.reduce((a, d) => a + d.gapPct, 0) / data.length),
+            mesesSobre: data.filter(d => d.gapUsd > 0.5).length,
+            mesesBajo: data.filter(d => d.gapUsd < -0.5).length,
+            mesesEnLinea: data.filter(d => Math.abs(d.gapUsd) <= 0.5).length,
+            gapProm: r1(data.reduce((a, d) => a + d.gapUsd, 0) / data.length),
+            gapPromPeso: r1(data.reduce((a, d) => a + d.gapPct, 0) / data.length),
           }),
         });
-        log('   métrica: ' + M.data.length + ' → ' + data.length + ' meses · último ' + u.mes +
-          ' · real ' + u.real.toLocaleString('es-AR') + ' vs proyectado ' + u.proy.toLocaleString('es-AR'));
+        log('   métrica en USD: ' + M.data.length + ' → ' + data.length + ' meses · último ' + u.mes +
+          ' · real USD ' + u.realUsd + ' vs ajustado ' + u.proyUsd + ' (brecha ' + u.gapUsd + '%' +
+          ' · en pesos ' + u.gapPct + '%)');
         escribir(destino, 'DATA', nuevo);
       }
     }
@@ -693,5 +955,83 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
         : '✓ los ' + viejo.grupos.length + ' grupos ya cargados dan igual'));
     }
     escribir(destino, 'RESUMEN', RESUMEN);
+
+    // ── los dos últimos meses, contados de nuevo desde el detalle de viajes ──
+    // El anexo del Excel trae los viajes cargados a mano. Acá se cuentan desde
+    // KG-FLETES-DESCRIMINADO, que tiene el viaje y lo que se pagó por él, y se
+    // valoriza la diferencia de dos formas: a la tarifa media de cada mes.
+    const nMes = RESUMEN.meses.length;
+    if (nMes >= 2) {
+      const mB = MES_LG.indexOf(RESUMEN.meses[nMes - 1]);
+      const mA = MES_LG.indexOf(RESUMEN.meses[nMes - 2]);
+      const comb = leer('2026 Consumo de combustible.xlsx');
+      const kf = comb.filas('KG-FLETES-DESCRIMINADO 2026');
+      const dest = {};
+      for (let i = 2; i < kf.length; i++) {
+        const x = kf[i]; if (!x || !(x[1] instanceof Date)) continue;
+        const m = x[1].getUTCMonth(); if (m !== mA && m !== mB) continue;
+        const k = (txt(x[3]) || '(sin destino)').replace(/\s+/g, ' ');
+        const t = num(x[5]) || 0;
+        const a = dest[k] = dest[k] || { d: k, vA: 0, iA: 0, vB: 0, iB: 0 };
+        if (m === mA) { a.vA++; a.iA += t; } else { a.vB++; a.iB += t; }
+      }
+      const filasV = Object.keys(dest).sort().map(k => {
+        const a = dest[k];
+        const pA = a.vA ? a.iA / a.vA : (a.vB ? a.iB / a.vB : 0);
+        const pB = a.vB ? a.iB / a.vB : pA;
+        return Object.assign(a, {
+          difV: a.vB - a.vA, difI: Math.round(a.iB - a.iA),
+          precioA: Math.round(pA), precioB: Math.round(pB),
+          valA: Math.round((a.vB - a.vA) * pA), valB: Math.round((a.vB - a.vA) * pB),
+        });
+      });
+      const sum = k => filasV.reduce((t, f) => t + (f[k] || 0), 0);
+      // La diferencia de importe se parte en dos: cuántos viajes más se hicieron
+      // (valorizados a la tarifa vieja) y cuánto cambió el precio por viaje.
+      const VIAJES = {
+        mesA: MES_LG[mA], mesB: MES_LG[mB],
+        filas: filasV,
+        totVA: sum('vA'), totVB: sum('vB'), totIA: Math.round(sum('iA')), totIB: Math.round(sum('iB')),
+        difV: sum('difV'), difI: Math.round(sum('difI')),
+        valorizadoA: Math.round(sum('valA')), valorizadoB: Math.round(sum('valB')),
+        efectoPrecio: Math.round(sum('difI') - sum('valA')),
+        // contra qué se puede contrastar
+        gastosA: null, gastosB: null,
+      };
+      const DM = util.actual('client/src/dashboards/matriz-costo-logistica.html', 'D_RAW') || {};
+      if (DM.fletTotal) { VIAJES.gastosA = Math.round(DM.fletTotal[mA]); VIAJES.gastosB = Math.round(DM.fletTotal[mB]); }
+      log('   viajes ' + VIAJES.mesA + '→' + VIAJES.mesB + ': ' + VIAJES.totVA + ' → ' + VIAJES.totVB +
+        ' (' + (VIAJES.difV > 0 ? '+' : '') + VIAJES.difV + ') · facturado ' +
+        (VIAJES.difI > 0 ? '+' : '') + Math.round(VIAJES.difI / 1e6) + ' M · valorizado a tarifa de ' +
+        VIAJES.mesA + ' ' + Math.round(VIAJES.valorizadoA / 1e6) + ' M');
+      escribir(destino, 'VIAJES', VIAJES);
+
+      // ── el presupuesto contra la matriz de costo, mes a mes ──
+      // Los dos miran el mismo gasto: si no dan igual hay que poder decir por qué.
+      const gr = n => (RESUMEN.grupos.find(x => x.g === n) || { vals: [] }).vals;
+      const FLEp = gr('FLETES');
+      const propios = RESUMEN.meses.map((_, i) => RESUMEN.grupos
+        .filter(x => x.g !== 'FLETES')
+        .reduce((t, x) => t + (x.vals[i] || 0), 0));
+      // el transporte de colgado / sebo está en la hoja Gastos y explica el resto
+      const gsRows = comb.filas('Gastos');
+      const fCol = gsRows.findIndex(x => x && /COLGADO ?\/ ?SEBO IMPORTE/i.test(String(x[0] || '')));
+      const colgado = RESUMEN.meses.map((_, i) => fCol >= 0 ? (num(gsRows[fCol][i + 1]) || 0) : 0);
+      const CONCIL = RESUMEN.meses.map((m, i) => {
+        const pf = FLEp[i] || 0, mf = (DM.fletTotal || [])[i] || 0;
+        const pp = propios[i] || 0, mp = (DM.propTotal || [])[i] || 0;
+        return {
+          mes: m,
+          fletesPres: Math.round(pf), fletesMatriz: Math.round(mf), fletesDif: Math.round(pf - mf),
+          colgado: Math.round(colgado[i]),
+          propiosPres: Math.round(pp), propiosMatriz: Math.round(mp), propiosDif: Math.round(pp - mp),
+          totalPres: Math.round(pp + pf), totalMatriz: Math.round(mp + mf),
+        };
+      });
+      const cierra = CONCIL.filter(c => Math.abs(c.fletesDif - c.colgado) < 1 && Math.abs(c.propiosDif) < 1).length;
+      log('   presupuesto vs matriz: ' + cierra + ' de ' + CONCIL.length + ' meses cierran' +
+        (cierra < CONCIL.length ? ' · revisar ' + CONCIL.filter(c => !(Math.abs(c.fletesDif - c.colgado) < 1 && Math.abs(c.propiosDif) < 1)).map(c => c.mes).join(', ') : ''));
+      escribir(destino, 'CONCIL', CONCIL);
+    }
   }
 };

@@ -159,8 +159,8 @@ const SISTEMAS = {
 // LOGÍSTICA: hoja con muchos bloques distintos (períodos mixtos) → sub-pestañas.
 // Los nombres de las ventanas no llevan mes ni semana: el período lo muestra
 // cada tablero a partir de sus propios datos.
-const G = { costo: 'Matriz de Costo', metrica: 'Métrica de Costo', flota: 'Disponibilidad de Flota',
-  lavado: 'Lavado de Camiones', tambores: 'Necesidad de Tambores',
+const G = { costo: 'Matriz de Costo', metrica: 'Métrica de Costo', fletes: 'Métrica de Fletes', flota: 'Disponibilidad de Flota',
+  lavado: 'Lavado de Camiones', tambores: 'Necesidad de Tambores', cierre: 'Cierre Enero–Febrero',
   gasoil: 'Consumo de Gasoil', frig: 'Costo por Frigorífico', hiel: 'Stock de Hiel' };
 // Rendimiento KG/LT semana a semana (S1–S31) para el histórico de gasoil.
 const KGLT = [9.07, 6.19, 6.38, 6.79, 5.71, 3.75, 4.12, 5.15, 6.17, 6.30, 5.89, 6.31, 6.29, 7.90, 5.48, 6.11, 6.09, 5.16, 6.63, 6.11, 5.52, 5.66, 5.71, 6.16, 4.63, 5.32, 6.84, 6.61, 6.59, 6.67, 6.21];
@@ -184,6 +184,12 @@ const LOGISTICA = {
     // Métrica de Costo (embebido; MetricaCosto.jsx): $/ton descargada real vs. proyección INDEC. Solo registra el grupo.
     { id: 'metrica_costo_reg', grupo: G.metrica, titulo: 'Métrica de Costo', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 0,
       info: '$/ton descargada real mes a mes vs. proyección por inflación (INDEC), con conclusión. (hoja Gastos)' },
+    // Cierre Enero–Febrero (embebido; CierreEneFeb.jsx). Solo registra el grupo/subtab.
+    { id: 'cierre_ene_feb_reg', grupo: G.cierre, titulo: 'Cierre Enero–Febrero', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 0,
+      info: 'Enero con su mano de obra propia, que no estaba cargada, y la comparación con febrero abierta por drivers: viajes, precio por viaje, fijo, variable y reparaciones. (presupuesto enero 2026 detallado + 2026 Consumo de combustible)' },
+    // Métrica de Fletes (embebido; MetricaFletes.jsx). Solo registra el grupo/subtab.
+    { id: 'metrica_fletes_reg', grupo: G.fletes, titulo: 'Métrica de Fletes', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 0,
+      info: 'Kilos y viajes propios contra fleteros mes a mes, la diferencia abierta por proveedor, los fletes valorizados contra el índice de FADEEAC y el INDEC, y la incidencia del gasoil. (ResumenKgs + KG-FLETES-DESCRIMINADO 2026 + PRECIO GASOIL)' },
     // Disponibilidad de Flota (Sem 30)
     { id: 'disp_general', grupo: G.flota, titulo: 'Disponibilidad de flota', unidad: '%', formato: 'porcentaje', sentido: 'up', meta: null, valor: 84,
       desglose: [{ nombre: 'Disponibles', valor: 67 }, { nombre: 'Total', valor: 80 }],

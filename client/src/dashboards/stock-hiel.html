@@ -140,11 +140,11 @@
   function renderKpis(){
     const u=DATA.ultimo;
     const cards=[
-      {hero:1,l:'Última fecha con movimiento',v:cap(u.fl),d:'Último ingreso o salida registrado'},
-      {l:'Semana',v:'S'+u.semana,d:'Semana ISO de esa fecha'},
-      {l:'Stock a esa fecha',v:nf.format(u.saldo)+'<span class="ku">kg</span>',d:'Saldo al '+u.fl},
+      {hero:1,l:'Stock a esa fecha',v:nf.format(u.saldo)+'<span class="ku">kg</span>',d:'Saldo al '+u.fl},
       {l:'Ingresos del mes',v:i0.format(DATA.totIng),d:MES_LARGO[DATA.mes-1]+' · ingreso + aditivo'},
       {l:'Salidas del mes',v:i0.format(DATA.totSal),d:MES_LARGO[DATA.mes-1]+' · '+DATA.salidasMes.length+' salidas'},
+      {l:'Semana',v:'S'+u.semana,d:'Semana ISO de esa fecha'},
+      {l:'Última fecha con movimiento',v:cap(u.fl),d:'Último ingreso o salida registrado'},
     ];
     document.getElementById('kpis').innerHTML=cards.map(c=>'<div class="kpi'+(c.hero?' hero':'')+'"><div class="kl">'+c.l+'</div><div class="kv">'+c.v+'</div><div class="kd">'+c.d+'</div></div>').join('');
   }
