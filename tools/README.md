@@ -15,7 +15,8 @@ node tools/actualizar.js fabrica-hielo
 ```
 
 Grupos disponibles: `fabrica-hielo`, `compras`, `sistemas`, `objetivos`,
-`presupuesto`, `insumos`, `logistica`. Sin argumentos lista todo lo que sabe hacer.
+`presupuesto`, `insumos`, `logistica`, `gestion`. Sin argumentos lista todo lo que
+sabe hacer.
 
 El script busca cada archivo por nombre en `Descargas`, tolerando los sufijos
 que agrega el navegador (`archivo (2).xlsx`) y quedándose con el más reciente.
@@ -146,7 +147,203 @@ JavaScript válido:
 node -e "const s=require('fs').readFileSync('client/src/dashboards/kpi-sistemas.html','utf8');new Function(s.match(/<script>\s*\(function\(\)\{([\s\S]*?)\}\)\(\);\s*<\/script>/)[1]);console.log('ok')"
 ```
 
+## Gerencia de Gestión no se organiza como Gerencia de Operaciones
+
+Las dos carpetas guardan el presupuesto, pero no de la misma forma, y conviene no
+confundirlas:
+
+- **Gerencia de Operaciones / Presupuesto** tiene *un archivo por mes* en una
+  única carpeta (`Gerencia de Operaciones 072026.xlsx`), ya analizado: trae
+  presupuestado, gasto real y las acciones correctivas que escribió cada sector.
+- **Gerencia de Gestión** tiene *una carpeta por mes analizado*, y adentro
+  `presupuesto <mes> <año>.xlsx`, que es el **export crudo del ERP**: sólo gasto
+  real, sin presupuestado y sin justificaciones.
+
+Del export crudo el gasto del mes **no es una hoja**, son tres que se suman:
+`Hoja1` No Transaccionables (servicios, mano de obra y fletes, imputados al
+facturarse), `Hoja4` Consumos (materiales, imputados al centro de costo
+**destino** al salir del almacén) y `Hoja2` Ajustes de inventario (suman o
+restan). `Hoja5` trae ese mismo total ya consolidado por la planilla: no se usa
+como fuente, se usa como **control** —cada corrida compara los tres componentes
+contra ella y avisa si alguno se despega más de medio punto.
+
+`Hoja3` (Detalle de Comprobante) es tentadora porque tiene historia —de 12/2023 a
+08/2026— pero **mide facturas de compra, no gasto del mes**: para julio da 5.798 M
+contra los 6.295 M de arriba. Sumarla a la serie daría una evolución que no cierra
+con ningún mes. Por eso el extractor la ignora.
+
+Y ojo con el nombre: en `Descargas` convive `presupuesto enero 2026
+detallado.xlsx`, que es otro archivo, de Logística. El extractor sólo acepta el
+patrón exacto `presupuesto <mes> <año>.xlsx`.
+
+### La "nueva presentación" de julio 2026
+
+En julio el archivo cambió de nombre —`INFO <MES> <AÑO> …`, antes `presupuesto
+<mes> <año>.xlsx`— y sobre todo de forma. El extractor lee las dos, pero conviene
+saber qué cambió:
+
+- Pasó de cinco hojas (`Hoja1`..`Hoja5`) a **dos**: `SERVICIOS` (no
+  transaccionables) y `MATERIALES` (consumos).
+- **La mano de obra ya no está.** Ni propia ni eventual. Se fue a un archivo
+  aparte, `COSTOS Mano de Obra <mes> <año>.xlsx`, que **todavía no se procesa**.
+  Por eso el total de julio bajó de 6.295 M a 2.581 M: no es que haya bajado el
+  gasto, es que faltan los 3.151 M de mano de obra.
+- Tampoco vienen los **ajustes de inventario** ni la hoja de **totales de
+  control**. De control quedó sólo la tabla dinámica de consumos por centro de
+  costo que `MATERIALES` trae pegada al costado, sin encabezado.
+- `SERVICIOS` sumó una columna, **`Periodo Devengado Manual`**, en el medio: por
+  eso las columnas se mapean **por nombre de encabezado** y no por posición.
+  Leerlas por posición tomaba el importe de la columna equivocada.
+- El **centro de costo viene a veces con el código y a veces con el nombre** en
+  la misma columna (`LOG` y `LOGISTICA`, `SIS` y `SISTEMAS`, `RH` y `RRHH`…). Sin
+  normalizar, Logística quedaba partida en dos filas, de 832,3 M y 5,3 M.
+
+Y lo importante para leer los números: la nueva presentación **incluye las
+facturas devengadas en el mes siguiente**, que es el criterio con el que los
+sectores arman su presupuesto. Con eso Fletes cerró:
+
+| Fletes de julio · centro `LOG` | |
+|---|---|
+| Gestión, presentación vieja (devengado 07/2026) | 768,0 M |
+| Gestión, presentación nueva | **827,1 M** |
+| Logística (`PRESUPUESTO LOGISTICA.xlsx`) | **827,1 M** |
+
+Antes la diferencia era de 59,1 M y se explicaba entera por el corrimiento: ningún
+fletero factura por mes, todos facturan a semana vencida, así que la factura del 5
+de agosto es de viajes de julio. Eran 103,7 M que Logística contaba en julio y el
+ERP devengaba en agosto, contra 44,6 M de facturas de julio que el ERP contaba y
+Logística ya había contado en junio.
+
+Si alguna vez hay que volver a cruzar las dos ventanas: **factura por factura sólo
+se puede desde el lado del ERP**, que trae proveedor y número de comprobante. El
+archivo de Logística no trae número de factura y agrupa la cola en una sola línea
+—en julio, 66 ítems menores en un renglón de 81,6 M—, así que lo más fino posible
+es cruzar por importe.
+
+### La carpeta de Gestión ya no hay que bajarla
+
+`fuentes.json` le pone al grupo una `carpetaLocal`: la carpeta de SharePoint
+sincronizada (`Gerencia de Gestion/Presupuesto <mes>`). El actualizador busca
+primero ahí y después en `Descargas`, así que los tres archivos del mes se leen
+directo de OneDrive, sin descargar nada. Con `--dir` se sigue pudiendo apuntar a
+otra carpeta.
+
+Los tres archivos son:
+
+| | |
+|---|---|
+| `INFO <MES> <AÑO> …` | servicios, fletes y materiales |
+| `COSTOS Mano de Obra <mes> <año>` | mano de obra propia y eventual |
+| `INFO PRESUPUESTADO <AÑO> …` | **presupuestado** y la gerencia de cada sector |
+
+Cuidado con los dos que empiezan igual: `INFO PRESUPUESTADO …` es el presupuesto
+y `INFO <MES> <AÑO> …` es el gasto.
+
+Del archivo de presupuestado hay dos cosas para saber. Primero, **a la derecha
+del año hay un segundo juego de doce columnas de mes** (`PARTIDAS AJUSTADAS`,
+`CODIGO` y otra vez enero a diciembre) que es un anexo de trabajo: se toma sólo el
+primer bloque contiguo, o el presupuesto sale al doble. Segundo, **cada archivo
+nombra distinto al mismo centro de costo** —"DESCARGA MENUDENCIAS" el de gasto,
+"DESCARGA" el de mano de obra, "ADMINISTRACION DE PLANTA" contra "ADMINISTRACION
+Y FINANZAS"— así que se guardan todos los alias vistos, más los que no se pueden
+deducir, en la constante `ALIAS` del extractor.
+
+`RECICLADO` y `RUNFO` tienen partida presupuestaria pero no gastaron nada en
+julio: entran igual, en cero, porque un presupuesto sin ejecutar también es una
+desviación.
+
+### Un mes por carpeta, todos los meses de una
+
+`carpetaLocal` apunta a `Gerencia de Gestion` y el actualizador **expande sus
+subcarpetas**: cada `Presupuesto <Mes>` entra sola en la búsqueda. El extractor
+lee **todos** los archivos de gasto que encuentre, uno por mes, y publica los dos
+—o los que haya— para poder comparar. El último es el mes analizado.
+
+Cuidado con dos cosas al sumar un mes:
+
+- **La forma cambia entre meses.** Junio trae la hoja `MATERIAL` y la columna
+  `DEVENGADO MANUAL`; julio, `MATERIALES` y `Periodo Devengado Manual`. Las hojas
+  se buscan con `/^material(es)?$/i` y `/^servicios?$/i`, y el mes acepta los dos
+  nombres de la columna manual. Todo lo demás se mapea por nombre de encabezado.
+- **En `Descargas` puede quedar el archivo viejo del mismo mes.** Quedó
+  `presupuesto julio 2026.xlsx`, de la presentación anterior, y por nombre más
+  corto ganaba: julio daba 9.235 M en vez de 5.521 M. Ahora `archivosDeGasto()`
+  prioriza el patrón nuevo (`INFO <MES> <AÑO>`) sobre el viejo, y recién a igual
+  presentación desempata por nombre más corto.
+
+El presupuestado no se toca: ese archivo ya trae los doce meses, así que sirve
+para cualquier mes que se cargue.
+
+### Tres niveles: grupo → ítem → comprobante
+
+La tabla de Gestión se abre en tres pasos, y cada uno sale del mismo lugar que el
+de arriba, así que los totales siempre cierran:
+
+1. **Gasto real** → los ítems (subrubros) que lo forman.
+2. **Dif. mes ant.** → los ítems que explican la diferencia contra el mes anterior.
+3. **clic en un ítem** → los comprobantes de los dos meses. La factura casi nunca
+   se repite entre meses: lo que aparece de un lado y no del otro **es** la
+   diferencia.
+
+`DATA.docs` guarda ese tercer nivel agregado por comprobante
+(`[mes, centro, grupo, ítem, comprobante, proveedor u origen, importe]`): 1.373
+filas de las 10.600 del archivo, 81 KB. La clave usa **el mismo ítem** que la
+celda del nivel de arriba, o los dos niveles no se encuentran.
+
+Dos grupos no tienen tercer nivel, y no es un olvido:
+
+- **Mano de obra.** Sale del archivo de costos, que es un modelo por CECO y
+  concepto. No hay comprobantes: el desglose por concepto ya es el máximo detalle.
+- **Fletes de Logística.** Se excluyen a propósito. Ningún fletero factura por
+  mes —todos facturan a semana vencida—, así que la factura suelta no explica el
+  movimiento: hay que mirarlo por viaje y por tonelada, como en Métrica de Fletes.
+  El resto de los fletes (Congelado, Supermercado) sí se abre.
+
+### El cruce contra los presupuestos de sector
+
+La ventana de Gestión trae una tabla que compara, grupo por grupo, lo que muestra
+el Presupuesto de cada sector contra lo que Gestión imputa a su centro de costo.
+No se carga a mano: `cruzar()` lee la constante del tablero de cada sector ya
+escrito, así que compara exactamente lo que la persona ve en pantalla. Si aparece
+una diferencia que no tiene causa declarada en `CAUSAS`, la corrida avisa y la
+ventana la marca **sin explicar**.
+
+En julio 2026, cinco de los siete sectores dan exactamente lo mismo. Los dos que
+no:
+
+- **Fábrica de Hielo, −38,5 M en Servicios Públicos.** *Le falta a Gestión.* El
+  archivo nuevo no trae servicios públicos: la presentación anterior tenía la
+  electricidad y el gas de toda la planta (518,5 M y 28,0 M) y la nueva los dejó
+  afuera. Hay que pedir de dónde salen ahora.
+- **Logística, −8,6 M en MO Propia.** *Error del sector.* La ventana de Logística
+  toma la mano de obra propia de la línea `GASTOS DE PERSONAL PROPIO` del ERP,
+  que en Logística ya incluye a los consultores, y además muestra esos mismos
+  consultores como MO eventual: los cuenta dos veces. Su total de julio debería
+  ser 1.045,2 M y no 1.053,8 M. Gestión los separa con el archivo de costos.
+
+Una tercera diferencia apareció y ya está corregida: **el rubro `REP` (REPARADO)
+existe en las dos hojas del archivo**. Las reparaciones de camiones que Taller
+factura afuera están en `SERVICIOS` y son servicios; los repuestos que salen del
+almacén están en `MATERIALES` y son material. Mapear el rubro sin mirar de qué
+hoja viene pasaba 41,2 M de Taller y 1,6 M de Sistemas de un grupo al otro —el
+total del sector daba bien, pero la apertura no. Por eso `grupoDe()` recibe de
+qué hoja viene la fila.
+
 ## Qué falta
+
+La ventana **Presupuesto de Gestión** muestra el gasto real de julio abierto por
+grupo de costo y por centro de costo, pero le faltan tres cosas, y las tres por
+la misma razón: no están en el archivo.
+
+1. **La mano de obra.** Es lo más urgente: sin ella el total no es el gasto de la
+   planta. Está en `COSTOS Mano de Obra <mes> <año>.xlsx`, que tiene una hoja por
+   mes (`JULIO-26`) con el costo por CECO abierto en líneas, horas al 50 y al
+   100, changas y terceros. Hay que decidir qué columna es el equivalente de
+   `MO PROPIA` y cuál de `MO EVENTUAL` antes de sumarlo.
+2. **El presupuestado**, que hay que traer de otra fuente: sin él no hay desvío
+   ni ejecución como en los presupuestos de sector.
+3. **La serie mes a mes**, que llega cuando estén las carpetas de los meses
+   anteriores en SharePoint.
 
 Dentro de `insumos`, la `merma-cajas`: el KPI mensual está en la hoja `KPIs`,
 pero el detalle por tipo de caja sale de cruzar `Consumos Deposito` con
@@ -155,7 +352,7 @@ extractor: los tableros están armados pero sus datos se cargaron a mano, así q
 pedir "actualizá logística" no los toca. El script avisa cuándo un grupo no tiene
 extractor en lugar de fallar de cualquier modo.
 
-Todo lo demás está cubierto: los 32 tableros de `client/src/dashboards` tienen
-su fuente declarada en `fuentes.json` y su extractor, y los siete grupos corren
+Todo lo demás está cubierto: los 34 tableros de `client/src/dashboards` tienen
+su fuente declarada en `fuentes.json` y su extractor, y los ocho grupos corren
 de punta a punta. Se puede comprobar con `--dry`, que muestra qué quedaría
 escrito sin tocar nada.

@@ -260,7 +260,7 @@
     document.querySelectorAll('#res-head th.mes').forEach(th=>th.onclick=()=>selMes(+th.dataset.m));
   }
 
-  const DCOLS=[{k:'g',lbl:'Grupo'},{k:'presup',lbl:'Presupuestado'},{k:'real',lbl:'Gasto real'},{k:'dreal',lbl:'Dif. mes ant.'},{k:'desvio',lbl:'Desvío $'},{k:'exec',lbl:'Ejecución'},{k:'estado',lbl:'Estado'}];
+  const DCOLS=[{k:'g',lbl:'Grupo'},{k:'presup',lbl:'Presupuestado'},{k:'real',lbl:'Gasto real'},{k:'dreal',lbl:'Dif. mes ant.'},{k:'desvio',lbl:'Desvío Presup.'},{k:'exec',lbl:'Ejecución'},{k:'estado',lbl:'Estado'}];
   function renderDetalle(){
     const mes=RESUMEN.meses[mi];
     document.getElementById('det-title').textContent='Detalle de '+mes+' · presupuestado vs. real';
