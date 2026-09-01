@@ -12,6 +12,7 @@
  * valores como matriz JSON, sin parsear el .xlsx.
  */
 const { construirMock } = require('./mockData');
+const { enriquecerLavadoCamiones } = require('./lavadosKpi');
 const { HOJAS, ORDEN_SECTORES } = require('../config/kpiConfig');
 
 const GRAPH = 'https://graph.microsoft.com/v1.0';
@@ -238,6 +239,9 @@ async function getKpis({ forzar = false } = {}) {
   } else {
     data = construirMock();
   }
+  // Lavado de Camiones: se lee EN VIVO desde SQL (controletiquetas.lavados) por
+  // encima del mock/Graph. Si no hay DB o falla, quedan los valores previos.
+  await enriquecerLavadoCamiones(data);
   cache = { data, ts: Date.now() };
   return data;
 }
