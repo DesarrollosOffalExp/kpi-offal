@@ -964,7 +964,7 @@
     html+=pGr.map(g=>prow(P_LBL[g.g]||g.g,g.vals)).join('');
     html+=prow('Total del mes',P_RES.totales,'tot');
     html+='</tbody></table></div>';
-    const DC=[{k:'g',l:'Grupo'},{k:'presup',l:'Presupuestado'},{k:'real',l:'Gasto real'},{k:'dreal',l:'Dif. mes ant.'},{k:'desvio',l:'Desvío $'},{k:'exec',l:'Ejecución'},{k:'estado',l:'Estado'}];
+    const DC=[{k:'g',l:'Grupo'},{k:'presup',l:'Presupuestado'},{k:'real',l:'Gasto real'},{k:'dreal',l:'Dif. mes ant.'},{k:'desvio',l:'Desvío Presup.'},{k:'exec',l:'Ejecución'},{k:'estado',l:'Estado'}];
     let rows=pDet(mes);
     rows.sort((a,b)=>psortK==='g'?psortD*a.g.localeCompare(b.g,'es'):psortK==='desvio'?psortD*(pDesv(a)-pDesv(b)):psortK==='exec'?psortD*((pExec(a)??-1)-(pExec(b)??-1)):psortD*((a[psortK]??0)-(b[psortK]??0)));
     html+='<h3 class="phd">Detalle de '+mes+' · presupuestado vs. real</h3><p class="psb">'+rows.length+' grupos · hoja '+pM3(mes).toUpperCase()+'-26 · clic en una columna para ordenar.</p>';

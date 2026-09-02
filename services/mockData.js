@@ -372,11 +372,22 @@ const LAVADERO = {
   ],
 };
 
+// GESTIÓN: gerencia propia (no sale del Excel de KPIs de operaciones). Por ahora
+// con la ventana Presupuesto, que se arma con el archivo de la carpeta del mes
+// analizado en SharePoint · Gerencia de Gestión.
+const GESTION = {
+  key: 'gestión', nombre: 'Gestión', estado: 'ok', objetivoPendiente: false,
+  kpis: [],
+  graficos: [
+    { tipo: 'tabla', grupo: 'Presupuesto', titulo: 'Presupuesto', info: 'Presupuestado vs. gasto real de la Gerencia de Gestión, por mes analizado.', columnas: [], filas: [] },
+  ],
+};
+
 function construirMock() {
   return {
     origen: 'mock',
     actualizado: new Date().toISOString(),
-    sectores: [INSUMOS, COMPRAS, HIELO, LOGISTICA, SISTEMAS, CONGELADO, TALLER, LAVADERO],
+    sectores: [INSUMOS, COMPRAS, HIELO, LOGISTICA, SISTEMAS, CONGELADO, TALLER, LAVADERO, GESTION],
   };
 }
 

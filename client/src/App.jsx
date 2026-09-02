@@ -20,6 +20,7 @@ import ComprasSinEntrega from './components/ComprasSinEntrega';
 import PresupuestoCongelado from './components/PresupuestoCongelado';
 import PresupuestoTaller from './components/PresupuestoTaller';
 import PresupuestoLavadero from './components/PresupuestoLavadero';
+import PresupuestoGestion from './components/PresupuestoGestion';
 import DisponibilidadFlota from './components/DisponibilidadFlota';
 import NecesidadTambores from './components/NecesidadTambores';
 import ObjetivoSector from './components/ObjetivoSector';
@@ -507,6 +508,16 @@ export default function App() {
                   <div className="grupo" key={g}>
                     {!conSub && <h2 className="grupo-titulo">{g}</h2>}
                     <PresupuestoTaller />
+                  </div>
+                );
+              }
+              // Presupuesto (Gestión): tabla ejecutiva embebida de la Gerencia de Gestión.
+              const esPresupGes = sector.key === 'gestión' && typeof g === 'string' && g.startsWith('Presupuesto');
+              if (esPresupGes) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <PresupuestoGestion />
                   </div>
                 );
               }

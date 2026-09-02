@@ -12,21 +12,36 @@ const args = process.argv.slice(2);
 const grupo = args.find(a => !a.startsWith('--'));
 const dry = args.includes('--dry');
 const dirArg = args.indexOf('--dir');
-const DESCARGAS = dirArg >= 0 ? args[dirArg + 1] : FUENTES.descargas;
+
+/** Dónde buscar los archivos, en orden. Con --dir manda esa carpeta y nada más.
+ *  Si no, primero la carpeta propia del grupo —lo que está sincronizado de
+ *  SharePoint no hace falta bajarlo— y después Descargas. */
+function carpetas(g) {
+  if (dirArg >= 0) return [args[dirArg + 1]];
+  const base = g && g.carpetaLocal;
+  const subs = base && fs.existsSync(base)
+    ? fs.readdirSync(base, { withFileTypes: true }).filter(e => e.isDirectory()).map(e => path.join(base, e.name))
+    : [];
+  return [base, ...subs, FUENTES.descargas].filter(d => d && fs.existsSync(d));
+}
+let DIRS = [FUENTES.descargas];
 
 const norm = s => s.replace(/\s+/g, ' ').trim().toLowerCase();
 
-/** Busca un archivo en la carpeta de descargas tolerando los sufijos del
+/** Busca un archivo en las carpetas configuradas, tolerando los sufijos del
  *  navegador —"archivo (2).xlsx"— y los espacios de más. Devuelve el más nuevo. */
 function buscar(nombre) {
   const base = norm(nombre).replace(/\.xls[xm]$/, '');
-  const cand = fs.readdirSync(DESCARGAS)
-    .filter(f => /\.xls[xm]$/i.test(f))
-    .filter(f => norm(f).replace(/\.xls[xm]$/, '').replace(/\s*\(\d+\)$/, '') === base)
-    .map(f => ({ f, t: fs.statSync(path.join(DESCARGAS, f)).mtimeMs }))
-    .sort((a, b) => b.t - a.t);
-  if (!cand.length) throw new Error('no encuentro "' + nombre + '" en ' + DESCARGAS);
-  return path.join(DESCARGAS, cand[0].f);
+  const cand = [];
+  DIRS.forEach(d => {
+    fs.readdirSync(d)
+      .filter(f => /\.xls[xm]$/i.test(f))
+      .filter(f => norm(f).replace(/\.xls[xm]$/, '').replace(/\s*\(\d+\)$/, '') === base)
+      .forEach(f => cand.push({ p: path.join(d, f), t: fs.statSync(path.join(d, f)).mtimeMs }));
+  });
+  cand.sort((a, b) => b.t - a.t);
+  if (!cand.length) throw new Error('no encuentro "' + nombre + '" en ' + DIRS.join(' ni en '));
+  return cand[0].p;
 }
 
 /** Lee un xlsx y devuelve helpers de hoja. */
@@ -135,7 +150,8 @@ if (!grupo || !grupos[grupo]) {
 
 const g = grupos[grupo];
 console.log('Grupo ' + grupo + ' · SharePoint / ' + g.carpeta);
-console.log('Archivos desde: ' + DESCARGAS + (dry ? '  (dry-run)' : '') + '\n');
+DIRS = carpetas(g);
+console.log('Archivos desde: ' + DIRS.join('\n                ') + (dry ? '  (dry-run)' : '') + '\n');
 
 let ext;
 try { ext = require('./extractores/' + g.extractor); }
@@ -146,6 +162,6 @@ catch (e) {
   process.exit(1);
 }
 
-ext.actualizar({ leer, escribir, log, dry, util, fuentes: g.fuentes })
+ext.actualizar({ leer, escribir, log, dry, util, fuentes: g.fuentes, descargas: DIRS[0], carpetas: DIRS })
   .then(() => console.log('\nListo.' + (dry ? ' (no se escribió nada)' : '')))
   .catch(e => { console.error('\nError: ' + e.message); process.exit(1); });

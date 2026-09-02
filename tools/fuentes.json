@@ -596,6 +596,66 @@
           "avisos": "Cargado a mano: no tiene extractor. Los importes son de enero y febrero de 2026 y no se recalculan solos. Ningún fletero factura por mes: todos facturan a semana vencida, así que el gasto de un mes nunca coincide con sus viajes."
         }
       ]
+    },
+    "gestion": {
+      "carpeta": "Gerencia de Gestion/Presupuesto <Mes>  (una carpeta por mes; se leen todas)",
+      "extractor": "gestion",
+      "_": "Cada mes analizado es una carpeta propia, no un archivo por mes como en Gerencia de Operaciones. Son DOS archivos: el del gasto y el de mano de obra. El del gasto cambió de nombre y de forma en julio 2026 (\"nueva presentación\"); el extractor lee las dos formas y mapea las columnas POR NOMBRE DE ENCABEZADO, porque la nueva insertó una columna en el medio.",
+      "fuentes": [
+        {
+          "id": "gasto-mes",
+          "archivo": "INFO <MES> <AÑO> … .xlsx  (uno por carpeta de mes; se leen todos)",
+          "destino": "client/src/dashboards/presupuesto-gestion.html",
+          "constante": "DATA (celdas por centro × grupo × ítem) y DATA.docs (un nivel más: el comprobante)",
+          "hojas": {
+            "SERVICIOS": "Reporte de No Transaccionables: servicios y fletes. Columnas por nombre: Denominación (el centro de costo), Código/Descripción Rubro, Código/Descripción Sub Rubro, Periodo Devengado Manual, Neto Item Moneda Pesos.",
+            "MATERIALES": "Reporte de Consumos. Columnas por nombre: Código Rubro, Rubro, Código Subrubro, Subrubro, Centro Costo Destino, Precio Total Pesos. Al costado, sin encabezado, una tabla dinámica de consumos por centro de costo que se usa como control.",
+            "Hoja1..Hoja5": "Presentación vieja: Hoja1 No Transaccionables, Hoja2 Ajustes, Hoja4 Consumos, Hoja5 totales de control. Hoja3 (Detalle de Comprobante) nunca se usó: mide compras, no gasto."
+          },
+          "cuenta": "SERVICIOS: el mes sale del \"Periodo Devengado Manual\" —no del devengado del ERP— porque esa columna reimputa al mes de la operación las facturas que llegan después (ningún fletero factura por mes, todos facturan a semana vencida), y el centro de costo sale de la \"Denominación\", porque la columna de código trae a veces el código y a veces el nombre. MATERIALES: sólo las filas con \"Centro Costo Destino\", que es quien consume. El ERP escribe el gasto en negativo; el tablero lo muestra en positivo. El grupo de costo sale del rubro/subrubro con el mismo vocabulario que los presupuestos de sector: FLETES = SER/2635 + rubro FLE, SERVICIOS PUBLICOS = SER/2696 y SER/2697, SERVICIOS = el resto de SER, MATERIAL = todos los demás rubros. Además del total por ítem se publica el comprobante que lo compone —número de factura y proveedor en servicios, material y almacén de origen en materiales— para poder abrir la diferencia contra el mes anterior hasta la factura. Quedan afuera la mano de obra (sale de un modelo de costo, no de comprobantes) y los fletes de Logística (se analizan por viaje y por tonelada en Métrica de Fletes, no factura por factura).",
+          "falta": "La hoja de materiales se llama MATERIALES en julio y MATERIAL en junio, y la columna del devengado manual \"Periodo Devengado Manual\" y \"DEVENGADO MANUAL\": se aceptan las dos formas. Si en Descargas quedó el archivo viejo del mismo mes (\"presupuesto julio 2026.xlsx\"), gana el nuevo."
+        },
+        {
+          "id": "mano-de-obra",
+          "archivo": "COSTOS Mano de Obra <mes> <año>.xlsx",
+          "destino": "client/src/dashboards/presupuesto-gestion.html",
+          "constante": "DATA.mo",
+          "hojas": "una por mes, \"<MES>-<AA>\" (ENERO-26 … JULIO-26). Las hojas de 2025 tienen otro orden de columnas y se saltean: las letras significarían otra cosa. Encabezado en la fila 2; se lee SÓLO el primer bloque, que corta en la primera fila sin CECO o en \"Total general\" —abajo vienen otros dos bloques con la misma lista de centros, uno en cero y otro con diferencias.",
+          "columnas": {
+            "MO PROPIA (OFFAL)": "E Total BDT, F Línea 2, J importe horas al 50%, M importe horas al 100%, N Plus Producción, O Changas Operarios, AA Enganche y Desenganche, AB Plus Nocturno, AC Plus Descarga, AD Medio Presentismo, AE Lavatachos, AF Remanejo, AG Auxilio, AH Diferencia de Hs Extra, AI Adicional Clark, AJ Sueldo Fijo Choferes, AL Ajustes, AM Vacaciones No Gozadas, AN Liquidación Final",
+            "MO EVENTUAL": "R La Telecristal, T Horas L2 $, V Changas $, W Presentismo, X Plus Descarga, Z Consultores",
+            "NO se suman": "G (Total BDT + L2), P (Total Offal), AK (Total a Pagar), AO (Final) y Y (Total La Telecristal) son SUBTOTALES. Y venía en la lista original de MO eventual: sumarla duplicaba 1.491,6 M de los 3.015,5 M, porque Y = R+T+V+W+X. H, K, S y U son cantidades (horas y changas), no importes."
+          },
+          "cuenta": "Por centro de costo, el importe de cada columna del desglose. J y M se llaman las dos \"TOTAL\" en la planilla: se renombran a \"Horas al 50%\" y \"Horas al 100%\" para poder leerlas. Cada corrida verifica dos cosas: que Y siga siendo el subtotal de R+T+V+W+X, y que OFFAL + EVENTUAL dé la columna AS (TOTAL FINAL) de la planilla. Se leen todos los meses del año del análisis para poder comparar ítem por ítem mes a mes."
+        },
+        {
+          "id": "presupuestado",
+          "archivo": "INFO PRESUPUESTADO <AÑO> … .xlsx",
+          "destino": "client/src/dashboards/presupuesto-gestion.html",
+          "constante": "DATA.pres",
+          "hojas": "PRESUPUESTO AJUSTADO. La hoja se busca por contenido —la fila que tiene \"Gerencia\" y \"GRUPO\"— porque en esta familia de archivos cambia de nombre.",
+          "columnas": {
+            "A": "Gerencia — de acá sale a qué gerencia pertenece cada sector",
+            "B": "Descripcion del centro de costo",
+            "C": "GRUPO — mismo vocabulario que el resto (MATERIAL, SERVICIOS, FLETES, SERVICIOS PUBLICOS, MO EVENTUAL, MO PROPIA)",
+            "F..Q": "un mes por columna, con el encabezado como fecha (2026-01-01 … 2026-12-01)",
+            "D, E": "\"cod\" y \"PROMEDIO 2025\": no se leen",
+            "S en adelante": "segundo juego de columnas (\"PARTIDAS AJUSTADAS\", CODIGO y otros doce meses). Es un anexo de trabajo, NO el presupuesto: se toma sólo el PRIMER bloque contiguo de meses."
+          },
+          "cuenta": "Presupuestado por gerencia × centro de costo × grupo × mes, los doce meses del año. El centro de costo se cruza por nombre contra los códigos del gasto, usando todos los alias conocidos: cada archivo lo llama distinto (\"DESCARGA MENUDENCIAS\" el de gasto, \"DESCARGA\" el de mano de obra). Los que no se pueden mapear —RECICLADO y RUNFO en julio— entran igual con su nombre como código y gasto en cero: un presupuesto sin ejecutar también es una desviación.",
+          "falta": "Servicios Públicos queda con 0 % de ejecución y todo el presupuesto sin gastar, pero no es una economía: el archivo de gasto no trae electricidad ni gas. Es el dato que falta."
+        },
+        {
+          "id": "cruce-sectores",
+          "archivo": "(ninguno: se lee de los tableros de sector ya escritos)",
+          "destino": "client/src/dashboards/presupuesto-gestion.html",
+          "constante": "DATA.cruce",
+          "hojas": "—",
+          "cuenta": "Compara, grupo por grupo, el gasto de julio que muestra el Presupuesto de cada sector contra el que Gestión imputa a su centro de costo: Insumos (AIN), Compras (COMP), Fábrica de Hielo (HIE), Logística (LOG), Sistemas (SIS), Taller (TALL) y Lavadero de Camiones (LAVC). Los números del sector salen de la constante RESUMEN de su propio tablero —P_RES en el de Sistemas—, así que se compara exactamente lo que se ve en pantalla. Las causas conocidas están en la constante CAUSAS del extractor; una diferencia sin causa cargada se marca \"sin explicar\" y la corrida lo avisa.",
+          "falta": "En julio 2026 quedan dos diferencias. Fábrica de Hielo, -38,5 M: el archivo nuevo no trae servicios públicos, así que le falta a Gestión. Logística, -8,6 M: la ventana del sector cuenta a los consultores dos veces, una dentro de GASTOS DE PERSONAL PROPIO y otra como MO eventual; el error es del sector."
+        }
+      ],
+      "carpetaLocal": "C:/Users/admin/OneDrive - OffalExp SA/Documentos - Offal Exp/Gerencia de Gestion"
     }
   }
 }
