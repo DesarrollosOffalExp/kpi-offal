@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "kpi-offal-api", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3006 },
+    { "name": "kpi-offal-client", "runtimeExecutable": "npm", "runtimeArgs": ["run", "client"], "port": 5173 }
+  ]
+}
