@@ -191,14 +191,15 @@
             "client/src/dashboards/compras-informe.html",
             "client/src/dashboards/compras-sin-entrega.html"
           ],
-          "cuenta": "La base es la hoja Reporte, no la hoja Demoradas: esa quedó congelada y trae un solo registro de 2026. Informe de puntualidad: los ítems que tienen fecha de entrega y de recepción; llega tarde el que se recibió después de la fecha de entrega, y se agrupa por año, mes, rubro y proveedor. Sin entrega: los ítems con fecha de entrega, sin recepción, con cantidad pendiente mayor a cero y con la OC viva (estado aprobada o emitida). Demoradas: de esas, las que tienen la fecha de entrega vencida y dentro del año en curso, agrupadas por proveedor y rubro. La columna Observaciones sale de \"Texto Variable Observaciones\" y se muestra tal cual, con los saltos de línea pasados a \" · \".",
+          "cuenta": "La base es la hoja Reporte, no la hoja Demoradas: esa quedó congelada. Demoradas y Sin entrega aplican los MISMOS filtros que la consulta Power Query «Demora» del propio archivo, que está en el código M embebido (customXml/item1.xml, UTF-16, paquete DataMashup): Oficina de Compras ∈ {01-MAT NO PRODUCTIVOS, 03-ART DE OFICINA}, Rubro ∉ {FLETES Y ACARREOS, SERVICIOS} y Estado = \"Aprobada/o\" (sólo aprobadas, las emitidas no entran). Después se reparten por la columna «tiempo sin entrega» que trae la propia planilla: demoradas son las de -1200 a -1 días con Estado del Item ≠ Anulada/o; sin entrega son las de 1 día en adelante, o sea las que todavía no llegaron a su fecha. Las dos vistas no se superponen. Informe de puntualidad: los ítems con fecha de entrega y de recepción; llega tarde el que se recibió después de la fecha de entrega, agrupado por año, mes, rubro y proveedor (este informe todavía no aplica los filtros de la consulta). La columna Observaciones sale de «Texto Variable Observaciones».",
           "constante": "DATA",
           "hojas": [
             "Reporte"
           ],
           "columnas": {
             "Reporte": "una fila por ítem de OC. Se buscan por título: Proveedor, Rubro, Orden de Compra, Item, Material, Requisición, Cantidad Solicitada, Cantidad Pendiente, Estado, Estado del Item, Comprador Asignado, Fecha Entrega, Fecha Recepción VE, Texto Variable Observaciones."
-          }
+          },
+          "avisos": "Los filtros salen del código M del archivo: si Compras los cambia ahí, hay que reflejarlo acá. Con estos filtros, demoradas da 257 ítems en 30 grupos y sin entrega 343 en 92, que es lo que muestra el archivo."
         }
       ]
     },
@@ -656,6 +657,26 @@
         }
       ],
       "carpetaLocal": "C:/Users/admin/OneDrive - OffalExp SA/Documentos - Offal Exp/Gerencia de Gestion"
+    },
+    "gestion-presentacion": {
+      "carpeta": "Gerencia de Gestion  (el pptx del corte, en la raíz de la carpeta)",
+      "carpetaLocal": "C:/Users/admin/OneDrive - OffalExp SA/Documentos - Offal Exp/Gerencia de Gestion",
+      "extractor": "gestion-presentacion",
+      "fuentes": [
+        {
+          "id": "presentacion-gerencial",
+          "archivo": "Tablero de Control General - Corte <fecha>.pptx",
+          "destino": "client/src/dashboards/gestion-presentacion.html",
+          "constante": "DATA",
+          "hojas": "ppt/charts/chartN.xml (las series con sus números) y ppt/slides/slideN.xml (los textos que escribe la Gerencia)",
+          "cuenta": "Un .pptx es un zip de XML: se abre con el módulo CFB que ya trae xlsx, sin dependencias nuevas. Los gráficos generales NO se toman por número —el orden cambia entre cortes— sino que cada uno se reconoce por el título o por los nombres de sus series. Los de cada gerencia salen de ppt/slides/_rels/slideN.xml.rels, que dice qué gráficos cuelgan de esa diapositiva: así la serie mensual y la apertura por sector son siempre las de esa gerencia y no las de la siguiente. De las diapositivas salen el corte, la tabla de KPI, el plan de acción general y, por cada gerencia, el desvío del mes, el acumulado, el monto, el peso sobre PB y los comentarios.",
+          "control": "Cada gerencia se cruza contra sí misma: la tarjeta escrita a mano (AR$ …MM) tiene que dar lo mismo que gasto − presupuesto del último mes del gráfico. En el corte de julio 2026 no cierran dos: Operaciones (tarjeta AR$ 295MM, gráfico 208,5 MM) y RRHH (tarjeta AR$ -16MM, gráfico +15,7 MM, signo cambiado). La ventana muestra las dos cifras y la corrida lo avisa.",
+          "unidades": "Los importes van en MM (millones), como el eje de los gráficos del archivo (#,##0,,\" MM\") y las tarjetas (AR$ -48,5MM). Los desvíos vienen del archivo como fracción y se guardan ya en porcentaje con dos decimales: redondear la fracción antes de multiplicar por cien convertía -6,90% en -7,00%.",
+          "cuenta2": "La ventana replica la filmina bloque por bloque: KPI del corte, Presupuesto vs Real (barras presupuesto/gasto/diferencia + línea de % variación + el PROM. al pie), Presión macroeconómica, Costo x Tonelada (sin y con Capex, con la línea de target y las toneladas del mes debajo del eje), Recupero sin Capex (las cuatro series en USD/Tn más las seis tarjetas y la NOTA), Toneladas Procesadas (los cuatro tipos con su línea de tendencia) y una filmina por gerencia con gráfico · cifras · apertura por sector y las bandas de Comentarios y Plan de Acción.",
+          "derivado": "Dos números no están en el archivo y se recalculan: el PROM. de Presupuesto vs Real, que la filmina imprime dentro del gráfico y es el desvío ponderado del acumulado (total diferencia / total presupuesto = +1,4% en julio), y las toneladas del mes, que se suman de las cuatro series de Toneladas Procesadas porque la serie del gráfico de costo viene redondeada.",
+          "falta": "Si un corte nuevo cambia los títulos de los gráficos o el orden de los textos, la corrida lo avisa (\"no encuentro el gráfico de …\") en vez de cargar cualquier cosa. Lo macro no sale del pptx: la presentación lo pega como imagen, sin datos detrás. Son DOS gráficos distintos, los dos en tools/macro-gestion.json: el de 12 meses (bloque \"anual\", con la línea roja del mes del corte) va al lado de Presupuesto vs Real, y el de dos años ene-25 → dic-26 (bloque \"bienal\", con la marca del reinicio anual) es el de la filmina de Presión macroeconómica. Lo único exacto de todo eso es la fila de la brecha 2026 que la filmina imprime al pie; el resto se transcribe de las imágenes con precisión de medio punto. Ojo que los dos gráficos no coinciden entre sí en 2026: en el bienal la brecha se estabiliza cerca de 16-17 pp hasta diciembre y en el anual baja hasta 7,5 pp — la ventana lo dice al pie del gráfico."
+        }
+      ]
     }
   }
 }

@@ -29,7 +29,10 @@ const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio',
   'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 // Grupo de costo, con el mismo vocabulario que los presupuestos de los sectores.
-const GRUPOS = ['MO PROPIA', 'MO EVENTUAL', 'FLETES', 'SERVICIOS PUBLICOS', 'SERVICIOS', 'MATERIAL'];
+const GRUPOS = ['MO PROPIA', 'MO EVENTUAL', 'FLETES', 'SERVICIOS', 'MATERIAL'];
+// Servicios públicos se sacó de las cuentas de todos los sectores: la electricidad
+// y el gas se analizan aparte. Las filas del ERP que caen acá no se suman a nada.
+const FUERA = 'SERVICIOS PUBLICOS';
 const G_MOP = 0, G_MOE = 1;
 
 // Los ajustes de inventario, cuando venían, casi nunca traían centro destino.
@@ -94,7 +97,7 @@ function grupoDe(rubro, subrubro, servicios) {
     if (subrubro === '2642') return 'MO PROPIA';
     if (subrubro === '2617') return 'MO EVENTUAL';
     if (subrubro === '2635') return 'FLETES';
-    if (subrubro === '2696' || subrubro === '2697') return 'SERVICIOS PUBLICOS';
+    if (subrubro === '2696' || subrubro === '2697') return FUERA;
     return 'SERVICIOS';
   }
   if (rubro === 'FLE') return 'FLETES';
@@ -381,25 +384,18 @@ function leerPresupuestado(carpetas, leer, log, util, alias) {
  * exactamente lo que la persona ve en pantalla.
  */
 const SECTORES = [
-  { nom: 'Insumos', cc: 'AIN', tablero: 'client/src/dashboards/presupuesto-insumos.html', cte: 'RESUMEN' },
-  { nom: 'Compras', cc: 'COMP', tablero: 'client/src/dashboards/presupuesto-compras.html', cte: 'RESUMEN' },
-  { nom: 'Fábrica de Hielo', cc: 'HIE', tablero: 'client/src/dashboards/presupuesto.html', cte: 'RESUMEN' },
-  { nom: 'Logística', cc: 'LOG', tablero: 'client/src/dashboards/presupuesto-logistica.html', cte: 'RESUMEN' },
-  { nom: 'Sistemas', cc: 'SIS', tablero: 'client/src/dashboards/kpi-sistemas.html', cte: 'P_RES' },
-  { nom: 'Taller', cc: 'TALL', tablero: 'client/src/dashboards/presupuesto-taller.html', cte: 'RESUMEN' },
-  { nom: 'Lavadero de Camiones', cc: 'LAVC', tablero: 'client/src/dashboards/presupuesto-lavadero.html', cte: 'RESUMEN' },
+  { nom: 'Insumos', cc: 'AIN', tablero: 'client/src/dashboards/presupuesto-insumos.html', cte: 'RESUMEN', det: 'DETALLE' },
+  { nom: 'Compras', cc: 'COMP', tablero: 'client/src/dashboards/presupuesto-compras.html', cte: 'RESUMEN', det: 'DETALLE' },
+  { nom: 'Fábrica de Hielo', cc: 'HIE', tablero: 'client/src/dashboards/presupuesto.html', cte: 'RESUMEN', det: 'DETALLE' },
+  { nom: 'Logística', cc: 'LOG', tablero: 'client/src/dashboards/presupuesto-logistica.html', cte: 'RESUMEN', det: 'DETALLE' },
+  { nom: 'Sistemas', cc: 'SIS', tablero: 'client/src/dashboards/kpi-sistemas.html', cte: 'P_RES', det: 'P_DET' },
+  { nom: 'Taller', cc: 'TALL', tablero: 'client/src/dashboards/presupuesto-taller.html', cte: 'RESUMEN', det: 'DETALLE' },
+  { nom: 'Lavadero de Camiones', cc: 'LAVC', tablero: 'client/src/dashboards/presupuesto-lavadero.html', cte: 'RESUMEN', det: 'DETALLE' },
 ];
 
 // Causas conocidas, con el importe que explican. Se escriben acá y no en el
 // tablero para que queden al lado de la cuenta que las produce.
 const CAUSAS = [
-  {
-    cc: 'HIE', grupo: 'SERVICIOS PUBLICOS',
-    causa: 'El archivo de Gestión no trae servicios públicos. La presentación anterior tenía la ' +
-      'electricidad y el gas del mes (518,5 M y 28,0 M en toda la planta); la nueva los dejó afuera, ' +
-      'así que a Fábrica de Hielo le falta su parte. No es que el sector esté de más: le falta a Gestión.',
-    lado: 'gestion',
-  },
   {
     cc: 'LOG', grupo: 'MO PROPIA',
     causa: 'La ventana de Logística toma la mano de obra propia de la línea GASTOS DE PERSONAL PROPIO del ERP, ' +
@@ -409,36 +405,51 @@ const CAUSAS = [
   },
 ];
 
-function cruzar(util, gestionPorCC, mesEtiqueta, log) {
+/** Cruza un mes contra los presupuestos de sector, en las dos medidas:
+ *  lo PRESUPUESTADO y el GASTO REAL. El real del sector sale de su RESUMEN y el
+ *  presupuestado de su DETALLE, que es la hoja del mes. Del lado de Gestión los
+ *  dos salen de lo que ya está armado, así que se compara exactamente lo que se
+ *  ve en pantalla. */
+function cruzarMes(util, mesEtiqueta, realDe, presDe, log) {
+  const corto = mesEtiqueta.split(' ')[0];
   const salida = [];
   SECTORES.forEach(s => {
-    let R = null;
+    let R = null, D = null;
     try { R = util.actual(s.tablero, s.cte); } catch (e) { R = null; }
+    try { D = util.actual(s.tablero, s.det); } catch (e) { D = null; }
     if (!R || !Array.isArray(R.meses) || !Array.isArray(R.grupos)) {
       log('   · cruce: no puedo leer ' + s.cte + ' de ' + s.tablero.split('/').pop());
       return;
     }
-    const i = R.meses.indexOf(mesEtiqueta.split(' ')[0]);
-    if (i < 0) { log('   · cruce: ' + s.nom + ' no tiene ' + mesEtiqueta.split(' ')[0]); return; }
+    const i = R.meses.indexOf(corto);
+    if (i < 0) { log('   · cruce ' + corto + ': ' + s.nom + ' no tiene ese mes'); return; }
 
-    const sector = {};
-    // Los tableros de sector guardan el gasto en positivo o en negativo según el
-    // archivo del que salen; para comparar vale el importe.
-    R.grupos.forEach(g => { sector[g.g] = Math.abs(g.vals[i] || 0); });
-    const gest = gestionPorCC(s.cc);
+    // Los tableros guardan el gasto en positivo o en negativo según el archivo
+    // del que salen; para comparar vale el importe.
+    const realSec = {}, presSec = {};
+    R.grupos.forEach(g => { realSec[g.g] = Math.abs(g.vals[i] || 0); });
+    ((D && D[corto] && D[corto].grupos) || []).forEach(g => { presSec[g.g] = Math.abs(g.presup || 0); });
+    const realGes = realDe(s.cc), presGes = presDe(s.cc);
 
     const filas = GRUPOS.map(g => {
-      const a = util.r2(sector[g] || 0), b = util.r2(gest[g] || 0), d = util.r2(b - a);
-      if (Math.abs(a) < MINIMO && Math.abs(b) < MINIMO) return null;
-      const c = Math.abs(d) >= MINIMO ? CAUSAS.find(x => x.cc === s.cc && x.grupo === g) : null;
-      return { g, sector: a, gestion: b, dif: d, causa: c ? c.causa : null, lado: c ? c.lado : null };
+      const rS = util.r2(realSec[g] || 0), rG = util.r2(realGes[g] || 0);
+      const pS = util.r2(presSec[g] || 0), pG = util.r2(presGes[g] || 0);
+      if ([rS, rG, pS, pG].every(v => Math.abs(v) < MINIMO)) return null;
+      const dR = util.r2(rG - rS), dP = util.r2(pG - pS);
+      const c = Math.abs(dR) >= MINIMO ? CAUSAS.find(x => x.cc === s.cc && x.grupo === g) : null;
+      return { g, presSector: pS, presGestion: pG, difPres: dP,
+        sector: rS, gestion: rG, dif: dR, causa: c ? c.causa : null, lado: c ? c.lado : null };
     }).filter(Boolean);
 
-    const tS = util.r2(filas.reduce((a, f) => a + f.sector, 0));
-    const tG = util.r2(filas.reduce((a, f) => a + f.gestion, 0));
+    const sum = k => util.r2(filas.reduce((a, f) => a + f[k], 0));
+    const tS = sum('sector'), tG = sum('gestion'), tPS = sum('presSector'), tPG = sum('presGestion');
     const sinExplicar = filas.filter(f => Math.abs(f.dif) >= MINIMO && !f.causa);
-    if (sinExplicar.length) log('   ! cruce ' + s.nom + ': ' + sinExplicar.map(f => f.g + ' ' + M(f.dif)).join(', ') + ' sin explicación cargada');
-    salida.push({ nom: s.nom, cc: s.cc, filas, tSector: tS, tGestion: tG, dif: util.r2(tG - tS) });
+    if (sinExplicar.length) log('   ! cruce ' + corto + ' · ' + s.nom + ': ' + sinExplicar.map(f => f.g + ' ' + M(f.dif)).join(', ') + ' sin explicación cargada');
+    salida.push({
+      nom: s.nom, cc: s.cc, filas,
+      tPresSector: tPS, tPresGestion: tPG, difPres: util.r2(tPG - tPS),
+      tSector: tS, tGestion: tG, dif: util.r2(tG - tS),
+    });
   });
   return salida;
 }
@@ -503,7 +514,9 @@ async function actualizar({ leer, escribir, log, util, descargas, carpetas }) {
     });
 
     const propio = { nt: 0, con: 0, aju: 0, mo: 0 };
+    const fuera = {};   // lo que cae en el grupo excluido, sólo para poder informarlo
     const sumar = (cc, grupo, det, campo, v) => {
+      if (grupo === FUERA) { fuera[campo] = (fuera[campo] || 0) + v; return; }
       const k = cc || SIN_CENTRO;
       if (!nombreCC[k]) nombreCC[k] = k;
       alias(k, nombreCC[k]);
@@ -572,6 +585,8 @@ async function actualizar({ leer, escribir, log, util, descargas, carpetas }) {
     else if (suyo) log('     ✓ materiales: ' + M(propio.con) + ' — cierra contra el total del archivo');
     else log('     · materiales: ' + M(propio.con) + ' — el archivo no trae total de control');
 
+    const dejado = Object.values(fuera).reduce((x, y) => x + y, 0);
+    if (Math.abs(dejado) >= MINIMO) log('     · ' + FUERA + ': ' + M(dejado) + ' fuera de las cuentas, por decisión');
     meses.push({ mes, etiqueta, archivo: a.nombre, presentacion: nueva ? 'nueva' : 'vieja', propio, sumar });
   });
 
@@ -657,14 +672,26 @@ async function actualizar({ leer, escribir, log, util, descargas, carpetas }) {
     .filter(f => !(f[1] === 'LOG' && GRUPOS[f[2]] === 'FLETES'))
     .sort((a, b) => a[0] - b[0] || Math.abs(b[6]) - Math.abs(a[6]));
 
-  const cruce = cruzar(util, cc => {
-    const r = {};
-    filasVivas.filter(f => f[0] === meses.length - 1 && f[1] === cc).forEach(f => {
-      const g = GRUPOS[f[2]];
-      r[g] = (r[g] || 0) + f[4] + f[5] + f[6] + f[7];
-    });
-    return r;
-  }, ultimo.etiqueta, log);
+  // Un cruce por mes leído, para poder mirar junio igual que julio.
+  const cruce = meses.map((m, mIdx) => cruzarMes(util, m.etiqueta,
+    cc => {
+      const r = {};
+      filasVivas.filter(f => f[0] === mIdx && f[1] === cc).forEach(f => {
+        const g = GRUPOS[f[2]];
+        r[g] = (r[g] || 0) + f[4] + f[5] + f[6] + f[7];
+      });
+      return r;
+    },
+    cc => {
+      const r = {};
+      if (!pres) return r;
+      const pm = pres.meses.findIndex(x => x.mes === m.mes);
+      if (pm < 0) return r;
+      pres.filas.filter(f => f[0] === pm && f[1] === cc).forEach(f => {
+        r[GRUPOS[f[2]]] = (r[GRUPOS[f[2]]] || 0) + f[3];
+      });
+      return r;
+    }, log));
 
   const DATA = {
     meses: meses.map(m => ({

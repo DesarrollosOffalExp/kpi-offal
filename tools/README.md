@@ -15,7 +15,7 @@ node tools/actualizar.js fabrica-hielo
 ```
 
 Grupos disponibles: `fabrica-hielo`, `compras`, `sistemas`, `objetivos`,
-`presupuesto`, `insumos`, `logistica`, `gestion`. Sin argumentos lista todo lo que
+`presupuesto`, `insumos`, `logistica`, `gestion`, `gestion-presentacion`. Sin argumentos lista todo lo que
 sabe hacer.
 
 El script busca cada archivo por nombre en `Descargas`, tolerando los sufijos
@@ -298,6 +298,36 @@ Dos grupos no tienen tercer nivel, y no es un olvido:
   mes —todos facturan a semana vencida—, así que la factura suelta no explica el
   movimiento: hay que mirarlo por viaje y por tonelada, como en Métrica de Fletes.
   El resto de los fletes (Congelado, Supermercado) sí se abre.
+
+### La presentación gerencial sale del PowerPoint
+
+Gestión arma cada corte un `Tablero de Control General - Corte <fecha>.pptx` en la
+raíz de su carpeta de SharePoint. La ventana **Presentación Gerencial** lo
+replica, y los números **no** se copian a mano: salen de los gráficos embebidos
+del propio archivo.
+
+Un `.pptx` es un zip de XML. No hizo falta una librería nueva: el módulo `CFB` que
+ya trae `xlsx` lo abre. De ahí salen dos cosas distintas:
+
+- **`ppt/charts/chartN.xml`** — las series con sus categorías y valores. Son los
+  números de verdad, con todos sus decimales, no una imagen del gráfico.
+- **`ppt/slides/slideN.xml`** — el texto: el corte, la tabla de KPI, el plan de
+  acción y, por cada gerencia, el desvío del mes, el acumulado, el monto, el peso
+  sobre PB y los comentarios que escribe la Gerencia.
+
+**Los gráficos NO se toman por número.** El orden cambia de un corte a otro, así
+que cada uno se reconoce por su título (`Gerencia de Operaciones`, `USD por
+tonelada`) o por los nombres de sus series (`Presupuesto` + `Gasto Real`). Si un
+corte nuevo cambia la forma, la corrida avisa `! no encuentro el gráfico de …` en
+vez de cargar cualquier cosa en su lugar.
+
+Dos cosas que el archivo esconde y hay que saber:
+
+- En `Costo x Tns (Sin Capex)` hay una segunda serie sin nombre con valores como
+  765, 657, 666. **Son las toneladas totales dibujadas en escala 1:10** para que
+  entren en el mismo eje que los USD/tn. El extractor las devuelve en toneladas.
+- El desvío del mes viene como `-6,90%/ Mes` en unas diapositivas y `+10,42%` en
+  otras; y el peso sobre PB aparece pegado al plan de acción. Los dos se limpian.
 
 ### El cruce contra los presupuestos de sector
 

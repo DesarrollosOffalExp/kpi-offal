@@ -1,0 +1,474 @@
+<title>Presentación Gerencial</title>
+<style>
+  :root{
+    --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
+    --line:#23353f; --line-2:#2c414d;
+    --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
+    --brand:#b27746; --brand-line:rgba(178,119,70,.45);
+    --info:#26b6d9; --good:#22e39b; --bad:#ff4d67; --amber:#f5a623;
+    /* la paleta de la filmina, para que los gráficos se lean igual */
+    --f-presup:#2e5f80; --f-gasto:#e07a3f; --f-linea:#29a8d0; --f-dif-neg:#3d9140; --f-dif-pos:#c92a36;
+    --radius:12px;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.4;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1320px;margin:0 auto;padding:22px 20px 40px;}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px;}
+  .overline{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--info);margin:0 0 5px;}
+  h1{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .sub{font-size:12.5px;color:var(--muted);margin:5px 0 0;max-width:720px;}
+  .fuente{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;}
+  .fuente::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand);box-shadow:0 0 7px 1px rgba(178,119,70,.7);}
+
+  /* separadores de sección, como las filminas GENERAL / GERENCIAS */
+  .seccion{display:flex;align-items:center;gap:12px;margin:26px 0 14px;}
+  .seccion h2{margin:0;font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--brand);white-space:nowrap;}
+  .seccion .linea{flex:1;height:1px;background:linear-gradient(90deg,var(--brand-line),transparent);}
+
+  /* cada filmina es un bloque, con su título y su banda de plan de acción */
+  .filmina,.ger{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);margin-bottom:16px;overflow:hidden;}
+  .fil-h{padding:15px 20px 13px;border-bottom:1px solid var(--line);background:var(--panel-2);}
+  .fil-h h3{margin:0;font-size:19px;font-weight:800;letter-spacing:-.015em;}
+  .fil-h .dash{display:block;width:52px;height:3px;background:var(--bad);border-radius:2px;margin-top:7px;}
+  .fil-h .dash::after{content:"";display:inline-block;width:14px;height:3px;background:var(--bad);border-radius:2px;margin-left:6px;vertical-align:top;}
+  .fil-b{padding:18px 20px 20px;}
+  .banda{background:#2a2a63;color:#fff;text-align:center;font-size:12px;font-weight:800;letter-spacing:.08em;
+    text-transform:uppercase;padding:7px;}
+  .plan{padding:14px 20px 18px;background:var(--panel-2);}
+  .plan ol{margin:0;padding-left:20px;}
+  .plan li{font-size:12.5px;line-height:1.8;color:var(--muted);}
+  .plan li::marker{color:var(--brand);font-weight:700;}
+
+  .g2{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;}
+  .g2b,.g22{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:980px){ .g2,.g2b,.g22{grid-template-columns:1fr;} }
+  .cuadro{border:1px solid var(--line);border-radius:10px;padding:12px 14px 14px;background:var(--panel-2);}
+  .cuadro h4{margin:0 0 9px;font-size:12.5px;font-weight:700;color:var(--muted);text-align:center;}
+
+  .chart{width:100%;display:block;}
+  .leyenda{display:flex;flex-wrap:wrap;gap:14px;margin-top:9px;font-size:11.5px;color:var(--muted);justify-content:center;}
+  .leyenda span{display:inline-flex;align-items:center;gap:6px;}
+  .leyenda i{width:11px;height:11px;border-radius:3px;display:inline-block;}
+  .leyenda i.ln{height:3px;border-radius:2px;width:16px;}
+  .prom{margin-top:10px;font-size:15px;font-weight:800;color:var(--bad);}
+
+  /* tabla de KPI del corte, el encabezado que repiten todas las filminas */
+  .kpi-tabla{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;}
+  .kpi-tabla th{text-align:center;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--muted);padding:9px 13px;background:var(--panel-2);border-bottom:1px solid var(--line);}
+  .kpi-tabla th:first-child{text-align:left;}
+  .kpi-tabla th.grp{color:var(--text);border-bottom:1px solid var(--line-2);}
+  .kpi-tabla td{padding:11px 13px;border-bottom:1px solid var(--line);text-align:center;}
+  .kpi-tabla td:first-child{text-align:left;font-weight:700;color:var(--text);}
+  .kpi-tabla tr:last-child td{border-bottom:none;}
+  .kpi-tabla td.dato{font-size:16px;font-weight:800;}
+  .kpi-tabla td.ok{color:var(--good);} .kpi-tabla td.mal{color:var(--bad);}
+  .kpi-tabla td.tgt{color:var(--muted);background:rgba(38,182,217,.06);}
+
+  /* tarjetas del recupero, como los recuadros de la filmina */
+  .tarjetas{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+  .tj{border-radius:9px;padding:12px 13px;border:1px solid var(--line-2);background:rgba(38,182,217,.10);}
+  .tj.saldo{background:rgba(34,227,155,.12);border-color:rgba(34,227,155,.35);}
+  .tj .l{font-size:11px;color:var(--muted);font-weight:600;}
+  .tj .v{font-size:17px;font-weight:800;color:#fff;margin-top:4px;}
+  .nota{margin-top:12px;border:1px solid var(--line-2);border-radius:9px;padding:12px 13px;
+    font-size:11.5px;line-height:1.65;color:var(--muted);background:var(--panel-3);}
+
+  /* lectura ejecutiva del macro */
+  .lect h4{margin:0 0 8px;font-size:13px;font-weight:800;color:var(--text);text-align:left;}
+  .lect .hit{font-size:14px;font-weight:800;color:var(--text);line-height:1.6;}
+  .lect p{font-size:12.5px;line-height:1.65;color:var(--muted);margin:8px 0 0;}
+  .lect .rows{margin-top:16px;}
+  .lect .row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);}
+  .lect .row:last-child{border-bottom:none;}
+  .lect .row .k{font-size:12.5px;color:var(--muted);}
+  .lect .row .v{font-size:17px;font-weight:800;color:var(--bad);}
+  .brecha-t{width:100%;border-collapse:separate;border-spacing:0;margin-top:10px;font-size:12.5px;text-align:center;}
+  .brecha-t th{font-size:10.5px;font-weight:800;letter-spacing:.06em;color:var(--bad);padding:6px 4px;}
+  .brecha-t td{font-weight:800;color:var(--bad);padding:5px 4px;border-top:1px solid var(--line);}
+  .sub-t{margin:0 0 2px;font-size:12px;font-weight:700;color:var(--text);}
+
+  /* gerencias: gráfico · cifras · sectores, como la filmina de Mantenimiento */
+  .ger-cuerpo{display:grid;grid-template-columns:1.5fr .8fr 1.1fr;gap:16px;padding:18px 20px;}
+  @media(max-width:1100px){ .ger-cuerpo{grid-template-columns:1fr;} }
+  .cifras{display:flex;flex-direction:column;justify-content:center;}
+  .cifras .big{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1;}
+  .cifras .big.pos{color:var(--bad);} .cifras .big.neg{color:var(--good);}
+  .cifras .lbl{font-size:13px;color:var(--muted);margin-top:5px;}
+  .cifras .acum{font-size:14px;color:var(--text);margin-top:6px;}
+  .cifras hr{border:none;border-top:2px solid var(--line-2);margin:15px 0 13px;width:100%;}
+  .cifras .monto{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.02em;}
+  .cifras .aviso{margin-top:12px;font-size:11px;line-height:1.55;color:var(--amber);
+    border-left:2px solid var(--amber);padding-left:9px;}
+  .cifras .peso{margin-top:16px;font-size:13px;font-weight:700;color:var(--text);line-height:1.6;}
+  .cifras .peso .tg{color:var(--amber);}
+  .bandas{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);}
+  @media(max-width:900px){ .bandas{grid-template-columns:1fr;} }
+  .bandas > div{min-width:0;}
+  .bandas .cont{padding:13px 18px 16px;background:var(--panel-2);height:100%;}
+  .bandas .cont p{margin:0 0 6px;font-size:12.5px;line-height:1.65;color:var(--muted);}
+  .bandas .cont ul{margin:0;padding-left:18px;}
+  .bandas .cont li{font-size:12.5px;line-height:1.75;color:var(--muted);}
+  .bandas .cont li::marker{color:var(--brand);}
+  .pie{margin-top:16px;font-size:11.5px;color:var(--muted-2);line-height:1.6;}
+  .zero{color:var(--muted-2);}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <p class="overline">Offal · Gerencia de Gestión</p>
+      <h1>Presentación Gerencial</h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <span class="fuente" id="fuente"></span>
+  </header>
+
+  <section class="filmina">
+    <div class="fil-h"><h3>KPI del corte</h3><span class="dash"></span></div>
+    <table class="kpi-tabla" id="kpis"></table>
+  </section>
+
+  <div class="seccion"><h2>General</h2><span class="linea"></span></div>
+  <div id="general"></div>
+
+  <div class="seccion"><h2>Gerencias</h2><span class="linea"></span></div>
+  <div id="gerencias"></div>
+
+  <p class="pie" id="pie"></p>
+</div>
+
+<script>
+(function(){
+  const DATA={"archivo":"Tablero de Control General - Corte 31 de julio - AV V2.pptx","corte":"Corte 31 de julio de 2026","meses":["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio"],"kpis":[{"kpi":"Costo x Tonelada","mes":"517","acum":"528","target":"540"},{"kpi":"Toneladas Procesadas","mes":"8011","acum":"6632","target":"6600"},{"kpi":"Cumplimiento de presupuesto","mes":"98%","acum":"98%","target":"100%"}],"planGeneral":["Se mantiene el proyecto de análisis de costos y gastos.","Definir target de punto de equilibrio, costo x tn, kilos procesados, recupero promedio.","Continuar ejercicio de mejoras de eficiencia y productividad."],"promVar":"","nota":"NOTA: Se modificó el precio de la barra de hielo, dejamos de tomar precio de venta ($7600) por el costo productivo. Esto generó una modificación importante en el recupero 1, corrigiéndose así todo el año corriente.","tarjetas":[{"l":"Gasto promedio","v":"USD 496,10/Tn"},{"l":"Recupero total promedio","v":"USD 359,81/Tn"},{"l":"Saldo final promedio","v":"USD 136,29/Tn"},{"l":"Gasto julio","v":"USD 494,58/Tn"},{"l":"Recupero total julio","v":"USD 404,87/Tn"},{"l":"Saldo final julio","v":"USD 89,71/Tn"}],"macro":{"_":"Los dos gráficos macro de la presentación. NO salen del pptx: los dos están pegados como IMAGEN, sin datos detrás, así que se transcriben a mano de la filmina y se actualizan con cada corte.","corte":"Corte 31 de julio de 2026","anual":{"_":"El gráfico chico que va al lado de Presupuesto vs Real: sólo 2026, con la línea roja vertical en el mes del corte.","titulo":"Presión dólar mayorista vs IPC · 2026","meses":["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],"series":[{"nom":"IPC acumulado","color":"#2f7ed8","_":"Calculada como dólar + brecha, para que las tres líneas cierren entre sí. Coincide con la línea azul de la filmina dentro de 0,4 pp.","vals":[2.3,4.6,6.6,9,12.3,15.4,18.3,21,23.6,26.4,29,31.5]},{"nom":"Dólar mayorista acumulado","color":"#e07a3f","_":"Leída de la imagen, con precisión de aproximadamente medio punto porcentual.","vals":[0,-2.5,-3.5,-4.8,-3.8,-1,2.2,5.7,9.5,14,18.7,24]},{"nom":"Brecha IPC − dólar","color":"#3d9140","_":"Los únicos valores exactos: son los que la filmina imprime en la fila al pie.","vals":[2.3,7.1,10.1,13.8,16.1,16.4,16.1,15.3,14.1,12.4,10.3,7.5]}],"marcas":[{"mes":"Jul","texto":"16,1%","color":"#e01b24"}]},"bienal":{"_":"El gráfico grande de la filmina de Presión macroeconómica: dos años, de enero 2025 a diciembre 2026, con el corte del acumulado en el cambio de año.","titulo":"Presión dólar mayorista vs IPC · 2025-2026","meses":["ene-25","feb-25","mar-25","abr-25","may-25","jun-25","jul-25","ago-25","sept-25","oct-25","nov-25","dic-25","ene-26","feb-26","mar-26","abr-26","may-26","jun-26","jul-26","ago-26","sept-26","oct-26","nov-26","dic-26"],"series":[{"nom":"IPC acumulado","color":"#1a9b8a","vals":[1.7,4.5,7.3,10.3,13.3,16,18.4,21.2,22.8,25.1,27.2,29,2.7,5.8,9.4,12.3,14.8,17.1,19.2,21.5,23.7,25.6,27.4,30]},{"nom":"Dólar mayorista acumulado","color":"#f0a95c","vals":[1,2.6,3.7,8.8,11.6,14.8,18.7,22.5,25,27.8,30.4,33.5,0.1,-2.7,-3.9,-4.9,-3.9,-0.8,2.6,4.1,6.4,8.6,11.5,13.7]},{"nom":"Brecha IPC − dólar","color":"#d94a3d","_":"Derivada: IPC − dólar, así las tres líneas cierran entre sí.","derivada":"resta"}],"marcas":[{"mes":"ene-26","pie":"reinicio anual","color":"#8fa3ad"},{"mes":"jul-26","color":"#8fa3ad"}],"aviso":"En 2026 este gráfico no coincide con el de 12 meses ni con la fila que la filmina imprime al pie: acá la brecha se estabiliza cerca de 16-17 pp hasta diciembre, y en el otro baja hasta 7,5 pp. Son dos recorridos distintos del dólar dentro del mismo archivo."},"brechaMesAMes":{"_":"La fila roja al pie de la filmina de Presión macroeconómica.","titulo":"Brecha IPC − dólar, mes a mes (pp) 2026","meses":["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"],"vals":[2.3,7.1,10.1,13.8,16.1,16.4,16.1,15.3,14.1,12.4,10.3,7.5]},"hitos":[{"l":"Máxima","v":"16,4 pp","mes":"Junio"},{"l":"Mínima","v":"2,3 pp","mes":"Enero"},{"l":"Cierre","v":"7,5 pp","mes":"Diciembre"}],"lectura":["Junio: brecha máxima +16,4 pp","Diciembre: brecha residual +7,5 pp"],"comentario":"El dólar recupera 8,9 pp entre junio y diciembre, pero todavía queda retrasado contra IPC.","falta":"De todo lo macro, lo único que sale de un número escrito en la filmina es la fila de la brecha 2026. El resto se transcribe de los gráficos —que son imágenes— con precisión de medio punto. Si aparece el Excel que los alimenta, se reemplazan por los valores exactos."},"pvr":{"presup":[5244059844.15,5128279585.76,5554370883.17,4706344087.48,5147577456.67,5467615639.72,5998018986.62],"real":[4939041995.76,4733509499.85,5691394291.62,4716621218.14,5519122970.55,6026682380.48,6144694177.43],"dif":[-305017848.39,-394770085.91,137023408.45,10277130.66,371545513.88,559066740.76,146675190.81],"varPct":[-5.82,-7.7,2.47,0.22,7.22,10.23,2.45]},"costo":{"sinCapex":[423.96,494.6,561.96,524.59,453.3,519.72,494.58],"conCapex":[446.02,515.7,617.93,550.44,497.12,544.86,516.5],"toneladas":[7650,6570,6660,6160,7890,7460,8010]},"usd":{"gasto":[423.96,494.6,561.96,524.59,453.3,519.72,494.58],"rec1":[66.53,80.88,90.69,75,76.19,91.78,81.17],"rec2":[193.55,210.51,250.79,211.02,185.2,226.11,248.63],"total":[290.6,319.01,378.82,388.17,346.82,390.35,404.87]},"toneladas":[{"nom":"Menudencia","vals":[6375.83,5389,5297.77,4846.03,5983.73,6070.53,6350.66]},{"nom":"Carne","vals":[780.87,753.08,794.31,778.12,891.36,852.74,1085.81]},{"nom":"Ctas ctes frescos","vals":[376.15,317.94,443.04,408.25,864.52,415.01,442.05]},{"nom":"Super","vals":[114.74,110.39,129.4,127.83,152.35,125.3,132.75]}],"gerencias":[{"nom":"Mantenimiento","aviso":"","desvioMes":"-6,90%","acumulado":"Acumulado +8,59%","monto":"AR$ -48,5MM","peso":"10,89% peso sobre PB/mes","alerta":"<8% clase mundial","comentarios":["Impacto de paritarias en mano de obra propia y ajustes de recursos en distintos sectores.","Se registran además reclasificaciones pendientes de gastos vinculados a inversiones y CAPEX."],"plan":["Profundizar proyecto de mantenimiento en base a la metodología RCM","Continuar con los trabajos de soporte de mantenimiento autónomo","Asegurar control de disponibilidad y mejora continua OEE"],"serie":{"presup":[714597831.41,734606570.69,739476190.87,710668901.19,631783393.81,709118420.31,701733390.63],"gasto":[903478975.56,594121819.68,1144344759.23,510090886.28,861969336.95,686120017.75,653287003.68],"desvio":[26.43,-19.12,54.75,-28.22,36.43,-3.24,-6.9],"promedio":8.59,"promLbl":"Promedio desvío (8.6%)"},"sectores":[{"s":" MANTENIMIENTO","v":33848917.4},{"s":" SALA DE MAQUINAS","v":17798166.95},{"s":" MAESTRANZA","v":1201473.44},{"s":" ALMACEN NO PRODUCTIVOS","v":350127.62},{"s":" INGENIERIA Y PROYECTOS","v":-101645072.36}]},{"nom":"Operaciones","aviso":"La tarjeta dice AR$ 295MM$ y el gráfico da 208,5 MM.","desvioMes":"+10,42%","acumulado":"Acumulado +4,04%","monto":"AR$ 295MM$","peso":"20% peso sobre PB/mes","alerta":">12% Alerta","comentarios":["Desvío impulsado principalmente por mayores costos de fletes, servicios públicos de congelado y consumos materiales asociados a mantenimiento, insumos y operaciones logísticas. También impactan incrementos salariales, mayor actividad operativa y algunas imputaciones extraordinarias o pendientes de regularización"],"plan":["Definir en consenso proyecto de revisión metodológica de gestión de fletes y logística integral"],"serie":{"presup":[1566194111.82,1610047546.95,1904404207.75,1654930913.71,1780759555.23,1835322906.71,1999920795.07],"gasto":[1633752027.52,1593711428.44,1915492317.45,1649348118.45,1749407347.77,2130190281.2,2208405625.01],"desvio":[4.31,-1.01,0.58,-0.34,-1.76,16.07,10.42],"promedio":4.04,"promLbl":"Promedio desvío (4.0%)"},"sectores":[{"s":" LOGISTICA","v":142275940.81},{"s":" CONGELADO","v":100487601.69},{"s":" TALLER","v":28314069.43},{"s":" ALMACEN INSUMOS","v":10256828.37},{"s":" COMPRAS","v":-31556.08},{"s":" LAVADERO DE CAMIONES","v":-591343.39},{"s":" FABRICA DE HIELO","v":-16467240.7},{"s":" SISTEMAS","v":-55759470.21}]},{"nom":"Producción, SHE y medio ambiente","aviso":"","desvioMes":"-1,28%","acumulado":"Acumulado -0,06%","monto":"AR$ -38MM$","peso":"","alerta":"","comentarios":["Resultado general alineado con ahorros netos, compensando incrementos puntuales en mano de obra por paritarias y changas, materiales de empaque, servicios públicos y gastos extraordinarios de mantenimiento."],"plan":["Continuar con los trabajos de soporte de mantenimiento autónomo","Asegurar control de disponibilidad y mejora continua OEE","Seguir con las mesas de trabajo multidisciplinarias","Priorizar mesa de excelencia operativa."],"serie":{"presup":[1990301359.91,2046029797.98,2394364866.89,2298848486.15,2455778733.41,2613863332.27,2963804040.13],"gasto":[2083344283.1,1977819036.67,2152936984.09,2243812765.33,2540119530.46,2837585663.09,2925734089.18],"desvio":[4.67,-3.33,-10.08,-2.39,3.43,8.56,-1.28],"promedio":-0.06,"promLbl":"Promedio desvío (-0.1%)"},"sectores":[{"s":" DESCARGA MENUDENCIAS","v":39251215.01},{"s":" LIMPIEZA","v":20899446.95},{"s":" SUPERMERCADO","v":4863363.98},{"s":" MEDIO AMBIENTE","v":4324254.46},{"s":" LAVANDERIA","v":1435880.84},{"s":" ADMINISTRACION DE PLANTA","v":493429.34},{"s":" SEGURIDAD E HIGIENE","v":-1855683.43},{"s":" DESPOSTADA","v":-9359174.3},{"s":" PRODUCCION DE MENUDENCIAS","v":-98122683.8}]},{"nom":"Calidad","aviso":"","desvioMes":"-15,92%","acumulado":"Acumulado -0,30%","monto":"AR$ -10MM$","peso":"","alerta":"","comentarios":["Ejecución controlada y alineada al presupuesto, con desvío mensual derivado principalmente de menores gastos en mano de obra. Los servicios si bien parecen haber disminuido, tenemos el faltante de uno de los principales “Inocular”, quien actualmente factura con una demora estimada en 60 días."],"plan":["Crear presupuesto en base 0"],"serie":{"presup":[223756858,219979125,310359228,66838827,58083918,62002008.92,64964038.72],"gasto":[157180026,352751999,272091438,61390782,67140815,57236742.18,54624098.7],"desvio":[-29.75,60.36,-12.33,-8.15,15.59,-7.69,-15.92],"promedio":0.3,"promLbl":"Promedio desvío (0.3%)"},"sectores":[{"s":"MATERIAL","v":46621.08},{"s":"MO PROPIA","v":-3559800.21},{"s":"SERVICIOS","v":-6826760.89}]},{"nom":"RRHH","aviso":"La tarjeta dice AR$ -16MM$ y el gráfico da 15,7 MM.","desvioMes":"+7,13%","acumulado":"Acumulado +0,74%","monto":"AR$ -16MM$","peso":"","alerta":"","comentarios":["Desvío explicado principalmente por mayores gastos en servicios vinculados a comedor, eventos, capacitaciones y beneficios al personal. El impacto fue parcialmente compensado por menores costos en vigilancia, materiales y mejoras en la gestión de consumos e imputaciones"],"plan":["Intentar nuevamente que se priorice el ejercicio de análisis de presupuesto por RRHH"],"serie":{"presup":[185525523.42,190720238.08,162075048.44,161341248.14,177204568.84,201949780.65,219868167.88],"gasto":[131099516.62,152912712.66,159671507.03,191317348.35,229695995.06,182073249.14,235553806.26],"desvio":[-29.34,-19.82,-1.48,18.58,29.62,-9.84,7.13],"promedio":-0.74,"promLbl":"Promedio desvío (-0.7%)"},"sectores":[{"s":" RRHH","v":23643575.58},{"s":" FARMACIA","v":758585.96},{"s":" VIGILANCIA","v":-8716523.16}]}]};
+
+  const nf=new Intl.NumberFormat('es-AR');
+  const money=v=> v==null?'—':'$ '+nf.format(Math.round(v));
+  const nUm=(v,d)=> v==null?'—':v.toLocaleString('es-AR',{minimumFractionDigits:d||0,maximumFractionDigits:d||0});
+  const pctTxt=(v,d)=> v==null?'—':((v>0?'+':'')+nUm(v,d==null?1:d)+'%');
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const corto=m=>String(m).slice(0,3);
+  const prom=a=>{ const v=(a||[]).filter(x=>x!=null); return v.length?v.reduce((s,x)=>s+x,0)/v.length:null; };
+  const signo=t=>/^\s*-/.test(String(t))?'neg':'pos';
+  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const C={presup:css('--f-presup'),gasto:css('--f-gasto'),linea:css('--f-linea'),
+    difNeg:css('--f-dif-neg'),difPos:css('--f-dif-pos'),good:css('--good'),bad:css('--bad'),grid:css('--line')};
+  const EJE='#8ba0ab', GRIS='#667d89';
+
+  /* ═════════ gráficos en SVG ═════════ */
+
+  /** Barras agrupadas, con línea opcional en eje secundario y etiquetas arriba. */
+  function barras(cats, series, o){
+    o=o||{};
+    const W=o.W||960, H=o.H||270, L=o.L||64, R=o.linea?54:16, T=26, B=o.sub?48:34;
+    const iw=W-L-R, ih=H-T-B;
+    const vals=series.flatMap(s=>s.vals).filter(v=>v!=null);
+    if(!vals.length) return '<div class="zero" style="padding:24px;text-align:center">Sin datos.</div>';
+    let max=Math.max(0,...vals), min=o.desde0?0:Math.min(0,...vals);
+    if(max===min) max=min+1;
+    const pad=(max-min)*0.10; max+=pad; if(min<0) min-=pad;
+    const y=v=>T+ih-((v-min)/(max-min))*ih;
+    const bw=iw/cats.length, gw=bw*(o.ancho||0.66), sw=gw/series.length;
+    let s='<svg class="chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">';
+    for(let i=0;i<=4;i++){ const v=min+(max-min)*i/4, yy=y(v);
+      s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy.toFixed(1)+'" y2="'+yy.toFixed(1)+'" stroke="'+C.grid+'"/>'+
+         '<text x="'+(L-8)+'" y="'+(yy+3.5).toFixed(1)+'" fill="'+GRIS+'" font-size="10" text-anchor="end">'+(o.fmtEje?o.fmtEje(v):nUm(v))+'</text>'; }
+    if(o.target!=null&&o.target>=min&&o.target<=max)
+      s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(o.target).toFixed(1)+'" y2="'+y(o.target).toFixed(1)+
+         '" stroke="'+GRIS+'" stroke-width="1.6" stroke-dasharray="7 5"/>';
+    cats.forEach((c,i)=>{
+      const x0=L+i*bw+(bw-gw)/2;
+      series.forEach((se,j)=>{
+        const v=se.vals[i]; if(v==null) return;
+        const col=typeof se.color==='function'?se.color(v,i):se.color;
+        const yy=Math.min(y(v),y(0)), h=Math.abs(y(v)-y(0));
+        s+='<rect x="'+(x0+j*sw).toFixed(1)+'" y="'+yy.toFixed(1)+'" width="'+Math.max(sw-2,2).toFixed(1)+'" height="'+Math.max(h,1).toFixed(1)+
+           '" rx="2" fill="'+col+'"><title>'+esc(c)+' · '+esc(se.nombre)+': '+(o.fmtTip?o.fmtTip(v):nUm(v))+'</title></rect>';
+        if(se.etiqueta) s+='<text x="'+(x0+j*sw+(sw-2)/2).toFixed(1)+'" y="'+(yy-6).toFixed(1)+
+          '" fill="'+EJE+'" font-size="10" font-weight="700" text-anchor="middle">'+esc(se.etiqueta(v,i))+'</text>';
+      });
+      const cx=(L+i*bw+bw/2).toFixed(1);
+      s+='<text x="'+cx+'" y="'+(H-(o.sub?25:11))+'" fill="'+EJE+'" font-size="10.5" text-anchor="middle">'+esc(corto(c))+'</text>';
+      if(o.sub&&o.sub[i]!=null)
+        s+='<text x="'+cx+'" y="'+(H-9)+'" fill="'+GRIS+'" font-size="9.5" font-weight="700" text-anchor="middle">'+esc(o.sub[i])+'</text>';
+    });
+    // Tendencia: va sobre el MISMO eje que las barras. Si se la dibuja como una
+    // línea de eje secundario, se reescala sola y todas salen con la misma
+    // pendiente aunque los datos sean distintos.
+    if(o.tendencia){
+      const pts=o.tendencia.map((v,i)=>v==null?null:[L+i*bw+bw/2,y(v)]).filter(Boolean);
+      if(pts.length>1) s+='<polyline points="'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+
+        '" fill="none" stroke="#e8eef2" stroke-width="2"/>';
+    }
+    if(o.linea){
+      const lv=o.linea.vals.filter(v=>v!=null);
+      let lmax=Math.max(...lv), lmin=Math.min(...lv);
+      if(lmax===lmin) lmax=lmin+1;
+      const lp=(lmax-lmin)*0.22; lmax+=lp; lmin-=lp;
+      const ly=v=>T+ih-((v-lmin)/(lmax-lmin))*ih;
+      if(o.eje2!==false) for(let i=0;i<=4;i++){ const v=lmin+(lmax-lmin)*i/4;
+        s+='<text x="'+(W-R+8)+'" y="'+(ly(v)+3.5).toFixed(1)+'" fill="'+GRIS+'" font-size="10">'+pctTxt(v,0)+'</text>'; }
+      if(o.promedio!=null&&o.promedio>=lmin&&o.promedio<=lmax)
+        s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+ly(o.promedio).toFixed(1)+'" y2="'+ly(o.promedio).toFixed(1)+
+           '" stroke="'+C.bad+'" stroke-width="1.8" stroke-dasharray="8 5" opacity=".9"/>';
+      const pts=o.linea.vals.map((v,i)=>v==null?null:[L+i*bw+bw/2,ly(v)]).filter(Boolean);
+      if(pts.length>1) s+='<polyline points="'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="none" stroke="'+
+        (o.linea.color||C.linea)+'" stroke-width="2.4"/>';
+      if(o.linea.puntos!==false) o.linea.vals.forEach((v,i)=>{ if(v==null) return;
+        const px=L+i*bw+bw/2, py=ly(v);
+        s+='<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="3.6" fill="'+(o.linea.color||C.linea)+'"/>'+
+           '<text x="'+px.toFixed(1)+'" y="'+(py-9).toFixed(1)+'" fill="'+EJE+'" font-size="10" font-weight="700" text-anchor="middle">'+pctTxt(v,1)+'</text>'; });
+    }
+    return s+'</svg>';
+  }
+
+  /** Líneas sobre un eje común, con etiquetas de dato opcionales. */
+  function lineas(cats, series, o){
+    o=o||{};
+    const W=o.W||960, H=o.H||270, L=o.L||66, R=20, T=22, B=o.rotarX?58:34;
+    const iw=W-L-R, ih=H-T-B;
+    const vals=series.flatMap(s=>s.vals).filter(v=>v!=null);
+    if(!vals.length) return '<div class="zero" style="padding:24px;text-align:center">Sin datos.</div>';
+    let max=Math.max(...vals), min=o.desde0?0:Math.min(...vals);
+    if(max===min) max=min+1;
+    const pad=(max-min)*(o.pad==null?0.16:o.pad); max+=pad; if(!o.desde0) min-=pad;
+    const x=i=>L+(cats.length>1?iw*i/(cats.length-1):iw/2);
+    const y=v=>T+ih-((v-min)/(max-min))*ih;
+    let s='<svg class="chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">';
+    for(let i=0;i<=4;i++){ const v=min+(max-min)*i/4, yy=y(v);
+      s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy.toFixed(1)+'" y2="'+yy.toFixed(1)+'" stroke="'+C.grid+'"/>'+
+         '<text x="'+(L-8)+'" y="'+(yy+3.5).toFixed(1)+'" fill="'+GRIS+'" font-size="10" text-anchor="end">'+(o.fmtEje?o.fmtEje(v):nUm(v))+'</text>'; }
+    if(o.target!=null&&o.target>=min&&o.target<=max)
+      s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(o.target).toFixed(1)+'" y2="'+y(o.target).toFixed(1)+
+         '" stroke="'+GRIS+'" stroke-width="1.6" stroke-dasharray="7 5"/>';
+    if(o.cero&&min<0&&max>0)
+      s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(0).toFixed(1)+'" y2="'+y(0).toFixed(1)+'" stroke="'+GRIS+'" stroke-width="1.2"/>';
+    // Las marcas verticales: el mes del corte y, en el gráfico de dos años, el
+    // reinicio anual del acumulado.
+    (o.marcas||[]).forEach(mk=>{
+      if(mk.i==null||mk.i<0) return;
+      const mx=x(mk.i), col=mk.color||C.bad;
+      s+='<line x1="'+mx.toFixed(1)+'" x2="'+mx.toFixed(1)+'" y1="'+T+'" y2="'+(T+ih)+'" stroke="'+col+'" stroke-width="1.6"/>';
+      if(mk.texto) s+='<text x="'+(mx+8).toFixed(1)+'" y="'+(T+ih*0.62).toFixed(1)+'" fill="'+col+
+        '" font-size="14" font-weight="800">'+esc(mk.texto)+'</text>';
+      if(mk.pie) s+='<text x="'+mx.toFixed(1)+'" y="'+(H-1)+'" fill="'+GRIS+
+        '" font-size="9.5" text-anchor="middle">'+esc(mk.pie)+'</text>';
+    });
+    series.forEach(se=>{
+      const pts=se.vals.map((v,i)=>v==null?null:[x(i),y(v)]).filter(Boolean);
+      if(pts.length>1) s+='<polyline points="'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="none" stroke="'+
+        se.color+'" stroke-width="2.4"'+(se.punteada?' stroke-dasharray="6 4"':'')+'/>';
+      se.vals.forEach((v,i)=>{ if(v==null) return;
+        s+='<circle cx="'+x(i).toFixed(1)+'" cy="'+y(v).toFixed(1)+'" r="3.4" fill="'+se.color+'"><title>'+
+           esc(cats[i])+' · '+esc(se.nombre)+': '+nUm(v,2)+'</title></circle>';
+        if(o.etiquetas) s+='<text x="'+(x(i)+8).toFixed(1)+'" y="'+(y(v)-8).toFixed(1)+'" fill="'+EJE+
+          '" font-size="9.5" font-weight="700" text-anchor="middle">'+nUm(v,o.dec==null?2:o.dec)+'</text>'; });
+    });
+    // Con 24 meses las etiquetas no entran de frente: se inclinan, como en la filmina.
+    cats.forEach((c,i)=>{
+      const px=x(i).toFixed(1);
+      s+=o.rotarX
+        ? '<text x="'+px+'" y="'+(H-B+22)+'" fill="'+EJE+'" font-size="9" text-anchor="end" transform="rotate(-45 '+px+' '+(H-B+22)+')">'+esc(c)+'</text>'
+        : '<text x="'+px+'" y="'+(H-11)+'" fill="'+EJE+'" font-size="10.5" text-anchor="middle">'+esc(corto(c))+'</text>';
+    });
+    return s+'</svg>';
+  }
+
+  /** Barras horizontales, para la apertura por sector de cada gerencia. */
+  function barrasH(items){
+    const n=items.length, fila=30, W=460, L=170, R=70, H=n*fila+16;
+    const iw=W-L-R, mx=Math.max(1,...items.map(x=>Math.abs(x.v)));
+    const cero=L+iw/2, anch=v=>(Math.abs(v)/mx)*(iw/2);
+    let s='<svg class="chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">';
+    s+='<line x1="'+cero+'" x2="'+cero+'" y1="4" y2="'+(H-6)+'" stroke="'+C.grid+'"/>';
+    items.forEach((x,i)=>{
+      const yy=9+i*fila, w=anch(x.v), pos=x.v>0;
+      s+='<text x="'+(L-10)+'" y="'+(yy+13)+'" fill="'+EJE+'" font-size="9.5" text-anchor="end">'+esc(String(x.s).slice(0,22))+'</text>'+
+         '<rect x="'+(pos?cero:cero-w).toFixed(1)+'" y="'+(yy+2)+'" width="'+Math.max(w,1.5).toFixed(1)+'" height="15" rx="2" fill="'+
+         (pos?C.difPos:C.difNeg)+'"><title>'+esc(x.s)+': '+money(x.v)+'</title></rect>'+
+         '<text x="'+(pos?cero+w+6:cero-w-6).toFixed(1)+'" y="'+(yy+14)+'" fill="'+(pos?C.bad:C.good)+
+         '" font-size="9.5" font-weight="700" text-anchor="'+(pos?'start':'end')+'">'+
+         (x.v>0?'+':'')+nUm(x.v/1e6,1)+' MM</text>';
+    });
+    return s+'</svg>';
+  }
+
+  const leyenda=ss=>'<div class="leyenda">'+ss.map(s=>'<span><i class="'+(s.ln?'ln':'')+'" style="background:'+s.color+'"></i>'+esc(s.nombre)+'</span>').join('')+'</div>';
+
+  /** Un cuadro macro: las tres líneas (IPC, dólar y la brecha entre las dos) más
+   *  las marcas verticales. La brecha puede venir cargada o derivarse restando. */
+  function grafMacro(g,alto,ancho,extra){
+    const ss=(g.series||[]).map(s=>({nombre:s.nom,color:s.color,
+      vals:s.derivada==='resta'
+        ? g.series[0].vals.map((v,i)=>v==null?null:+(v-g.series[1].vals[i]).toFixed(1))
+        : s.vals}));
+    const marcas=(g.marcas||[]).map(mk=>({...mk,i:g.meses.indexOf(mk.mes)}));
+    return '<div class="cuadro"><h4>'+esc(g.titulo)+'</h4>'+
+      lineas(g.meses,ss,Object.assign({H:alto,W:ancho||undefined,cero:1,marcas,pad:.06,fmtEje:v=>nUm(v,0)},extra||{}))+
+      leyenda(ss.map(s=>({nombre:s.nombre,color:s.color,ln:1})))+'</div>';
+  }
+  const banda=t=>'<div class="banda">'+t+'</div>';
+  const filmina=(tit,cuerpo,plan)=>'<section class="filmina"><div class="fil-h"><h3>'+esc(tit)+'</h3><span class="dash"></span></div>'+
+    '<div class="fil-b">'+cuerpo+'</div>'+
+    (plan&&plan.length?banda('Plan de Acción')+'<div class="plan"><ol>'+plan.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ol></div>':'')+'</section>';
+
+  /* ═════════ render ═════════ */
+  function render(){
+    if(!DATA||!DATA.meses){ document.querySelector('.wrap').innerHTML=
+      '<p class="sub">Todavía no se cargó ninguna presentación. Corré <b>node tools/actualizar.js gestion-presentacion</b>.</p>'; return; }
+    const MS=DATA.meses, plan=DATA.planGeneral||[];
+    document.getElementById('sub').textContent='Réplica del Tablero de Control General que arma la Gerencia de Gestión.';
+    document.getElementById('fuente').textContent=DATA.corte||'';
+
+    /* KPI del corte */
+    document.getElementById('kpis').innerHTML=
+      '<thead><tr><th rowspan="2">KPI</th><th colspan="2" class="grp">Actual</th><th rowspan="2">Target mensual</th></tr>'+
+      '<tr><th>Mes</th><th>Acumulado prom.</th></tr></thead><tbody>'+
+      (DATA.kpis||[]).map(k=>{
+        const a=parseFloat(String(k.mes).replace('%','').replace(',','.'));
+        const t=parseFloat(String(k.target).replace('%','').replace(',','.'));
+        const menos=/costo|cumplimiento/i.test(k.kpi);   // menor o igual al target es bueno
+        const cls=(isNaN(a)||isNaN(t))?'':((menos? a<=t : a>=t)?'ok':'mal');
+        return '<tr><td>'+esc(k.kpi)+'</td><td class="dato '+cls+'">'+esc(k.mes)+'</td>'+
+          '<td class="dato ok">'+esc(k.acum)+'</td><td class="tgt">'+esc(k.target)+'</td></tr>';
+      }).join('')+'</tbody>';
+
+    let html='';
+
+    /* ── Presupuesto vs Real ── */
+    if(DATA.pvr){
+      const ss=[{nombre:'Presupuesto',vals:DATA.pvr.presup,color:C.presup},
+        {nombre:'Gasto Real',vals:DATA.pvr.real,color:C.gasto},
+        {nombre:'Diferencia',vals:DATA.pvr.dif,color:v=>v>0?C.difPos:C.difNeg}];
+      // La filmina imprime el PROM. dentro del gráfico (no queda como texto), así que se
+      // recalcula: es el desvío ponderado del acumulado, total diferencia / total presupuesto.
+      const sp=DATA.pvr.presup.reduce((a,b)=>a+(b||0),0), sd=DATA.pvr.dif.reduce((a,b)=>a+(b||0),0);
+      const p=DATA.promVar||pctTxt(sp?sd/sp*100:null);
+      const izq='<div class="cuadro"><h4>Presupuesto · Gasto Real · Diferencia</h4>'+
+        barras(MS,ss,{H:330,fmtEje:v=>nUm(v/1e6,0)+' MM',fmtTip:v=>money(v),ancho:.74,
+          linea:{nombre:'% Variación',vals:DATA.pvr.varPct}})+
+        leyenda([{nombre:'Presupuesto',color:C.presup},{nombre:'Gasto Real',color:C.gasto},
+          {nombre:'Diferencia',color:C.difNeg},{nombre:'% Variación',color:C.linea,ln:1}])+
+        '<div class="prom">PROM. '+esc(p)+'</div></div>';
+      // La filmina lleva al costado el gráfico macro de 12 meses (el de dos años va
+      // en su propia filmina, más abajo).
+      const der=(DATA.macro&&DATA.macro.anual)?grafMacro(DATA.macro.anual,330,540):'';
+      html+=filmina('Presupuesto vs Real','<div class="g2">'+izq+der+'</div>',plan);
+    }
+
+    /* ── Presión macroeconómica ── */
+    if(DATA.macro&&DATA.macro.bienal){
+      const m=DATA.macro, b=m.bienal;
+      const izq=grafMacro(b,340,null,{rotarX:1});
+      const der='<div class="cuadro lect"><h4>Lectura ejecutiva</h4>'+
+        (m.lectura||[]).map(t=>'<div class="hit">'+esc(t)+'</div>').join('')+
+        '<p>'+esc(m.comentario||'')+'</p>'+
+        '<div class="rows">'+(m.hitos||[]).map(h=>'<div class="row"><span class="k">'+esc(h.l)+
+          (h.mes?' <span class="zero">· '+esc(h.mes)+'</span>':'')+'</span><span class="v">'+esc(h.v)+'</span></div>').join('')+'</div></div>';
+      const f=m.brechaMesAMes;
+      const tabla=f?'<div style="margin-top:16px"><p class="sub-t">'+esc(f.titulo)+'</p>'+
+        '<table class="brecha-t"><thead><tr>'+f.meses.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead>'+
+        '<tbody><tr>'+f.vals.map(v=>'<td>'+nUm(v,1)+'</td>').join('')+'</tr></tbody></table></div>':'';
+      html+=filmina('Presión macroeconómica','<div class="g2">'+izq+der+'</div>'+tabla);
+    }
+
+    /* ── Costo x Tonelada ── */
+    if(DATA.costo){
+      const tgt=(DATA.kpis||[]).find(k=>/costo/i.test(k.kpi));
+      const target=tgt?parseFloat(String(tgt.target).replace(',','.')):null;
+      // Las toneladas del mes son la suma de los cuatro tipos: así salen exactas.
+      const tn=MS.map((_,i)=>{ const s=(DATA.toneladas||[]).reduce((a,t)=>a+(t.vals[i]||0),0); return s||null; });
+      // La filmina pinta la barra según el target y deja las toneladas del mes debajo del eje.
+      const ss=[{nombre:'Costo USD/tn',vals:DATA.costo.sinCapex,etiqueta:v=>nUm(v,0),
+          color:v=>target==null?C.presup:(v>target?C.difPos:(v>target*0.95?'#e0a020':'#2f6b34'))}];
+      const izq='<div class="cuadro"><h4>Costo x Tns (Sin Capex)</h4>'+
+        barras(MS,ss,{H:310,desde0:1,target:target,ancho:.5,sub:tn.map(v=>v?nUm(v,0)+' TN':''),
+          fmtEje:v=>'USD '+nUm(v,0),fmtTip:v=>nUm(v,2)})+
+        leyenda([{nombre:'Bajo target',color:'#2f6b34'},{nombre:'Cerca del target',color:'#e0a020'},
+          {nombre:'Sobre target',color:C.difPos},{nombre:'Target '+nUm(target,0),color:GRIS,ln:1}])+'</div>';
+      const der='<div class="cuadro"><h4>Costo x Tns (Con Capex)</h4>'+
+        lineas(MS,[{nombre:'Con Capex',vals:DATA.costo.conCapex,color:C.linea}],
+          {H:310,W:540,target:target,etiquetas:1,fmtEje:v=>'USD '+nUm(v,0)})+
+        leyenda([{nombre:'Con Capex',color:C.linea,ln:1},{nombre:'Target '+nUm(target,0),color:GRIS,ln:1}])+'</div>';
+      html+=filmina('Costo x Tonelada','<div class="g2b">'+izq+der+'</div>',plan);
+    }
+
+    /* ── Recupero sin Capex ── */
+    if(DATA.usd){
+      const ss=[{nombre:'Gasto',vals:DATA.usd.gasto,color:'#1f3f5c'},
+        {nombre:'Recupero 1',vals:DATA.usd.rec1,color:C.gasto,punteada:1},
+        {nombre:'Recupero 2',vals:DATA.usd.rec2,color:'#9aa6ad',punteada:1},
+        {nombre:'Recupero total',vals:DATA.usd.total,color:'#1a9b8a'}];
+      const izq='<div class="cuadro"><h4>USD por tonelada</h4>'+
+        lineas(MS,ss,{H:340,desde0:1,etiquetas:1,fmtEje:v=>nUm(v,0)})+leyenda(ss)+'</div>';
+      const tj=(DATA.tarjetas||[]).map(t=>'<div class="tj'+(/saldo/i.test(t.l)?' saldo':'')+'">'+
+        '<div class="l">'+esc(t.l)+'</div><div class="v">'+esc(t.v)+'</div></div>').join('');
+      const der='<div><div class="tarjetas">'+tj+'</div>'+(DATA.nota?'<div class="nota">'+esc(DATA.nota)+'</div>':'')+'</div>';
+      html+=filmina('Recupero sin Capex','<div class="g2">'+izq+der+'</div>',plan);
+    }
+
+    /* ── Toneladas Procesadas ── */
+    if(DATA.toneladas&&DATA.toneladas.length){
+      const cuadros=DATA.toneladas.map(t=>{
+        // línea de tendencia por mínimos cuadrados, como la que dibuja la filmina
+        const ys=t.vals.map((v,i)=>[i,v]).filter(p=>p[1]!=null);
+        let tend=null;
+        if(ys.length>1){
+          const n=ys.length, sx=ys.reduce((a,p)=>a+p[0],0), sy=ys.reduce((a,p)=>a+p[1],0);
+          const sxy=ys.reduce((a,p)=>a+p[0]*p[1],0), sxx=ys.reduce((a,p)=>a+p[0]*p[0],0);
+          const b=(n*sxy-sx*sy)/(n*sxx-sx*sx), a=(sy-b*sx)/n;
+          tend=t.vals.map((_,i)=>a+b*i);
+        }
+        return '<div class="cuadro"><h4>'+esc(t.nom)+' mensual (TN)</h4>'+
+          barras(MS,[{nombre:t.nom,vals:t.vals,color:C.presup}],
+            {H:240,W:540,desde0:1,ancho:.5,fmtEje:v=>nUm(v,0)+' TN',fmtTip:v=>nUm(v,2)+' TN',
+             tendencia:tend})+'</div>';
+      }).join('');
+      html+=filmina('Toneladas Procesadas','<div class="g22">'+cuadros+'</div>');
+    }
+    document.getElementById('general').innerHTML=html;
+
+    /* ── una filmina por gerencia ── */
+    document.getElementById('gerencias').innerHTML=(DATA.gerencias||[]).map(g=>{
+      const ss=[{nombre:'Presupuesto',vals:(g.serie&&g.serie.presup)||[],color:C.presup},
+        {nombre:'Gasto',vals:(g.serie&&g.serie.gasto)||[],color:'#c0504d'}];
+      const desvio=(g.serie&&g.serie.desvio)||[];       // ya viene en %
+      const promD=(g.serie&&g.serie.promedio!=null)?g.serie.promedio:null;
+      const graf=(g.serie&&g.serie.presup&&g.serie.presup.length)
+        ? '<div class="cuadro">'+barras(MS,ss,{H:300,W:640,fmtEje:v=>nUm(v/1e6,0)+' MM',fmtTip:v=>money(v),
+            linea:{nombre:'Desvío %',vals:desvio,color:'#a9b4ba'},promedio:promD})+
+          leyenda([{nombre:'Presupuesto',color:C.presup},{nombre:'Gasto',color:'#c0504d'},
+            {nombre:'Desvío %',color:'#a9b4ba',ln:1}].concat(promD!=null?[{nombre:g.serie.promLbl||'Promedio desvío',color:C.bad,ln:1}]:[]))+'</div>'
+        : '<div class="cuadro zero" style="text-align:center;padding:30px">Sin serie mensual.</div>';
+      const cif='<div class="cifras">'+
+        (g.desvioMes?'<div class="big '+signo(g.desvioMes)+'">'+esc(g.desvioMes)+'</div><div class="lbl">Desvío</div>':'')+
+        (g.acumulado?'<div class="acum">'+esc(g.acumulado)+'</div>':'')+'<hr>'+
+        (g.monto?'<div class="monto">'+esc(g.monto)+'</div><div class="lbl">Desvío mensual</div>':'')+
+        (g.aviso?'<div class="aviso">'+esc(g.aviso)+'</div>':'')+
+        (g.peso?'<div class="peso">'+esc(g.peso)+(g.alerta?'<br><span class="tg">'+esc(g.alerta)+'</span>':'')+'</div>':'')+
+        '</div>';
+      const sect=(g.sectores&&g.sectores.length)
+        ? '<div class="cuadro"><h4>Gerencia de '+esc(g.nom)+' · Diferencia $ (MM)</h4>'+barrasH(g.sectores)+'</div>'
+        : '<div class="cuadro zero" style="text-align:center;padding:30px">Sin apertura por sector.</div>';
+      const com=(g.comentarios&&g.comentarios.length)
+        ? g.comentarios.map(t=>'<p>'+esc(t)+'</p>').join('') : '<p class="zero">Sin comentarios.</p>';
+      const pl=(g.plan&&g.plan.length)
+        ? '<ul>'+g.plan.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>' : '<p class="zero">Sin plan cargado.</p>';
+      return '<section class="ger"><div class="fil-h"><h3>'+esc(g.nom)+'</h3><span class="dash"></span></div>'+
+        '<div class="ger-cuerpo">'+graf+cif+sect+'</div>'+
+        '<div class="bandas"><div>'+banda('Comentarios')+'<div class="cont">'+com+'</div></div>'+
+        '<div>'+banda('Plan de Acción')+'<div class="cont">'+pl+'</div></div></div></section>';
+    }).join('');
+
+    document.getElementById('pie').innerHTML='Fuente: <b>'+esc(DATA.archivo||'—')+
+      '</b> (SharePoint · Gerencia de Gestión). Los números salen de los <b>gráficos embebidos</b> del PowerPoint, no de una imagen. '+
+      (DATA.macro?'La excepción son los <b>dos gráficos macro</b>: en la filmina están pegados como imagen, sin datos detrás, '+
+        'así que se transcriben a mano en <b>tools/macro-gestion.json</b>. De todo eso, lo único exacto es la fila de la brecha 2026.':'');
+  }
+  render();
+
+  function postAlto(){ try{ parent.postMessage({tipo:'matriz-alto',alto:document.body.scrollHeight},'*'); }catch(e){} }
+  if(window.parent!==window){ postAlto(); window.addEventListener('resize',postAlto); new MutationObserver(postAlto).observe(document.body,{subtree:true,childList:true}); }
+})();
+</script>

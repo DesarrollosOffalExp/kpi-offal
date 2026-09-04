@@ -21,6 +21,7 @@ import PresupuestoCongelado from './components/PresupuestoCongelado';
 import PresupuestoTaller from './components/PresupuestoTaller';
 import PresupuestoLavadero from './components/PresupuestoLavadero';
 import PresupuestoGestion from './components/PresupuestoGestion';
+import GestionPresentacion from './components/GestionPresentacion';
 import DisponibilidadFlota from './components/DisponibilidadFlota';
 import NecesidadTambores from './components/NecesidadTambores';
 import ObjetivoSector from './components/ObjetivoSector';
@@ -512,6 +513,15 @@ export default function App() {
                 );
               }
               // Presupuesto (Gestión): tabla ejecutiva embebida de la Gerencia de Gestión.
+              // Presentación Gerencial (Gestión): réplica del PowerPoint del corte.
+              if (sector.key === 'gestión' && g === 'Presentación Gerencial') {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <GestionPresentacion />
+                  </div>
+                );
+              }
               const esPresupGes = sector.key === 'gestión' && typeof g === 'string' && g.startsWith('Presupuesto');
               if (esPresupGes) {
                 return (
