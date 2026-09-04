@@ -15,8 +15,12 @@ node tools/actualizar.js fabrica-hielo
 ```
 
 Grupos disponibles: `fabrica-hielo`, `compras`, `sistemas`, `objetivos`,
-`presupuesto`, `insumos`, `logistica`, `gestion`, `gestion-presentacion`. Sin argumentos lista todo lo que
+`presupuesto`, `insumos`, `logistica`, `lavado`, `gestion`, `gestion-presentacion`. Sin argumentos lista todo lo que
 sabe hacer.
+
+`lavado` va **después** de `presupuesto` y `logistica`: el form de lavado no
+tiene costo, así que el tablero de KPI lo toma de los tableros que ellos dejan
+escritos.
 
 El script busca cada archivo por nombre en `Descargas`, tolerando los sufijos
 que agrega el navegador (`archivo (2).xlsx`) y quedándose con el más reciente.
@@ -82,6 +86,77 @@ suposición se rompió.
   que fue un arqueo). El saldo es la suma de la S21 a la S32 y `Año 2026` la de
   la S34 en adelante. Los cortes están en la constante `TRAMOS` del extractor y
   cada corrida controla que las dos columnas den la suma de sus semanas.
+
+## El form de lavado de camiones
+
+El lavadero no tiene una planilla: tiene un **formulario** que el operario carga
+unidad por unidad (atraco, inicio y fin de lavado, desatraco, quiénes lavaron y
+una observación). De ahí salen dos archivos, y el extractor `lavado` toma los
+dos porque ninguno alcanza solo:
+
+- `reporte-lavados-AAAAMMDD-HHMM.xlsx` — la exportación de la app, hoja
+  `Detalle`. **Cada exportación es una foto de un período distinto**, no un
+  acumulado: la del 23/07 sólo trae la semana 29 y la del 30/06 las semanas 24 a
+  27. Por eso se leen todas las que haya en Descargas y se unen.
+- `Registro de lavadero.xlsx` — la descarga cruda del form. Sirve de respaldo y
+  aporta lo que ninguna exportación tenga.
+
+El grupo escribe **tres tableros con el mismo `DATA`**, que son las tres vistas de
+la ventana *Logística › Lavado de Camiones* (navega por dentro, como Sistemas):
+`lavado-camiones.html` es el tablero, `lavado-informe.html` el informe del sector
+y `lavado-kpi.html` el cuadro de mando. No hay que tocar ninguno a mano.
+
+**Cómo se exporta** (app de lavados → Reportes): `Semana desde` en la primera que
+falte, `Semana hasta` en la última, y **Exportar a Excel dos veces**, una con
+circuito **Camiones** y otra con **Todos**. Los dos archivos a Descargas, sin
+renombrar. El reporte tiene piso en la **semana 26**: las semanas 24 y 25 sólo
+existen en los exports viejos, que por eso no se borran.
+
+No hay forma de traer esto sin pasar por la exportación: el botón arma el archivo
+en el servidor y lo manda **en base64 por el circuito SignalR de Blazor**
+(`js/download.js`), no hay una URL con parámetros que se pueda pedir, y
+`/reportes?desde=…&hasta=…` los ignora.
+
+Cosas que hay que saber:
+
+- **La exportación viene en dos formatos.** El de circuito camión trae dársena,
+  frigorífico, tambores y las cuatro marcas de tiempo; el de «todos» suma las
+  tareas de hielo y varias, pero sólo trae inicio y fin de lavado. Cuando el
+  mismo lavado aparece en los dos, **gana el completo**.
+- **La clave para no duplicar es fecha + patente + hora de inicio.** La marca
+  temporal viene con distinta precisión en cada origen: si se usa como clave,
+  los dos archivos se suman en lugar de pisarse (pasó: 1.021 registros donde
+  había 821).
+- **Las tareas no son lavados.** Hielo y varias aportan tiempo y horas hombre,
+  pero no cuentan como cantidad. La productividad se mide contra la hora hombre
+  aplicada a camiones, o una semana con mucho hielo aparece como una caída de
+  productividad que no existió.
+- **Horas hombre = Σ(ciclo × operarios de ese lavado)**, no ciclo × operarios
+  distintos: un operario que hizo 1 de 40 lavados no trabajó las 40 horas.
+- **El form viejo tenía un solo operario por lavado.** Las semanas 24 y 26
+  muestran una dotación de 1,07 que no es real; por eso una semana con menos de
+  cuatro jornadas cargadas no puede fijar la meta del cuadro de mando.
+- **La fecha la escribe el operario y a veces le erra el mes.** Hay un registro
+  cargado como 19/08 cuya marca temporal es del 20/06. Si difieren en más de dos
+  días manda la marca temporal, que la pone el sistema.
+- **Ciclos imposibles.** Los de menos de 2 minutos son registros mal cerrados y
+  los de más de 2 horas son unidades que quedaron atracadas por otra cosa (carga
+  de tambores, parada de comida). Quedan fuera de los promedios y listados en
+  «calidad del dato» del tablero.
+- **La cantidad de lavados de la matriz de costo es un supuesto.** La matriz usa
+  850 por mes desde marzo. Julio, que el form cubre entero (27 jornadas de 27
+  hábiles), dio **689**: el $/lavado real es $100.774 y no $81.691, un 23,4 %
+  más. El tablero de KPI muestra las dos lecturas, una al lado de la otra.
+- **La mitad de la hora hombre del sector no es lavar camiones.** 3.796 hs en
+  camiones contra 3.732 en tareas (varias 2.012, fábrica de hielo 1.494, hiel
+  226). El $/lavado divide todo el gasto por los camiones, así que carga sobre
+  el lavado un trabajo que le piden otros sectores.
+- **La dotación por lavado se duplica en la semana 32.** Venía en 2,1–2,5
+  operarios por unidad hasta la 31 y salta a 4,0 / 4,8 / 4,6 / 4,7 / 5,1. La
+  productividad cae de 0,63–0,70 a 0,34–0,37 camiones por hora hombre. Antes de
+  leerlo como una caída de productividad hay que confirmar con el sector si
+  cambió la forma de cargar el form —si ahora se asigna el turno completo a cada
+  lavado, la hora hombre queda multiplicada.
 
 ## Cómo se analiza el costo de Logística
 

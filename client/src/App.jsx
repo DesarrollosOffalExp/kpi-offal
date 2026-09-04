@@ -31,6 +31,7 @@ import StockHiel from './components/StockHiel';
 import ConsumoGasoil from './components/ConsumoGasoil';
 import CostoFrigorifico from './components/CostoFrigorifico';
 import MetricaCosto from './components/MetricaCosto';
+import LavadoCamiones from './components/LavadoCamiones';
 import MetricaFletes from './components/MetricaFletes';
 import CierreEneFeb from './components/CierreEneFeb';
 import ProductividadArmado from './components/ProductividadArmado';
@@ -270,6 +271,16 @@ export default function App() {
                   <div className="grupo" key={g}>
                     {!conSub && <h2 className="grupo-titulo">{g}</h2>}
                     <CierreEneFeb />
+                  </div>
+                );
+              }
+              // Lavado de Camiones (Logística): el form de control de lavado, semana a semana.
+              const esLavado = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Lavado de Camiones');
+              if (esLavado) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <LavadoCamiones onSub={setSubSistemas} />
                   </div>
                 );
               }

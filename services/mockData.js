@@ -197,13 +197,9 @@ const LOGISTICA = {
     { id: 'fuera_serv', grupo: G.flota, titulo: 'Unidades fuera de servicio', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 15,
       desglose: [{ nombre: 'Tractor', valor: 3 }, { nombre: 'Semi', valor: 11 }, { nombre: 'Bateas', valor: 1 }],
       info: 'Unidades con parada temporal (FS) en la semana. Las de baja permanente (FSP) NO se cuentan. Detalle en la tabla. (DISPONIBILIDAD DE FLOTA)' },
-    // Lavado de Camiones (Sem 30)
-    { id: 'camiones_lav', grupo: G.lavado, titulo: 'Camiones lavados', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 215,
-      info: 'Total de camiones lavados en la semana. (LAVADO DE CAMIONES)' },
-    { id: 'hs_lavado', grupo: G.lavado, titulo: 'Horas de lavado', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 686,
-      info: 'Horas totales de lavado en la semana. (LAVADO DE CAMIONES)' },
-    { id: 'operarios', grupo: G.lavado, titulo: 'Operarios presentes', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 21,
-      desglose: [{ nombre: 'Por nómina', valor: 23 }], info: 'Operarios presentes vs. nómina. (LAVADO DE CAMIONES)' },
+    // Lavado de Camiones (embebido; LavadoCamiones.jsx). Sólo registra el grupo/subtab.
+    { id: 'lavado_reg', grupo: G.lavado, titulo: 'Lavado de Camiones', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 0,
+      info: 'La ventana navega por dentro: Tablero (cada unidad con sus tiempos, dotación y observación), Informe del sector (la lectura y las conclusiones) y KPI del Lavadero (el cuadro de mando de proceso y costo). (form de control de lavado de camiones + Presupuesto del Lavadero)' },
     // Cuenta de Tambores (Sem 31)
     { id: 'stock_tambores', grupo: G.tambores, titulo: 'Stock final de tambores', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: -280,
       desglose: [{ nombre: 'Enviados', valor: 18761 }, { nombre: 'Recibidos', valor: 18809 }],

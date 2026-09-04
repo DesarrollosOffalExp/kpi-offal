@@ -677,6 +677,47 @@
           "falta": "Si un corte nuevo cambia los títulos de los gráficos o el orden de los textos, la corrida lo avisa (\"no encuentro el gráfico de …\") en vez de cargar cualquier cosa. Lo macro no sale del pptx: la presentación lo pega como imagen, sin datos detrás. Son DOS gráficos distintos, los dos en tools/macro-gestion.json: el de 12 meses (bloque \"anual\", con la línea roja del mes del corte) va al lado de Presupuesto vs Real, y el de dos años ene-25 → dic-26 (bloque \"bienal\", con la marca del reinicio anual) es el de la filmina de Presión macroeconómica. Lo único exacto de todo eso es la fila de la brecha 2026 que la filmina imprime al pie; el resto se transcribe de las imágenes con precisión de medio punto. Ojo que los dos gráficos no coinciden entre sí en 2026: en el bienal la brecha se estabiliza cerca de 16-17 pp hasta diciembre y en el anual baja hasta 7,5 pp — la ventana lo dice al pie del gráfico."
         }
       ]
+    },
+    "lavado": {
+      "carpeta": "Gerencia de Operaciones/Lavadero",
+      "extractor": "lavado",
+      "fuentes": [
+        {
+          "id": "lavados",
+          "archivo": "reporte-lavados-AAAAMMDD-HHMM.xlsx  (todas las que haya) + Registro de lavadero.xlsx",
+          "destino": [
+            "client/src/dashboards/lavado-camiones.html",
+            "client/src/dashboards/lavado-informe.html",
+            "client/src/dashboards/lavado-kpi.html"
+          ],
+          "constante": "DATA",
+          "hojas": "«Detalle» en las exportaciones de la app de lavados; «Respuestas de formulario 1» (o «Form_Responses») en la descarga cruda del form.",
+          "columnas": {
+            "Marca temporal": "momento en que el operario cerró el registro; con la patente forma la clave para no duplicar",
+            "Fecha / Turno": "jornada y turno (Mañana 06:00-17:59, Tarde el resto)",
+            "Tipo": "Camion | Hielo | Varias. Sólo los camiones cuentan como cantidad; las tareas aportan tiempo",
+            "Patente / Equipo": "la unidad lavada",
+            "Dársena / Frigorífico / Tambores / Pallets": "sólo en el formato de circuito camión",
+            "Operarios": "lista separada por comas; cada uno recibe el ciclo completo del lavado",
+            "Atraco→Lavado / Lavado / Fin→Desatraco / Total": "las cuatro duraciones; en el formato corto sólo viene Total",
+            "Semana": "semana ISO de la fecha",
+            "Incidencias": "texto libre del operario; se clasifica en las familias de pérdida del proceso"
+          },
+          "cuenta": "Se unen TODAS las exportaciones que haya en la carpeta: cada una es una foto de un período distinto y ninguna sola tiene todo. La clave es «marca temporal + patente» y, ante un duplicado, gana el registro del formato completo (el que trae atraco y desatraco). La descarga cruda del form sólo aporta lo que ninguna exportación tenga. Cantidad = camiones (las tareas de hielo o varias no suman unidades, sólo tiempo). Horas hombre = Σ(ciclo × operarios de ese lavado), no ciclo × operarios distintos. Para los promedios se descartan los ciclos de menos de 2 minutos o de más de 2 horas y los lavados de más de 2 horas: son registros mal cerrados o unidades que quedaron atracadas por otra causa (carga de tambores, parada de comida). Quedan listados en «calidad del dato»."
+        },
+        {
+          "id": "costo-lavadero",
+          "archivo": "(no se lee un Excel: se toma de los tableros que ya lo mantienen)",
+          "destino": [
+            "client/src/dashboards/lavado-kpi.html",
+            "client/src/dashboards/lavado-informe.html"
+          ],
+          "constante": "DATA.costo",
+          "hojas": "RESUMEN de presupuesto-lavadero.html (extractor «presupuesto») y D_RAW de matriz-costo-logistica.html (extractor «logistica»)",
+          "cuenta": "El form no tiene costo. La mano de obra propia, la eventual y el material salen del Presupuesto del Lavadero; la cantidad de lavados y el $/lavado que se informan, de la matriz de costo. Por eso el orden de actualización importa: primero «presupuesto» y «logistica», después «lavado»."
+        }
+      ],
+      "ventana": "Logística › Lavado de Camiones. La ventana navega por dentro (LavadoCamiones.jsx): Tablero, Informe del sector y KPI del Lavadero, los tres sobre el mismo DATA."
     }
   }
 }
