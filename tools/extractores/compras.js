@@ -267,9 +267,11 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
     //   sin entrega → tiempo sin entrega ≥ 1
     const OFICINAS = ['01-MAT NO PRODUCTIVOS', '03-ART DE OFICINA'];
     const RUBROS_FUERA = ['FLETES Y ACARREOS', 'SERVICIOS'];
-    const enPadron = r => OFICINAS.includes(limpio(r[K.ofi]))
-      && !RUBROS_FUERA.includes(limpio(r[K.rubro]))
-      && limpio(r[K.est]) === 'Aprobada/o';
+    // El universo que miran todas las consultas del archivo: qué oficina compra
+    // y qué rubro. El estado va aparte, porque no es el mismo en las tres vistas.
+    const delPadron = r => OFICINAS.includes(limpio(r[K.ofi]))
+      && !RUBROS_FUERA.includes(limpio(r[K.rubro]));
+    const enPadron = r => delPadron(r) && limpio(r[K.est]) === 'Aprobada/o';
     // la propia planilla calcula los días: negativo es vencido, positivo es que falta
     const diasSin = r => (K.sinEnt >= 0 && typeof r[K.sinEnt] === 'number') ? r[K.sinEnt] : null;
 
@@ -299,8 +301,13 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
           else if (dias <= -1 && dias >= -1200 && limpio(r[K.estIt]) !== 'Anulada/o') { pendientes++; dem.push(f); }
         }
       }
-      // informe de puntualidad: sólo las que ya se recibieron
-      if (ent instanceof Date && rec instanceof Date) {
+      // Informe de puntualidad: las que ya se recibieron, sobre el mismo universo
+      // que las otras dos vistas. No se les pide Estado = "Aprobada/o" porque una
+      // OC entregada pasa a "Cancelada/o" —es el estado del 91 % de las recibidas,
+      // y es el que tiene puesto la tabla dinámica del archivo—; sí se descartan
+      // los ítems anulados, como hace la consulta Demora.
+      if (ent instanceof Date && rec instanceof Date
+        && delPadron(r) && limpio(r[K.estIt]) !== 'Anulada/o') {
         recibidos++;
         const tarde = rec > ent;
         const a = rec.getUTCFullYear(), m = rec.getUTCMonth() + 1;
