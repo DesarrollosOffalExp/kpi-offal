@@ -94,9 +94,37 @@ suposición se rompió.
 ## La hoja de ruta y la saturación de flota
 
 `HOJA DE RUTA - TRANSPORTE.xlsx`, hoja **Respuestas**, es el volcado de un form
-que tráfico carga por cada viaje: qué tractor sale, a qué destino, **qué semi
-lleva y qué semi trae**. Cruzado con Disponibilidad de Flota da la saturación:
-cuánto se le pide a la flota contra lo que la flota puede dar.
+que tráfico carga por cada viaje: qué unidad motriz sale, a qué destino, **qué
+semi lleva y qué semi trae**. Cruzado con Disponibilidad de Flota da la
+saturación de cada parque.
+
+### Las reglas del sector, que son las que hacen que el número signifique algo
+
+Sin esto el indicador miente, porque mide los dos parques con la misma vara:
+
+- **El semi sí tiene la regla de un viaje por día.** Vuelve cargado y se
+  descarga esa noche o al día siguiente; si se descarga tarde puede llegar a
+  salir para los cambios de la noche, pero es la excepción. Se cumple en el
+  **88 %** de los días de semi con movimiento.
+- **El tractor no tiene esa regla.** La suya es otra: sale con un vacío y vuelve
+  con un lleno, así que al soltar la unidad queda libre y encadena. Medirlo
+  contra «un viaje por día» daba 139 % y no significaba nada.
+- **Salvo en los viajes dedicados**, donde el tractor se queda con su unidad:
+  las bateas de sebo (Swift, Refinería, Grabya) y los viajes de Arre Beef,
+  Ramallo y Hugues. La regla se verifica sola en el dato: de **354** viajes a
+  esos destinos, **349** tienen la misma unidad de ida y de vuelta y **ninguno**
+  tiene intercambio.
+- **Chasis y balancines son unidad completa**: siempre vuelven con lo suyo, así
+  que para ellos la regla de un viaje por día sí aplica, y la cumplen.
+- **Los toritos son de patio.** Mueven adentro y sólo salen por fuerza mayor: no
+  cuentan como capacidad de viaje. En el período salió uno, una sola vez.
+
+De ahí sale la forma de medir la motriz: en vez de contar viajes contra
+unidades, se convierte la carga del día en tractores con el rendimiento que
+muestra el propio dato —**1,66** intercambios o **1,46** dedicados por tractor y
+por día, medidos sobre los días en que el tractor hizo un solo tipo de viaje—.
+
+### Cosas del archivo
 
 - **La hoja no acumula.** Guarda una ventana y el resto se archiva en la base
   (`controletiquetas → transporte.HojasRuta`, ver `cargar-hojas-ruta.sql`). La
@@ -104,27 +132,23 @@ cuánto se le pide a la flota contra lo que la flota puede dar.
   de abril a junio: **se leen todas las copias y se unen por `Id`**. Hoy quedan
   58 días hábiles sin cubrir entre el 14/06 y el 31/08; salen de la base, no de
   ninguna exportación.
-- **Lo que tracciona y lo que se arrastra son dos parques distintos** y no se
-  pueden promediar. Tracción: 17 tractores + 9 chasis/balancines, salen en la
-  columna *Patente*. Remolque: 41 semis + 4 bateas, salen en *Semi Lleva* y
-  *Semi Trae*. Los 5 toritos son de patio y no aparecen en ninguna hoja de ruta.
-- **La regla es un viaje por unidad por día**, pero en tractores el 60 % de los
-  días de unidad tienen dos o más: la operación cierra con la doble vuelta, no
-  con la regla. Por eso la saturación da 139 % con sólo el 74 % de las unidades
-  saliendo.
+- **El padrón está embebido en el extractor**, como lo pasó Logística el
+  05/09/2026: 16 tractores, 5 toritos, 6 chasis, 2 balancines, 46 semis, 4
+  bateas y 16 fuera de servicio. Distingue chasis de balancín y marca las bajas,
+  cosas que el indicador de disponibilidad no separa. Si cambia la flota, se
+  actualiza ahí.
+- **Lo que hace viajes y no está en el padrón se cuenta aparte.** Hoy es ESK012
+  con 226 viajes —casi todos de intercambio—: capacidad que la operación usa y
+  que no aparece en ningún indicador de disponibilidad.
 - **Los ciclos que cruzan un hueco de datos hay que descartarlos.** Un semi que
   «salió el 13/06 y volvió el 01/09» no estuvo 80 días afuera: es que no hay
-  julio ni agosto. Sin ese filtro la rotación daba 2,24 días en vez de 0,70 y el
-  reparto por destino quedaba al doble. Se descartan 43 ciclos y se avisa.
+  julio ni agosto. Sin ese filtro la rotación daba 2,24 días en vez de 0,70.
 - **Las patentes se escriben a mano.** Hay transposiciones (AG525VN por
   AG252VN), dígitos de más (HMH2555) y texto pegado (SPW094FEDERAL). Se corrigen
   contra el padrón por distancia de edición y **sólo cuando hay un único
   candidato**; con dos o más se dejan y quedan listadas en calidad del dato.
 - **En Descargas hay copias que son HTML con nombre .xlsx.** El extractor las
   prueba antes de leerlas y las saltea avisando, en vez de tumbar la corrida.
-- **Siete unidades no registraron un solo movimiento** en cinco meses (seis
-  semis y un tractor). Cuentan como capacidad disponible y no rotan: el tablero
-  las lista porque cambian la lectura de la saturación.
 
 ## El form de lavado de camiones
 
