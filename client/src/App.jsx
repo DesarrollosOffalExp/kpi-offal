@@ -281,7 +281,7 @@ export default function App() {
                 return (
                   <div className="grupo" key={g}>
                     {!conSub && <h2 className="grupo-titulo">{g}</h2>}
-                    <SaturacionFlota />
+                    <SaturacionFlota onSub={setSubSistemas} />
                   </div>
                 );
               }

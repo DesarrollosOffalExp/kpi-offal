@@ -722,13 +722,14 @@
     "saturacion": {
       "carpeta": "Gerencia de Operaciones/Logistica",
       "extractor": "saturacion",
-      "ventana": "Logística › Saturación de Flota.",
+      "ventana": "Logística › Saturación de Flota. Navega por dentro (SaturacionFlota.jsx): Indicadores e Informe diario, los dos sobre el mismo DATA.",
       "fuentes": [
         {
           "id": "hojas-de-ruta",
           "archivo": "HOJA DE RUTA - TRANSPORTE.xlsx  (todas las copias que haya)",
           "destino": [
-            "client/src/dashboards/saturacion-flota.html"
+            "client/src/dashboards/saturacion-flota.html",
+            "client/src/dashboards/saturacion-diario.html"
           ],
           "constante": "DATA",
           "hojas": "«Respuestas» (el volcado del form) y «Base» (patente → tipo de unidad)",
@@ -746,7 +747,8 @@
           "id": "capacidad-de-flota",
           "archivo": "(no se lee un Excel: se toma del tablero que ya lo mantiene)",
           "destino": [
-            "client/src/dashboards/saturacion-flota.html"
+            "client/src/dashboards/saturacion-flota.html",
+            "client/src/dashboards/saturacion-diario.html"
           ],
           "constante": "DATA.capacidad",
           "hojas": "DATA de disponibilidad-flota.html (extractor «logistica»)",

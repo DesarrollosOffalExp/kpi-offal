@@ -146,6 +146,11 @@ Del lado del remolque, **«en uso» es el que está fuera de planta**, no sólo 
 que sale ese día: un semi cargado esperando en el frigorífico está ocupado
 igual. Contar sólo las salidas subestima el uso en veinte puntos.
 
+El grupo escribe **dos tableros con el mismo `DATA`**, que son las dos vistas de
+la ventana *Logística › Saturación de Flota* (navega por dentro, como Lavado de
+Camiones): `saturacion-flota.html` son los indicadores del período y
+`saturacion-diario.html` el informe día por día. Ninguno se toca a mano.
+
 ### El informe diario
 
 La ventana cierra con un detalle día por día del **último mes con hojas de

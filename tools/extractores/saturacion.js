@@ -26,7 +26,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const DESTINO = 'client/src/dashboards/saturacion-flota.html';
+// La ventana tiene dos vistas del mismo DATA: los indicadores y el informe diario.
+const TABLEROS = ['client/src/dashboards/saturacion-flota.html', 'client/src/dashboards/saturacion-diario.html'];
 
 /* El archivo trae desde noviembre de 2025, pero el tablero mira el año en curso:
    la disponibilidad de flota —que es el denominador— arranca en 2026, y mezclar
@@ -565,7 +566,7 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
     calidad: { corregidas: [...CORREGIDAS.entries()], sinPadron, huecos },
   };
 
-  escribir(DESTINO, 'DATA', DATA);
+  TABLEROS.forEach(t => escribir(t, 'DATA', DATA));
 
   log('hojas de ruta: ' + L.length + ' únicas de ' + filasLeidas + ' filas leídas · ' + DATA.meta.desde + ' a ' + DATA.meta.hasta
     + ' · ' + fechas.length + ' días (' + nHab + ' hábiles)');
