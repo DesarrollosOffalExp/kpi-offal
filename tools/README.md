@@ -124,6 +124,28 @@ unidades, se convierte la carga del día en tractores con el rendimiento que
 muestra el propio dato —**1,66** intercambios o **1,46** dedicados por tractor y
 por día, medidos sobre los días en que el tractor hizo un solo tipo de viaje—.
 
+### El denominador: del padrón al parque utilizable
+
+La hoja **BASE DE DATOS** del indicador de disponibilidad lista, semana por
+semana, las unidades que están paradas: **todo lo que figura ahí no se puede
+usar**. El extractor las descuenta del padrón antes de calcular nada, así que la
+saturación y el uso se miden contra el parque real.
+
+Eso separa dos cosas que parecen la misma y no lo son:
+
+- Una unidad **sin movimiento porque está parada** ya está fuera del
+  denominador. No es un problema de uso. De los cinco remolques que no hicieron
+  un viaje en el período, cuatro —IHZ227, IHZ228, LMD345 y LMD346— figuran
+  parados las 12 semanas por pecho partido y piso y puertas rotos.
+- Una unidad **disponible y sin salir** sí es un problema de uso, y es la que
+  hay que mirar. Hoy es una sola: HRV058, disponible 61 de 65 días, que el
+  indicador anota como «SE USA PARA HIELO» —probablemente esté asignada a otro
+  circuito, y en ese caso habría que sacarla del denominador—.
+
+Del lado del remolque, **«en uso» es el que está fuera de planta**, no sólo el
+que sale ese día: un semi cargado esperando en el frigorífico está ocupado
+igual. Contar sólo las salidas subestima el uso en veinte puntos.
+
 ### Cosas del archivo
 
 - **La hoja no acumula.** Guarda una ventana y el resto se archiva en la base

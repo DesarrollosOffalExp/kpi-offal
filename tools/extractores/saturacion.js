@@ -164,6 +164,33 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
   });
   const cap = (s, k) => { const x = DISP.get(s); return x ? x[k] : null; };
 
+  /* Semanas del período en que cada unidad figura parada en el indicador de
+     disponibilidad. Sin esto, una unidad que no hizo viajes porque está rota
+     parece una unidad ociosa, y es lo contrario: ya está descontada de la
+     capacidad. */
+  const semanasHR = [...new Set(L.map(h => h.sem))];
+  const PARADA_SEM = new Map();
+  FLOTA.weeks.filter(w => semanasHR.includes(w.week)).forEach(w => {
+    w.unidades.forEach(u => {
+      const p = normalizar(placa(u.dom));
+      if (!PARADA_SEM.has(p)) PARADA_SEM.set(p, { semanas: 0, obs: '', destino: '' });
+      const v = PARADA_SEM.get(p); v.semanas++;
+      if (u.obs) v.obs = u.obs;
+      if (u.destino) v.destino = u.destino;
+    });
+  });
+  const PARADA_EN = new Map();   // patente → set de semanas en que figura parada
+  FLOTA.weeks.forEach(w => w.unidades.forEach(u => {
+    const p = normalizar(placa(u.dom));
+    if (!PARADA_EN.has(p)) PARADA_EN.set(p, new Set());
+    PARADA_EN.get(p).add(w.week);
+  }));
+  // Días del período en que la unidad NO figuraba parada: es contra esto que hay
+  // que mirar si se usó, no contra el calendario.
+  const diasDisponibles = p => { const par = PARADA_EN.get(p); return par ? fechas.filter(f => !par.has(semanaISO(f))).length : fechas.length; };
+  const semParada = p => (PARADA_SEM.get(p) || { semanas: 0 }).semanas;
+  const semDisponible = p => semanasHR.length - semParada(p);
+
   /* ═══ 3 · rotación de los remolques ═══
      Un ciclo sólo vale si todos los días hábiles entre la salida y el regreso
      tienen hoja de ruta: si en el medio hay un tramo que ningún archivo cubre, la
@@ -270,10 +297,18 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
     p: v.p, g: v.g, viajes: v.viajes, ded: v.ded, inter: v.inter, sale: v.sale, vuelve: v.vuelve,
     dias: v.dias.size, porDia: v.viajes ? r2(v.viajes / v.dias.size) : null,
     ocupacion: r1(100 * v.dias.size / fechas.length),
+    semParada: semParada(v.p), semTotal: semanasHR.length,
+    diasDisp: diasDisponibles(v.p), usoDias: r1(100 * v.dias.size / (diasDisponibles(v.p) || 1)),
   })).sort((a, b) => (b.viajes + b.sale + b.vuelve) - (a.viajes + a.sale + a.vuelve));
-  const OCIOSAS = Object.keys(PADRON)
+  // Sin movimiento hay dos casos distintos y no se pueden mezclar: la unidad que
+  // estuvo parada todas las semanas —ya descontada de la capacidad, no es un
+  // problema de uso— y la que estuvo disponible y aun así no salió.
+  const sinMover = Object.keys(PADRON)
     .filter(p => !uso.has(p) && PADRON[p] !== 'Fuera de servicio' && PADRON[p] !== 'Torito')
-    .map(p => ({ p, g: PADRON[p] }));
+    .map(p => ({ p, g: PADRON[p], semParada: semParada(p), semDisp: semDisponible(p),
+      motivo: (PARADA_SEM.get(p) || {}).destino || (PARADA_SEM.get(p) || {}).obs || '' }));
+  const OCIOSAS = sinMover.filter(u => u.semDisp > 0);
+  const PARADAS_TODO = sinMover.filter(u => u.semDisp <= 0);
   const TORITOS = Object.keys(PADRON).filter(p => PADRON[p] === 'Torito')
     .map(p => ({ p, viajes: uso.has(p) ? uso.get(p).viajes : 0 }));
   const EXTERNOS = UNIDADES.filter(u => u.g === 'Fuera del padrón' && u.viajes > 0);
@@ -337,13 +372,47 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
   L.forEach(h => [h.pat, h.lleva, h.trae].forEach(p => { if (p && !PADRON[p]) sinPadron[p] = (sinPadron[p] || 0) + 1; }));
   const declarados = L.filter(h => DEDICADO_DECLARADO.test(h.des));
 
+  /* ═══ el embudo: de la flota total al parque que realmente se puede usar ═══
+     Es la cuenta que hay que ver antes de cualquier porcentaje: si el
+     denominador es el padrón entero, la saturación siempre parece baja. */
+  const ultW = FLOTA.weeks[FLOTA.weeks.length - 1];
+  const paradasUlt = g => ultW.unidades.filter(u => {
+    const t = grupo(normalizar(placa(u.dom)));
+    return g === 'motriz' ? (t === 'Tractor' || t === 'Chasis' || t === 'Balancín') : REMOLQUE.has(t);
+  });
+  const usadasSet = g => { const S = new Set();
+    UNIDADES.forEach(u => { const esMot = u.g === 'Tractor' || u.g === 'Chasis' || u.g === 'Balancín';
+      if (g === 'motriz' ? (esMot && u.viajes > 0) : (REMOLQUE.has(u.g) && (u.sale > 0 || u.vuelve > 0))) S.add(u.p); });
+    return S; };
+  const delPadron = g => Object.keys(PADRON).filter(p => g === 'motriz' ? MOTRIZ.has(PADRON[p]) : REMOLQUE.has(PADRON[p]));
+  const EMBUDO = ['motriz', 'remolque'].map(g => {
+    const total = delPadron(g), usadas = usadasSet(g);
+    const nuncaSalio = total.filter(p => !usadas.has(p));
+    return {
+      g,
+      padron: total.length,
+      fueraServicio: Object.keys(PADRON).filter(p => PADRON[p] === 'Fuera de servicio').length,
+      paradasUlt: paradasUlt(g).length,
+      dispUlt: total.length - paradasUlt(g).length,
+      paradasProm: r1(prom(HAB.map(d => (g === 'motriz' ? (capBase.motriz - d.capT - d.capC) : (capBase.remolque - d.capR))))),
+      dispProm: r1(prom(HAB.map(d => (g === 'motriz' ? (d.capT + d.capC) : d.capR)))),
+      // Un remolque que está en el frigorífico está en uso aunque hoy no salga:
+      // por eso del lado del remolque se cuenta el que está fuera de planta.
+      usadasProm: r1(prom(HAB.map(d => (g === 'motriz' ? (d.tractores + d.chasis) : d.fueraPlanta)))),
+      salidasProm: g === 'remolque' ? r1(prom(HAB.map(d => d.salidas))) : null,
+      nuncaSalio: nuncaSalio.map(p => ({ p, g: PADRON[p], semParada: semParada(p), diasDisp: diasDisponibles(p),
+        motivo: (PARADA_SEM.get(p) || {}).destino || (PARADA_SEM.get(p) || {}).obs || '' })),
+      detenidas: paradasUlt(g).map(u => ({ p: normalizar(placa(u.dom)), obs: u.destino || u.obs || '', dias: u.dias })),
+    };
+  });
+
   const DATA = {
     meta: {
       desde: fechas[0], hasta: fechas[fechas.length - 1], dias: fechas.length, habiles: nHab,
       hojas: L.length, archivos: ARCHIVOS.length, corte: new Date().toISOString().slice(0, 10),
       semanaFlota: FLOTA.weeks[FLOTA.weeks.length - 1].label,
     },
-    padron: ROSTER, capBase,
+    padron: ROSTER, capBase, embudo: EMBUDO, semanaUlt: ultW.label,
     capacidad: { tractor: r1(prom(HAB.map(d => d.capT))), chasis: r1(prom(HAB.map(d => d.capC))), remolque: r1(prom(HAB.map(d => d.capR))) },
     resumen: {
       viajesDia: r1(prom(HAB.map(d => d.viajes))), viajesMax: Math.max(...HAB.map(d => d.viajes)),
@@ -364,7 +433,8 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
       dist: [0, 1, 2, 3, 4, 5, 6, 7].map(d => ({ d: d === 7 ? '7+' : String(d), n: diasFuera.filter(x => d === 7 ? x >= 7 : x === d).length })),
     },
     reglaSemi: cuboSemi, reglaChasis: cuboChasis, reglaTractor: cuboTractor,
-    dias: DIAS, meses: MESES, unidades: UNIDADES, ociosas: OCIOSAS, toritos: TORITOS, externos: EXTERNOS,
+    dias: DIAS, meses: MESES, unidades: UNIDADES, ociosas: OCIOSAS, paradasTodo: PARADAS_TODO,
+    semanasPeriodo: semanasHR.length, toritos: TORITOS, externos: EXTERNOS,
     destinos: DESTINOS,
     validacion: {
       declarados: declarados.length,
@@ -379,6 +449,9 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
 
   log('hojas de ruta: ' + L.length + ' · ' + DATA.meta.desde + ' a ' + DATA.meta.hasta + ' · ' + fechas.length + ' días (' + nHab + ' hábiles)');
   log('padrón: ' + JSON.stringify(ROSTER));
+  EMBUDO.forEach(e => log('   ' + e.g.padEnd(9) + ': padrón ' + e.padron + ' · parados hoy ' + e.paradasUlt
+    + ' → utilizables ' + e.dispUlt + '  |  promedio del período: ' + e.dispProm + ' utilizables, ' + e.usadasProm
+    + ' usadas (' + r1(100 * e.usadasProm / e.dispProm) + '%)' + (e.nuncaSalio.length ? ' · nunca salieron ' + e.nuncaSalio.length : '')));
   log('viajes por día hábil: ' + DATA.resumen.viajesDia + ' → ' + DATA.resumen.dedDia + ' dedicados + ' + DATA.resumen.interDia + ' de intercambio');
   log('motriz: ' + DATA.resumen.tractoresDia + ' tractores por día de ' + DATA.capacidad.tractor + ' disponibles (uso ' + DATA.resumen.usoT + '%)');
   log('   necesarios por la carga del día: ' + DATA.resumen.tractoresNec + ' → saturación ' + DATA.resumen.satMotriz + '% · '
@@ -390,7 +463,11 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
   log('   cumplimiento de la regla: ' + JSON.stringify(cuboSemi) + ' salidas por semi-día');
   log('rotación: ' + DATA.rotacion.prom + ' días (mediana ' + DATA.rotacion.p50 + ', p90 ' + DATA.rotacion.p90 + ') sobre ' + DATA.rotacion.n + ' ciclos · ' + descartados + ' descartados');
   log('validación de la regla: ' + DATA.validacion.declaradosDedicados + '/' + DATA.validacion.declarados + ' de los destinos declarados van dedicados, ' + DATA.validacion.declaradosIntercambio + ' con intercambio');
-  if (OCIOSAS.length) log('! sin un solo movimiento: ' + OCIOSAS.map(u => u.p + ' (' + u.g + ')').join(', '));
+  if (PARADAS_TODO.length) log('sin movimiento pero paradas todo el período (ya descontadas): '
+    + PARADAS_TODO.map(u => u.p).join(', '));
+  if (OCIOSAS.length) log('! disponibles y sin un solo movimiento: '
+    + OCIOSAS.map(u => u.p + ' (' + u.g + ', ' + u.semDisp + ' de ' + semanasHR.length + ' semanas disponible)').join(', '));
+  else log('no hay unidades disponibles sin movimiento');
   if (CORREGIDAS.size) log('patentes corregidas: ' + CORREGIDAS.size);
   if (huecos.length) log('! ' + huecos.length + ' día(s) hábil(es) sin hoja de ruta en el rango');
 };
