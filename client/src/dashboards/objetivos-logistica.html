@@ -23,14 +23,14 @@
   .aviso{background:rgba(38,182,217,.06);border:1px solid rgba(38,182,217,.26);border-radius:11px;padding:13px 16px;font-size:12.5px;color:#bfe6f2;line-height:1.6;margin-bottom:18px;}
   .aviso b{color:#fff;}
 
-  .cuadro{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:0;overflow:hidden;margin-bottom:18px;}
+  .cuadro{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:18px;}
   .tscroll{overflow-x:auto;}
   table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;}
-  thead th{position:sticky;top:0;z-index:2;text-align:center;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:11px 10px;background:var(--panel-2);border-bottom:1px solid var(--line-2);white-space:nowrap;}
-  thead th.kn{text-align:left;min-width:270px;position:sticky;left:0;z-index:3;}
+  thead th{text-align:center;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:11px 10px;background:var(--panel-2);border-bottom:1px solid var(--line-2);white-space:nowrap;}
+  thead th.kn{text-align:left;min-width:270px;}
   tbody td{padding:0;border-bottom:1px solid var(--line);text-align:center;}
   tbody tr:last-child td{border-bottom:none;}
-  tbody td.kn{text-align:left;padding:13px 14px;background:var(--panel);position:sticky;left:0;z-index:1;border-right:1px solid var(--line);min-width:270px;}
+  tbody td.kn{text-align:left;padding:13px 14px;background:var(--panel);border-right:1px solid var(--line);min-width:270px;}
   .kt{font-size:13px;font-weight:800;letter-spacing:-.01em;}
   .kd{font-size:11px;color:var(--muted-2);font-weight:600;margin-top:3px;line-height:1.45;max-width:330px;}
   .kn .num{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:6px;background:var(--brand-dim);color:#f0d9c2;font-size:11px;font-weight:800;margin-right:7px;vertical-align:1px;}
@@ -41,7 +41,7 @@
   .celda.on{background:var(--brand-dim);box-shadow:inset 0 -2px 0 var(--brand);}
   .celda .v{font-size:16px;font-weight:800;letter-spacing:-.02em;}
   .celda .v.good{color:var(--good);} .celda .v.bad{color:var(--bad);} .celda .v.amber{color:var(--amber);} .celda .v.na{color:var(--muted-2);font-weight:600;font-size:13px;}
-  .celda .s{font-size:10px;color:var(--muted-2);font-weight:600;line-height:1.2;}
+  .celda .s{font-size:10px;color:var(--muted-2);font-weight:600;line-height:1.25;}
   .celda .p{font-size:9px;font-weight:800;color:var(--amber);letter-spacing:.04em;}
 
   .det{background:var(--panel);border:1px solid var(--brand-line);border-radius:var(--radius);padding:18px 20px;margin-bottom:18px;}
@@ -73,13 +73,38 @@
   .fuentes b{color:var(--muted);}
   .plate{display:inline-flex;font-family:ui-monospace,Consolas,monospace;font-weight:700;font-size:11px;letter-spacing:.06em;color:#fff;background:var(--panel-3);border:1px solid var(--line-2);border-left:3px solid var(--info);border-radius:5px;padding:2px 7px;}
   .pill{display:inline-flex;padding:2px 9px;border-radius:999px;font-weight:700;font-size:10.5px;}
-  .pill.pro{background:rgba(34,227,155,.14);color:var(--good);} .pill.fle{background:rgba(245,166,35,.14);color:var(--amber);}
+  .pill.pro{background:rgba(34,227,155,.14);color:var(--good);}
 
-  .spark{margin-top:10px;}
-  .nota{font-size:11.5px;color:var(--muted-2);line-height:1.6;margin-top:12px;}
-  .nota b{color:var(--muted);}
   .fuera{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--muted-2);border-radius:11px;padding:13px 16px;font-size:12.5px;color:var(--muted);line-height:1.6;}
   .fuera b{color:var(--text);}
+
+  .concl{margin-top:26px;}
+  .concl .ch{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .concl .ch h2{font-size:18px;font-weight:800;letter-spacing:-.02em;margin:0;white-space:nowrap;}
+  .concl .ch .sd{flex:1;height:1px;background:linear-gradient(90deg,var(--line-2),transparent);}
+  .concl .ch .sr{font-size:11.5px;color:var(--muted-2);font-weight:600;white-space:nowrap;}
+  .pan{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 18px;margin-bottom:14px;}
+  .pan h3{font-size:14.5px;font-weight:800;margin:0 0 6px;}
+  .pan p{font-size:12.5px;color:var(--muted);margin:0 0 10px;line-height:1.65;}
+  .pan p b{color:var(--text);}
+  .pan.ok{border-left:3px solid var(--good);} .pan.mal{border-left:3px solid var(--bad);}
+  .pan.ojo{border-left:3px solid var(--amber);} .pan.info{border-left:3px solid var(--info);}
+  .idx{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;}
+  .idx th{text-align:right;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted-2);padding:7px 11px;background:var(--panel-2);border-bottom:1px solid var(--line);white-space:nowrap;}
+  .idx th:first-child{text-align:left;}
+  .idx td{padding:7px 11px;border-bottom:1px solid rgba(255,255,255,.045);text-align:right;white-space:nowrap;}
+  .idx td:first-child{text-align:left;font-weight:700;}
+  .idx tr:last-child td{border-bottom:none;}
+  .idxwrap{border:1px solid var(--line);border-radius:9px;overflow-x:auto;margin:10px 0;}
+  .acc2{display:grid;gap:9px;margin-top:6px;}
+  .acc2 .a{background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:10px;padding:12px 15px;}
+  .acc2 .a .at{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:4px;}
+  .acc2 .a .an{font-size:13px;font-weight:800;}
+  .acc2 .a .aq{font-size:12.5px;font-weight:800;color:var(--good);white-space:nowrap;}
+  .acc2 .a p{margin:0;font-size:12.5px;color:var(--muted);}
+  .acc2 .a.a2{border-left-color:var(--amber);} .acc2 .a.a2 .aq{color:var(--amber);}
+  .acc2 .a.a3{border-left-color:var(--info);} .acc2 .a.a3 .aq{color:var(--info);}
+  .acc2 .a.a4{border-left-color:var(--bad);} .acc2 .a.a4 .aq{color:var(--bad);}
 </style>
 
 <div class="wrap">
@@ -101,59 +126,32 @@
   <div id="detalle"></div>
 
   <div class="fuera" id="fuera"></div>
+
+  <div class="concl" id="concl"></div>
 </div>
 
 <script>
 (function(){
-  const DATA={"meta":{"anio":"2026","generado":"2026-09-05","persona":"Dario Pisano","ultimoMes":9,"meses":["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre"],"hojaRuta":{"viajes":5962,"desde":"2026-01-02","hasta":"2026-09-05"},"fletes":{"filas":3259,"hoja":"KG-FLETES-DESCRIMINADO 2026","hasta":"2026-08-27"},"ingresos":{"filas":7328,"hoja":"ResumenKgs","hasta":"2026-08-28"}},"kpis":[{"n":1,"sentido":"up","unidad":"%","titulo":"Colgado con flota propia","kpi":"REEMPLAZAR LOS VIAJES DE COLGADO PARA HACER CON FLOTA PROPIA UNA VEZ REPARADOS LOS EQUIPOS DE FRIO.","objetivo":"Mejorar un 15% el costo por tonelada transportado (interno y externo)","mide":"Qué parte de los viajes de colgado hacemos nosotros, sobre el total de viajes de colgado del mes.","formula":"viajes propios de colgado ÷ (propios + de fletero) × 100","fuentes":["Propios: HOJA DE RUTA - TRANSPORTE.xlsx, viajes con destino «RUNFO (COLGADO)».","De fletero: 2026 Consumo de combustible.xlsx, hoja «KG-FLETES-DESCRIMINADO 2026», filas con MERCADERÍA = COLGADO."],"valores":[{"mes":6,"valor":0,"parcial":false,"propios":0,"fleteros":29,"total":29,"kilosFlete":1049140,"tarifaFlete":12855100,"porProveedor":[{"k":"FUTUTROCK","v":22},{"k":"EZEMIC","v":7}],"detallePropios":[]},{"mes":7,"valor":0,"parcial":false,"propios":0,"fleteros":60,"total":60,"kilosFlete":1950700,"tarifaFlete":25744600,"porProveedor":[{"k":"FUTUTROCK","v":27},{"k":"FUTURO","v":18},{"k":"EZEMIC","v":12},{"k":"PAVILE","v":3}],"detallePropios":[]},{"mes":8,"valor":19.1,"parcial":false,"propios":9,"fleteros":38,"total":47,"kilosFlete":1536400,"tarifaFlete":13216600,"porProveedor":[{"k":"FUTURO","v":21},{"k":"EZEMIC","v":17}],"detallePropios":[{"f":"2026-08-06","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-07","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-20","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-25","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-26","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-27","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-28","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-31","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-31","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"}]},{"mes":9,"valor":100,"parcial":true,"propios":1,"fleteros":0,"total":1,"kilosFlete":0,"tarifaFlete":0,"porProveedor":[],"detallePropios":[{"f":"2026-09-02","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"}]}]},{"n":2,"sentido":"up","unidad":"%","titulo":"Rutas que pasaron a flota propia","kpi":"PRESENTAREMOS ALTERNATIVAS PARA REALIZAR VIAJES CON FLOTA PROPIA EN RUTAS QUE PODAMOS CUMPLIR Y ELIMINAREMOS EL FLETE DE ESA RUTA.","objetivo":"Mejorar un 15% el costo por tonelada transportado (interno y externo)","mide":"Qué parte de los viajes a Arre Beef y Black Bamboo hacemos con flota propia. Son dos rutas que antes se hacían enteras con flete.","formula":"viajes propios a esas dos rutas ÷ total de viajes a esas dos rutas × 100","fuentes":["2026 Consumo de combustible.xlsx, hoja «ResumenKgs»: cada fila es un ingreso con su proveedor y su transporte.","Se toman los proveedores ARRE BEEF S.A y BLACK BAMBOO ENTERPRISES S.A, y se cuenta como propio lo que tiene TRANSPORTE = PROPIO."],"valores":[{"mes":1,"valor":11.1,"parcial":false,"propios":9,"total":81,"fleteros":72,"viajesMes":944,"kilosMes":10226917,"pesoViajes":8.6,"pesoKilos":11.9,"kilosPropios":135302,"kilosTotal":1219703,"porRuta":[{"ruta":"ARRE BEEF","total":60,"propios":9,"kilos":921790},{"ruta":"BLACK BAMBOO","total":21,"propios":0,"kilos":297913}],"porFletero":[{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":30},{"k":"TRANSPORTE FORTUSKI","v":21},{"k":"DIEGO FRANCO","v":21}]},{"mes":2,"valor":14.9,"parcial":false,"propios":10,"total":67,"fleteros":57,"viajesMes":828,"kilosMes":8830778,"pesoViajes":8.1,"pesoKilos":11,"kilosPropios":151857,"kilosTotal":969452,"porRuta":[{"ruta":"ARRE BEEF","total":50,"propios":10,"kilos":721368},{"ruta":"BLACK BAMBOO","total":17,"propios":0,"kilos":248084}],"porFletero":[{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":34},{"k":"TRANSPORTE FORTUSKI","v":17},{"k":"TRANSPORTE DIEGO FRANCO","v":6}]},{"mes":3,"valor":23,"parcial":false,"propios":17,"total":74,"fleteros":57,"viajesMes":957,"kilosMes":10221354,"pesoViajes":7.7,"pesoKilos":10,"kilosPropios":233550,"kilosTotal":1024738,"porRuta":[{"ruta":"ARRE BEEF","total":52,"propios":17,"kilos":700205},{"ruta":"BLACK BAMBOO","total":22,"propios":0,"kilos":324533}],"porFletero":[{"k":"TRANSPORTE FORTUSKI","v":22},{"k":"TRANSPORTE DIEGO FRANCO","v":21},{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":14}]},{"mes":4,"valor":31.3,"parcial":false,"propios":20,"total":64,"fleteros":44,"viajesMes":778,"kilosMes":8271259,"pesoViajes":8.2,"pesoKilos":10.8,"kilosPropios":290610,"kilosTotal":890160,"porRuta":[{"ruta":"ARRE BEEF","total":50,"propios":13,"kilos":703522},{"ruta":"BLACK BAMBOO","total":14,"propios":7,"kilos":186638}],"porFletero":[{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":21},{"k":"TRANSPORTE DIEGO FRANCO","v":16},{"k":"TRANSPORTE FORTUSKI","v":7}]},{"mes":5,"valor":56.3,"parcial":false,"propios":45,"total":80,"fleteros":35,"viajesMes":884,"kilosMes":10222863.05,"pesoViajes":9,"pesoKilos":12.1,"kilosPropios":710160.4,"kilosTotal":1232200.5999999999,"porRuta":[{"ruta":"ARRE BEEF","total":57,"propios":34,"kilos":886197.6},{"ruta":"BLACK BAMBOO","total":23,"propios":11,"kilos":346003}],"porFletero":[{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":20},{"k":"TRANSPORTE FORTUSKI","v":12},{"k":"TRANSPORTE DIEGO FRANCO","v":3}]},{"mes":6,"valor":58.2,"parcial":false,"propios":46,"total":79,"fleteros":33,"viajesMes":995,"kilosMes":11311986.599999996,"pesoViajes":7.9,"pesoKilos":11.1,"kilosPropios":731466.6,"kilosTotal":1260874.2000000004,"porRuta":[{"ruta":"ARRE BEEF","total":56,"propios":35,"kilos":913696.2},{"ruta":"BLACK BAMBOO","total":23,"propios":11,"kilos":347178}],"porFletero":[{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":17},{"k":"TRANSPORTE FORTUSKI","v":12},{"k":"TRANSPORTE DIEGO FRANCO","v":4}]},{"mes":7,"valor":73.5,"parcial":false,"propios":50,"total":68,"fleteros":18,"viajesMes":1043,"kilosMes":11103412,"pesoViajes":6.5,"pesoKilos":9.5,"kilosPropios":797308,"kilosTotal":1055781,"porRuta":[{"ruta":"ARRE BEEF","total":44,"propios":39,"kilos":691059},{"ruta":"BLACK BAMBOO","total":24,"propios":11,"kilos":364722}],"porFletero":[{"k":"TRANSPORTE FORTUSKI","v":13},{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":3},{"k":"TRANSPORTE DIEGO FRANCO","v":2}]},{"mes":8,"valor":70.9,"parcial":false,"propios":39,"total":55,"fleteros":16,"viajesMes":899,"kilosMes":10190686.4,"pesoViajes":6.1,"pesoKilos":7.7,"kilosPropios":554941,"kilosTotal":786969.2000000001,"porRuta":[{"ruta":"ARRE BEEF","total":36,"propios":28,"kilos":472927.19999999995},{"ruta":"BLACK BAMBOO","total":19,"propios":11,"kilos":314042}],"porFletero":[{"k":"TRANSPORTE FORTUSKI","v":8},{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":5},{"k":"TRANSPORTE DIEGO FRANCO","v":3}]}]},{"n":3,"sentido":"down","unidad":"%","titulo":"Costo real contra el ajustado por inflación","kpi":"SE TOMARAN LOS GASTOS DEL AÑO ANTERIOR MAS LA INFLACION DEL AÑO Y SE LO VA A COMPRARAR POR LO PAGADO AL TRANSPORTISTA.","objetivo":"Mejorar un 15% el costo por tonelada transportado (interno y externo)","mide":"Cuánto se despegó el costo real por tonelada de lo que la inflación explicaba. Negativo es bueno: el mes cerró por debajo del ajuste.","formula":"(costo real del mes − costo del mes anterior ajustado por INDEC) ÷ ajustado × 100","fuentes":["Matriz de Costo de Logística: TOTAL $ x TONS DESC de cada mes.","Índice de precios del INDEC del mes, el mismo que usa la Métrica de Costo."],"nota":"Se evalúa dentro del año, mes contra mes anterior, y no contra el año pasado. Enero es la base y por eso no tiene variación.","valores":[{"mes":2,"valor":16.9,"parcial":false,"real":98047,"ajustado":83885,"base":81521,"indec":2.9,"diferencia":14162},{"mes":3,"valor":0.7,"parcial":false,"real":102127,"ajustado":101381,"base":98047,"indec":3.4,"diferencia":746},{"mes":4,"valor":-6.7,"parcial":false,"real":97795,"ajustado":104782,"base":102127,"indec":2.6,"diferencia":-6987},{"mes":5,"valor":-2.2,"parcial":false,"real":97645,"ajustado":99849,"base":97795,"indec":2.1,"diferencia":-2204},{"mes":6,"valor":-1.1,"parcial":false,"real":98396,"ajustado":99500,"base":97645,"indec":1.9,"diferencia":-1104},{"mes":7,"valor":1.5,"parcial":false,"real":101986,"ajustado":100462,"base":98396,"indec":2.1,"diferencia":1524}]}]};
+  const DATA={"meta":{"anio":"2026","generado":"2026-09-05","persona":"Dario Pisano","ultimoMes":9,"meses":["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre"],"hojaRuta":{"viajes":5962,"desde":"2026-01-02","hasta":"2026-09-05"},"fletes":{"filas":3259,"hoja":"KG-FLETES-DESCRIMINADO 2026","hasta":"2026-08-27"},"ingresos":{"filas":7328,"hoja":"ResumenKgs","hasta":"2026-08-28"}},"conclusion":{"hasta":"Julio","meses":7,"ton":{"ini":81521,"fin":101986,"var":25.1},"indices":{"indec":16,"fadeeac":22.4,"tarifa":21.6,"gasoilOficial":36,"gasoilNuestro":48.6,"reparaciones":11.5,"personal":21.9,"tallerReal":172.6},"contrafactico":{"real":3958955000,"aFadeeac":4092954014,"dif":-133999014,"pct":-3.3,"meses":7},"interna":[{"mes":1,"mezcla":43.5,"movidos":-4406,"propioKg":38.4,"fleteKg":104.1,"brecha":65.7,"ahorro":-289632},{"mes":2,"mezcla":42.8,"movidos":-57599,"propioKg":35.8,"fleteKg":106,"brecha":70.2,"ahorro":-4041820},{"mes":3,"mezcla":47.4,"movidos":398596,"propioKg":46.7,"fleteKg":110.7,"brecha":64.1,"ahorro":25544727},{"mes":4,"mezcla":53.2,"movidos":797997,"propioKg":33.6,"fleteKg":121.7,"brecha":88.1,"ahorro":70315210},{"mes":5,"mezcla":55.2,"movidos":1199361,"propioKg":30.9,"fleteKg":109.1,"brecha":78.2,"ahorro":93781003},{"mes":6,"mezcla":53.6,"movidos":1146261,"propioKg":41.5,"fleteKg":96.9,"brecha":55.4,"ahorro":63473866},{"mes":7,"mezcla":57.1,"movidos":1506083,"propioKg":35.8,"fleteKg":93.5,"brecha":57.7,"ahorro":86851516}],"ahorroAcum":335924502,"denom":[{"mes":1,"viajesFact":428,"viajesDesc":489,"kgFact":5652168,"kgDesc":5773121,"pctFuera":-2.1},{"mes":2,"viajesFact":356,"viajesDesc":441,"kgFact":4670364,"kgDesc":5039568,"pctFuera":-7.9},{"mes":3,"viajesFact":369,"viajesDesc":458,"kgFact":4940172,"kgDesc":5368035,"pctFuera":-8.7},{"mes":4,"viajesFact":315,"viajesDesc":349,"kgFact":3929310,"kgDesc":3872691,"pctFuera":1.4},{"mes":5,"viajesFact":349,"viajesDesc":360,"kgFact":4914269,"kgDesc":4573950,"pctFuera":6.9},{"mes":6,"viajesFact":450,"viajesDesc":412,"kgFact":6457050,"kgDesc":5241052,"pctFuera":18.8},{"mes":7,"viajesFact":541,"viajesDesc":407,"kgFact":7363010,"kgDesc":4755354,"pctFuera":35.4}],"aporte":[{"rubro":"Fletes","ini":54385,"fin":65177,"puntos":13.2},{"rubro":"Taller","ini":4039,"fin":10143,"puntos":7.5},{"rubro":"Propios","ini":16653,"fin":20412,"puntos":4.6},{"rubro":"Lavadero","ini":6443,"fin":6254,"puntos":-0.2}],"gasoil":{"litros":221157,"precioIni":1082,"precioFin":1609,"sobreIndec":59499648,"sobreOficial":18784492}},"kpis":[{"n":1,"sentido":"up","unidad":"%","titulo":"Colgado con flota propia","kpi":"REEMPLAZAR LOS VIAJES DE COLGADO PARA HACER CON FLOTA PROPIA UNA VEZ REPARADOS LOS EQUIPOS DE FRIO.","objetivo":"Mejorar un 15% el costo por tonelada transportado (interno y externo)","mide":"Qué parte de los viajes de colgado hacemos nosotros, sobre el total de viajes de colgado del mes.","formula":"viajes propios de colgado ÷ (propios + de fletero) × 100","fuentes":["Propios: HOJA DE RUTA - TRANSPORTE.xlsx, viajes con destino «RUNFO (COLGADO)».","De fletero: 2026 Consumo de combustible.xlsx, hoja «KG-FLETES-DESCRIMINADO 2026», filas con MERCADERÍA = COLGADO."],"valores":[{"mes":6,"valor":0,"parcial":false,"propios":0,"fleteros":29,"total":29,"kilosFlete":1049140,"tarifaFlete":12855100,"porProveedor":[{"k":"FUTUTROCK","v":22},{"k":"EZEMIC","v":7}],"detallePropios":[]},{"mes":7,"valor":0,"parcial":false,"propios":0,"fleteros":60,"total":60,"kilosFlete":1950700,"tarifaFlete":25744600,"porProveedor":[{"k":"FUTUTROCK","v":27},{"k":"FUTURO","v":18},{"k":"EZEMIC","v":12},{"k":"PAVILE","v":3}],"detallePropios":[]},{"mes":8,"valor":19.1,"parcial":false,"propios":9,"fleteros":38,"total":47,"kilosFlete":1536400,"tarifaFlete":13216600,"porProveedor":[{"k":"FUTURO","v":21},{"k":"EZEMIC","v":17}],"detallePropios":[{"f":"2026-08-06","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-07","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-20","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-25","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-26","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-27","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-28","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-31","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"},{"f":"2026-08-31","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"}]},{"mes":9,"valor":100,"parcial":true,"propios":1,"fleteros":0,"total":1,"kilosFlete":0,"tarifaFlete":0,"porProveedor":[],"detallePropios":[{"f":"2026-09-02","pat":"AC555VJ","rem":"","chofer":"MONT MATIAS"}]}]},{"n":2,"sentido":"up","unidad":"%","titulo":"Rutas que pasaron a flota propia","kpi":"PRESENTAREMOS ALTERNATIVAS PARA REALIZAR VIAJES CON FLOTA PROPIA EN RUTAS QUE PODAMOS CUMPLIR Y ELIMINAREMOS EL FLETE DE ESA RUTA.","objetivo":"Mejorar un 15% el costo por tonelada transportado (interno y externo)","mide":"Qué parte de los viajes a Arre Beef y Black Bamboo hacemos con flota propia. Son dos rutas que antes se hacían enteras con flete.","formula":"viajes propios a esas dos rutas ÷ total de viajes a esas dos rutas × 100","fuentes":["2026 Consumo de combustible.xlsx, hoja «ResumenKgs»: cada fila es un ingreso con su proveedor y su transporte.","Se toman los proveedores ARRE BEEF S.A y BLACK BAMBOO ENTERPRISES S.A, y se cuenta como propio lo que tiene TRANSPORTE = PROPIO."],"valores":[{"mes":1,"valor":11.1,"parcial":false,"propios":9,"total":81,"fleteros":72,"viajesMes":944,"kilosMes":10226917,"pesoViajes":8.6,"pesoKilos":11.9,"kilosPropios":135302,"kilosTotal":1219703,"porRuta":[{"ruta":"ARRE BEEF","total":60,"propios":9,"kilos":921790},{"ruta":"BLACK BAMBOO","total":21,"propios":0,"kilos":297913}],"porFletero":[{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":30},{"k":"TRANSPORTE FORTUSKI","v":21},{"k":"DIEGO FRANCO","v":21}]},{"mes":2,"valor":14.9,"parcial":false,"propios":10,"total":67,"fleteros":57,"viajesMes":828,"kilosMes":8830778,"pesoViajes":8.1,"pesoKilos":11,"kilosPropios":151857,"kilosTotal":969452,"porRuta":[{"ruta":"ARRE BEEF","total":50,"propios":10,"kilos":721368},{"ruta":"BLACK BAMBOO","total":17,"propios":0,"kilos":248084}],"porFletero":[{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":34},{"k":"TRANSPORTE FORTUSKI","v":17},{"k":"TRANSPORTE DIEGO FRANCO","v":6}]},{"mes":3,"valor":23,"parcial":false,"propios":17,"total":74,"fleteros":57,"viajesMes":957,"kilosMes":10221354,"pesoViajes":7.7,"pesoKilos":10,"kilosPropios":233550,"kilosTotal":1024738,"porRuta":[{"ruta":"ARRE BEEF","total":52,"propios":17,"kilos":700205},{"ruta":"BLACK BAMBOO","total":22,"propios":0,"kilos":324533}],"porFletero":[{"k":"TRANSPORTE FORTUSKI","v":22},{"k":"TRANSPORTE DIEGO FRANCO","v":21},{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":14}]},{"mes":4,"valor":31.3,"parcial":false,"propios":20,"total":64,"fleteros":44,"viajesMes":778,"kilosMes":8271259,"pesoViajes":8.2,"pesoKilos":10.8,"kilosPropios":290610,"kilosTotal":890160,"porRuta":[{"ruta":"ARRE BEEF","total":50,"propios":13,"kilos":703522},{"ruta":"BLACK BAMBOO","total":14,"propios":7,"kilos":186638}],"porFletero":[{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":21},{"k":"TRANSPORTE DIEGO FRANCO","v":16},{"k":"TRANSPORTE FORTUSKI","v":7}]},{"mes":5,"valor":56.3,"parcial":false,"propios":45,"total":80,"fleteros":35,"viajesMes":884,"kilosMes":10222863.05,"pesoViajes":9,"pesoKilos":12.1,"kilosPropios":710160.4,"kilosTotal":1232200.5999999999,"porRuta":[{"ruta":"ARRE BEEF","total":57,"propios":34,"kilos":886197.6},{"ruta":"BLACK BAMBOO","total":23,"propios":11,"kilos":346003}],"porFletero":[{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":20},{"k":"TRANSPORTE FORTUSKI","v":12},{"k":"TRANSPORTE DIEGO FRANCO","v":3}]},{"mes":6,"valor":58.2,"parcial":false,"propios":46,"total":79,"fleteros":33,"viajesMes":995,"kilosMes":11311986.599999996,"pesoViajes":7.9,"pesoKilos":11.1,"kilosPropios":731466.6,"kilosTotal":1260874.2000000004,"porRuta":[{"ruta":"ARRE BEEF","total":56,"propios":35,"kilos":913696.2},{"ruta":"BLACK BAMBOO","total":23,"propios":11,"kilos":347178}],"porFletero":[{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":17},{"k":"TRANSPORTE FORTUSKI","v":12},{"k":"TRANSPORTE DIEGO FRANCO","v":4}]},{"mes":7,"valor":73.5,"parcial":false,"propios":50,"total":68,"fleteros":18,"viajesMes":1043,"kilosMes":11103412,"pesoViajes":6.5,"pesoKilos":9.5,"kilosPropios":797308,"kilosTotal":1055781,"porRuta":[{"ruta":"ARRE BEEF","total":44,"propios":39,"kilos":691059},{"ruta":"BLACK BAMBOO","total":24,"propios":11,"kilos":364722}],"porFletero":[{"k":"TRANSPORTE FORTUSKI","v":13},{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":3},{"k":"TRANSPORTE DIEGO FRANCO","v":2}]},{"mes":8,"valor":70.9,"parcial":false,"propios":39,"total":55,"fleteros":16,"viajesMes":899,"kilosMes":10190686.4,"pesoViajes":6.1,"pesoKilos":7.7,"kilosPropios":554941,"kilosTotal":786969.2000000001,"porRuta":[{"ruta":"ARRE BEEF","total":36,"propios":28,"kilos":472927.19999999995},{"ruta":"BLACK BAMBOO","total":19,"propios":11,"kilos":314042}],"porFletero":[{"k":"TRANSPORTE FORTUSKI","v":8},{"k":"TRANSPORTE DEFILIPI (CIGNA)","v":5},{"k":"TRANSPORTE DIEGO FRANCO","v":3}]}]},{"n":3,"sentido":"down","unidad":"%","titulo":"Costo real contra el ajustado por inflación","kpi":"SE TOMARAN LOS GASTOS DEL AÑO ANTERIOR MAS LA INFLACION DEL AÑO Y SE LO VA A COMPRARAR POR LO PAGADO AL TRANSPORTISTA.","objetivo":"Mejorar un 15% el costo por tonelada transportado (interno y externo)","mide":"Cuánto se despegó el costo real por tonelada de lo que la inflación explicaba. Negativo es bueno: el mes cerró por debajo del ajuste.","formula":"(costo real del mes − costo del mes anterior ajustado por INDEC) ÷ ajustado × 100","fuentes":["Matriz de Costo de Logística: TOTAL $ x TONS DESC de cada mes.","Índice de precios del INDEC del mes, el mismo que usa la Métrica de Costo."],"nota":"Se evalúa dentro del año, mes contra mes anterior, y no contra el año pasado. Enero es la base y por eso no tiene variación.","valores":[{"mes":2,"valor":16.9,"parcial":false,"real":98047,"ajustado":83885,"base":81521,"indec":2.9,"diferencia":14162},{"mes":3,"valor":0.7,"parcial":false,"real":102127,"ajustado":101381,"base":98047,"indec":3.4,"diferencia":746},{"mes":4,"valor":-6.7,"parcial":false,"real":97795,"ajustado":104782,"base":102127,"indec":2.6,"diferencia":-6987},{"mes":5,"valor":-2.2,"parcial":false,"real":97645,"ajustado":99849,"base":97795,"indec":2.1,"diferencia":-2204},{"mes":6,"valor":-1.1,"parcial":false,"real":98396,"ajustado":99500,"base":97645,"indec":1.9,"diferencia":-1104},{"mes":7,"valor":1.5,"parcial":false,"real":101986,"ajustado":100462,"base":98396,"indec":2.1,"diferencia":1524}]}]};
 
   const n0=v=>v==null||isNaN(v)?'—':Math.round(v).toLocaleString('es-AR');
   const n1=v=>v==null||isNaN(v)?'—':v.toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1});
   const n2=v=>v==null||isNaN(v)?'—':v.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const $$=v=>v==null||isNaN(v)?'—':'$ '+Math.round(v).toLocaleString('es-AR');
+  const pesos=v=>v==null||isNaN(v)?'—':'$ '+Math.round(v).toLocaleString('es-AR');
+  const millones=v=>v==null||isNaN(v)?'—':'$ '+(Math.abs(v)/1e6).toLocaleString('es-AR',{maximumFractionDigits:0})+' M';
+  const pc=v=>v==null||isNaN(v)?'—':(v>0?'+':'')+n1(v)+' %';
   const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const MES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const ab=m=>MES[m-1].slice(0,3);
   const dm=f=>f.slice(8,10)+'/'+f.slice(5,7);
 
   const M=DATA.meta, K=DATA.kpis;
   let sel={k:null,m:null};
 
-  document.getElementById('fuente').textContent='Cuadro de '+M.persona+' · año '+M.anio;
-  document.getElementById('aviso').innerHTML='Los tres KPI que se pueden medir con el dato que ya existe. '+
-    'El cuarto del cuadro —<b>informes de gestión</b>— no se calcula: es un informe que todavía no se levanta a ningún sistema, '+
-    'así que ponerle un número sería inventarlo.<br>'+
-    'Última carga: hoja de ruta hasta el <b>'+dm(M.hojaRuta.hasta)+'</b>, fletes hasta el <b>'+dm(M.fletes.hasta)+'</b> y ResumenKgs hasta el <b>'+dm(M.ingresos.hasta)+'</b>.';
-
-  /* ── el cuadro ── */
   const color=(k,v)=>{
     if(v==null) return 'na';
     if(k.sentido==='up') return v>=60?'good':v>=25?'amber':'bad';
     return v<=0?'good':v<=5?'amber':'bad';
   };
-  function pintaCuadro(){
-    document.getElementById('tk-h').innerHTML='<tr><th class="kn">KPI asignado</th>'+
-      M.meses.map((m,i)=>'<th>'+m.slice(0,3)+'</th>').join('')+'</tr>';
-    document.getElementById('tk-b').innerHTML=K.map((k,ki)=>{
-      const porMes={}; k.valores.forEach(v=>{ porMes[v.mes]=v; });
-      return '<tr><td class="kn"><div class="kt"><span class="num">'+k.n+'</span>'+esc(k.titulo)+'</div>'+
-        '<div class="kd">'+esc(k.mide)+'</div></td>'+
-        M.meses.map((_,i)=>{
-          const m=i+1, v=porMes[m];
-          if(!v) return '<td><div class="celda" style="cursor:default"><span class="v na">—</span></div></td>';
-          const on=sel.k===ki&&sel.m===m;
-          return '<td><button class="celda'+(on?' on':'')+'" data-k="'+ki+'" data-m="'+m+'">'+
-            '<span class="v '+color(k,v.valor)+'">'+(v.valor==null?'—':n1(v.valor)+'%')+'</span>'+
-            '<span class="s">'+sub(k,v)+'</span>'+
-            (v.parcial?'<span class="p">parcial</span>':'')+'</button></td>';
-        }).join('')+'</tr>';
-    }).join('');
-    document.querySelectorAll('.celda[data-k]').forEach(b=>b.onclick=()=>{
-      const k=+b.dataset.k, m=+b.dataset.m;
-      sel=(sel.k===k&&sel.m===m)?{k:null,m:null}:{k,m};
-      pintaCuadro(); pintaDetalle(); alto();
-    });
-  }
   const sub=(k,v)=>{
     if(k.n===2) return v.propios+' de '+v.total+(v.pesoViajes!=null?'<br>'+n1(v.pesoViajes)+'% de los viajes del mes':'');
     if(k.n===1) return v.propios+' de '+v.total;
@@ -161,17 +159,49 @@
     return '';
   };
 
-  /* ── la justificación ── */
+  /* ── el cuadro ─────────────────────────────────────────────────────────── */
+  function pintaCuadro(){
+    document.getElementById('tk-h').innerHTML='<tr><th class="kn">KPI asignado</th>'+
+      M.meses.map(m=>'<th>'+m.slice(0,3)+'</th>').join('')+'</tr>';
+    document.getElementById('tk-b').innerHTML=K.map(function(k,ki){
+      const porMes={};
+      k.valores.forEach(function(v){ porMes[v.mes]=v; });
+      const celdas=M.meses.map(function(_,i){
+        const m=i+1, v=porMes[m];
+        if(!v) return '<td><div class="celda" style="cursor:default"><span class="v na">—</span></div></td>';
+        const on=(sel.k===ki&&sel.m===m);
+        return '<td><button class="celda'+(on?' on':'')+'" data-k="'+ki+'" data-m="'+m+'">'+
+          '<span class="v '+color(k,v.valor)+'">'+(v.valor==null?'—':n1(v.valor)+'%')+'</span>'+
+          '<span class="s">'+sub(k,v)+'</span>'+
+          (v.parcial?'<span class="p">parcial</span>':'')+'</button></td>';
+      }).join('');
+      return '<tr><td class="kn"><div class="kt"><span class="num">'+k.n+'</span>'+esc(k.titulo)+'</div>'+
+        '<div class="kd">'+esc(k.mide)+'</div></td>'+celdas+'</tr>';
+    }).join('');
+    const btns=document.querySelectorAll('.celda[data-k]');
+    for(let i=0;i<btns.length;i++){
+      btns[i].onclick=function(){
+        const k=+this.dataset.k, m=+this.dataset.m;
+        sel=(sel.k===k&&sel.m===m)?{k:null,m:null}:{k:k,m:m};
+        pintaCuadro(); pintaDetalle(); alto();
+      };
+    }
+  }
+
+  /* ── la justificación de cada valor ────────────────────────────────────── */
   function pintaDetalle(){
     const box=document.getElementById('detalle');
     if(sel.k==null){ box.innerHTML=''; return; }
-    const k=K[sel.k], v=k.valores.find(x=>x.mes===sel.m);
+    const k=K[sel.k];
+    let v=null;
+    k.valores.forEach(function(x){ if(x.mes===sel.m) v=x; });
     if(!v){ box.innerHTML=''; return; }
+    const cl=color(k,v.valor);
+    const colVar={good:'var(--good)',bad:'var(--bad)',amber:'var(--amber)',na:'var(--muted-2)'}[cl];
     let h='<div class="det"><div class="dh"><div>'+
       '<div class="dt">'+esc(k.titulo)+'</div>'+
       '<div class="dm">'+MES[v.mes-1]+' '+M.anio+(v.parcial?' · <b style="color:var(--amber)">mes incompleto</b>':'')+'</div></div>'+
-      '<div class="dq '+color(k,v.valor)+'" style="color:var(--'+({good:'good',bad:'bad',amber:'amber',na:'muted-2'})[color(k,v.valor)]+')">'+
-      (v.valor==null?'—':n1(v.valor)+'<small>%</small>')+'</div></div>';
+      '<div class="dq" style="color:'+colVar+'">'+(v.valor==null?'—':n1(v.valor)+'<small>%</small>')+'</div></div>';
 
     if(k.n===1||k.n===2){
       h+='<div class="cuenta"><div class="cf">'+
@@ -179,71 +209,197 @@
         '<span class="op">÷</span><b>'+v.total+'</b> viajes en total'+
         '<span class="op">×</span>100<span class="op">=</span><b>'+(v.valor==null?'—':n1(v.valor)+' %')+'</b></div>'+
         '<div class="cr">El total son los <b>'+v.propios+'</b> que hicimos nosotros más los <b>'+v.fleteros+'</b> que hizo un fletero.</div></div>';
-      h+='<div class="cards">'+[
+      const cards=[
         {l:'Viajes propios',v:n0(v.propios),c:'var(--good)'},
         {l:'Viajes de fletero',v:n0(v.fleteros),c:'var(--amber)'},
-        {l:'Total del mes',v:n0(v.total),c:'var(--text)'},
-      ].concat(
-        k.n===1&&v.tarifaFlete?[{l:'Tarifa pagada al fletero',v:$$(v.tarifaFlete),c:'var(--bad)',d:n0(v.kilosFlete)+' kg'}]
-        :k.n===2?[
-          {l:'Kilos propios',v:n0(v.kilosPropios),c:'var(--good)',d:'de '+n0(v.kilosTotal)+' kg de las dos rutas'},
-          {l:'Peso sobre todo el mes',v:n1(v.pesoViajes)+' %',c:'var(--info)',d:v.total+' de '+n0(v.viajesMes)+' viajes de todas las rutas'},
-          {l:'Peso en kilos',v:n1(v.pesoKilos)+' %',c:'var(--violeta)',d:n0(v.kilosTotal)+' de '+n0(v.kilosMes)+' kg movidos en el mes'},
-        ]:[])
-        .map(c=>'<div class="card"><div class="cl">'+c.l+'</div><div class="cv" style="color:'+c.c+'">'+c.v+'</div>'+(c.d?'<div class="cd">'+c.d+'</div>':'')+'</div>').join('')+'</div>';
+        {l:'Total del mes',v:n0(v.total),c:'var(--text)'}];
+      if(k.n===1&&v.tarifaFlete) cards.push({l:'Tarifa pagada al fletero',v:pesos(v.tarifaFlete),c:'var(--bad)',d:n0(v.kilosFlete)+' kg'});
+      if(k.n===2){
+        cards.push({l:'Kilos propios',v:n0(v.kilosPropios),c:'var(--good)',d:'de '+n0(v.kilosTotal)+' kg de las dos rutas'});
+        cards.push({l:'Peso sobre todo el mes',v:n1(v.pesoViajes)+' %',c:'var(--info)',d:v.total+' de '+n0(v.viajesMes)+' viajes de todas las rutas'});
+        cards.push({l:'Peso en kilos',v:n1(v.pesoKilos)+' %',c:'var(--violeta)',d:n0(v.kilosTotal)+' de '+n0(v.kilosMes)+' kg movidos en el mes'});
+      }
+      h+='<div class="cards">'+cards.map(function(c){
+        return '<div class="card"><div class="cl">'+c.l+'</div><div class="cv" style="color:'+c.c+'">'+c.v+'</div>'+
+          (c.d?'<div class="cd">'+c.d+'</div>':'')+'</div>'; }).join('')+'</div>';
     }
 
     if(k.n===1&&v.detallePropios&&v.detallePropios.length){
       h+='<div class="blk"><h4>Los viajes propios, uno por uno</h4><div class="miniwrap"><table class="mini">'+
         '<thead><tr><th>Fecha</th><th>Unidad</th><th>Remito</th><th style="text-align:left">Chofer</th></tr></thead><tbody>'+
-        v.detallePropios.map(d=>'<tr><td>'+esc(dm(d.f))+'</td><td><span class="plate">'+esc(d.pat)+'</span></td>'+
-        '<td>'+esc(d.rem||'—')+'</td><td style="text-align:left;font-weight:600;color:var(--muted)">'+esc(d.chofer||'—')+'</td></tr>').join('')+
+        v.detallePropios.map(function(d){
+          return '<tr><td>'+esc(dm(d.f))+'</td><td><span class="plate">'+esc(d.pat)+'</span></td>'+
+            '<td>'+esc(d.rem||'—')+'</td><td style="text-align:left;font-weight:600;color:var(--muted)">'+esc(d.chofer||'—')+'</td></tr>'; }).join('')+
         '</tbody></table></div></div>';
     }
     if(k.n===1&&v.porProveedor&&v.porProveedor.length){
       h+='<div class="blk"><h4>Los que hizo el fletero</h4><div class="miniwrap"><table class="mini">'+
         '<thead><tr><th>Transportista</th><th>Viajes</th></tr></thead><tbody>'+
-        v.porProveedor.map(p=>'<tr><td>'+esc(p.k)+'</td><td>'+p.v+'</td></tr>').join('')+'</tbody></table></div></div>';
+        v.porProveedor.map(function(p){ return '<tr><td>'+esc(p.k)+'</td><td>'+p.v+'</td></tr>'; }).join('')+
+        '</tbody></table></div></div>';
     }
     if(k.n===2&&v.porRuta){
       h+='<div class="blk"><h4>Abierto por ruta</h4><div class="miniwrap"><table class="mini">'+
         '<thead><tr><th>Ruta</th><th>Propios</th><th>Total</th><th>%</th><th>Kilos</th></tr></thead><tbody>'+
-        v.porRuta.map(r=>'<tr><td>'+esc(r.ruta)+'</td><td><span class="pill pro">'+r.propios+'</span></td><td>'+r.total+'</td>'+
-        '<td style="font-weight:800">'+(r.total?n1(100*r.propios/r.total):'—')+'%</td><td>'+n0(r.kilos)+'</td></tr>').join('')+
+        v.porRuta.map(function(r){
+          return '<tr><td>'+esc(r.ruta)+'</td><td><span class="pill pro">'+r.propios+'</span></td><td>'+r.total+'</td>'+
+            '<td style="font-weight:800">'+(r.total?n1(100*r.propios/r.total):'—')+'%</td><td>'+n0(r.kilos)+'</td></tr>'; }).join('')+
         '</tbody></table></div></div>';
-      if(v.porFletero&&v.porFletero.length) h+='<div class="blk"><h4>Los que todavía hace un fletero</h4><div class="miniwrap"><table class="mini">'+
-        '<thead><tr><th>Transportista</th><th>Viajes</th></tr></thead><tbody>'+
-        v.porFletero.map(p=>'<tr><td>'+esc(p.k)+'</td><td>'+p.v+'</td></tr>').join('')+'</tbody></table></div></div>';
+      if(v.porFletero&&v.porFletero.length){
+        h+='<div class="blk"><h4>Los que todavía hace un fletero</h4><div class="miniwrap"><table class="mini">'+
+          '<thead><tr><th>Transportista</th><th>Viajes</th></tr></thead><tbody>'+
+          v.porFletero.map(function(p){ return '<tr><td>'+esc(p.k)+'</td><td>'+p.v+'</td></tr>'; }).join('')+
+          '</tbody></table></div></div>';
+      }
     }
 
     if(k.n===3){
       h+='<div class="cuenta"><div class="cf">'+
-        '<b>'+$$(v.base)+'</b> de '+MES[v.mes-2]+'<span class="op">×</span>(1 + <b>'+n2(v.indec)+' %</b> del INDEC)<span class="op">=</span><b>'+$$(v.ajustado)+'</b><br>'+
-        '<b>'+$$(v.real)+'</b> real<span class="op">−</span><b>'+$$(v.ajustado)+'</b> ajustado<span class="op">=</span>'+
-        '<b style="color:var(--'+(v.diferencia<=0?'good':'bad')+')">'+(v.diferencia>0?'+':'')+$$(v.diferencia)+'</b>'+
-        '<span class="op">→</span><b>'+(v.valor==null?'—':(v.valor>0?'+':'')+n1(v.valor)+' %')+'</b></div>'+
+        '<b>'+pesos(v.base)+'</b> de '+MES[v.mes-2]+'<span class="op">×</span>(1 + <b>'+n2(v.indec)+' %</b> del INDEC)'+
+        '<span class="op">=</span><b>'+pesos(v.ajustado)+'</b><br>'+
+        '<b>'+pesos(v.real)+'</b> real<span class="op">−</span><b>'+pesos(v.ajustado)+'</b> ajustado<span class="op">=</span>'+
+        '<b style="color:'+(v.diferencia<=0?'var(--good)':'var(--bad)')+'">'+(v.diferencia>0?'+':'')+pesos(v.diferencia)+'</b>'+
+        '<span class="op">→</span><b>'+(v.valor==null?'—':pc(v.valor))+'</b></div>'+
         '<div class="cr">Todo en pesos por tonelada descargada. '+
-        (v.valor<=0?'El mes cerró <b>por debajo</b> de lo que la inflación explicaba.':'El mes cerró <b>por encima</b> de lo que la inflación explicaba.')+'</div></div>';
+        (v.valor<=0?'El mes cerró <b>por debajo</b> de lo que la inflación explicaba.':'El mes cerró <b>por encima</b> de lo que la inflación explicaba.')+
+        ' Ojo con la lectura: el INDEC no es el patrón del flete —eso se explica al pie de la ventana.</div></div>';
       h+='<div class="cards">'+[
-        {l:'Base · '+MES[v.mes-2],v:$$(v.base),c:'var(--muted)'},
+        {l:'Base · '+MES[v.mes-2],v:pesos(v.base),c:'var(--muted)'},
         {l:'INDEC del mes',v:n2(v.indec)+' %',c:'var(--info)'},
-        {l:'Ajustado por inflación',v:$$(v.ajustado),c:'var(--amber)'},
-        {l:'Costo real',v:$$(v.real),c:v.diferencia<=0?'var(--good)':'var(--bad)'},
-      ].map(c=>'<div class="card"><div class="cl">'+c.l+'</div><div class="cv" style="color:'+c.c+'">'+c.v+'</div></div>').join('')+'</div>';
+        {l:'Ajustado por inflación',v:pesos(v.ajustado),c:'var(--amber)'},
+        {l:'Costo real',v:pesos(v.real),c:v.diferencia<=0?'var(--good)':'var(--bad)'},
+      ].map(function(c){ return '<div class="card"><div class="cl">'+c.l+'</div><div class="cv" style="color:'+c.c+'">'+c.v+'</div></div>'; }).join('')+'</div>';
     }
 
-    h+='<div class="fuentes"><b>De dónde sale.</b><br>'+k.fuentes.map(f=>'· '+esc(f)).join('<br>')+
+    h+='<div class="fuentes"><b>De dónde sale.</b><br>'+k.fuentes.map(function(f){ return '· '+esc(f); }).join('<br>')+
       (k.nota?'<br><b>Criterio.</b> '+esc(k.nota):'')+'</div></div>';
     box.innerHTML=h;
   }
 
-  /* ── el KPI que no se mide ── */
+  /* ── la lectura de costo ────────────────────────────────────────────────
+     El flete no se indexa por INDEC sino por FADEEAC, y el gasoil se movió por
+     encima de los dos. Medir todo contra el INDEC da un diagnóstico equivocado:
+     el flete aparece caro cuando en realidad quedó por debajo de su índice. */
+  function pintaConclusion(){
+    const C=DATA.conclusion;
+    if(!C){ document.getElementById('concl').innerHTML=''; return; }
+    const I=C.indices, ult=C.denom[C.denom.length-1], ini=C.denom[0];
+    const busca=function(r){ const f=C.aporte.filter(function(a){ return a.rubro===r; }); return f.length?f[0].puntos:null; };
+    const ptsFlete=busca('Fletes'), ptsTaller=busca('Taller');
+    const uInt=C.interna[C.interna.length-1], pInt=C.interna[0];
+
+    let h='<div class="ch"><h2>Qué pasó con el costo</h2><div class="sd"></div>'+
+      '<span class="sr">enero a '+C.hasta+' · '+C.meses+' meses</span></div>';
+
+    h+='<div class="pan info"><h3>El patrón de comparación no es el INDEC</h3><p>'+
+      'El costo por tonelada descargada pasó de <b>'+pesos(C.ton.ini)+'</b> a <b>'+pesos(C.ton.fin)+'</b>: <b>'+pc(C.ton.var)+'</b>. '+
+      'Contra el INDEC —que subió '+n1(I.indec)+' %— eso parece un desastre. Pero <b>el INDEC no es el patrón de esta operación</b>: '+
+      'la tarifa del flete se indexa por <b>FADEEAC</b> y el gasoil se mueve por su cuenta. Con el índice que le toca a cada rubro, la lectura cambia.</p>'+
+      '<div class="idxwrap"><table class="idx"><thead><tr><th>Índice acumulado a '+C.hasta+'</th><th>El índice subió</th><th>Nuestro costo</th><th>Diferencia</th></tr></thead><tbody>'+
+      '<tr><td>INDEC</td><td>'+n1(I.indec)+' %</td><td style="color:var(--muted-2)">referencia general</td><td>—</td></tr>'+
+      '<tr><td>FADEEAC · el índice del flete</td><td>'+n1(I.fadeeac)+' %</td>'+
+        '<td style="font-weight:800;color:var(--good)">'+n1(I.tarifa)+' %</td>'+
+        '<td style="color:var(--good);font-weight:700">'+pc(I.tarifa-I.fadeeac)+'</td></tr>'+
+      '<tr><td>Gasoil · precio oficial</td><td>'+n1(I.gasoilOficial)+' %</td>'+
+        '<td style="font-weight:800;color:var(--bad)">'+n1(I.gasoilNuestro)+' %</td>'+
+        '<td style="color:var(--bad);font-weight:700">'+pc(I.gasoilNuestro-I.gasoilOficial)+'</td></tr>'+
+      '<tr><td>FADEEAC · reparaciones</td><td>'+n1(I.reparaciones)+' %</td>'+
+        '<td style="font-weight:800;color:var(--bad)">'+n1(I.tallerReal)+' %</td>'+
+        '<td style="color:var(--bad);font-weight:700">'+pc(I.tallerReal-I.reparaciones)+'</td></tr>'+
+      '</tbody></table></div></div>';
+
+    h+='<div class="pan ok"><h3>La tarifa de flete está bien negociada</h3><p>'+
+      'Medida sobre <b>rutas comparables</b> —la misma ruta contra el mes anterior, sin mezcla de destinos— la tarifa subió '+
+      '<b>'+n1(I.tarifa)+' %</b> contra <b>'+n1(I.fadeeac)+' %</b> de FADEEAC, que es el índice del contrato: quedó <b>'+pc(I.tarifa-I.fadeeac)+'</b> por debajo.'+
+      (C.contrafactico?' Sobre '+C.contrafactico.meses+' meses son <b>'+millones(C.contrafactico.real)+'</b> pagados contra '+
+        '<b>'+millones(C.contrafactico.aFadeeac)+'</b> que el índice habría permitido: <b style="color:var(--good)">'+millones(C.contrafactico.dif)+' menos</b> ('+n1(C.contrafactico.pct)+' %).':'')+
+      ' <b>Acá no está el problema</b>, y conviene saberlo antes de sentarse a renegociar.</p></div>';
+
+    h+='<div class="pan ok"><h3>Internalizar funcionó</h3><p>'+
+      'La mezcla pasó de <b>'+n1(pInt.mezcla)+' %</b> a <b>'+n1(uInt.mezcla)+' %</b> de kilos propios. '+
+      'Valuando los kilos que efectivamente se corrieron por la brecha de costo unitario de cada mes, el ahorro acumulado es '+
+      '<b style="color:var(--good)">'+millones(C.ahorroAcum)+'</b>. '+
+      'Los dos costos se miden sobre la misma base de kilos: el del flete sale de su propia hoja y no de dividir el gasto por los kilos de descarga.</p>'+
+      '<div class="idxwrap"><table class="idx"><thead><tr><th>Mes</th><th>Mezcla propia</th><th>Kilos movidos</th><th>$/kg propio</th><th>$/kg flete</th><th>Ahorro</th></tr></thead><tbody>'+
+      C.interna.map(function(x){
+        return '<tr><td>'+MES[x.mes-1]+'</td><td>'+n1(x.mezcla)+' %</td><td>'+n0(x.movidos)+'</td>'+
+          '<td>'+n1(x.propioKg)+'</td><td>'+n1(x.fleteKg)+'</td>'+
+          '<td style="font-weight:800;color:'+(x.ahorro>=0?'var(--good)':'var(--bad)')+'">'+millones(x.ahorro)+'</td></tr>'; }).join('')+
+      '</tbody></table></div></div>';
+
+    h+='<div class="pan mal"><h3>El $/ton descargada está midiendo mal al flete</h3><p>'+
+      'El flete aporta <b>'+n1(ptsFlete)+' puntos</b> de la suba, pero no por precio: por <b>denominador</b>. '+
+      'El indicador divide <b>todo</b> el gasto de flete por <b>sólo</b> los kilos que entran a planta, y el fletero hace cada vez más trabajo que no es descarga '+
+      '—el colgado y el sebo <i>salen</i>, no entran—.</p>'+
+      '<div class="idxwrap"><table class="idx"><thead><tr><th>Mes</th><th>Viajes facturados</th><th>Viajes de descarga</th><th>Kg facturados</th><th>Kg de descarga</th><th>No es descarga</th></tr></thead><tbody>'+
+      C.denom.map(function(x){
+        const col=x.pctFuera>15?'var(--bad)':x.pctFuera>5?'var(--amber)':'var(--muted)';
+        return '<tr><td>'+MES[x.mes-1]+'</td><td>'+n0(x.viajesFact)+'</td><td>'+n0(x.viajesDesc)+'</td>'+
+          '<td>'+n0(x.kgFact)+'</td><td>'+n0(x.kgDesc)+'</td>'+
+          '<td style="font-weight:800;color:'+col+'">'+n1(x.pctFuera)+' %</td></tr>'; }).join('')+
+      '</tbody></table></div>'+
+      '<p>En '+MES[ini.mes-1]+' el fletero facturaba <b>menos</b> kilos de los que descargaba; en '+MES[ult.mes-1]+', '+
+      '<b>'+n1(ult.pctFuera)+' %</b> de sus kilos no entran al denominador. Buena parte de la suba del $/ton es aritmética, no de gestión.</p></div>';
+
+    h+='<div class="pan mal"><h3>El taller es el que más rompe</h3><p>'+
+      'Subió <b>'+n1(I.tallerReal)+' %</b> cuando el índice de reparaciones de FADEEAC subió <b>'+n1(I.reparaciones)+' %</b>, '+
+      'y aporta <b>'+n1(ptsTaller)+' puntos</b> de los '+n1(C.ton.var)+' que subió el costo. '+
+      'Sin un preventivo, el $/ton salta de mes a mes por una causa que nadie anticipa, y las roturas bajan la disponibilidad justo cuando la flota corre al límite.</p>'+
+      '<div class="idxwrap"><table class="idx"><thead><tr><th>Rubro</th><th>$/ton en enero</th><th>$/ton en '+C.hasta+'</th><th>Puntos que aporta</th></tr></thead><tbody>'+
+      C.aporte.map(function(a){
+        const col=a.puntos>5?'var(--bad)':a.puntos>0?'var(--amber)':'var(--good)';
+        return '<tr><td>'+a.rubro+'</td><td>'+n0(a.ini)+'</td><td>'+n0(a.fin)+'</td>'+
+          '<td style="font-weight:800;color:'+col+'">'+pc(a.puntos)+'</td></tr>'; }).join('')+
+      '</tbody></table></div></div>';
+
+    h+='<div class="pan ojo"><h3>El gasoil se compró por encima del mercado</h3><p>'+
+      'Nuestro precio pasó de <b>'+pesos(C.gasoil.precioIni)+'</b> a <b>'+pesos(C.gasoil.precioFin)+'</b> por litro: <b>'+n1(I.gasoilNuestro)+' %</b>, '+
+      'cuando el precio oficial subió <b>'+n1(I.gasoilOficial)+' %</b>. Sobre <b>'+n0(C.gasoil.litros)+'</b> litros comprados, esa diferencia contra el mercado son '+
+      '<b style="color:var(--bad)">'+millones(C.gasoil.sobreOficial)+'</b>. '+
+      'Contra el INDEC serían '+millones(C.gasoil.sobreIndec)+', pero el combustible nunca sigue al INDEC y compararlo así no sirve para decidir. '+
+      'Es la única parte del costo propio que se despegó.</p></div>';
+
+    const acc=[
+      {c:'a4',n:'1 · Arreglar el indicador antes de decidir sobre él',q:n1(ult.pctFuera)+' % fuera del denominador',
+       d:'El $/ton descargada mezcla el flete de entrada con el de salida. Hay que separarlos, o cambiar el denominador a toneladas movidas. '+
+         'Mientras no se separe, cada viaje de colgado o de sebo que se le da a un fletero <b>empeora el indicador aunque sea la decisión correcta</b>.'},
+      {c:'a4',n:'2 · El taller, con un preventivo aunque sea básico',q:pc(ptsTaller)+' del costo',
+       d:'Es el rubro que más se despegó de su índice y el que más ruido mete en la medición. Además las roturas bajan la disponibilidad, '+
+         'y eso empuja la saturación de una flota que ya corre al límite.'},
+      {c:'a2',n:'3 · Revisar cómo se compra el gasoil',q:millones(C.gasoil.sobreOficial)+' contra el mercado',
+       d:'No es el precio del combustible: es la diferencia entre lo que pagamos y lo que costaba en el mercado. '+
+         'Con '+n0(C.gasoil.litros)+' litros en el período, cada punto porcentual vale plata todos los meses.'},
+      {c:'',n:'4 · Seguir internalizando, pero ya cuesta fierro',q:millones(C.ahorroAcum)+' ganados',
+       d:'La mezcla ganó '+n1(uInt.mezcla-pInt.mezcla)+' puntos y eso valió '+millones(C.ahorroAcum)+'. '+
+         'Pero la motriz ya corre al límite de saturación: cada punto más de mezcla necesita una unidad más. '+
+         'La cuenta cierra —la brecha de costo unitario es de '+n1(uInt.brecha)+' $/kg— pero ya no es gratis.'},
+      {c:'a3',n:'5 · Cambiar el KPI, no sólo cumplirlo',q:'—',
+       d:'Los dos KPI de arriba miden bien pero mueven entre el 6 y el 9 % de los viajes. El número que efectivamente movió la aguja es '+
+         '<b>la mezcla global de kilos propios</b>, y no lo sigue ningún objetivo. '+
+         'El segundo debería ser <b>la tarifa por ruta contra FADEEAC</b>, que hoy da bien y conviene sostener.'},
+    ];
+    h+='<div class="pan"><h3>Qué haría, en orden de plata</h3><div class="acc2">'+
+      acc.map(function(r){
+        return '<div class="a '+r.c+'"><div class="at"><span class="an">'+r.n+'</span><span class="aq">'+r.q+'</span></div><p>'+r.d+'</p></div>'; }).join('')+
+      '</div></div>';
+
+    document.getElementById('concl').innerHTML=h;
+  }
+
+  function alto(){ if(window.parent!==window){ try{ parent.postMessage({tipo:'matriz-alto',alto:document.body.scrollHeight},'*'); }catch(e){} } }
+
+  document.getElementById('fuente').textContent='Cuadro de '+M.persona+' · año '+M.anio;
+  document.getElementById('aviso').innerHTML='Los tres KPI que se pueden medir con el dato que ya existe. '+
+    'El cuarto del cuadro —<b>informes de gestión</b>— no se calcula: es un informe que todavía no se levanta a ningún sistema, '+
+    'así que ponerle un número sería inventarlo.<br>'+
+    'Última carga: hoja de ruta hasta el <b>'+dm(M.hojaRuta.hasta)+'</b>, fletes hasta el <b>'+dm(M.fletes.hasta)+'</b> y ResumenKgs hasta el <b>'+dm(M.ingresos.hasta)+'</b>.';
   document.getElementById('fuera').innerHTML='<b>El cuarto KPI del cuadro queda sin calcular.</b> «INFORMES DE GESTION», con meta de cumplimiento mayor al 70 %, '+
     'necesita que los informes se carguen en algún lado para poder contarlos. Hoy no hay de dónde leerlos, así que la fila se deja vacía en vez de completarla con un supuesto.';
 
-  pintaCuadro(); pintaDetalle();
+  pintaCuadro();
+  pintaDetalle();
+  pintaConclusion();
 
-  function alto(){ if(window.parent!==window){ try{ parent.postMessage({tipo:'matriz-alto',alto:document.body.scrollHeight},'*'); }catch(e){} } }
   if(window.parent!==window){ alto(); window.addEventListener('resize',alto); new MutationObserver(alto).observe(document.body,{subtree:true,childList:true}); }
 })();
 </script>

@@ -192,6 +192,84 @@ exports.actualizar = async function ({ leer, escribir, log, util, carpetas }) {
     return out;
   })();
 
+  /* ═══ 4 · la lectura de costo, con el índice que le toca a cada rubro ═══
+     El flete NO se indexa por INDEC: su contrato sigue a FADEEAC. Y el gasoil se
+     movió muy por encima de los dos. Medir todo contra el INDEC —como hacía la
+     primera versión de este análisis— da un diagnóstico equivocado: el flete
+     aparece caro cuando en realidad quedó por debajo de su propio índice. */
+  const FL = util.actual('client/src/dashboards/metrica-fletes.html', 'DATA');
+  const CONCL = (() => {
+    if (!FL || !FL.volumen || !FL.economia) return null;
+    const n = Math.min(MZ.pesoTonDesc.length, FL.volumen.length, FL.economia.length);
+    const cerrados = [];
+    for (let i = 0; i < n; i++) if (!FL.volumen[i].parcial && !FL.economia[i].parcial && MZ.pesoTonDesc[i] != null) cerrados.push(i);
+    const ult = cerrados[cerrados.length - 1];
+    const acum = a => { let x = 1; for (let i = 1; i <= ult; i++) x *= 1 + (a[i] || 0); return r1((x - 1) * 100); };
+
+    // Ahorro por internalizar: los kilos que efectivamente se corrieron a flota
+    // propia, por la brecha de costo unitario de ese mes. Los dos costos se miden
+    // sobre la misma base de kilos, que es lo que la primera versión no hacía.
+    const mixBase = FL.volumen[0].pctPropio / 100;
+    const interna = []; let ahorroAcum = 0;
+    cerrados.forEach(i => {
+      const v = FL.volumen[i], tot = v.propioKg + v.fleteKg;
+      const pk = MZ.propTotal[i] / v.propioKg, fk = FL.economia[i].porKg;
+      const movidos = v.propioKg - tot * mixBase, ahorro = movidos * (fk - pk);
+      if (i > 0) ahorroAcum += ahorro;
+      interna.push({ mes: i + 1, mezcla: v.pctPropio, movidos: Math.round(movidos),
+        propioKg: r1(pk), fleteKg: r1(fk), brecha: r1(fk - pk), ahorro: Math.round(ahorro) });
+    });
+
+    // El denominador: cuánto del trabajo del fletero NO es descarga y por lo tanto
+    // suma gasto sin sumar toneladas al $/ton.
+    const denom = cerrados.map(i => {
+      const kgFact = FL.economia[i].kgPorViaje * FL.economia[i].viajes, kgDesc = FL.volumen[i].fleteKg;
+      return { mes: i + 1, viajesFact: FL.economia[i].viajes, viajesDesc: FL.volumen[i].fleteV,
+        kgFact: Math.round(kgFact), kgDesc: Math.round(kgDesc),
+        pctFuera: kgFact ? r1(100 * (1 - kgDesc / kgFact)) : null };
+    });
+
+    // Cuántos puntos del $/ton aporta cada rubro entre el primer mes y el último.
+    const t0 = MZ.descNeta[0] / 1000, tN = MZ.descNeta[ult] / 1000, base = MZ.pesoTonDesc[0];
+    const aporte = [['Fletes', MZ.fletTotal], ['Taller', MZ.tallTotal], ['Propios', MZ.propTotal], ['Lavadero', MZ.lavTotal]]
+      .map(([r, a]) => ({ rubro: r, ini: Math.round(a[0] / t0), fin: Math.round(a[ult] / tN),
+        puntos: r1(100 * (a[ult] / tN - a[0] / t0) / base) }))
+      .sort((x, y) => y.puntos - x.puntos);
+
+    const g0 = FL.gasoil[0], gU = FL.gasoil.slice(0, ult + 1).filter(g => g.nuestro != null).pop();
+    const litros = FL.gasoil.slice(0, ult + 1).reduce((a, g) => a + (g.litros || 0), 0);
+    const iIndec = MZ.indec.slice(0, ult + 1).reduce((x, v, i) => i ? x * (1 + v) : x, 1);
+    return {
+      hasta: MESES[ult], meses: ult + 1,
+      ton: { ini: Math.round(MZ.pesoTonDesc[0]), fin: Math.round(MZ.pesoTonDesc[ult]),
+        var: r1(100 * (MZ.pesoTonDesc[ult] / MZ.pesoTonDesc[0] - 1)) },
+      indices: {
+        indec: acum(MZ.indec),
+        fadeeac: FL.rutaAcum ? r1(FL.rutaAcum.fadeeac * 100) : null,
+        tarifa: FL.rutaAcum ? r1(FL.rutaAcum.tarifa * 100) : null,
+        gasoilOficial: g0.oficial && gU && gU.oficial ? r1(100 * (gU.oficial / g0.oficial - 1)) : null,
+        gasoilNuestro: g0.nuestro && gU ? r1(100 * (gU.nuestro / g0.nuestro - 1)) : null,
+        reparaciones: FL.fadeeacRubros ? acum([0].concat(FL.fadeeacRubros.reparaciones)) : null,
+        personal: FL.fadeeacRubros ? acum([0].concat(FL.fadeeacRubros.personal)) : null,
+        tallerReal: r1(100 * (MZ.tallTotal[ult] / MZ.tallTotal[0] - 1)),
+      },
+      contrafactico: FL.contrafactico ? {
+        real: Math.round(FL.contrafactico.gastoReal), aFadeeac: Math.round(FL.contrafactico.gastoFadeeac),
+        dif: Math.round(FL.contrafactico.dif), pct: r1(FL.contrafactico.pct * 100), meses: FL.contrafactico.meses,
+      } : null,
+      interna, ahorroAcum: Math.round(ahorroAcum), denom, aporte,
+      gasoil: { litros, precioIni: Math.round(g0.nuestro), precioFin: gU ? Math.round(gU.nuestro) : null,
+        sobreIndec: Math.round(FL.gasoil.slice(0, ult + 1).reduce((a, g, i) => {
+          if (!g.litros || g.nuestro == null) return a;
+          const acu = MZ.indec.slice(0, i + 1).reduce((x, v, j) => j ? x * (1 + v) : x, 1);
+          return a + (g.nuestro - g0.nuestro * acu) * g.litros; }, 0)),
+        sobreOficial: Math.round(FL.gasoil.slice(0, ult + 1).reduce((a, g, i) => {
+          if (!g.litros || g.nuestro == null || g.oficial == null) return a;
+          return a + (g.nuestro - g0.nuestro * (g.oficial / g0.oficial)) * g.litros; }, 0)),
+      },
+    };
+  })();
+
   /* ═══ el paquete ═══ */
   const ultimoMes = Math.max(...[].concat(K1, K2, K3).map(v => v.mes));
   const DATA = {
@@ -202,6 +280,7 @@ exports.actualizar = async function ({ leer, escribir, log, util, carpetas }) {
       fletes: { filas: fletes.length, hoja: hojaFlet, hasta: fletes.map(v => v.fecha).sort().pop() },
       ingresos: { filas: ingresos.length, hoja: hojaRes, hasta: ingresos.map(v => v.fecha).sort().pop() },
     },
+    conclusion: CONCL,
     kpis: [
       {
         n: 1, sentido: 'up', unidad: '%',
@@ -257,4 +336,14 @@ exports.actualizar = async function ({ leer, escribir, log, util, carpetas }) {
       + (v.valor == null ? '—' : v.valor + '%') + (v.parcial ? '*' : '')).join(' · '));
   });
   if (DATA.kpis[0].valores.some(v => v.parcial)) log('   (*) mes con la hoja de ruta cargada y el archivo de fletes todavía sin cerrar');
+  if (CONCL) {
+    log('conclusión de costo a ' + CONCL.hasta + ':');
+    log('   $/ton ' + CONCL.ton.ini.toLocaleString('es-AR') + ' → ' + CONCL.ton.fin.toLocaleString('es-AR') + ' (' + CONCL.ton.var + '%)');
+    log('   índices: INDEC ' + CONCL.indices.indec + '% · FADEEAC ' + CONCL.indices.fadeeac + '% · nuestra tarifa ' + CONCL.indices.tarifa
+      + '% · gasoil oficial ' + CONCL.indices.gasoilOficial + '% · gasoil nuestro ' + CONCL.indices.gasoilNuestro + '%');
+    log('   taller real ' + CONCL.indices.tallerReal + '% contra reparaciones FADEEAC ' + CONCL.indices.reparaciones + '%');
+    log('   ahorro por internalizar: $' + Math.round(CONCL.ahorroAcum / 1e6) + ' M');
+    log('   aporte al $/ton: ' + CONCL.aporte.map(a => a.rubro + ' ' + a.puntos + 'pt').join(' · '));
+    log('   trabajo del fletero que no es descarga, último mes: ' + CONCL.denom[CONCL.denom.length - 1].pctFuera + '%');
+  }
 };
