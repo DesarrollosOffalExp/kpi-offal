@@ -718,6 +718,42 @@
         }
       ],
       "ventana": "Logística › Lavado de Camiones. La ventana navega por dentro (LavadoCamiones.jsx): Tablero, Informe del sector y KPI del Lavadero, los tres sobre el mismo DATA."
+    },
+    "saturacion": {
+      "carpeta": "Gerencia de Operaciones/Logistica",
+      "extractor": "saturacion",
+      "ventana": "Logística › Saturación de Flota.",
+      "fuentes": [
+        {
+          "id": "hojas-de-ruta",
+          "archivo": "HOJA DE RUTA - TRANSPORTE.xlsx  (todas las copias que haya)",
+          "destino": [
+            "client/src/dashboards/saturacion-flota.html"
+          ],
+          "constante": "DATA",
+          "hojas": "«Respuestas» (el volcado del form) y «Base» (patente → tipo de unidad)",
+          "columnas": {
+            "Id": "id del formulario; es la clave para unir copias sin duplicar",
+            "Fecha": "jornada del viaje",
+            "Patente": "la unidad que tracciona: tractor o chasis/balancín",
+            "Destino": "el frigorífico o punto al que va",
+            "Semi Lleva": "el remolque que sale de planta en ese viaje",
+            "Semi Trae": "el remolque que vuelve a entrar en ese viaje"
+          },
+          "cuenta": "La hoja «Respuestas» NO acumula: guarda una ventana y el resto se archiva en la base (transporte.HojasRuta). Por eso se leen TODAS las copias que haya en las carpetas y se unen por Id. Se separa lo que tracciona (17 tractores + 9 chasis/balancines) de lo que se arrastra (41 semis + 4 bateas); los 5 toritos son de patio y no aparecen en ninguna hoja de ruta. Saturación de tracción = viajes del día ÷ unidades de tracción disponibles, con la regla de un viaje por unidad por día. Ocupación de remolques = semis y bateas fuera de planta ese día ÷ disponibles, contando a cada uno desde que sale hasta que vuelve. Las patentes se escriben a mano: se corrigen contra el padrón por distancia de edición cuando hay un único candidato, y las que no matchean quedan listadas en calidad del dato."
+        },
+        {
+          "id": "capacidad-de-flota",
+          "archivo": "(no se lee un Excel: se toma del tablero que ya lo mantiene)",
+          "destino": [
+            "client/src/dashboards/saturacion-flota.html"
+          ],
+          "constante": "DATA.capacidad",
+          "hojas": "DATA de disponibilidad-flota.html (extractor «logistica»)",
+          "cuenta": "El denominador es la flota realmente disponible: el padrón de unidades menos las paradas de esa semana. Por eso este grupo se corre DESPUÉS de «logistica»: si la disponibilidad está vieja, la saturación sale mal."
+        }
+      ],
+      "carpetaLocal": "C:/Users/admin/OneDrive - OffalExp SA/Documentos - Offal Exp/Gerencia de Operaciones/Logistica"
     }
   }
 }

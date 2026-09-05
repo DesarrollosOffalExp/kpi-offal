@@ -160,7 +160,7 @@ const SISTEMAS = {
 // Los nombres de las ventanas no llevan mes ni semana: el período lo muestra
 // cada tablero a partir de sus propios datos.
 const G = { costo: 'Matriz de Costo', metrica: 'Métrica de Costo', fletes: 'Métrica de Fletes', flota: 'Disponibilidad de Flota',
-  lavado: 'Lavado de Camiones', tambores: 'Necesidad de Tambores', cierre: 'Cierre Enero–Febrero',
+  saturacion: 'Saturación de Flota', lavado: 'Lavado de Camiones', tambores: 'Necesidad de Tambores', cierre: 'Cierre Enero–Febrero',
   gasoil: 'Consumo de Gasoil', frig: 'Costo por Frigorífico', hiel: 'Stock de Hiel' };
 // Rendimiento KG/LT semana a semana (S1–S31) para el histórico de gasoil.
 const KGLT = [9.07, 6.19, 6.38, 6.79, 5.71, 3.75, 4.12, 5.15, 6.17, 6.30, 5.89, 6.31, 6.29, 7.90, 5.48, 6.11, 6.09, 5.16, 6.63, 6.11, 5.52, 5.66, 5.71, 6.16, 4.63, 5.32, 6.84, 6.61, 6.59, 6.67, 6.21];
@@ -197,6 +197,9 @@ const LOGISTICA = {
     { id: 'fuera_serv', grupo: G.flota, titulo: 'Unidades fuera de servicio', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 15,
       desglose: [{ nombre: 'Tractor', valor: 3 }, { nombre: 'Semi', valor: 11 }, { nombre: 'Bateas', valor: 1 }],
       info: 'Unidades con parada temporal (FS) en la semana. Las de baja permanente (FSP) NO se cuentan. Detalle en la tabla. (DISPONIBILIDAD DE FLOTA)' },
+    // Saturación de Flota (embebido; SaturacionFlota.jsx). Sólo registra el grupo/subtab.
+    { id: 'saturacion_reg', grupo: G.saturacion, titulo: 'Saturación de Flota', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 0,
+      info: 'Los viajes de la hoja de ruta contra la flota que queda disponible, separando lo que tracciona (tractores, chasis y balancines) de lo que se arrastra (semis y bateas). La regla es un viaje por unidad por día. (HOJA DE RUTA - TRANSPORTE + Disponibilidad de Flota)' },
     // Lavado de Camiones (embebido; LavadoCamiones.jsx). Sólo registra el grupo/subtab.
     { id: 'lavado_reg', grupo: G.lavado, titulo: 'Lavado de Camiones', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 0,
       info: 'La ventana navega por dentro: Tablero (cada unidad con sus tiempos, dotación y observación), Informe del sector (la lectura y las conclusiones) y KPI del Lavadero (el cuadro de mando de proceso y costo). (form de control de lavado de camiones + Presupuesto del Lavadero)' },

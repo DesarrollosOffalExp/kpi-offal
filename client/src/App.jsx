@@ -32,6 +32,7 @@ import ConsumoGasoil from './components/ConsumoGasoil';
 import CostoFrigorifico from './components/CostoFrigorifico';
 import MetricaCosto from './components/MetricaCosto';
 import LavadoCamiones from './components/LavadoCamiones';
+import SaturacionFlota from './components/SaturacionFlota';
 import MetricaFletes from './components/MetricaFletes';
 import CierreEneFeb from './components/CierreEneFeb';
 import ProductividadArmado from './components/ProductividadArmado';
@@ -271,6 +272,16 @@ export default function App() {
                   <div className="grupo" key={g}>
                     {!conSub && <h2 className="grupo-titulo">{g}</h2>}
                     <CierreEneFeb />
+                  </div>
+                );
+              }
+              // Saturación de Flota (Logística): la hoja de ruta contra la flota disponible.
+              const esSaturacion = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Saturación de Flota');
+              if (esSaturacion) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <SaturacionFlota />
                   </div>
                 );
               }

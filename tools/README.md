@@ -15,12 +15,16 @@ node tools/actualizar.js fabrica-hielo
 ```
 
 Grupos disponibles: `fabrica-hielo`, `compras`, `sistemas`, `objetivos`,
-`presupuesto`, `insumos`, `logistica`, `lavado`, `gestion`, `gestion-presentacion`. Sin argumentos lista todo lo que
-sabe hacer.
+`presupuesto`, `insumos`, `logistica`, `saturacion`, `lavado`, `gestion`,
+`gestion-presentacion`. Sin argumentos lista todo lo que sabe hacer.
 
-`lavado` va **después** de `presupuesto` y `logistica`: el form de lavado no
-tiene costo, así que el tablero de KPI lo toma de los tableros que ellos dejan
-escritos.
+Dos grupos dependen de otros y por eso van al final:
+
+- `lavado` después de `presupuesto` y `logistica`: el form de lavado no tiene
+  costo, así que el tablero de KPI lo toma de los tableros que ellos dejan
+  escritos.
+- `saturacion` después de `logistica`: el denominador es la flota disponible que
+  deja escrita Disponibilidad de Flota. Si esa está vieja, la saturación sale mal.
 
 El script busca cada archivo por nombre en `Descargas`, tolerando los sufijos
 que agrega el navegador (`archivo (2).xlsx`) y quedándose con el más reciente.
@@ -86,6 +90,41 @@ suposición se rompió.
   que fue un arqueo). El saldo es la suma de la S21 a la S32 y `Año 2026` la de
   la S34 en adelante. Los cortes están en la constante `TRAMOS` del extractor y
   cada corrida controla que las dos columnas den la suma de sus semanas.
+
+## La hoja de ruta y la saturación de flota
+
+`HOJA DE RUTA - TRANSPORTE.xlsx`, hoja **Respuestas**, es el volcado de un form
+que tráfico carga por cada viaje: qué tractor sale, a qué destino, **qué semi
+lleva y qué semi trae**. Cruzado con Disponibilidad de Flota da la saturación:
+cuánto se le pide a la flota contra lo que la flota puede dar.
+
+- **La hoja no acumula.** Guarda una ventana y el resto se archiva en la base
+  (`controletiquetas → transporte.HojasRuta`, ver `cargar-hojas-ruta.sql`). La
+  copia sincronizada tenía 133 filas de septiembre y la vieja de Descargas 1.693
+  de abril a junio: **se leen todas las copias y se unen por `Id`**. Hoy quedan
+  58 días hábiles sin cubrir entre el 14/06 y el 31/08; salen de la base, no de
+  ninguna exportación.
+- **Lo que tracciona y lo que se arrastra son dos parques distintos** y no se
+  pueden promediar. Tracción: 17 tractores + 9 chasis/balancines, salen en la
+  columna *Patente*. Remolque: 41 semis + 4 bateas, salen en *Semi Lleva* y
+  *Semi Trae*. Los 5 toritos son de patio y no aparecen en ninguna hoja de ruta.
+- **La regla es un viaje por unidad por día**, pero en tractores el 60 % de los
+  días de unidad tienen dos o más: la operación cierra con la doble vuelta, no
+  con la regla. Por eso la saturación da 139 % con sólo el 74 % de las unidades
+  saliendo.
+- **Los ciclos que cruzan un hueco de datos hay que descartarlos.** Un semi que
+  «salió el 13/06 y volvió el 01/09» no estuvo 80 días afuera: es que no hay
+  julio ni agosto. Sin ese filtro la rotación daba 2,24 días en vez de 0,70 y el
+  reparto por destino quedaba al doble. Se descartan 43 ciclos y se avisa.
+- **Las patentes se escriben a mano.** Hay transposiciones (AG525VN por
+  AG252VN), dígitos de más (HMH2555) y texto pegado (SPW094FEDERAL). Se corrigen
+  contra el padrón por distancia de edición y **sólo cuando hay un único
+  candidato**; con dos o más se dejan y quedan listadas en calidad del dato.
+- **En Descargas hay copias que son HTML con nombre .xlsx.** El extractor las
+  prueba antes de leerlas y las saltea avisando, en vez de tumbar la corrida.
+- **Siete unidades no registraron un solo movimiento** en cinco meses (seis
+  semis y un tractor). Cuentan como capacidad disponible y no rotan: el tablero
+  las lista porque cambian la lectura de la saturación.
 
 ## El form de lavado de camiones
 

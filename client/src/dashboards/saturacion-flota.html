@@ -1,0 +1,460 @@
+<meta charset="utf-8">
+<title>Saturación de Flota</title>
+<style>
+  :root{
+    --bg:#0c1c26; --panel:#12242f; --panel-2:#0e1e28; --panel-3:#162b37;
+    --line:#23353f; --line-2:#2c414d;
+    --text:#eef2f5; --muted:#8ba0ab; --muted-2:#667d89;
+    --brand:#b27746; --brand-dim:rgba(178,119,70,.13); --brand-line:rgba(178,119,70,.45);
+    --info:#26b6d9; --good:#22e39b; --bad:#ff4d67; --amber:#f5a623; --violeta:#9b8cf0;
+    --radius:12px;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.45;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 50px;}
+  .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:18px;}
+  .overline{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--info);margin:0 0 5px;}
+  h1{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .sub{font-size:12.5px;color:var(--muted);margin:5px 0 0;max-width:740px;}
+  .fuente{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;}
+  .fuente::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--info);box-shadow:0 0 7px 1px rgba(38,182,217,.7);}
+
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
+  @media(max-width:960px){ .kpis{grid-template-columns:repeat(2,1fr);} }
+  .kpi{background:linear-gradient(160deg,var(--panel) 0%,var(--panel-2) 135%);border:1px solid var(--line);border-radius:11px;padding:14px 15px;}
+  .kpi.hero{border-color:var(--brand-line);background:linear-gradient(135deg,var(--brand-dim) 0%,var(--panel) 60%,var(--panel-2) 130%);border-top:3px solid var(--brand);}
+  .kpi .kl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;line-height:1.35;}
+  .kpi .kv{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.05;margin-top:6px;color:#fff;}
+  .kpi .kv small{font-size:13px;font-weight:700;color:var(--muted);margin-left:2px;}
+  .kpi .kv.good{color:var(--good);} .kpi .kv.amber{color:var(--amber);} .kpi .kv.bad{color:var(--bad);}
+  .kpi .kd{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:4px;line-height:1.45;}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 18px;margin-bottom:16px;}
+  .panel-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px;}
+  .panel h3{font-size:15px;font-weight:800;margin:0;}
+  .panel .psub{font-size:11.5px;color:var(--muted);margin:0;max-width:600px;}
+  .lead{font-size:12.5px;color:var(--muted);margin:6px 0 14px;max-width:840px;}
+  .lead b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .grid2 .panel{margin-bottom:0;}
+  @media(max-width:960px){ .grid2{grid-template-columns:1fr;} }
+
+  .lgd{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:8px;}
+  .lgd i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;}
+  .lgd i.ln{width:14px;height:3px;border-radius:2px;vertical-align:3px;}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center;}
+  .chip{appearance:none;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);font:inherit;font-size:12px;font-weight:700;padding:6px 13px;border-radius:999px;cursor:pointer;}
+  .chip:hover{color:var(--text);border-color:var(--line-2);}
+  .chip.on{background:var(--brand-dim);border-color:var(--brand-line);color:#f0d9c2;}
+  .flabel{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);}
+
+  .tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;}
+  .tscroll.vh{max-height:400px;overflow-y:auto;}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;white-space:nowrap;}
+  thead th{position:sticky;top:0;z-index:2;text-align:right;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding:10px 13px;background:var(--panel-2);border-bottom:1px solid var(--line);cursor:pointer;user-select:none;}
+  thead th:first-child{text-align:left;} thead th:hover{color:var(--text);}
+  thead th .ar{opacity:0;margin-left:4px;font-size:9px;} thead th.sorted{color:#fff;} thead th.sorted .ar{opacity:1;color:var(--brand);}
+  tbody td{padding:8px 13px;border-bottom:1px solid var(--line);text-align:right;}
+  tbody td:first-child{text-align:left;font-weight:700;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover td{background:rgba(255,255,255,.025);}
+  tfoot td{padding:9px 13px;text-align:right;font-weight:800;background:var(--panel-2);border-top:1px solid var(--line-2);}
+  tfoot td:first-child{text-align:left;}
+  .plate{display:inline-flex;font-family:ui-monospace,Consolas,monospace;font-weight:700;font-size:11.5px;letter-spacing:.07em;color:#fff;background:linear-gradient(180deg,var(--panel-3),var(--panel-2));border:1px solid var(--line-2);border-left:3px solid var(--info);border-radius:6px;padding:3px 9px;}
+  .plate.tr{border-left-color:var(--info);} .plate.ch{border-left-color:var(--amber);}
+  .plate.se{border-left-color:var(--good);} .plate.ba{border-left-color:var(--violeta);}
+  .gp{display:inline-flex;padding:2px 9px;border-radius:999px;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;}
+  .gp.tr{background:rgba(38,182,217,.13);color:var(--info);} .gp.ch{background:rgba(245,166,35,.13);color:var(--amber);}
+  .gp.se{background:rgba(34,227,155,.13);color:var(--good);} .gp.ba{background:rgba(155,140,240,.15);color:var(--violeta);}
+  .barcel{position:relative;}
+  .barcel i{position:absolute;left:0;top:0;bottom:0;background:rgba(38,182,217,.14);border-right:2px solid var(--info);}
+  .barcel span{position:relative;}
+
+  .bar-row{display:grid;grid-template-columns:150px 1fr 96px;align-items:center;gap:10px;margin-bottom:7px;font-size:12px;}
+  .bar-row .bl{color:var(--muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .bar-row .bt{height:15px;border-radius:5px;min-width:2px;background:var(--info);}
+  .bar-row .bv{text-align:right;font-weight:800;}
+
+  .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;}
+  @media(max-width:860px){ .cards3{grid-template-columns:1fr;} }
+  .card{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:13px 15px;}
+  .card .cl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  .card .cv{font-size:23px;font-weight:800;letter-spacing:-.025em;margin-top:5px;}
+  .card .cd{font-size:11.5px;color:var(--muted-2);font-weight:600;margin-top:4px;line-height:1.5;}
+
+  .rec{display:grid;gap:10px;}
+  .rec .r{background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:10px;padding:13px 16px;}
+  .rec .r .rt{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:5px;}
+  .rec .r .rn{font-size:13.5px;font-weight:800;}
+  .rec .r .rq{font-size:12.5px;font-weight:800;color:var(--good);white-space:nowrap;}
+  .rec .r p{margin:0;font-size:12.5px;color:var(--muted);}
+  .rec .r p b{color:var(--text);}
+  .rec .r.a{border-left-color:var(--amber);} .rec .r.a .rq{color:var(--amber);}
+  .rec .r.i{border-left-color:var(--info);} .rec .r.i .rq{color:var(--info);}
+
+  .aviso{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.3);border-radius:11px;padding:13px 16px;font-size:12.5px;color:#f0d9a8;line-height:1.6;margin-bottom:16px;}
+  .aviso b{color:#fff;}
+  .nota{font-size:11.5px;color:var(--muted-2);line-height:1.6;margin-top:12px;border-top:1px dashed var(--line);padding-top:10px;}
+  .nota b{color:var(--muted);}
+  .tip{position:fixed;z-index:60;pointer-events:none;background:#0e1e28;border:1px solid var(--line-2);border-radius:9px;padding:8px 11px;font-size:12px;line-height:1.5;color:var(--text);white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(5px);transition:opacity .12s;max-width:300px;}
+  .tip.show{opacity:1;transform:none;}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <p class="overline">Offal · Logística</p>
+      <h1>Saturación de Flota</h1>
+      <p class="sub">Cuánto le estamos pidiendo a la flota contra lo que la flota puede dar. Los viajes salen de la <b>hoja de ruta</b> —qué tractor sale, qué semi lleva y qué semi trae— y la capacidad, de <b>Disponibilidad de Flota</b>. La regla de planificación es <b>un viaje por unidad por día</b>.</p>
+    </div>
+    <span class="fuente" id="fuente"></span>
+  </header>
+
+  <div class="aviso" id="aviso"></div>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="panel">
+    <div class="panel-head"><div><h3>La tracción y los semis no están igual de apretados</h3></div></div>
+    <p class="lead" id="lead-cmp"></p>
+    <div class="cards3" id="cmp"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div><h3>Día a día</h3></div>
+      <p class="psub">La línea del 100% es la regla: un viaje por unidad disponible. Por encima, la flota está haciendo más de lo previsto.</p>
+    </div>
+    <div class="chips" id="chips-mes"></div>
+    <div class="lgd">
+      <span><i class="ln" style="background:var(--brand)"></i>Saturación de tracción · viajes ÷ unidades disponibles</span>
+      <span><i class="ln" style="background:var(--good)"></i>Semis fuera de planta ÷ semis disponibles</span>
+      <span><i style="background:var(--info)"></i>Viajes del día</span>
+    </div>
+    <div id="ch-dias"></div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel">
+      <div class="panel-head"><div><h3>La regla de un viaje por día</h3></div></div>
+      <p class="psub" style="margin:4px 0 12px">Cuántos días una unidad hizo 1, 2, 3 o más viajes. Todo lo que no es «1» es la regla estirada.</p>
+      <div id="regla"></div>
+      <p class="nota" id="regla-nota"></p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><div><h3>Cuánto tarda un semi en volver</h3></div></div>
+      <p class="psub" style="margin:4px 0 12px">Días entre que un semi sale y vuelve a entrar. Es lo que decide cuántos semis hacen falta.</p>
+      <div id="rot"></div>
+      <div class="cards3" style="margin-top:12px" id="rot-cards"></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head"><div><h3>Destinos: cuáles inmovilizan la flota</h3></div><p class="psub">Los que más viajes tienen no son los que más semis consumen.</p></div>
+    <div class="tscroll"><table id="tdes"><thead id="tdes-h"></thead><tbody id="tdes-b"></tbody></table></div>
+    <p class="nota">«Semis inmovilizados» es la cantidad media de semis que ese destino tiene retenidos en un día hábil: ciclos del destino × días afuera ÷ días del período. Es la porción de flota que se lleva.</p>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div><h3>Unidad por unidad</h3></div>
+      <div class="chips" id="chips-grupo" style="margin:0"></div>
+    </div>
+    <div class="tscroll vh"><table id="tuni"><thead id="tuni-h"></thead><tbody id="tuni-b"></tbody><tfoot id="tuni-f"></tfoot></table></div>
+    <p class="nota" id="uni-nota"></p>
+  </section>
+
+  <div class="grid2">
+    <section class="panel">
+      <div class="panel-head"><div><h3>Mes a mes</h3></div></div>
+      <div class="tscroll" style="margin-top:8px"><table id="tmes"><thead></thead><tbody id="tmes-b"></tbody></table></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><div><h3>Calidad del dato</h3></div></div>
+      <div class="cards3" id="cal" style="grid-template-columns:1fr"></div>
+      <p class="nota" id="cal-nota"></p>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head"><div><h3>Qué dice esto</h3></div></div>
+    <div class="rec" id="rec"></div>
+  </section>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+(function(){
+  const DATA={"meta":{"desde":"2026-04-01","hasta":"2026-09-04","dias":65,"habiles":55,"hojas":1824,"archivos":2,"corte":"2026-09-05","semanaFlota":"Sem 36"},"roster":{"Tractor":17,"Torito":5,"Chasis/Balancín":9,"Semi":41,"Batea":4},"capacidad":{"tracc":22.5,"semis":33.8},"resumen":{"viajesDia":31.1,"viajesMax":44,"satT":139.1,"usoT":74,"satS":90.1,"ocuS":90.6,"diasSobre100T":46,"diasSobre100S":17,"salidasDia":26.2},"rotacion":{"n":1352,"prom":0.7,"p50":0,"p90":2,"max":8,"dist":[{"d":"0","n":799},{"d":"1","n":351},{"d":"2","n":87},{"d":"3","n":70},{"d":"4","n":22},{"d":"5","n":13},{"d":"6","n":8},{"d":"7+","n":2}]},"dias":[{"f":"2026-04-01","sem":14,"dow":3,"habil":true,"viajes":38,"tracc":20,"semis":31,"salidas":25,"fuera":18,"capT":25,"capS":30,"satT":152,"usoT":80,"satS":103.3,"ocuS":60},{"f":"2026-04-02","sem":14,"dow":4,"habil":true,"viajes":10,"tracc":7,"semis":7,"salidas":6,"fuera":5,"capT":25,"capS":30,"satT":40,"usoT":28,"satS":23.3,"ocuS":16.7},{"f":"2026-04-04","sem":14,"dow":6,"habil":false,"viajes":11,"tracc":6,"semis":13,"salidas":11,"fuera":10,"capT":25,"capS":30,"satT":44,"usoT":24,"satS":43.3,"ocuS":33.3},{"f":"2026-04-06","sem":15,"dow":1,"habil":true,"viajes":22,"tracc":13,"semis":28,"salidas":19,"fuera":26,"capT":24,"capS":33,"satT":91.7,"usoT":54.2,"satS":84.8,"ocuS":78.8},{"f":"2026-04-07","sem":15,"dow":2,"habil":true,"viajes":25,"tracc":16,"semis":33,"salidas":22,"fuera":32,"capT":24,"capS":33,"satT":104.2,"usoT":66.7,"satS":100,"ocuS":97},{"f":"2026-04-08","sem":15,"dow":3,"habil":true,"viajes":23,"tracc":17,"semis":29,"salidas":19,"fuera":33,"capT":24,"capS":33,"satT":95.8,"usoT":70.8,"satS":87.9,"ocuS":100},{"f":"2026-04-09","sem":15,"dow":4,"habil":true,"viajes":25,"tracc":15,"semis":30,"salidas":21,"fuera":32,"capT":24,"capS":33,"satT":104.2,"usoT":62.5,"satS":90.9,"ocuS":97},{"f":"2026-04-10","sem":15,"dow":5,"habil":true,"viajes":31,"tracc":15,"semis":34,"salidas":28,"fuera":35,"capT":24,"capS":33,"satT":129.2,"usoT":62.5,"satS":103,"ocuS":106.1},{"f":"2026-04-11","sem":15,"dow":6,"habil":false,"viajes":10,"tracc":7,"semis":13,"salidas":10,"fuera":25,"capT":24,"capS":33,"satT":41.7,"usoT":29.2,"satS":39.4,"ocuS":75.8},{"f":"2026-04-13","sem":16,"dow":1,"habil":true,"viajes":22,"tracc":15,"semis":24,"salidas":17,"fuera":28,"capT":24,"capS":33,"satT":91.7,"usoT":62.5,"satS":72.7,"ocuS":84.8},{"f":"2026-04-14","sem":16,"dow":2,"habil":true,"viajes":37,"tracc":19,"semis":34,"salidas":32,"fuera":36,"capT":24,"capS":33,"satT":154.2,"usoT":79.2,"satS":103,"ocuS":109.1},{"f":"2026-04-15","sem":16,"dow":3,"habil":true,"viajes":35,"tracc":20,"semis":32,"salidas":27,"fuera":34,"capT":24,"capS":33,"satT":145.8,"usoT":83.3,"satS":97,"ocuS":103},{"f":"2026-04-16","sem":16,"dow":4,"habil":true,"viajes":37,"tracc":21,"semis":34,"salidas":30,"fuera":36,"capT":24,"capS":33,"satT":154.2,"usoT":87.5,"satS":103,"ocuS":109.1},{"f":"2026-04-17","sem":16,"dow":5,"habil":true,"viajes":31,"tracc":16,"semis":33,"salidas":27,"fuera":35,"capT":24,"capS":33,"satT":129.2,"usoT":66.7,"satS":100,"ocuS":106.1},{"f":"2026-04-18","sem":16,"dow":6,"habil":false,"viajes":16,"tracc":12,"semis":21,"salidas":16,"fuera":29,"capT":24,"capS":33,"satT":66.7,"usoT":50,"satS":63.6,"ocuS":87.9},{"f":"2026-04-20","sem":17,"dow":1,"habil":true,"viajes":27,"tracc":18,"semis":28,"salidas":20,"fuera":31,"capT":22,"capS":33,"satT":122.7,"usoT":81.8,"satS":84.8,"ocuS":93.9},{"f":"2026-04-21","sem":17,"dow":2,"habil":true,"viajes":32,"tracc":17,"semis":28,"salidas":23,"fuera":32,"capT":22,"capS":33,"satT":145.5,"usoT":77.3,"satS":84.8,"ocuS":97},{"f":"2026-04-22","sem":17,"dow":3,"habil":true,"viajes":27,"tracc":15,"semis":29,"salidas":23,"fuera":30,"capT":22,"capS":33,"satT":122.7,"usoT":68.2,"satS":87.9,"ocuS":90.9},{"f":"2026-04-23","sem":17,"dow":4,"habil":true,"viajes":21,"tracc":13,"semis":25,"salidas":19,"fuera":29,"capT":22,"capS":33,"satT":95.5,"usoT":59.1,"satS":75.8,"ocuS":87.9},{"f":"2026-04-24","sem":17,"dow":5,"habil":true,"viajes":27,"tracc":14,"semis":31,"salidas":24,"fuera":30,"capT":22,"capS":33,"satT":122.7,"usoT":63.6,"satS":93.9,"ocuS":90.9},{"f":"2026-04-25","sem":17,"dow":6,"habil":false,"viajes":11,"tracc":9,"semis":14,"salidas":11,"fuera":22,"capT":22,"capS":33,"satT":50,"usoT":40.9,"satS":42.4,"ocuS":66.7},{"f":"2026-04-27","sem":18,"dow":1,"habil":true,"viajes":21,"tracc":16,"semis":22,"salidas":18,"fuera":27,"capT":23,"capS":32,"satT":91.3,"usoT":69.6,"satS":68.8,"ocuS":84.4},{"f":"2026-04-28","sem":18,"dow":2,"habil":true,"viajes":36,"tracc":18,"semis":35,"salidas":28,"fuera":34,"capT":23,"capS":32,"satT":156.5,"usoT":78.3,"satS":109.4,"ocuS":106.3},{"f":"2026-04-29","sem":18,"dow":3,"habil":true,"viajes":36,"tracc":17,"semis":31,"salidas":31,"fuera":33,"capT":23,"capS":32,"satT":156.5,"usoT":73.9,"satS":96.9,"ocuS":103.1},{"f":"2026-04-30","sem":18,"dow":4,"habil":true,"viajes":40,"tracc":17,"semis":34,"salidas":35,"fuera":33,"capT":23,"capS":32,"satT":173.9,"usoT":73.9,"satS":106.3,"ocuS":103.1},{"f":"2026-05-01","sem":18,"dow":5,"habil":true,"viajes":12,"tracc":11,"semis":16,"salidas":12,"fuera":26,"capT":23,"capS":32,"satT":52.2,"usoT":47.8,"satS":50,"ocuS":81.3},{"f":"2026-05-04","sem":19,"dow":1,"habil":true,"viajes":24,"tracc":17,"semis":27,"salidas":20,"fuera":31,"capT":22,"capS":34,"satT":109.1,"usoT":77.3,"satS":79.4,"ocuS":91.2},{"f":"2026-05-05","sem":19,"dow":2,"habil":true,"viajes":36,"tracc":19,"semis":31,"salidas":27,"fuera":32,"capT":22,"capS":34,"satT":163.6,"usoT":86.4,"satS":91.2,"ocuS":94.1},{"f":"2026-05-06","sem":19,"dow":3,"habil":true,"viajes":32,"tracc":16,"semis":33,"salidas":28,"fuera":33,"capT":22,"capS":34,"satT":145.5,"usoT":72.7,"satS":97.1,"ocuS":97.1},{"f":"2026-05-07","sem":19,"dow":4,"habil":true,"viajes":38,"tracc":17,"semis":34,"salidas":32,"fuera":32,"capT":22,"capS":34,"satT":172.7,"usoT":77.3,"satS":100,"ocuS":94.1},{"f":"2026-05-08","sem":19,"dow":5,"habil":true,"viajes":33,"tracc":16,"semis":32,"salidas":31,"fuera":35,"capT":22,"capS":34,"satT":150,"usoT":72.7,"satS":94.1,"ocuS":102.9},{"f":"2026-05-09","sem":19,"dow":6,"habil":false,"viajes":12,"tracc":12,"semis":13,"salidas":10,"fuera":25,"capT":22,"capS":34,"satT":54.5,"usoT":54.5,"satS":38.2,"ocuS":73.5},{"f":"2026-05-11","sem":20,"dow":1,"habil":true,"viajes":23,"tracc":13,"semis":26,"salidas":21,"fuera":29,"capT":21,"capS":34,"satT":109.5,"usoT":61.9,"satS":76.5,"ocuS":85.3},{"f":"2026-05-12","sem":20,"dow":2,"habil":true,"viajes":33,"tracc":18,"semis":33,"salidas":30,"fuera":35,"capT":21,"capS":34,"satT":157.1,"usoT":85.7,"satS":97.1,"ocuS":102.9},{"f":"2026-05-13","sem":20,"dow":3,"habil":true,"viajes":37,"tracc":18,"semis":32,"salidas":33,"fuera":35,"capT":21,"capS":34,"satT":176.2,"usoT":85.7,"satS":94.1,"ocuS":102.9},{"f":"2026-05-14","sem":20,"dow":4,"habil":true,"viajes":36,"tracc":20,"semis":36,"salidas":32,"fuera":36,"capT":21,"capS":34,"satT":171.4,"usoT":95.2,"satS":105.9,"ocuS":105.9},{"f":"2026-05-15","sem":20,"dow":5,"habil":true,"viajes":35,"tracc":15,"semis":34,"salidas":31,"fuera":35,"capT":21,"capS":34,"satT":166.7,"usoT":71.4,"satS":100,"ocuS":102.9},{"f":"2026-05-16","sem":20,"dow":6,"habil":false,"viajes":11,"tracc":9,"semis":14,"salidas":11,"fuera":25,"capT":21,"capS":34,"satT":52.4,"usoT":42.9,"satS":41.2,"ocuS":73.5},{"f":"2026-05-18","sem":21,"dow":1,"habil":true,"viajes":25,"tracc":15,"semis":28,"salidas":21,"fuera":31,"capT":22,"capS":34,"satT":113.6,"usoT":68.2,"satS":82.4,"ocuS":91.2},{"f":"2026-05-19","sem":21,"dow":2,"habil":true,"viajes":34,"tracc":17,"semis":35,"salidas":32,"fuera":37,"capT":22,"capS":34,"satT":154.5,"usoT":77.3,"satS":102.9,"ocuS":108.8},{"f":"2026-05-20","sem":21,"dow":3,"habil":true,"viajes":37,"tracc":19,"semis":32,"salidas":30,"fuera":35,"capT":22,"capS":34,"satT":168.2,"usoT":86.4,"satS":94.1,"ocuS":102.9},{"f":"2026-05-21","sem":21,"dow":4,"habil":true,"viajes":38,"tracc":18,"semis":38,"salidas":35,"fuera":37,"capT":22,"capS":34,"satT":172.7,"usoT":81.8,"satS":111.8,"ocuS":108.8},{"f":"2026-05-22","sem":21,"dow":5,"habil":true,"viajes":44,"tracc":19,"semis":34,"salidas":36,"fuera":34,"capT":22,"capS":34,"satT":200,"usoT":86.4,"satS":100,"ocuS":100},{"f":"2026-05-23","sem":21,"dow":6,"habil":false,"viajes":13,"tracc":9,"semis":16,"salidas":12,"fuera":9,"capT":22,"capS":34,"satT":59.1,"usoT":40.9,"satS":47.1,"ocuS":26.5},{"f":"2026-05-26","sem":22,"dow":2,"habil":true,"viajes":28,"tracc":17,"semis":29,"salidas":23,"fuera":20,"capT":21,"capS":35,"satT":133.3,"usoT":81,"satS":82.9,"ocuS":57.1},{"f":"2026-05-27","sem":22,"dow":3,"habil":true,"viajes":34,"tracc":17,"semis":28,"salidas":26,"fuera":31,"capT":21,"capS":35,"satT":161.9,"usoT":81,"satS":80,"ocuS":88.6},{"f":"2026-05-28","sem":22,"dow":4,"habil":true,"viajes":38,"tracc":17,"semis":31,"salidas":33,"fuera":33,"capT":21,"capS":35,"satT":181,"usoT":81,"satS":88.6,"ocuS":94.3},{"f":"2026-05-29","sem":22,"dow":5,"habil":true,"viajes":36,"tracc":16,"semis":32,"salidas":33,"fuera":32,"capT":21,"capS":35,"satT":171.4,"usoT":76.2,"satS":91.4,"ocuS":91.4},{"f":"2026-05-30","sem":22,"dow":6,"habil":false,"viajes":14,"tracc":9,"semis":18,"salidas":14,"fuera":27,"capT":21,"capS":35,"satT":66.7,"usoT":42.9,"satS":51.4,"ocuS":77.1},{"f":"2026-06-01","sem":23,"dow":1,"habil":true,"viajes":29,"tracc":14,"semis":28,"salidas":21,"fuera":30,"capT":23,"capS":35,"satT":126.1,"usoT":60.9,"satS":80,"ocuS":85.7},{"f":"2026-06-02","sem":23,"dow":2,"habil":true,"viajes":37,"tracc":19,"semis":32,"salidas":31,"fuera":30,"capT":23,"capS":35,"satT":160.9,"usoT":82.6,"satS":91.4,"ocuS":85.7},{"f":"2026-06-03","sem":23,"dow":3,"habil":true,"viajes":38,"tracc":20,"semis":33,"salidas":30,"fuera":33,"capT":23,"capS":35,"satT":165.2,"usoT":87,"satS":94.3,"ocuS":94.3},{"f":"2026-06-04","sem":23,"dow":4,"habil":true,"viajes":36,"tracc":17,"semis":34,"salidas":31,"fuera":32,"capT":23,"capS":35,"satT":156.5,"usoT":73.9,"satS":97.1,"ocuS":91.4},{"f":"2026-06-05","sem":23,"dow":5,"habil":true,"viajes":37,"tracc":19,"semis":35,"salidas":30,"fuera":36,"capT":23,"capS":35,"satT":160.9,"usoT":82.6,"satS":100,"ocuS":102.9},{"f":"2026-06-06","sem":23,"dow":6,"habil":false,"viajes":5,"tracc":4,"semis":5,"salidas":5,"fuera":16,"capT":23,"capS":35,"satT":21.7,"usoT":17.4,"satS":14.3,"ocuS":45.7},{"f":"2026-06-08","sem":24,"dow":1,"habil":true,"viajes":20,"tracc":14,"semis":24,"salidas":17,"fuera":28,"capT":21,"capS":35,"satT":95.2,"usoT":66.7,"satS":68.6,"ocuS":80},{"f":"2026-06-09","sem":24,"dow":2,"habil":true,"viajes":37,"tracc":17,"semis":38,"salidas":32,"fuera":35,"capT":21,"capS":35,"satT":176.2,"usoT":81,"satS":108.6,"ocuS":100},{"f":"2026-06-10","sem":24,"dow":3,"habil":true,"viajes":27,"tracc":16,"semis":30,"salidas":24,"fuera":35,"capT":21,"capS":35,"satT":128.6,"usoT":76.2,"satS":85.7,"ocuS":100},{"f":"2026-06-11","sem":24,"dow":4,"habil":true,"viajes":28,"tracc":16,"semis":31,"salidas":23,"fuera":31,"capT":21,"capS":35,"satT":133.3,"usoT":76.2,"satS":88.6,"ocuS":88.6},{"f":"2026-06-12","sem":24,"dow":5,"habil":true,"viajes":34,"tracc":17,"semis":35,"salidas":30,"fuera":26,"capT":21,"capS":35,"satT":161.9,"usoT":81,"satS":100,"ocuS":74.3},{"f":"2026-06-13","sem":24,"dow":6,"habil":false,"viajes":9,"tracc":7,"semis":12,"salidas":9,"fuera":8,"capT":21,"capS":35,"satT":42.9,"usoT":33.3,"satS":34.3,"ocuS":22.9},{"f":"2026-09-01","sem":36,"dow":2,"habil":true,"viajes":34,"tracc":19,"semis":33,"salidas":29,"fuera":19,"capT":23,"capS":36,"satT":147.8,"usoT":82.6,"satS":91.7,"ocuS":52.8},{"f":"2026-09-02","sem":36,"dow":3,"habil":true,"viajes":40,"tracc":18,"semis":34,"salidas":35,"fuera":30,"capT":23,"capS":36,"satT":173.9,"usoT":78.3,"satS":94.4,"ocuS":83.3},{"f":"2026-09-03","sem":36,"dow":4,"habil":true,"viajes":43,"tracc":21,"semis":36,"salidas":35,"fuera":31,"capT":23,"capS":36,"satT":187,"usoT":91.3,"satS":100,"ocuS":86.1},{"f":"2026-09-04","sem":36,"dow":5,"habil":true,"viajes":16,"tracc":11,"semis":20,"salidas":13,"fuera":11,"capT":23,"capS":36,"satT":69.6,"usoT":47.8,"satS":55.6,"ocuS":30.6}],"meses":[{"m":"2026-04","dias":21,"viajes":603,"viajesDia":28.7,"satT":122.8,"usoT":69,"satS":89.4,"ocuS":91.7},{"m":"2026-05","dias":20,"viajes":653,"viajesDia":32.7,"satT":151.5,"usoT":77.7,"satS":91,"ocuS":95.2},{"m":"2026-06","dias":10,"viajes":323,"viajesDia":32.3,"satT":146.5,"usoT":76.8,"satS":91.4,"ocuS":90.3},{"m":"2026-09","dias":4,"viajes":133,"viajesDia":33.3,"satT":144.6,"usoT":75,"satS":85.4,"ocuS":63.2}],"unidades":[{"p":"ESK012","g":"Tractor","viajes":228,"sale":0,"vuelve":0,"dias":56,"porDia":4.07,"ocupacion":86.2},{"p":"HXU959","g":"Chasis/Balancín","viajes":43,"sale":60,"vuelve":62,"dias":47,"porDia":0.91,"ocupacion":72.3},{"p":"AC555VJ","g":"Tractor","viajes":150,"sale":0,"vuelve":0,"dias":61,"porDia":2.46,"ocupacion":93.8},{"p":"AC555VL","g":"Tractor","viajes":140,"sale":0,"vuelve":0,"dias":60,"porDia":2.33,"ocupacion":92.3},{"p":"AC427IU","g":"Batea","viajes":0,"sale":63,"vuelve":62,"dias":51,"porDia":0,"ocupacion":78.5},{"p":"AG390LR","g":"Batea","viajes":0,"sale":62,"vuelve":62,"dias":54,"porDia":0,"ocupacion":83.1},{"p":"AG252VN","g":"Tractor","viajes":123,"sale":0,"vuelve":0,"dias":59,"porDia":2.08,"ocupacion":90.8},{"p":"AD064DJ","g":"Batea","viajes":1,"sale":58,"vuelve":58,"dias":46,"porDia":0.02,"ocupacion":70.8},{"p":"AE145FT","g":"Batea","viajes":1,"sale":58,"vuelve":58,"dias":50,"porDia":0.02,"ocupacion":76.9},{"p":"AG252VM","g":"Tractor","viajes":114,"sale":0,"vuelve":0,"dias":59,"porDia":1.93,"ocupacion":90.8},{"p":"SLW322","g":"Chasis/Balancín","viajes":33,"sale":41,"vuelve":40,"dias":43,"porDia":0.77,"ocupacion":66.2},{"p":"AC555VK","g":"Tractor","viajes":113,"sale":0,"vuelve":0,"dias":57,"porDia":1.98,"ocupacion":87.7},{"p":"MXC711","g":"Tractor","viajes":106,"sale":0,"vuelve":0,"dias":53,"porDia":2,"ocupacion":81.5},{"p":"AC555VI","g":"Tractor","viajes":100,"sale":0,"vuelve":0,"dias":50,"porDia":2,"ocupacion":76.9},{"p":"AH546GC","g":"Semi","viajes":0,"sale":47,"vuelve":47,"dias":44,"porDia":0,"ocupacion":67.7},{"p":"AC356EE","g":"Semi","viajes":0,"sale":47,"vuelve":45,"dias":55,"porDia":0,"ocupacion":84.6},{"p":"BMS047","g":"Chasis/Balancín","viajes":26,"sale":33,"vuelve":32,"dias":39,"porDia":0.67,"ocupacion":60},{"p":"CMR938","g":"Semi","viajes":0,"sale":45,"vuelve":46,"dias":53,"porDia":0,"ocupacion":81.5},{"p":"AC356EF","g":"Semi","viajes":0,"sale":46,"vuelve":44,"dias":54,"porDia":0,"ocupacion":83.1},{"p":"IZH428","g":"Tractor","viajes":90,"sale":0,"vuelve":0,"dias":55,"porDia":1.64,"ocupacion":84.6},{"p":"MXC713","g":"Semi","viajes":0,"sale":43,"vuelve":46,"dias":53,"porDia":0,"ocupacion":81.5},{"p":"IHZ285","g":"Semi","viajes":0,"sale":43,"vuelve":43,"dias":53,"porDia":0,"ocupacion":81.5},{"p":"AE865GF","g":"Semi","viajes":0,"sale":42,"vuelve":43,"dias":52,"porDia":0,"ocupacion":80},{"p":"AH546GB","g":"Semi","viajes":0,"sale":42,"vuelve":43,"dias":43,"porDia":0,"ocupacion":66.2},{"p":"KWT404","g":"Semi","viajes":0,"sale":41,"vuelve":43,"dias":46,"porDia":0,"ocupacion":70.8},{"p":"AH532BY","g":"Semi","viajes":0,"sale":40,"vuelve":44,"dias":52,"porDia":0,"ocupacion":80},{"p":"JEQ393","g":"Chasis/Balancín","viajes":27,"sale":29,"vuelve":28,"dias":28,"porDia":0.96,"ocupacion":43.1},{"p":"HMH252","g":"Semi","viajes":0,"sale":42,"vuelve":40,"dias":53,"porDia":0,"ocupacion":81.5},{"p":"JNS094","g":"Semi","viajes":0,"sale":40,"vuelve":41,"dias":46,"porDia":0,"ocupacion":70.8},{"p":"AC356EJ","g":"Semi","viajes":0,"sale":42,"vuelve":37,"dias":48,"porDia":0,"ocupacion":73.8},{"p":"IKO413","g":"Semi","viajes":0,"sale":38,"vuelve":41,"dias":49,"porDia":0,"ocupacion":75.4},{"p":"HMH255","g":"Semi","viajes":0,"sale":40,"vuelve":38,"dias":45,"porDia":0,"ocupacion":69.2},{"p":"IKO416","g":"Semi","viajes":0,"sale":39,"vuelve":39,"dias":47,"porDia":0,"ocupacion":72.3},{"p":"NGY770","g":"Tractor","viajes":77,"sale":0,"vuelve":0,"dias":54,"porDia":1.43,"ocupacion":83.1},{"p":"AH532BZ","g":"Semi","viajes":0,"sale":41,"vuelve":36,"dias":47,"porDia":0,"ocupacion":72.3},{"p":"JNS092","g":"Semi","viajes":0,"sale":42,"vuelve":35,"dias":48,"porDia":0,"ocupacion":73.8},{"p":"IMO536","g":"Semi","viajes":0,"sale":39,"vuelve":37,"dias":50,"porDia":0,"ocupacion":76.9},{"p":"AE865GG","g":"Semi","viajes":0,"sale":37,"vuelve":39,"dias":48,"porDia":0,"ocupacion":73.8},{"p":"AC356EI","g":"Semi","viajes":0,"sale":40,"vuelve":33,"dias":46,"porDia":0,"ocupacion":70.8},{"p":"NIJ630","g":"Semi","viajes":0,"sale":36,"vuelve":34,"dias":50,"porDia":0,"ocupacion":76.9},{"p":"AC356EK","g":"Semi","viajes":0,"sale":36,"vuelve":33,"dias":47,"porDia":0,"ocupacion":72.3},{"p":"AG252VJ","g":"Tractor","viajes":69,"sale":0,"vuelve":0,"dias":52,"porDia":1.33,"ocupacion":80},{"p":"IND595","g":"Semi","viajes":0,"sale":34,"vuelve":32,"dias":46,"porDia":0,"ocupacion":70.8},{"p":"IKO414","g":"Semi","viajes":0,"sale":33,"vuelve":32,"dias":42,"porDia":0,"ocupacion":64.6},{"p":"AH546GA","g":"Semi","viajes":0,"sale":31,"vuelve":31,"dias":33,"porDia":0,"ocupacion":50.8},{"p":"AC555VH","g":"Tractor","viajes":62,"sale":0,"vuelve":0,"dias":50,"porDia":1.24,"ocupacion":76.9},{"p":"AB186BC","g":"Semi","viajes":0,"sale":32,"vuelve":30,"dias":43,"porDia":0,"ocupacion":66.2},{"p":"NIJ632","g":"Semi","viajes":0,"sale":30,"vuelve":30,"dias":48,"porDia":0,"ocupacion":73.8},{"p":"AB186BD","g":"Semi","viajes":0,"sale":29,"vuelve":29,"dias":47,"porDia":0,"ocupacion":72.3},{"p":"LZG119","g":"Chasis/Balancín","viajes":16,"sale":17,"vuelve":17,"dias":18,"porDia":0.89,"ocupacion":27.7},{"p":"KWT406","g":"Semi","viajes":0,"sale":24,"vuelve":26,"dias":29,"porDia":0,"ocupacion":44.6},{"p":"AC555VG","g":"Tractor","viajes":49,"sale":0,"vuelve":0,"dias":40,"porDia":1.23,"ocupacion":61.5},{"p":"JNA841","g":"Tractor","viajes":48,"sale":0,"vuelve":0,"dias":42,"porDia":1.14,"ocupacion":64.6},{"p":"AG252VL","g":"Tractor","viajes":45,"sale":1,"vuelve":1,"dias":35,"porDia":1.29,"ocupacion":53.8},{"p":"DLI931","g":"Chasis/Balancín","viajes":14,"sale":16,"vuelve":17,"dias":16,"porDia":0.88,"ocupacion":24.6},{"p":"SPW094","g":"Semi","viajes":0,"sale":25,"vuelve":21,"dias":37,"porDia":0,"ocupacion":56.9},{"p":"MXC715","g":"Semi","viajes":0,"sale":26,"vuelve":20,"dias":33,"porDia":0,"ocupacion":50.8},{"p":"HMH249","g":"Semi","viajes":0,"sale":23,"vuelve":21,"dias":25,"porDia":0,"ocupacion":38.5},{"p":"SIK946","g":"Chasis/Balancín","viajes":11,"sale":16,"vuelve":16,"dias":20,"porDia":0.55,"ocupacion":30.8},{"p":"POG190","g":"Semi","viajes":0,"sale":24,"vuelve":18,"dias":37,"porDia":0,"ocupacion":56.9},{"p":"IKO415","g":"Semi","viajes":0,"sale":22,"vuelve":19,"dias":26,"porDia":0,"ocupacion":40},{"p":"AQB067","g":"Chasis/Balancín","viajes":9,"sale":10,"vuelve":10,"dias":9,"porDia":1,"ocupacion":13.8},{"p":"AC581KP","g":"Tractor","viajes":26,"sale":0,"vuelve":0,"dias":21,"porDia":1.24,"ocupacion":32.3},{"p":"DAY315","g":"Chasis/Balancín","viajes":9,"sale":9,"vuelve":8,"dias":9,"porDia":1,"ocupacion":13.8},{"p":"MWP509","g":"Semi","viajes":0,"sale":12,"vuelve":13,"dias":16,"porDia":0,"ocupacion":24.6},{"p":"AG252VK","g":"Tractor","viajes":22,"sale":0,"vuelve":0,"dias":19,"porDia":1.16,"ocupacion":29.2},{"p":"DYR712","g":"Chasis/Balancín","viajes":2,"sale":3,"vuelve":6,"dias":6,"porDia":0.33,"ocupacion":9.2},{"p":"AC356EG","g":"Semi","viajes":0,"sale":5,"vuelve":5,"dias":7,"porDia":0,"ocupacion":10.8},{"p":"JAP922","g":"Semi","viajes":0,"sale":5,"vuelve":3,"dias":6,"porDia":0,"ocupacion":9.2},{"p":"IHZ284","g":"Semi","viajes":0,"sale":3,"vuelve":4,"dias":6,"porDia":0,"ocupacion":9.2},{"p":"FKP957","g":"Semi","viajes":0,"sale":2,"vuelve":1,"dias":3,"porDia":0,"ocupacion":4.6},{"p":"MXC712","g":"Semi","viajes":0,"sale":1,"vuelve":1,"dias":1,"porDia":0,"ocupacion":1.5},{"p":"192","g":"Otro","viajes":0,"sale":0,"vuelve":1,"dias":1,"porDia":0,"ocupacion":1.5},{"p":"VUELVECONTALLER","g":"Otro","viajes":0,"sale":0,"vuelve":1,"dias":1,"porDia":0,"ocupacion":1.5},{"p":"GGL938","g":"Torito","viajes":1,"sale":0,"vuelve":0,"dias":1,"porDia":1,"ocupacion":1.5},{"p":"AH546BY","g":"Otro","viajes":0,"sale":1,"vuelve":0,"dias":1,"porDia":0,"ocupacion":1.5}],"ociosas":[{"p":"LMD345","g":"Semi"},{"p":"LMD346","g":"Semi"},{"p":"IHZ228","g":"Semi"},{"p":"FPJ309","g":"Semi"},{"p":"HRV058","g":"Semi"},{"p":"IHZ227","g":"Semi"},{"p":"IJG687","g":"Tractor"}],"destinos":[{"d":"RIOPLATENSE","viajes":267,"ciclos":235,"rot":0.41,"semisDia":5.11},{"d":"GORINA","viajes":191,"ciclos":167,"rot":0.8,"semisDia":4.62},{"d":"SWIFT","viajes":174,"ciclos":173,"rot":0,"semisDia":2.66},{"d":"FRIGOLAR","viajes":139,"ciclos":98,"rot":0.67,"semisDia":2.52},{"d":"RUNFO","viajes":107,"ciclos":67,"rot":1.22,"semisDia":2.29},{"d":"FINEXCOR","viajes":103,"ciclos":40,"rot":1.58,"semisDia":1.58},{"d":"RAMALLO","viajes":89,"ciclos":88,"rot":0,"semisDia":1.35},{"d":"COCARSA","viajes":89,"ciclos":78,"rot":1.03,"semisDia":2.43},{"d":"FEDERAL","viajes":85,"ciclos":53,"rot":0.92,"semisDia":1.57},{"d":"FARAON","viajes":82,"ciclos":44,"rot":1.55,"semisDia":1.72},{"d":"TOLOSA","viajes":81,"ciclos":65,"rot":1.15,"semisDia":2.15},{"d":"CARINDU","viajes":65,"ciclos":45,"rot":1.18,"semisDia":1.51},{"d":"REFINERIA","viajes":54,"ciclos":54,"rot":0,"semisDia":0.83},{"d":"LOA","viajes":41,"ciclos":0,"rot":null,"semisDia":null},{"d":"CAÑUELAS","viajes":40,"ciclos":32,"rot":1.75,"semisDia":1.35},{"d":"PENTA","viajes":37,"ciclos":23,"rot":2.61,"semisDia":1.28},{"d":"LOBOS","viajes":27,"ciclos":21,"rot":2.48,"semisDia":1.12},{"d":"NAVARRO","viajes":22,"ciclos":14,"rot":1.07,"semisDia":0.45},{"d":"HUGUES","viajes":20,"ciclos":20,"rot":0,"semisDia":0.31},{"d":"DON THEO","viajes":16,"ciclos":0,"rot":null,"semisDia":null},{"d":"VTV","viajes":14,"ciclos":10,"rot":0,"semisDia":0.15},{"d":"GRABYA","viajes":13,"ciclos":11,"rot":0,"semisDia":0.17},{"d":"MORON","viajes":13,"ciclos":3,"rot":0.67,"semisDia":0.08},{"d":"ACHURITAS","viajes":11,"ciclos":0,"rot":null,"semisDia":null},{"d":"RUNFO/DON THEO","viajes":10,"ciclos":0,"rot":null,"semisDia":null},{"d":"ELASTIQUERO","viajes":5,"ciclos":0,"rot":null,"semisDia":null},{"d":"ZUCARS","viajes":5,"ciclos":1,"rot":1,"semisDia":0.03},{"d":"IFCO","viajes":4,"ciclos":0,"rot":null,"semisDia":null},{"d":"BLACK BAMBOO","viajes":3,"ciclos":3,"rot":0,"semisDia":0.05},{"d":"HUGHES","viajes":2,"ciclos":2,"rot":0,"semisDia":0.03},{"d":"ZUCARS / VTV","viajes":1,"ciclos":1,"rot":0,"semisDia":0.02},{"d":"FERROCEMENT","viajes":1,"ciclos":1,"rot":0,"semisDia":0.02},{"d":"FLUENTE/DEZA","viajes":1,"ciclos":0,"rot":null,"semisDia":null},{"d":"CERAMICAS LURDES","viajes":1,"ciclos":0,"rot":null,"semisDia":null},{"d":"AUXILIO - (RAMALLO)","viajes":1,"ciclos":0,"rot":null,"semisDia":null},{"d":"AUXILIO","viajes":1,"ciclos":0,"rot":null,"semisDia":null},{"d":"TALLER - CIUDADELA","viajes":1,"ciclos":0,"rot":null,"semisDia":null},{"d":"LOA - DON THEO","viajes":1,"ciclos":0,"rot":null,"semisDia":null},{"d":"INTERFARMA","viajes":1,"ciclos":1,"rot":0,"semisDia":0.02},{"d":"GRABYA / ROVAFARM","viajes":1,"ciclos":0,"rot":null,"semisDia":null},{"d":"RUNFO - (FIERROS)","viajes":1,"ciclos":0,"rot":null,"semisDia":null},{"d":"RUNFO (COLGADO)","viajes":1,"ciclos":0,"rot":null,"semisDia":null},{"d":"RUNFO/DONTHEO","viajes":1,"ciclos":0,"rot":null,"semisDia":null},{"d":"ROVAFARM","viajes":1,"ciclos":1,"rot":0,"semisDia":0.02}],"regla":{"Tractor":{"1":396,"2":235,"3":112,"4":52,"5+":27},"Chasis/Balancín":{"1":158,"2":16},"Batea":{"1":2}},"calidad":{"corregidas":[["AE965GG","AE865GG"],["AE835GF","AE865GF"],["AG525VN","AG252VN"],["POG192","POG190"],["SPW094FEDERAL","SPW094"],["AC256EI","AC356EI"],["HMH2555","HMH255"],["OSK912","ESK012"],["AG2152VM","AG252VM"],["MCX711","MXC711"],["ESK014","ESK012"],["AG546GA","AH546GA"],["AC247IU","AC427IU"],["SC555VI","AC555VI"]],"sinPadron":{"192":1,"VUELVECONTALLER":1,"AH546BY":1},"huecos":["2026-04-03","2026-05-25","2026-06-15","2026-06-16","2026-06-17","2026-06-18","2026-06-19","2026-06-22","2026-06-23","2026-06-24","2026-06-25","2026-06-26","2026-06-29","2026-06-30","2026-07-01","2026-07-02","2026-07-03","2026-07-06","2026-07-07","2026-07-08","2026-07-09","2026-07-10","2026-07-13","2026-07-14","2026-07-15","2026-07-16","2026-07-17","2026-07-20","2026-07-21","2026-07-22","2026-07-23","2026-07-24","2026-07-27","2026-07-28","2026-07-29","2026-07-30","2026-07-31","2026-08-03","2026-08-04","2026-08-05","2026-08-06","2026-08-07","2026-08-10","2026-08-11","2026-08-12","2026-08-13","2026-08-14","2026-08-17","2026-08-18","2026-08-19","2026-08-20","2026-08-21","2026-08-24","2026-08-25","2026-08-26","2026-08-27","2026-08-28","2026-08-31"],"ciclosDescartados":43,"ciclosAbiertos":34}};
+
+  const n0=v=>v==null||isNaN(v)?'—':Math.round(v).toLocaleString('es-AR');
+  const n1=v=>v==null||isNaN(v)?'—':v.toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1});
+  const n2=v=>v==null||isNaN(v)?'—':v.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const prom=a=>{const v=a.filter(x=>x!=null);return v.length?v.reduce((x,y)=>x+y,0)/v.length:null;};
+  const DOW=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const dm=f=>f.slice(8,10)+'/'+f.slice(5,7);
+  const MES={'01':'Enero','02':'Febrero','03':'Marzo','04':'Abril','05':'Mayo','06':'Junio','07':'Julio','08':'Agosto','09':'Septiembre','10':'Octubre','11':'Noviembre','12':'Diciembre'};
+  const nomMes=m=>MES[m.slice(5,7)]+' '+m.slice(0,4);
+  const cls=g=>/tractor/i.test(g)?'tr':/chasis|balanc/i.test(g)?'ch':/batea/i.test(g)?'ba':'se';
+
+  const M=DATA.meta, R=DATA.resumen, RO=DATA.rotacion;
+  const HAB=DATA.dias.filter(d=>d.habil);
+  let mesSel='todos', grupoSel='Tracción';
+
+  /* ── encabezado ── */
+  document.getElementById('fuente').textContent='Hoja de Ruta · '+M.desde+' a '+M.hasta+' · '+n0(M.hojas)+' viajes';
+  document.getElementById('aviso').innerHTML='La hoja de ruta <b>no acumula</b>: el archivo guarda una ventana y el resto se archiva. '+
+    'Con las copias que hay se cubren <b>'+M.dias+' días</b> ('+M.habiles+' hábiles) entre el '+M.desde+' y el '+M.hasta+
+    (DATA.calidad.huecos.length>20?', con un hueco de '+DATA.calidad.huecos.length+' días hábiles en el medio que no está en ningún archivo':'')+
+    '. La capacidad es la de <b>'+M.semanaFlota+'</b> de Disponibilidad de Flota para la semana de cada viaje.';
+
+  /* ── tarjetas ── */
+  document.getElementById('kpis').innerHTML=[
+    {h:1,l:'Viajes por día hábil',v:n1(R.viajesDia),d:'máximo del período: '+n0(R.viajesMax)},
+    {l:'Saturación de tracción',v:n1(R.satT),u:'%',c:R.satT>100?'bad':R.satT>85?'amber':'good',
+     d:'viajes ÷ unidades disponibles · '+R.diasSobre100T+' de '+M.habiles+' días por encima del 100%'},
+    {l:'Unidades de tracción que salen',v:n1(R.usoT),u:'%',c:R.usoT<70?'amber':'good',
+     d:'de las disponibles · el resto no sale ningún día'},
+    {l:'Semis fuera de planta',v:n1(R.ocuS),u:'%',c:R.ocuS>95?'bad':R.ocuS>80?'amber':'good',
+     d:'de los semis disponibles, en un día cualquiera'},
+    {l:'Rotación de un semi',v:n2(RO.prom),u:'días',c:'amber',d:'de que sale a que vuelve · mediana '+n0(RO.p50)+', p90 '+n0(RO.p90)},
+  ].map(k=>'<div class="kpi'+(k.h?' hero':'')+'"><div class="kl">'+k.l+'</div>'+
+    '<div class="kv '+(k.c||'')+'">'+k.v+(k.u?'<small>'+k.u+'</small>':'')+'</div><div class="kd">'+k.d+'</div></div>').join('');
+
+  /* ── el contraste ── */
+  const porUnidad=prom(HAB.map(d=>d.viajes/d.tracc));
+  const salen=prom(HAB.map(d=>d.tracc));
+  document.getElementById('lead-cmp').innerHTML=
+    'Los dos parques se leen distinto y conviene no promediarlos. La <b>tracción</b> mueve <b>'+n1(R.satT)+'%</b> de lo que la regla de un viaje '+
+    'por unidad permitiría, y no porque falten unidades —sale el <b>'+n1(R.usoT)+'%</b> de las disponibles— sino porque cada una que sale hace '+
+    '<b>'+n2(porUnidad)+'</b> viajes. La operación no cierra con la regla: cierra con la doble vuelta. '+
+    'Los <b>remolques</b> —semis y bateas— están ocupados el <b>'+n1(R.ocuS)+'%</b> del tiempo, con '+R.diasSobre100S+' de '+M.habiles+
+    ' días hábiles por encima del 100%. Es un activo que además necesita colchón: si vuelve tarde, el viaje del día siguiente no sale.';
+  document.getElementById('cmp').innerHTML=[
+    {l:'Tracción · viajes contra la regla',v:n1(R.satT)+'%',c:'#ff4d67',
+     d:'Con '+n1(DATA.capacidad.tracc)+' unidades disponibles y la regla de 1 viaje, la capacidad son '+n1(DATA.capacidad.tracc)+' viajes por día. Se hacen '+n1(R.viajesDia)+'.'},
+    {l:'Tracción · unidades que efectivamente salen',v:n1(R.usoT)+'%',c:'#f5a623',
+     d:'Salen '+n1(prom(HAB.map(d=>d.tracc)))+' unidades de las '+n1(DATA.capacidad.tracc)+' disponibles. Las que salen hacen '+n2(prom(HAB.map(d=>d.viajes/d.tracc)))+' viajes cada una.'},
+    {l:'Semis · ocupación real',v:n1(R.ocuS)+'%',c:'#22e39b',
+     d:'En un día hábil hay '+n1(prom(HAB.map(d=>d.fuera)))+' semis fuera de planta sobre '+n1(DATA.capacidad.semis)+' disponibles.'},
+  ].map(c=>'<div class="card"><div class="cl">'+c.l+'</div><div class="cv" style="color:'+c.c+'">'+c.v+'</div><div class="cd">'+c.d+'</div></div>').join('');
+
+  /* ── día a día ── */
+  const meses=[...new Set(DATA.dias.map(d=>d.f.slice(0,7)))];
+  function chipsMes(){
+    let h='<span class="flabel">Mes</span><button class="chip'+(mesSel==='todos'?' on':'')+'" data-m="todos">Todo el período</button>';
+    meses.forEach(m=>{ h+='<button class="chip'+(mesSel===m?' on':'')+'" data-m="'+m+'">'+nomMes(m)+'</button>'; });
+    const c=document.getElementById('chips-mes'); c.innerHTML=h;
+    c.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ mesSel=b.dataset.m; chipsMes(); chDias(); alto(); });
+  }
+  function chDias(){
+    const D=HAB.filter(d=>mesSel==='todos'||d.f.startsWith(mesSel));
+    if(!D.length){ document.getElementById('ch-dias').innerHTML='<p class="psub">Sin días en esta selección.</p>'; return; }
+    const W=Math.max(640,D.length*22), H=300, pl=42, pr=42, pt=16, pb=46, iw=W-pl-pr, ih=H-pt-pb;
+    const maxPct=Math.max(160,...D.map(d=>Math.max(d.satT||0,d.ocuS||0)))*1.05;
+    const maxV=Math.max(...D.map(d=>d.viajes))*1.6;
+    const x=i=>pl+iw*(i+.5)/D.length, y=v=>pt+ih-ih*v/maxPct, yv=v=>pt+ih-ih*v/maxV;
+    let g='';
+    for(let k=0;k<=4;k++){ const v=maxPct*k/4, yy=y(v);
+      g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+yy+'" y2="'+yy+'" stroke="#23353f"/>'+
+         '<text x="'+(pl-7)+'" y="'+(yy+4)+'" fill="#667d89" font-size="10" text-anchor="end">'+n0(v)+'%</text>'; }
+    const bw=Math.min(14,iw/D.length*.5);
+    D.forEach((d,i)=>{ const h=ih*d.viajes/maxV;
+      g+='<rect x="'+(x(i)-bw/2)+'" y="'+(pt+ih-h)+'" width="'+bw+'" height="'+Math.max(0,h)+'" rx="3" fill="#26b6d9" opacity=".38"'+
+         ' data-tip="'+DOW[d.dow]+' '+d.f+'\n'+d.viajes+' viajes · '+d.tracc+' unidades de tracción de '+d.capT+
+         '\nsaturación '+n1(d.satT)+'% · uso '+n1(d.usoT)+'%\nsemis fuera de planta '+d.fuera+' de '+d.capS+' ('+n1(d.ocuS)+'%)"/>'; });
+    const y100=y(100);
+    g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y100+'" y2="'+y100+'" stroke="#8ba0ab" stroke-width="1.6" stroke-dasharray="5 4"/>'+
+       '<text x="'+(W-pr+6)+'" y="'+(y100+4)+'" fill="#8ba0ab" font-size="10" font-weight="700">100%</text>';
+    const linea=(campo,color)=>{
+      const pts=D.map((d,i)=>d[campo]==null?null:[x(i),y(d[campo])]).filter(Boolean);
+      if(pts.length<2) return '';
+      return '<polyline points="'+pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')+'" fill="none" stroke="'+color+'" stroke-width="2.2" stroke-linejoin="round"/>';
+    };
+    g+=linea('ocuS','#22e39b')+linea('satT','#b27746');
+    const paso=Math.ceil(D.length/22);
+    D.forEach((d,i)=>{ if(i%paso) return;
+      g+='<text x="'+x(i)+'" y="'+(pt+ih+16)+'" fill="#667d89" font-size="9" text-anchor="middle">'+dm(d.f)+'</text>'; });
+    g+='<text x="'+(pl+iw/2)+'" y="'+(H-6)+'" fill="#667d89" font-size="10" text-anchor="middle">barras: viajes del día · líneas: % sobre la flota disponible</text>';
+    document.getElementById('ch-dias').innerHTML='<div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" width="100%" style="min-width:'+Math.min(W,700)+'px;height:'+H+'px">'+g+'</svg></div>';
+  }
+
+  /* ── la regla ── */
+  {
+    const G=DATA.regla, cubos=['1','2','3','4','5+'];
+    const col={'1':'#22e39b','2':'#f5a623','3':'#ff9f43','4':'#ff4d67','5+':'#c62b45'};
+    let h='';
+    Object.entries(G).forEach(([g,d])=>{
+      const tot=Object.values(d).reduce((a,b)=>a+b,0); if(!tot) return;
+      h+='<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:800;margin-bottom:6px">'+esc(g)+
+         ' <span style="color:var(--muted);font-weight:600">· '+n0(tot)+' días de unidad</span></div>'+
+         '<div style="display:flex;height:26px;border-radius:7px;overflow:hidden;border:1px solid var(--line-2)">'+
+         cubos.map(c=>{ const n=d[c]||0; if(!n) return '';
+           return '<div style="width:'+(100*n/tot)+'%;background:'+col[c]+';display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:#08161d"'+
+             ' data-tip="'+esc(g)+' · '+c+' viaje(s) en el día\n'+n+' días de unidad ('+n1(100*n/tot)+'%)">'+(100*n/tot>9?c:'')+'</div>'; }).join('')+
+         '</div></div>';
+    });
+    document.getElementById('regla').innerHTML=h;
+    const T=DATA.regla['Tractor']||{}, tot=Object.values(T).reduce((a,b)=>a+b,0);
+    const mas=tot-(T['1']||0);
+    document.getElementById('regla-nota').innerHTML='En los tractores, <b>'+n0(mas)+'</b> de '+n0(tot)+' días de unidad ('+
+      n1(100*mas/tot)+'%) tienen más de un viaje. La regla de uno por día ya no describe lo que pasa: '+
+      'los destinos cercanos permiten doble y triple vuelta, y eso es lo que sostiene el volumen con la flota que hay.';
+  }
+
+  /* ── rotación ── */
+  {
+    const D=RO.dist, max=Math.max(...D.map(d=>d.n))||1, tot=D.reduce((a,d)=>a+d.n,0);
+    document.getElementById('rot').innerHTML=D.map(d=>
+      '<div class="bar-row"><span class="bl">'+(d.d==='0'?'Vuelve el mismo día':d.d==='7+'?'7 días o más':d.d+' día'+(d.d==='1'?'':'s'))+'</span>'+
+      '<span class="bt" style="width:'+(100*d.n/max)+'%;background:'+(d.d==='0'?'#22e39b':+d.d<=2?'#26b6d9':+d.d<=4?'#f5a623':'#ff4d67')+'"'+
+      ' data-tip="'+d.d+' día(s) afuera\n'+d.n+' ciclos ('+n1(100*d.n/tot)+'%)"></span>'+
+      '<span class="bv">'+n0(d.n)+'</span></div>').join('');
+    document.getElementById('rot-cards').innerHTML=[
+      {l:'Ciclos medidos',v:n0(RO.n),c:'#26b6d9',d:'salidas con su regreso'},
+      {l:'Días afuera',v:n2(RO.prom),c:'#f5a623',d:'promedio · mediana '+n0(RO.p50)},
+      {l:'El peor',v:n0(RO.max)+' días',c:'#ff4d67',d:'un semi sin volver a entrar'},
+    ].map(c=>'<div class="card"><div class="cl">'+c.l+'</div><div class="cv" style="color:'+c.c+'">'+c.v+'</div><div class="cd">'+c.d+'</div></div>').join('');
+  }
+
+  /* ── destinos ── */
+  const DCOLS=[{k:'d',l:'Destino',t:'txt'},{k:'viajes',l:'Viajes',t:'num'},{k:'ciclos',l:'Ciclos de semi',t:'num'},
+    {k:'rot',l:'Días afuera',t:'num'},{k:'semisDia',l:'Semis inmovilizados',t:'num'}];
+  let ordD={k:'semisDia',d:-1};
+  function pintaDes(){
+    const L=[...DATA.destinos].filter(x=>x.viajes>=3);
+    const c=DCOLS.find(c=>c.k===ordD.k);
+    L.sort((a,b)=>{ const x=a[ordD.k],y=b[ordD.k];
+      if(c.t==='txt') return String(x||'').localeCompare(String(y||''),'es')*ordD.d;
+      return ((x==null?-1:x)-(y==null?-1:y))*ordD.d; });
+    document.getElementById('tdes-h').innerHTML='<tr>'+DCOLS.map(c=>
+      '<th data-k="'+c.k+'" class="'+(ordD.k===c.k?'sorted':'')+'">'+c.l+'<span class="ar">'+(ordD.k===c.k?(ordD.d>0?'▲':'▼'):'▲')+'</span></th>').join('')+'</tr>';
+    const maxS=Math.max(...L.map(x=>x.semisDia||0))||1;
+    document.getElementById('tdes-b').innerHTML=L.map(x=>
+      '<tr><td>'+esc(x.d)+'</td><td>'+n0(x.viajes)+'</td><td>'+n0(x.ciclos)+'</td>'+
+      '<td style="color:'+(x.rot>=4?'var(--bad)':x.rot>=2?'var(--amber)':'var(--muted)')+';font-weight:700">'+n2(x.rot)+'</td>'+
+      '<td class="barcel"><i style="width:'+(100*(x.semisDia||0)/maxS)+'%"></i><span>'+n2(x.semisDia)+'</span></td></tr>').join('');
+    document.querySelectorAll('#tdes-h th').forEach(th=>th.onclick=()=>{
+      const k=th.dataset.k, col=DCOLS.find(c=>c.k===k);
+      if(ordD.k===k) ordD.d*=-1; else ordD={k,d:col.t==='txt'?1:-1};
+      pintaDes(); });
+  }
+
+  /* ── unidades ── */
+  const UCOLS=[{k:'p',l:'Dominio',t:'txt'},{k:'g',l:'Tipo',t:'txt'},{k:'viajes',l:'Viajes',t:'num'},
+    {k:'sale',l:'Sale como semi',t:'num'},{k:'vuelve',l:'Vuelve',t:'num'},{k:'dias',l:'Días con movimiento',t:'num'},
+    {k:'ocupacion',l:'% de días',t:'num'},{k:'porDia',l:'Viajes por día activo',t:'num'}];
+  let ordU={k:'viajes',d:-1};
+  function chipsGrupo(){
+    const gs=['Tracción','Semis','Todas'];
+    const c=document.getElementById('chips-grupo');
+    c.innerHTML='<span class="flabel">Ver</span>'+gs.map(g=>'<button class="chip'+(grupoSel===g?' on':'')+'" data-g="'+g+'">'+g+'</button>').join('');
+    c.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{ grupoSel=b.dataset.g; chipsGrupo(); pintaUni(); alto(); });
+  }
+  function pintaUni(){
+    const trac=g=>/tractor|chasis|balanc/i.test(g);
+    let L=DATA.unidades.filter(u=>grupoSel==='Todas'?true:grupoSel==='Tracción'?trac(u.g):!trac(u.g));
+    const c=UCOLS.find(c=>c.k===ordU.k);
+    L=[...L].sort((a,b)=>{ const x=a[ordU.k],y=b[ordU.k];
+      if(c.t==='txt') return String(x||'').localeCompare(String(y||''),'es')*ordU.d;
+      return ((x==null?-1:x)-(y==null?-1:y))*ordU.d; });
+    document.getElementById('tuni-h').innerHTML='<tr>'+UCOLS.map(c=>
+      '<th data-k="'+c.k+'" class="'+(ordU.k===c.k?'sorted':'')+'">'+c.l+'<span class="ar">'+(ordU.k===c.k?(ordU.d>0?'▲':'▼'):'▲')+'</span></th>').join('')+'</tr>';
+    const maxV=Math.max(...L.map(u=>u.viajes))||1;
+    document.getElementById('tuni-b').innerHTML=L.map(u=>
+      '<tr><td><span class="plate '+cls(u.g)+'">'+esc(u.p)+'</span></td>'+
+      '<td><span class="gp '+cls(u.g)+'">'+esc(u.g)+'</span></td>'+
+      '<td class="barcel">'+(u.viajes?'<i style="width:'+(100*u.viajes/maxV)+'%"></i>':'')+'<span>'+(u.viajes||'—')+'</span></td>'+
+      '<td>'+(u.sale||'—')+'</td><td>'+(u.vuelve||'—')+'</td><td>'+n0(u.dias)+'</td>'+
+      '<td>'+n1(u.ocupacion)+'%</td><td style="font-weight:700">'+(u.viajes?n2(u.porDia):'—')+'</td></tr>').join('');
+    document.getElementById('tuni-f').innerHTML='<tr><td>'+L.length+' unidades</td><td></td><td>'+n0(L.reduce((a,u)=>a+u.viajes,0))+'</td>'+
+      '<td>'+n0(L.reduce((a,u)=>a+u.sale,0))+'</td><td>'+n0(L.reduce((a,u)=>a+u.vuelve,0))+'</td><td></td><td></td><td></td></tr>';
+    document.querySelectorAll('#tuni-h th').forEach(th=>th.onclick=()=>{
+      const k=th.dataset.k, col=UCOLS.find(c=>c.k===k);
+      if(ordU.k===k) ordU.d*=-1; else ordU={k,d:col.t==='txt'?1:-1};
+      pintaUni(); });
+    const oci=DATA.ociosas;
+    document.getElementById('uni-nota').innerHTML= oci.length
+      ? '<b>'+oci.length+' unidad(es) del padrón no aparecen en ninguna hoja de ruta del período:</b> '+
+        oci.map(u=>u.p+' ('+u.g+')').join(' · ')+'. Están contadas como capacidad disponible pero no rotan; si el motivo no es una parada, es flota que se puede poner a trabajar antes de pensar en incorporar.'
+      : '';
+  }
+
+  /* ── meses ── */
+  {
+    const T=DATA.meses;
+    document.getElementById('tmes').querySelector('thead').innerHTML='<tr><th>Mes</th><th>Días</th><th>Viajes/día</th><th>Sat. tracción</th><th>Uso unidades</th><th>Semis fuera</th></tr>';
+    document.getElementById('tmes-b').innerHTML=T.map(m=>
+      '<tr><td>'+nomMes(m.m)+'</td><td>'+m.dias+'</td><td>'+n1(m.viajesDia)+'</td>'+
+      '<td style="color:'+(m.satT>110?'var(--bad)':'var(--amber)')+';font-weight:700">'+n1(m.satT)+'%</td>'+
+      '<td>'+n1(m.usoT)+'%</td>'+
+      '<td style="color:'+(m.ocuS>95?'var(--bad)':'var(--good)')+';font-weight:700">'+n1(m.ocuS)+'%</td></tr>').join('');
+  }
+
+  /* ── calidad ── */
+  {
+    const C=DATA.calidad;
+    const sp=Object.entries(C.sinPadron);
+    document.getElementById('cal').innerHTML=[
+      {l:'Días hábiles sin hoja de ruta en el rango',v:n0(C.huecos.length),c:C.huecos.length>10?'#ff4d67':'#f5a623'},
+      {l:'Patentes corregidas automáticamente',v:n0(C.corregidas.length),c:'#26b6d9'},
+      {l:'Patentes que no existen en el padrón',v:n0(sp.length),c:sp.length?'#f5a623':'#22e39b'},
+    ].map(c=>'<div class="card" style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">'+
+      '<span class="cl" style="flex:1">'+c.l+'</span><span class="cv" style="color:'+c.c+';margin:0">'+c.v+'</span></div>').join('');
+    let h='';
+    if(C.corregidas.length) h+='<b>Corregidas:</b> '+C.corregidas.map(([a,b])=>a+' → '+b).join(' · ')+'. Se arreglan contra el padrón cuando hay un único candidato a un carácter de distancia.<br>';
+    if(sp.length) h+='<b>Sin padrón:</b> '+sp.map(([p,n])=>p+' ('+n+')').join(' · ')+'. Quedan fuera del cálculo de saturación.<br>';
+    if(C.ciclosAbiertos) h+='<b>'+C.ciclosAbiertos+' semis</b> tienen salidas y regresos descompensados: alguien cargó una punta y no la otra. La rotación se calcula sólo sobre los ciclos que cierran.';
+    document.getElementById('cal-nota').innerHTML=h;
+  }
+
+  /* ── conclusiones ── */
+  {
+    const salen=prom(HAB.map(d=>d.tracc)), disp=DATA.capacidad.tracc;
+    const porUnidad=prom(HAB.map(d=>d.viajes/d.tracc));
+    const oci=DATA.ociosas.filter(u=>/semi|batea/i.test(u.g)).length;
+    const lentos=[...DATA.destinos].filter(d=>d.rot!=null&&d.ciclos>=15).sort((a,b)=>b.rot-a.rot).slice(0,3);
+    const R2=[
+      {c:'',n:'Los dos parques están al límite, pero por motivos distintos',q:n1(R.satT)+'% / '+n1(R.ocuS)+'%',
+       d:'La <b>tracción</b> hace <b>'+n1(R.satT)+'%</b> de lo que la regla permite y supera el 100% en <b>'+R.diasSobre100T+'</b> de '+M.habiles+' días hábiles, '+
+         'pero sale sólo el <b>'+n1(R.usoT)+'%</b> de las unidades: <b>'+n1(salen)+'</b> de <b>'+n1(disp)+'</b>. El margen que queda no está en comprar, está en repartir. '+
+         'Los <b>remolques</b> están ocupados el <b>'+n1(R.ocuS)+'%</b> del tiempo: ahí el margen no existe, y es el activo que primero frena un pico de demanda.'},
+      {c:'a',n:'La regla de un viaje por día ya no se cumple, y es lo que salva al día',q:n2(porUnidad)+' viajes por unidad',
+       d:'Cada unidad que sale hace <b>'+n2(porUnidad)+'</b> viajes en promedio, y hay tractores con 4 y 5 en un día. '+
+         'Eso explica la saturación de <b>'+n1(R.satT)+'%</b>: no es que la flota alcance, es que se la estira. '+
+         'Conviene decidir si esa es la regla nueva —y planificar con ella— o si es una excepción que está tapando un faltante.'},
+      {c:'a',n:'Los destinos lentos se llevan la flota',q:lentos.length?lentos[0].d+' '+n2(lentos[0].rot)+' días':'—',
+       d:'Un semi tarda <b>'+n2(RO.prom)+'</b> días en volver, pero el promedio esconde todo: '+
+         lentos.map(d=>'<b>'+d.d+'</b> '+n2(d.rot)+' días').join(', ')+'. '+
+         'Cada día extra de un destino es un semi menos para el resto de la operación, y la tabla de destinos muestra cuántos inmoviliza cada uno.'},
+      {c:'i',n:'Hay flota que no se mueve',q:oci?oci+' semis':'—',
+       d: oci
+         ? '<b>'+oci+'</b> semis o bateas del padrón no aparecen en ninguna hoja de ruta del período. Cuentan como disponibles y no rotan. '+
+           'Antes de discutir incorporaciones hay que saber si están rotos, asignados a otra cosa, o simplemente olvidados.'
+         : 'Todas las unidades del padrón registraron al menos un movimiento en el período.'},
+      {c:'i',n:'Con esto se puede dimensionar, no sólo describir',q:'—',
+       d:'Con salidas por día (<b>'+n1(R.salidasDia)+'</b>) y días de rotación (<b>'+n2(RO.prom)+'</b>) se puede calcular cuántos semis hace falta tener en circulación, '+
+         'y simular qué pasa si un destino baja un día su rotación. Es la cuenta que conviene cerrar antes de comprar o alquilar.'},
+    ];
+    document.getElementById('rec').innerHTML=R2.map(r=>'<div class="r '+r.c+'"><div class="rt"><span class="rn">'+r.n+'</span><span class="rq">'+r.q+'</span></div><p>'+r.d+'</p></div>').join('');
+  }
+
+  chipsMes(); chDias(); pintaDes(); chipsGrupo(); pintaUni();
+
+  const tip=document.getElementById('tip');
+  document.addEventListener('mousemove',e=>{ const el=e.target.closest&&e.target.closest('[data-tip]');
+    if(el){ tip.textContent=el.getAttribute('data-tip'); tip.classList.add('show');
+      const r=tip.getBoundingClientRect(); let nx=e.clientX+14,ny=e.clientY+14;
+      if(nx+r.width>innerWidth-8)nx=e.clientX-r.width-14; if(ny+r.height>innerHeight-8)ny=e.clientY-r.height-14;
+      tip.style.left=nx+'px'; tip.style.top=ny+'px'; }
+    else if(tip.classList.contains('show')) tip.classList.remove('show'); });
+
+  function alto(){ if(window.parent!==window){ try{ parent.postMessage({tipo:'matriz-alto',alto:document.body.scrollHeight},'*'); }catch(e){} } }
+  if(window.parent!==window){ alto(); window.addEventListener('resize',alto); new MutationObserver(alto).observe(document.body,{subtree:true,childList:true}); }
+})();
+</script>
