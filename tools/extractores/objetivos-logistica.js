@@ -142,6 +142,9 @@ exports.actualizar = async function ({ leer, escribir, log, util, carpetas }) {
   const K2 = (() => {
     const sel = ingresos.filter(x => RUTAS.some(r => r.re.test(x.prov)));
     const porMes = agrupar(sel);
+    // Cuánto pesan estas dos rutas sobre todo lo que se movió en el mes: sin ese
+    // contexto, un 70 % de cumplimiento puede estar moviendo el 5 % del gasto.
+    const todoElMes = agrupar(ingresos);
     const meses = Object.keys(porMes).map(Number).sort((a, b) => a - b);
     return meses.map(m => {
       const l = porMes[m];
@@ -153,9 +156,15 @@ exports.actualizar = async function ({ leer, escribir, log, util, carpetas }) {
       });
       const porFletero = {};
       l.filter(x => !/PROPIO/.test(x.tr)).forEach(x => { porFletero[x.rs || '(sin razón social)'] = (porFletero[x.rs || '(sin razón social)'] || 0) + 1; });
+      const mes = todoElMes[m] || [];
+      const kilosMes = mes.reduce((a, x) => a + x.kilos, 0);
+      const kilosRutas = l.reduce((a, x) => a + x.kilos, 0);
       return {
         mes: m, valor: l.length ? r1(100 * prop.length / l.length) : null, parcial: false,
         propios: prop.length, total: l.length, fleteros: l.length - prop.length,
+        viajesMes: mes.length, kilosMes,
+        pesoViajes: mes.length ? r1(100 * l.length / mes.length) : null,
+        pesoKilos: kilosMes ? r1(100 * kilosRutas / kilosMes) : null,
         kilosPropios: prop.reduce((a, x) => a + x.kilos, 0),
         kilosTotal: l.reduce((a, x) => a + x.kilos, 0),
         porRuta, porFletero: Object.entries(porFletero).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ k, v })),
