@@ -171,12 +171,32 @@ de terminar la jornada; el tablero lo avisa.
 
 ### Cosas del archivo
 
-- **La hoja no acumula.** Guarda una ventana y el resto se archiva en la base
-  (`controletiquetas → transporte.HojasRuta`, ver `cargar-hojas-ruta.sql`). La
-  copia sincronizada tenía 133 filas de septiembre y la vieja de Descargas 1.693
-  de abril a junio: **se leen todas las copias y se unen por `Id`**. Hoy quedan
-  58 días hábiles sin cubrir entre el 14/06 y el 31/08; salen de la base, no de
-  ninguna exportación.
+- **El archivo cambió de forma y hay que leerlo por columnas, no por nombre de
+  hoja.** Antes era el volcado del form en una hoja `Respuestas` que guardaba
+  sólo una ventana; ahora trae el histórico partido por año en `H.R 2025` y
+  `HR 2026`, y esta última ya no tiene columna `Id`. El extractor toma **toda
+  hoja que tenga fecha, patente, semi lleva y semi trae**, así que sigue
+  funcionando con las copias viejas y con las nuevas.
+- **Las hojas por año se pisan entre sí** —`H.R 2025` llega hasta junio de 2026
+  y `HR 2026` arranca en enero— así que hay que unirlas sin duplicar. La clave
+  es fecha + remito + patente + lleva + trae + destino, **con un número de
+  repetición dentro de cada hoja**: dos viajes idénticos el mismo día son dos
+  viajes de verdad y hay que conservarlos, pero el mismo viaje repetido en dos
+  hojas tiene la misma repetición y se pisa. De 12.953 filas leídas quedan 5.962
+  viajes únicos de 2026.
+- **El tablero mira sólo el año en curso** (`DESDE` en el extractor). El archivo
+  trae desde noviembre de 2025, pero la disponibilidad de flota —el denominador—
+  arranca en 2026, y mezclar años sin capacidad conocida ensucia todos los
+  porcentajes. Por lo mismo, las jornadas anteriores a la primera semana del
+  indicador cuentan viajes pero no porcentajes.
+- **La clave de semana lleva el año.** Con más de un año en el archivo, la
+  semana 45 de 2025 buscaría una disponibilidad que no existe, o peor, la de
+  otro año.
+- **Una semana que el indicador no cubre no es una semana disponible**, es una
+  semana sin dato. Contarla como disponible hacía aparecer como ociosas a
+  unidades que estuvieron paradas todo el año.
+- **El sábado se trabaja pero es media jornada**: tiene su propio número en el
+  informe diario y no promedia con los días hábiles.
 - **El padrón está embebido en el extractor**, como lo pasó Logística el
   05/09/2026: 16 tractores, 5 toritos, 6 chasis, 2 balancines, 46 semis, 4
   bateas y 16 fuera de servicio. Distingue chasis de balancín y marca las bajas,

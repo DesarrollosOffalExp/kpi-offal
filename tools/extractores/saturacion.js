@@ -28,6 +28,11 @@ const path = require('path');
 
 const DESTINO = 'client/src/dashboards/saturacion-flota.html';
 
+/* El archivo trae desde noviembre de 2025, pero el tablero mira el año en curso:
+   la disponibilidad de flota —que es el denominador— arranca en 2026, y mezclar
+   años sin capacidad conocida ensucia todos los porcentajes. */
+const DESDE = '2026-01-01';
+
 /* ── utilidades ── */
 const placa = s => String(s == null ? '' : s).toUpperCase().replace(/\(.*?\)/g, '').replace(/[^A-Z0-9]/g, '');
 const iso = d => d instanceof Date ? d.toISOString().slice(0, 10) : null;
@@ -41,6 +46,11 @@ const habil = f => { const w = new Date(f + 'T00:00:00Z').getUTCDay(); return w 
 const semanaISO = f => { const t = new Date(f + 'T00:00:00Z');
   t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
   return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7); };
+// La semana sola no alcanza como clave si el archivo trae más de un año: la 45 de
+// 2025 buscaría una disponibilidad que no existe, o peor, la de otro año.
+const anioSemana = f => { const t = new Date(f + 'T00:00:00Z');
+  t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+  return t.getUTCFullYear() + '-' + String(semanaISO(f)).padStart(2, '0'); };
 
 /* ── el padrón, como lo pasó Logística el 05/09/2026 ──────────────────────
    Es la referencia: distingue chasis de balancín y marca las unidades fuera de
@@ -115,28 +125,52 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
     return r;
   }
 
+  /* El archivo cambió de forma con el tiempo: primero fue el volcado del form en
+     una hoja «Respuestas», ahora es el histórico partido por año en «H.R 2025» y
+     «HR 2026», sin la columna Id. Por eso las hojas se buscan por sus columnas y
+     no por su nombre, y la clave se arma con el contenido del viaje.
+
+     Las hojas por año se pisan entre sí —2025 llega hasta junio de 2026 y 2026
+     arranca en enero—, así que hay que unirlas sin duplicar. La clave lleva un
+     número de repetición dentro de cada hoja: dos viajes idénticos el mismo día
+     son dos viajes de verdad y hay que conservarlos, pero el mismo viaje
+     repetido en dos hojas tiene la misma repetición y se pisa. */
   const HR = new Map();
+  let filasLeidas = 0;
   ARCHIVOS.forEach(f => {
     const wb = XLSX.readFile(f, { cellDates: true });
-    const hoja = wb.SheetNames.find(s => /respuesta/i.test(s));
-    if (!hoja) return;
-    const R = XLSX.utils.sheet_to_json(wb.Sheets[hoja], { header: 1, raw: true, defval: null, blankrows: false });
-    const enc = R[0].map(v => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().toLowerCase());
-    const c = n => enc.findIndex(v => v === n);
-    const K = { id: c('id'), fe: c('fecha'), pat: c('patente'), des: c('destino'), lle: c('semi lleva'), tra: c('semi trae') };
-    R.slice(1).forEach(r => {
-      if (!r || r[K.id] == null) return;
-      const fecha = iso(r[K.fe]); if (!fecha) return;
-      const lleva = normalizar(placa(r[K.lle])), trae = normalizar(placa(r[K.tra]));
-      HR.set(r[K.id], {
-        id: r[K.id], fecha, sem: semanaISO(fecha), pat: normalizar(placa(r[K.pat])), lleva, trae,
-        des: String(r[K.des] || '').replace(/\s+/g, ' ').trim().toUpperCase(),
-        // El tractor se queda con su unidad cuando la lleva y la trae de vuelta.
-        tipo: (!lleva || !trae) ? 'incompleto' : (lleva === trae ? 'dedicado' : 'intercambio'),
+    wb.SheetNames.forEach(hoja => {
+      const R = XLSX.utils.sheet_to_json(wb.Sheets[hoja], { header: 1, raw: true, defval: null, blankrows: false });
+      if (!R.length || !R[0]) return;
+      const enc = R[0].map(v => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().toLowerCase());
+      const c = n => enc.findIndex(v => v === n);
+      const K = { id: c('id'), fe: c('fecha'), rem: c('numero de remito'), pat: c('patente'),
+        des: c('destino'), lle: c('semi lleva'), tra: c('semi trae') };
+      if (K.fe < 0 || K.pat < 0 || K.lle < 0 || K.tra < 0) return;   // no es una hoja de viajes
+      const vistas = new Map();
+      R.slice(1).forEach(r => {
+        if (!r) return;
+        const fecha = iso(r[K.fe]); if (!fecha) return;
+        const lleva = normalizar(placa(r[K.lle])), trae = normalizar(placa(r[K.tra]));
+        const pat = normalizar(placa(r[K.pat]));
+        const des = String(r[K.des] || '').replace(/\s+/g, ' ').trim().toUpperCase();
+        const rem = K.rem >= 0 ? String(r[K.rem] == null ? '' : r[K.rem]).trim() : '';
+        const base = fecha + '|' + rem + '|' + pat + '|' + lleva + '|' + trae + '|' + des;
+        const n = (vistas.get(base) || 0) + 1;
+        vistas.set(base, n);
+        HR.set(base + '#' + n, {
+          id: K.id >= 0 ? r[K.id] : null, fecha, sem: anioSemana(fecha), pat, lleva, trae, des, rem,
+          // El tractor se queda con su unidad cuando la lleva y la trae de vuelta.
+          tipo: (!lleva || !trae) ? 'incompleto' : (lleva === trae ? 'dedicado' : 'intercambio'),
+        });
+        filasLeidas++;
       });
+      log('   · ' + path.basename(f) + ' → hoja «' + hoja + '»: ' + (R.length - 1) + ' filas');
     });
   });
-  const L = [...HR.values()].sort((a, b) => a.fecha < b.fecha ? -1 : (a.fecha > b.fecha ? 1 : a.id - b.id));
+  const L = [...HR.values()].filter(h => h.fecha >= DESDE)
+    .sort((a, b) => a.fecha < b.fecha ? -1 : (a.fecha > b.fecha ? 1 : 0));
+  const descartadasPorAnio = HR.size - L.length;
   if (!L.length) throw new Error('no hay hojas de ruta para leer');
   const fechas = [...new Set(L.map(h => h.fecha))].sort();
 
@@ -149,6 +183,7 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
     tractor: ROSTER['Tractor'] || 0, chasis: (ROSTER['Chasis'] || 0) + (ROSTER['Balancín'] || 0),
     remolque: (ROSTER['Semi'] || 0) + (ROSTER['Batea'] || 0) };
   const DISP = new Map();
+  const ANIO_FLOTA = DESDE.slice(0, 4);
   FLOTA.weeks.forEach(w => {
     let pTractor = 0, pChasis = 0, pRem = 0;
     w.unidades.forEach(u => {
@@ -157,20 +192,21 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
       else if (g === 'Chasis' || g === 'Balancín') pChasis++;
       else if (REMOLQUE.has(g)) pRem++;
     });
-    DISP.set(w.week, { label: w.label,
+    DISP.set(ANIO_FLOTA + '-' + String(w.week).padStart(2, '0'), { label: w.label,
       tractor: capBase.tractor - pTractor, chasis: capBase.chasis - pChasis,
       motriz: capBase.motriz - pTractor - pChasis, remolque: capBase.remolque - pRem,
       paradas: { tractor: pTractor, chasis: pChasis, remolque: pRem } });
   });
   const cap = (s, k) => { const x = DISP.get(s); return x ? x[k] : null; };
+  const conCapacidad = d => d.capT != null;
 
   /* Semanas del período en que cada unidad figura parada en el indicador de
      disponibilidad. Sin esto, una unidad que no hizo viajes porque está rota
      parece una unidad ociosa, y es lo contrario: ya está descontada de la
      capacidad. */
-  const semanasHR = [...new Set(L.map(h => h.sem))];
+  const semanasHR = [...new Set(L.map(h => h.sem))];   // ya vienen como AAAA-SS
   const PARADA_SEM = new Map();
-  FLOTA.weeks.filter(w => semanasHR.includes(w.week)).forEach(w => {
+  FLOTA.weeks.filter(w => semanasHR.includes(ANIO_FLOTA + '-' + String(w.week).padStart(2, '0'))).forEach(w => {
     w.unidades.forEach(u => {
       const p = normalizar(placa(u.dom));
       if (!PARADA_SEM.has(p)) PARADA_SEM.set(p, { semanas: 0, obs: '', destino: '' });
@@ -183,13 +219,15 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
   FLOTA.weeks.forEach(w => w.unidades.forEach(u => {
     const p = normalizar(placa(u.dom));
     if (!PARADA_EN.has(p)) PARADA_EN.set(p, new Set());
-    PARADA_EN.get(p).add(w.week);
+    PARADA_EN.get(p).add(ANIO_FLOTA + '-' + String(w.week).padStart(2, '0'));
   }));
   // Días del período en que la unidad NO figuraba parada: es contra esto que hay
   // que mirar si se usó, no contra el calendario.
-  const diasDisponibles = p => { const par = PARADA_EN.get(p); return par ? fechas.filter(f => !par.has(semanaISO(f))).length : fechas.length; };
+  const diasDisponibles = p => { const par = PARADA_EN.get(p) || new Set();
+    return fechas.filter(f => DISP.has(anioSemana(f)) && !par.has(anioSemana(f))).length; };
   const semParada = p => (PARADA_SEM.get(p) || { semanas: 0 }).semanas;
-  const semDisponible = p => semanasHR.length - semParada(p);
+  const semanasConDato = semanasHR.filter(s => DISP.has(s));
+  const semDisponible = p => semanasConDato.length - semParada(p);
 
   /* ═══ 3 · rotación de los remolques ═══
      Un ciclo sólo vale si todos los días hábiles entre la salida y el regreso
@@ -264,7 +302,7 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
       else incompl++;
       if (h.lleva && esRemolque(h.lleva)) salidas.add(h.lleva);
     });
-    const sem = semanaISO(f);
+    const sem = anioSemana(f);
     const cT = cap(sem, 'tractor'), cC = cap(sem, 'chasis'), cR = cap(sem, 'remolque');
     const fueraPlanta = (ocupados.get(f) || new Set()).size;
     return {
@@ -280,13 +318,19 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
       viajesPorTractor: tractores.size ? r2((dedTractor + interTractor) / tractores.size) : null,
     };
   });
-  const HAB = DIAS.filter(d => d.habil);
+  // Las primeras semanas de enero pueden no estar en el indicador de
+  // disponibilidad: esos días cuentan viajes pero no porcentajes.
+  const HAB = DIAS.filter(d => d.habil && conCapacidad(d));
+  const sinCapacidad = DIAS.filter(d => d.habil && !conCapacidad(d)).length;
   const nHab = HAB.length;
 
   /* ═══ 5 · cuántos tractores hacen falta ═══
      El dedicado ata el tractor: en un día donde sólo hace dedicados hace 1,5. El
      intercambio lo libera: en un día donde sólo intercambia hace 1,8. Con esos
      dos rendimientos medidos se puede convertir la demanda del día en tractores. */
+  // El sábado se trabaja pero es media jornada: no promedia con los días
+  // hábiles, aunque en el informe diario tiene que mostrar su propio número.
+  const necesarios = d => (d.dedTractor / rendDed) + (d.interTractor / rendInter);
   const td = new Map();
   L.filter(h => h.habil !== false && habil(h.fecha) && grupo(h.pat) === 'Tractor').forEach(h => {
     const k = h.fecha + '|' + h.pat;
@@ -298,8 +342,7 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
   const soloD = [...td.values()].filter(v => v.e === 0 && v.d > 0);
   const rendInter = prom(soloE.map(v => v.e)) || 1;
   const rendDed = prom(soloD.map(v => v.d)) || 1;
-  const necesarios = d => (d.dedTractor / rendDed) + (d.interTractor / rendInter);
-  HAB.forEach(d => { d.tractoresNec = r2(necesarios(d)); d.satMotriz = d.capT ? r1(100 * necesarios(d) / d.capT) : null; });
+  DIAS.forEach(d => { d.tractoresNec = r2(necesarios(d)); d.satMotriz = d.capT ? r1(100 * necesarios(d) / d.capT) : null; });
 
   /* ═══ 6 · unidades ═══ */
   const uso = new Map();
@@ -430,7 +473,7 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
   const mesDetalle = fechas[fechas.length - 1].slice(0, 7);
   const paradaEse = (p, sem) => { const par = PARADA_EN.get(p); return !!par && par.has(sem); };
   const INFORME = fechas.filter(f => f.startsWith(mesDetalle)).map(f => {
-    const sem = semanaISO(f);
+    const sem = anioSemana(f);
     const dia = L.filter(h => h.fecha === f);
     const movio = new Map();      // patente → qué hizo ese día
     dia.forEach(h => {
@@ -485,6 +528,7 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
     meta: {
       desde: fechas[0], hasta: fechas[fechas.length - 1], dias: fechas.length, habiles: nHab,
       hojas: L.length, archivos: ARCHIVOS.length, corte: new Date().toISOString().slice(0, 10),
+      diasSinCapacidad: sinCapacidad, anio: DESDE.slice(0, 4),
       semanaFlota: FLOTA.weeks[FLOTA.weeks.length - 1].label,
     },
     padron: ROSTER, capBase, embudo: EMBUDO, semanaUlt: ultW.label,
@@ -523,8 +567,12 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
 
   escribir(DESTINO, 'DATA', DATA);
 
-  log('hojas de ruta: ' + L.length + ' · ' + DATA.meta.desde + ' a ' + DATA.meta.hasta + ' · ' + fechas.length + ' días (' + nHab + ' hábiles)');
+  log('hojas de ruta: ' + L.length + ' únicas de ' + filasLeidas + ' filas leídas · ' + DATA.meta.desde + ' a ' + DATA.meta.hasta
+    + ' · ' + fechas.length + ' días (' + nHab + ' hábiles)');
+  if (descartadasPorAnio) log('   ' + descartadasPorAnio + ' viaje(s) anteriores a ' + DESDE + ' quedan fuera: el tablero mira ' + DESDE.slice(0, 4));
   log('padrón: ' + JSON.stringify(ROSTER));
+  if (sinCapacidad) log('   ' + sinCapacidad + ' día(s) hábil(es) sin disponibilidad cargada quedan fuera de los porcentajes'
+    + ' (el indicador arranca en ' + FLOTA.weeks[0].label + '); los viajes se cuentan igual.');
   EMBUDO.forEach(e => log('   ' + e.g.padEnd(9) + ': padrón ' + e.padron + ' · parados hoy ' + e.paradasUlt
     + ' → utilizables ' + e.dispUlt + '  |  promedio del período: ' + e.dispProm + ' utilizables, ' + e.usadasProm
     + ' usadas (' + r1(100 * e.usadasProm / e.dispProm) + '%)' + (e.nuncaSalio.length ? ' · nunca salieron ' + e.nuncaSalio.length : '')));
