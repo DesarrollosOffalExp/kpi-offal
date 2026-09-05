@@ -209,20 +209,37 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
       if (!eventos.has(p)) eventos.set(p, []); eventos.get(p).push({ f: h.fecha, t, des: h.des }); };
     push(h.lleva, 'sale'); push(h.trae, 'vuelve');
   });
-  const CICLOS = []; let descartados = 0;
+  // Bloques de días seguidos: una salida sin regreso ocupa hasta el final de SU
+  // bloque, no hasta el final del período. Si no, un semi que salió el 13/06 y
+  // nunca volvió aparecería ocupado durante julio y agosto, que no existen.
+  const BLOQUES = [];
+  fechas.forEach(f => {
+    const ult = BLOQUES.length ? BLOQUES[BLOQUES.length - 1] : null;
+    if (ult && !cruzaHueco(ult.hasta, f)) ult.hasta = f;
+    else BLOQUES.push({ desde: f, hasta: f });
+  });
+  const finDeBloque = f => (BLOQUES.find(b => b.desde <= f && f <= b.hasta) || { hasta: f }).hasta;
+
+  const CICLOS = []; let descartados = 0, abiertos = 0;
   eventos.forEach((lista, p) => {
     lista.sort((a, b) => a.f < b.f ? -1 : 1);
     let abierta = null;
+    const cerrar = (sale, vuelve, des, real) => {
+      const c = { p, sale, vuelve, dias: dif(sale, vuelve), des, abierto: !real };
+      if (cruzaHueco(sale, vuelve)) descartados++; else { CICLOS.push(c); if (!real) abiertos++; }
+    };
     lista.forEach(e => {
-      if (e.t === 'sale') { if (!abierta) abierta = e; }
-      else if (abierta) {
-        const c = { p, sale: abierta.f, vuelve: e.f, dias: dif(abierta.f, e.f), des: abierta.des };
-        if (cruzaHueco(c.sale, c.vuelve)) descartados++; else CICLOS.push(c);
-        abierta = null;
-      }
+      if (e.t === 'sale') {
+        // dos salidas seguidas sin regreso: la primera se cierra al final de su bloque
+        if (abierta) cerrar(abierta.f, finDeBloque(abierta.f), abierta.des, false);
+        abierta = e;
+      } else if (abierta) { cerrar(abierta.f, e.f, abierta.des, true); abierta = null; }
     });
+    if (abierta) cerrar(abierta.f, finDeBloque(abierta.f), abierta.des, false);
   });
-  const diasFuera = CICLOS.map(c => c.dias);
+  // La rotación se mide sólo con los ciclos que cerraron de verdad: un ciclo
+  // abierto no dice cuánto tardó en volver, dice hasta dónde llega el dato.
+  const diasFuera = CICLOS.filter(c => !c.abierto).map(c => c.dias);
   const ocupados = new Map();
   CICLOS.forEach(c => {
     for (let t = new Date(c.sale + 'T00:00:00Z'); t <= new Date(c.vuelve + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + 1)) {
@@ -321,7 +338,7 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
     const v = dest.get(h.des); v.viajes++;
     if (h.tipo === 'dedicado') v.ded++; else if (h.tipo === 'intercambio') v.inter++;
   });
-  CICLOS.forEach(c => { if (dest.has(c.des)) dest.get(c.des).ciclos.push(c.dias); });
+  CICLOS.filter(c => !c.abierto).forEach(c => { if (dest.has(c.des)) dest.get(c.des).ciclos.push(c.dias); });
   const DESTINOS = [...dest.values()].map(x => ({
     d: x.d, viajes: x.viajes, ded: x.ded, inter: x.inter,
     modo: x.ded > x.inter ? 'dedicado' : x.inter > 0 ? 'intercambio' : 'sin dato',
@@ -406,6 +423,64 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
     };
   });
 
+  /* ═══ informe diario ═══
+     Del último mes con hojas de ruta, día por día: qué salió, qué no salió y por
+     qué. Es la vista que permite mirar la asignación del coordinador; en los
+     promedios del período esto se pierde. */
+  const mesDetalle = fechas[fechas.length - 1].slice(0, 7);
+  const paradaEse = (p, sem) => { const par = PARADA_EN.get(p); return !!par && par.has(sem); };
+  const INFORME = fechas.filter(f => f.startsWith(mesDetalle)).map(f => {
+    const sem = semanaISO(f);
+    const dia = L.filter(h => h.fecha === f);
+    const movio = new Map();      // patente → qué hizo ese día
+    dia.forEach(h => {
+      const anotar = (p, campo, extra) => {
+        if (!p) return;
+        if (!movio.has(p)) movio.set(p, { p, viajes: 0, ded: 0, inter: 0, sale: 0, vuelve: 0, destinos: [] });
+        const v = movio.get(p); v[campo]++;
+        if (extra && !v.destinos.includes(extra)) v.destinos.push(extra);
+      };
+      anotar(h.pat, 'viajes', h.des);
+      if (h.pat && movio.has(h.pat)) { const v = movio.get(h.pat); if (h.tipo === 'dedicado') v.ded++; else if (h.tipo === 'intercambio') v.inter++; }
+      anotar(h.lleva, 'sale', h.des);
+      anotar(h.trae, 'vuelve', h.des);
+    });
+    const reparto = tipos => {
+      const uni = Object.keys(PADRON).filter(p => tipos.has(PADRON[p]));
+      const paradas = uni.filter(p => paradaEse(p, sem));
+      const utilizables = uni.filter(p => !paradaEse(p, sem));
+      const usadas = utilizables.filter(p => movio.has(p));
+      const sinUsar = utilizables.filter(p => !movio.has(p));
+      return {
+        padron: uni.length, paradas: paradas.length, utilizables: utilizables.length, usadas: usadas.length,
+        uso: utilizables.length ? r1(100 * usadas.length / utilizables.length) : null,
+        detalleUsadas: usadas.map(p => Object.assign({ g: PADRON[p] }, movio.get(p)))
+          .sort((a, b) => (b.viajes + b.sale + b.vuelve) - (a.viajes + a.sale + a.vuelve)),
+        detalleSinUsar: sinUsar.map(p => ({ p, g: PADRON[p] })),
+        detalleParadas: paradas.map(p => ({ p, g: PADRON[p],
+          motivo: (PARADA_SEM.get(p) || {}).destino || (PARADA_SEM.get(p) || {}).obs || '' })),
+      };
+    };
+    const d = DIAS.find(x => x.f === f) || {};
+    // Los remolques que están afuera de un viaje anterior no son «sin usar».
+    const afuera = ocupados.get(f) || new Set();
+    const rem = reparto(REMOLQUE);
+    rem.enTransito = rem.detalleSinUsar.filter(u => afuera.has(u.p));
+    rem.detalleSinUsar = rem.detalleSinUsar.filter(u => !afuera.has(u.p));
+    rem.sinUsar = rem.detalleSinUsar.length;
+    return {
+      f, sem, dow: new Date(f + 'T00:00:00Z').getUTCDay(), habil: habil(f),
+      viajes: dia.length, ded: d.ded || 0, inter: d.inter || 0, incompl: d.incompl || 0,
+      satMotriz: d.satMotriz == null ? null : d.satMotriz, tractoresNec: d.tractoresNec,
+      fueraPlanta: d.fueraPlanta || 0, ocuR: d.ocuR,
+      motriz: reparto(MOTRIZ), remolque: rem,
+      detalle: dia.map(h => ({ pat: h.pat, g: h.pat ? (PADRON[h.pat] || 'Fuera del padrón') : 'Sin patente',
+        des: h.des, lleva: h.lleva, trae: h.trae, tipo: h.tipo }))
+        // las que no tienen patente cargada van al final: son un dato que falta
+        .sort((a, b) => (a.pat ? 0 : 1) - (b.pat ? 0 : 1) || (a.pat < b.pat ? -1 : a.pat > b.pat ? 1 : 0)),
+    };
+  });
+
   const DATA = {
     meta: {
       desde: fechas[0], hasta: fechas[fechas.length - 1], dias: fechas.length, habiles: nHab,
@@ -428,12 +503,13 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
       rendInter: r2(rendInter), rendDed: r2(rendDed),
     },
     rotacion: {
-      n: CICLOS.length, prom: r2(prom(diasFuera)), p50: pctil(diasFuera, .5), p90: pctil(diasFuera, .9),
+      n: diasFuera.length, abiertos, prom: r2(prom(diasFuera)), p50: pctil(diasFuera, .5), p90: pctil(diasFuera, .9),
       max: diasFuera.length ? Math.max(...diasFuera) : null, descartados,
       dist: [0, 1, 2, 3, 4, 5, 6, 7].map(d => ({ d: d === 7 ? '7+' : String(d), n: diasFuera.filter(x => d === 7 ? x >= 7 : x === d).length })),
     },
     reglaSemi: cuboSemi, reglaChasis: cuboChasis, reglaTractor: cuboTractor,
-    dias: DIAS, meses: MESES, unidades: UNIDADES, ociosas: OCIOSAS, paradasTodo: PARADAS_TODO,
+    dias: DIAS, meses: MESES, informe: INFORME, mesDetalle,
+    unidades: UNIDADES, ociosas: OCIOSAS, paradasTodo: PARADAS_TODO,
     semanasPeriodo: semanasHR.length, toritos: TORITOS, externos: EXTERNOS,
     destinos: DESTINOS,
     validacion: {
@@ -452,6 +528,9 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
   EMBUDO.forEach(e => log('   ' + e.g.padEnd(9) + ': padrón ' + e.padron + ' · parados hoy ' + e.paradasUlt
     + ' → utilizables ' + e.dispUlt + '  |  promedio del período: ' + e.dispProm + ' utilizables, ' + e.usadasProm
     + ' usadas (' + r1(100 * e.usadasProm / e.dispProm) + '%)' + (e.nuncaSalio.length ? ' · nunca salieron ' + e.nuncaSalio.length : '')));
+  log('informe diario de ' + mesDetalle + ': ' + INFORME.length + ' día(s) · '
+    + INFORME.map(d => d.f.slice(8) + ' (' + d.viajes + ' viajes, motriz ' + d.motriz.usadas + '/' + d.motriz.utilizables
+    + ', sin usar ' + d.motriz.detalleSinUsar.length + ')').join(' · '));
   log('viajes por día hábil: ' + DATA.resumen.viajesDia + ' → ' + DATA.resumen.dedDia + ' dedicados + ' + DATA.resumen.interDia + ' de intercambio');
   log('motriz: ' + DATA.resumen.tractoresDia + ' tractores por día de ' + DATA.capacidad.tractor + ' disponibles (uso ' + DATA.resumen.usoT + '%)');
   log('   necesarios por la carga del día: ' + DATA.resumen.tractoresNec + ' → saturación ' + DATA.resumen.satMotriz + '% · '
@@ -461,7 +540,8 @@ exports.actualizar = async function ({ escribir, log, util, carpetas }) {
   log('semis: ' + DATA.resumen.salidasDia + ' salidas por día de ' + DATA.capacidad.remolque + ' disponibles (regla de 1 viaje: ' + DATA.resumen.satR + '%)');
   log('   fuera de planta: ' + DATA.resumen.fueraPlantaDia + ' por día → ocupación ' + DATA.resumen.ocuR + '% · ' + DATA.resumen.diasSobreR + '/' + nHab + ' días sobre el 100%');
   log('   cumplimiento de la regla: ' + JSON.stringify(cuboSemi) + ' salidas por semi-día');
-  log('rotación: ' + DATA.rotacion.prom + ' días (mediana ' + DATA.rotacion.p50 + ', p90 ' + DATA.rotacion.p90 + ') sobre ' + DATA.rotacion.n + ' ciclos · ' + descartados + ' descartados');
+  log('rotación: ' + DATA.rotacion.prom + ' días (mediana ' + DATA.rotacion.p50 + ', p90 ' + DATA.rotacion.p90 + ') sobre ' + DATA.rotacion.n + ' ciclos cerrados · '
+    + abiertos + ' abiertos al cierre del bloque · ' + descartados + ' descartados por cruzar el hueco');
   log('validación de la regla: ' + DATA.validacion.declaradosDedicados + '/' + DATA.validacion.declarados + ' de los destinos declarados van dedicados, ' + DATA.validacion.declaradosIntercambio + ' con intercambio');
   if (PARADAS_TODO.length) log('sin movimiento pero paradas todo el período (ya descontadas): '
     + PARADAS_TODO.map(u => u.p).join(', '));

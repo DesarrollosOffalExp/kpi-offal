@@ -146,6 +146,29 @@ Del lado del remolque, **«en uso» es el que está fuera de planta**, no sólo 
 que sale ese día: un semi cargado esperando en el frigorífico está ocupado
 igual. Contar sólo las salidas subestima el uso en veinte puntos.
 
+### El informe diario
+
+La ventana cierra con un detalle día por día del **último mes con hojas de
+ruta**, que es donde se ve la asignación: en el promedio del período, una unidad
+que no salió en toda la semana desaparece detrás de las que sí salieron. Por
+cada día lista el parque utilizable, cuánto se usó, **qué unidades no salieron**
+—separando las que estaban paradas de las que estaban y no se usaron— y los
+movimientos uno por uno.
+
+Dos detalles del cálculo que hacen falta para que el día cierre:
+
+- **Un remolque que salió y todavía no volvió está afuera igual.** Si sólo se
+  cuentan los ciclos cerrados, los últimos días del período aparecen medio
+  vacíos. Un ciclo abierto se cierra al final de **su bloque de días seguidos**,
+  no al final del período: un semi que salió el 13/06 y nunca volvió no puede
+  quedar ocupado durante julio y agosto, que no existen en el dato. Con eso la
+  ocupación pasó de 78,9 % a 86,7 %.
+- **La rotación se mide sólo con los ciclos que cerraron de verdad.** Uno
+  abierto no dice cuánto tardó en volver, dice hasta dónde llega el dato.
+
+El último día del mes puede estar incompleto si la hoja de ruta se exportó antes
+de terminar la jornada; el tablero lo avisa.
+
 ### Cosas del archivo
 
 - **La hoja no acumula.** Guarda una ventana y el resto se archiva en la base
