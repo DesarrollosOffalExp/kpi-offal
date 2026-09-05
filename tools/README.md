@@ -15,8 +15,18 @@ node tools/actualizar.js fabrica-hielo
 ```
 
 Grupos disponibles: `fabrica-hielo`, `compras`, `sistemas`, `objetivos`,
-`presupuesto`, `insumos`, `logistica`, `gestion`. Sin argumentos lista todo lo que
-sabe hacer.
+`presupuesto`, `insumos`, `logistica`, `saturacion`, `objetivos-logistica`,
+`lavado`, `gestion`,
+`gestion-presentacion`. Sin argumentos lista todo lo que sabe hacer.
+
+Dos grupos dependen de otros y por eso van al final:
+
+- `lavado` después de `presupuesto` y `logistica`: el form de lavado no tiene
+  costo, así que el tablero de KPI lo toma de los tableros que ellos dejan
+  escritos.
+- `objetivos-logistica` después de `logistica`: el KPI de costo sale de la matriz.
+- `saturacion` después de `logistica`: el denominador es la flota disponible que
+  deja escrita Disponibilidad de Flota. Si esa está vieja, la saturación sale mal.
 
 El script busca cada archivo por nombre en `Descargas`, tolerando los sufijos
 que agrega el navegador (`archivo (2).xlsx`) y quedándose con el más reciente.
@@ -82,6 +92,237 @@ suposición se rompió.
   que fue un arqueo). El saldo es la suma de la S21 a la S32 y `Año 2026` la de
   la S34 en adelante. Los cortes están en la constante `TRAMOS` del extractor y
   cada corrida controla que las dos columnas den la suma de sus semanas.
+
+## Los KPI asignados a Logística, calculados
+
+El cuadro de «KPI asignados» viene del archivo de objetivos con las celdas en
+blanco o en `N/A`: dice qué se comprometió pero no cuánto se cumplió. El grupo
+`objetivos-logistica` calcula los tres que se pueden medir y guarda con cada
+valor **cómo se formó**, para que al hacer clic se vea el numerador, el
+denominador y de qué archivo salió cada número.
+
+- **Colgado con flota propia.** Numerador: los viajes de la hoja de ruta con
+  destino `RUNFO (COLGADO)` —el destino se escribe a mano y aparece también como
+  `RUNFO (COLGADOS)`, por eso se busca la palabra—. Denominador: esos más los de
+  `KG-FLETES-DESCRIMINADO 2026` con `MERCADERÍA = COLGADO`. **El encabezado de
+  esa hoja está en la segunda fila**: la primera sólo tiene el año.
+- **Rutas que pasaron a flota propia.** De `ResumenKgs`, los ingresos de
+  `ARRE BEEF S.A` y `BLACK BAMBOO ENTERPRISES S.A`, contando como propio lo que
+  tiene `TRANSPORTE = PROPIO`. Son dos rutas que antes se hacían enteras con
+  flete.
+- **Costo real contra el ajustado por INDEC.** Sale de `D_RAW` de la matriz, que
+  ya lo calcula: real del mes contra el real del mes anterior inflado por el
+  INDEC. Se evalúa dentro del año y no contra el año pasado, así que enero es la
+  base y no tiene variación. **Negativo es bueno.** Por eso el grupo se corre
+  después de `logistica`.
+
+Un mes se marca **parcial** cuando una fuente llegó y la otra no —hoy septiembre
+tiene el viaje propio cargado en la hoja de ruta y el archivo de fletes todavía
+sin cerrar, así que el 100 % no es un logro, es un mes a medio contar.
+
+El cuarto KPI del cuadro, «INFORMES DE GESTION», **no se calcula**: necesita que
+los informes se carguen en algún lado para poder contarlos, y hoy no hay de dónde
+leerlos. La fila se deja vacía en vez de completarla con un supuesto.
+
+## La hoja de ruta y la saturación de flota
+
+`HOJA DE RUTA - TRANSPORTE.xlsx`, hoja **Respuestas**, es el volcado de un form
+que tráfico carga por cada viaje: qué unidad motriz sale, a qué destino, **qué
+semi lleva y qué semi trae**. Cruzado con Disponibilidad de Flota da la
+saturación de cada parque.
+
+### Las reglas del sector, que son las que hacen que el número signifique algo
+
+Sin esto el indicador miente, porque mide los dos parques con la misma vara:
+
+- **El semi sí tiene la regla de un viaje por día.** Vuelve cargado y se
+  descarga esa noche o al día siguiente; si se descarga tarde puede llegar a
+  salir para los cambios de la noche, pero es la excepción. Se cumple en el
+  **88 %** de los días de semi con movimiento.
+- **El tractor no tiene esa regla.** La suya es otra: sale con un vacío y vuelve
+  con un lleno, así que al soltar la unidad queda libre y encadena. Medirlo
+  contra «un viaje por día» daba 139 % y no significaba nada.
+- **Salvo en los viajes dedicados**, donde el tractor se queda con su unidad:
+  las bateas de sebo (Swift, Refinería, Grabya) y los viajes de Arre Beef,
+  Ramallo y Hugues. La regla se verifica sola en el dato: de **354** viajes a
+  esos destinos, **349** tienen la misma unidad de ida y de vuelta y **ninguno**
+  tiene intercambio.
+- **Chasis y balancines son unidad completa**: siempre vuelven con lo suyo, así
+  que para ellos la regla de un viaje por día sí aplica, y la cumplen.
+- **Los toritos son de patio.** Mueven adentro y sólo salen por fuerza mayor: no
+  cuentan como capacidad de viaje. En el período salió uno, una sola vez.
+
+De ahí sale la forma de medir la motriz: en vez de contar viajes contra
+unidades, se convierte la carga del día en tractores con el rendimiento que
+muestra el propio dato —**1,66** intercambios o **1,46** dedicados por tractor y
+por día, medidos sobre los días en que el tractor hizo un solo tipo de viaje—.
+
+### El denominador: del padrón al parque utilizable
+
+La hoja **BASE DE DATOS** del indicador de disponibilidad lista, semana por
+semana, las unidades que están paradas: **todo lo que figura ahí no se puede
+usar**. El extractor las descuenta del padrón antes de calcular nada, así que la
+saturación y el uso se miden contra el parque real.
+
+Eso separa dos cosas que parecen la misma y no lo son:
+
+- Una unidad **sin movimiento porque está parada** ya está fuera del
+  denominador. No es un problema de uso. De los cinco remolques que no hicieron
+  un viaje en el período, cuatro —IHZ227, IHZ228, LMD345 y LMD346— figuran
+  parados las 12 semanas por pecho partido y piso y puertas rotos.
+- Una unidad **disponible y sin salir** sí es un problema de uso, y es la que
+  hay que mirar. Hoy es una sola: HRV058, disponible 61 de 65 días, que el
+  indicador anota como «SE USA PARA HIELO» —probablemente esté asignada a otro
+  circuito, y en ese caso habría que sacarla del denominador—.
+
+Del lado del remolque, **«en uso» es el que está fuera de planta**, no sólo el
+que sale ese día: un semi cargado esperando en el frigorífico está ocupado
+igual. Contar sólo las salidas subestima el uso en veinte puntos.
+
+El grupo escribe **dos tableros con el mismo `DATA`**, que son las dos vistas de
+la ventana *Logística › Saturación de Flota* (navega por dentro, como Lavado de
+Camiones): `saturacion-flota.html` son los indicadores del período y
+`saturacion-diario.html` el informe día por día. Ninguno se toca a mano.
+
+### El informe diario
+
+La ventana cierra con un detalle día por día del **último mes con hojas de
+ruta**, que es donde se ve la asignación: en el promedio del período, una unidad
+que no salió en toda la semana desaparece detrás de las que sí salieron. Por
+cada día lista el parque utilizable, cuánto se usó, **qué unidades no salieron**
+—separando las que estaban paradas de las que estaban y no se usaron— y los
+movimientos uno por uno.
+
+Dos detalles del cálculo que hacen falta para que el día cierre:
+
+- **Un remolque que salió y todavía no volvió está afuera igual.** Si sólo se
+  cuentan los ciclos cerrados, los últimos días del período aparecen medio
+  vacíos. Un ciclo abierto se cierra al final de **su bloque de días seguidos**,
+  no al final del período: un semi que salió el 13/06 y nunca volvió no puede
+  quedar ocupado durante julio y agosto, que no existen en el dato. Con eso la
+  ocupación pasó de 78,9 % a 86,7 %.
+- **La rotación se mide sólo con los ciclos que cerraron de verdad.** Uno
+  abierto no dice cuánto tardó en volver, dice hasta dónde llega el dato.
+
+El último día del mes puede estar incompleto si la hoja de ruta se exportó antes
+de terminar la jornada; el tablero lo avisa.
+
+### Cosas del archivo
+
+- **El archivo cambió de forma y hay que leerlo por columnas, no por nombre de
+  hoja.** Antes era el volcado del form en una hoja `Respuestas` que guardaba
+  sólo una ventana; ahora trae el histórico partido por año en `H.R 2025` y
+  `HR 2026`, y esta última ya no tiene columna `Id`. El extractor toma **toda
+  hoja que tenga fecha, patente, semi lleva y semi trae**, así que sigue
+  funcionando con las copias viejas y con las nuevas.
+- **Las hojas por año se pisan entre sí** —`H.R 2025` llega hasta junio de 2026
+  y `HR 2026` arranca en enero— así que hay que unirlas sin duplicar. La clave
+  es fecha + remito + patente + lleva + trae + destino, **con un número de
+  repetición dentro de cada hoja**: dos viajes idénticos el mismo día son dos
+  viajes de verdad y hay que conservarlos, pero el mismo viaje repetido en dos
+  hojas tiene la misma repetición y se pisa. De 12.953 filas leídas quedan 5.962
+  viajes únicos de 2026.
+- **El tablero mira sólo el año en curso** (`DESDE` en el extractor). El archivo
+  trae desde noviembre de 2025, pero la disponibilidad de flota —el denominador—
+  arranca en 2026, y mezclar años sin capacidad conocida ensucia todos los
+  porcentajes. Por lo mismo, las jornadas anteriores a la primera semana del
+  indicador cuentan viajes pero no porcentajes.
+- **La clave de semana lleva el año.** Con más de un año en el archivo, la
+  semana 45 de 2025 buscaría una disponibilidad que no existe, o peor, la de
+  otro año.
+- **Una semana que el indicador no cubre no es una semana disponible**, es una
+  semana sin dato. Contarla como disponible hacía aparecer como ociosas a
+  unidades que estuvieron paradas todo el año.
+- **El sábado se trabaja pero es media jornada**: tiene su propio número en el
+  informe diario y no promedia con los días hábiles.
+- **El padrón está embebido en el extractor**, como lo pasó Logística el
+  05/09/2026: 16 tractores, 5 toritos, 6 chasis, 2 balancines, 46 semis, 4
+  bateas y 16 fuera de servicio. Distingue chasis de balancín y marca las bajas,
+  cosas que el indicador de disponibilidad no separa. Si cambia la flota, se
+  actualiza ahí.
+- **Lo que hace viajes y no está en el padrón se cuenta aparte.** Hoy es ESK012
+  con 226 viajes —casi todos de intercambio—: capacidad que la operación usa y
+  que no aparece en ningún indicador de disponibilidad.
+- **Los ciclos que cruzan un hueco de datos hay que descartarlos.** Un semi que
+  «salió el 13/06 y volvió el 01/09» no estuvo 80 días afuera: es que no hay
+  julio ni agosto. Sin ese filtro la rotación daba 2,24 días en vez de 0,70.
+- **Las patentes se escriben a mano.** Hay transposiciones (AG525VN por
+  AG252VN), dígitos de más (HMH2555) y texto pegado (SPW094FEDERAL). Se corrigen
+  contra el padrón por distancia de edición y **sólo cuando hay un único
+  candidato**; con dos o más se dejan y quedan listadas en calidad del dato.
+- **En Descargas hay copias que son HTML con nombre .xlsx.** El extractor las
+  prueba antes de leerlas y las saltea avisando, en vez de tumbar la corrida.
+
+## El form de lavado de camiones
+
+El lavadero no tiene una planilla: tiene un **formulario** que el operario carga
+unidad por unidad (atraco, inicio y fin de lavado, desatraco, quiénes lavaron y
+una observación). De ahí salen dos archivos, y el extractor `lavado` toma los
+dos porque ninguno alcanza solo:
+
+- `reporte-lavados-AAAAMMDD-HHMM.xlsx` — la exportación de la app, hoja
+  `Detalle`. **Cada exportación es una foto de un período distinto**, no un
+  acumulado: la del 23/07 sólo trae la semana 29 y la del 30/06 las semanas 24 a
+  27. Por eso se leen todas las que haya en Descargas y se unen.
+- `Registro de lavadero.xlsx` — la descarga cruda del form. Sirve de respaldo y
+  aporta lo que ninguna exportación tenga.
+
+El grupo escribe **tres tableros con el mismo `DATA`**, que son las tres vistas de
+la ventana *Logística › Lavado de Camiones* (navega por dentro, como Sistemas):
+`lavado-camiones.html` es el tablero, `lavado-informe.html` el informe del sector
+y `lavado-kpi.html` el cuadro de mando. No hay que tocar ninguno a mano.
+
+**Cómo se exporta** (app de lavados → Reportes): `Semana desde` en la primera que
+falte, `Semana hasta` en la última, y **Exportar a Excel dos veces**, una con
+circuito **Camiones** y otra con **Todos**. Los dos archivos a Descargas, sin
+renombrar. El reporte tiene piso en la **semana 26**: las semanas 24 y 25 sólo
+existen en los exports viejos, que por eso no se borran.
+
+No hay forma de traer esto sin pasar por la exportación: el botón arma el archivo
+en el servidor y lo manda **en base64 por el circuito SignalR de Blazor**
+(`js/download.js`), no hay una URL con parámetros que se pueda pedir, y
+`/reportes?desde=…&hasta=…` los ignora.
+
+Cosas que hay que saber:
+
+- **La exportación viene en dos formatos.** El de circuito camión trae dársena,
+  frigorífico, tambores y las cuatro marcas de tiempo; el de «todos» suma las
+  tareas de hielo y varias, pero sólo trae inicio y fin de lavado. Cuando el
+  mismo lavado aparece en los dos, **gana el completo**.
+- **La clave para no duplicar es fecha + patente + hora de inicio.** La marca
+  temporal viene con distinta precisión en cada origen: si se usa como clave,
+  los dos archivos se suman en lugar de pisarse (pasó: 1.021 registros donde
+  había 821).
+- **Las tareas no son lavados.** Hielo y varias aportan tiempo y horas hombre,
+  pero no cuentan como cantidad. La productividad se mide contra la hora hombre
+  aplicada a camiones, o una semana con mucho hielo aparece como una caída de
+  productividad que no existió.
+- **Horas hombre = Σ(ciclo × operarios de ese lavado)**, no ciclo × operarios
+  distintos: un operario que hizo 1 de 40 lavados no trabajó las 40 horas.
+- **El form viejo tenía un solo operario por lavado.** Las semanas 24 y 26
+  muestran una dotación de 1,07 que no es real; por eso una semana con menos de
+  cuatro jornadas cargadas no puede fijar la meta del cuadro de mando.
+- **La fecha la escribe el operario y a veces le erra el mes.** Hay un registro
+  cargado como 19/08 cuya marca temporal es del 20/06. Si difieren en más de dos
+  días manda la marca temporal, que la pone el sistema.
+- **Ciclos imposibles.** Los de menos de 2 minutos son registros mal cerrados y
+  los de más de 2 horas son unidades que quedaron atracadas por otra cosa (carga
+  de tambores, parada de comida). Quedan fuera de los promedios y listados en
+  «calidad del dato» del tablero.
+- **La cantidad de lavados de la matriz de costo es un supuesto.** La matriz usa
+  850 por mes desde marzo. Julio, que el form cubre entero (27 jornadas de 27
+  hábiles), dio **689**: el $/lavado real es $100.774 y no $81.691, un 23,4 %
+  más. El tablero de KPI muestra las dos lecturas, una al lado de la otra.
+- **La mitad de la hora hombre del sector no es lavar camiones.** 3.796 hs en
+  camiones contra 3.732 en tareas (varias 2.012, fábrica de hielo 1.494, hiel
+  226). El $/lavado divide todo el gasto por los camiones, así que carga sobre
+  el lavado un trabajo que le piden otros sectores.
+- **La dotación por lavado se duplica en la semana 32.** Venía en 2,1–2,5
+  operarios por unidad hasta la 31 y salta a 4,0 / 4,8 / 4,6 / 4,7 / 5,1. La
+  productividad cae de 0,63–0,70 a 0,34–0,37 camiones por hora hombre. Antes de
+  leerlo como una caída de productividad hay que confirmar con el sector si
+  cambió la forma de cargar el form —si ahora se asigna el turno completo a cada
+  lavado, la hora hombre queda multiplicada.
 
 ## Cómo se analiza el costo de Logística
 
@@ -298,6 +539,36 @@ Dos grupos no tienen tercer nivel, y no es un olvido:
   mes —todos facturan a semana vencida—, así que la factura suelta no explica el
   movimiento: hay que mirarlo por viaje y por tonelada, como en Métrica de Fletes.
   El resto de los fletes (Congelado, Supermercado) sí se abre.
+
+### La presentación gerencial sale del PowerPoint
+
+Gestión arma cada corte un `Tablero de Control General - Corte <fecha>.pptx` en la
+raíz de su carpeta de SharePoint. La ventana **Presentación Gerencial** lo
+replica, y los números **no** se copian a mano: salen de los gráficos embebidos
+del propio archivo.
+
+Un `.pptx` es un zip de XML. No hizo falta una librería nueva: el módulo `CFB` que
+ya trae `xlsx` lo abre. De ahí salen dos cosas distintas:
+
+- **`ppt/charts/chartN.xml`** — las series con sus categorías y valores. Son los
+  números de verdad, con todos sus decimales, no una imagen del gráfico.
+- **`ppt/slides/slideN.xml`** — el texto: el corte, la tabla de KPI, el plan de
+  acción y, por cada gerencia, el desvío del mes, el acumulado, el monto, el peso
+  sobre PB y los comentarios que escribe la Gerencia.
+
+**Los gráficos NO se toman por número.** El orden cambia de un corte a otro, así
+que cada uno se reconoce por su título (`Gerencia de Operaciones`, `USD por
+tonelada`) o por los nombres de sus series (`Presupuesto` + `Gasto Real`). Si un
+corte nuevo cambia la forma, la corrida avisa `! no encuentro el gráfico de …` en
+vez de cargar cualquier cosa en su lugar.
+
+Dos cosas que el archivo esconde y hay que saber:
+
+- En `Costo x Tns (Sin Capex)` hay una segunda serie sin nombre con valores como
+  765, 657, 666. **Son las toneladas totales dibujadas en escala 1:10** para que
+  entren en el mismo eje que los USD/tn. El extractor las devuelve en toneladas.
+- El desvío del mes viene como `-6,90%/ Mes` en unas diapositivas y `+10,42%` en
+  otras; y el peso sobre PB aparece pegado al plan de acción. Los dos se limpian.
 
 ### El cruce contra los presupuestos de sector
 

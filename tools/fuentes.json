@@ -191,14 +191,15 @@
             "client/src/dashboards/compras-informe.html",
             "client/src/dashboards/compras-sin-entrega.html"
           ],
-          "cuenta": "La base es la hoja Reporte, no la hoja Demoradas: esa quedó congelada y trae un solo registro de 2026. Informe de puntualidad: los ítems que tienen fecha de entrega y de recepción; llega tarde el que se recibió después de la fecha de entrega, y se agrupa por año, mes, rubro y proveedor. Sin entrega: los ítems con fecha de entrega, sin recepción, con cantidad pendiente mayor a cero y con la OC viva (estado aprobada o emitida). Demoradas: de esas, las que tienen la fecha de entrega vencida y dentro del año en curso, agrupadas por proveedor y rubro. La columna Observaciones sale de \"Texto Variable Observaciones\" y se muestra tal cual, con los saltos de línea pasados a \" · \".",
+          "cuenta": "La base es la hoja Reporte, no la hoja Demoradas: esa quedó congelada. Demoradas y Sin entrega aplican los MISMOS filtros que la consulta Power Query «Demora» del propio archivo, que está en el código M embebido (customXml/item1.xml, UTF-16, paquete DataMashup): Oficina de Compras ∈ {01-MAT NO PRODUCTIVOS, 03-ART DE OFICINA}, Rubro ∉ {FLETES Y ACARREOS, SERVICIOS} y Estado = \"Aprobada/o\" (sólo aprobadas, las emitidas no entran). Después se reparten por la columna «tiempo sin entrega» que trae la propia planilla: demoradas son las de -1200 a -1 días con Estado del Item ≠ Anulada/o; sin entrega son las de 1 día en adelante, o sea las que todavía no llegaron a su fecha. Las dos vistas no se superponen. Informe de puntualidad: los ítems con fecha de entrega y de recepción; llega tarde el que se recibió después de la fecha de entrega, agrupado por año, mes, rubro y proveedor (este informe todavía no aplica los filtros de la consulta). La columna Observaciones sale de «Texto Variable Observaciones».",
           "constante": "DATA",
           "hojas": [
             "Reporte"
           ],
           "columnas": {
             "Reporte": "una fila por ítem de OC. Se buscan por título: Proveedor, Rubro, Orden de Compra, Item, Material, Requisición, Cantidad Solicitada, Cantidad Pendiente, Estado, Estado del Item, Comprador Asignado, Fecha Entrega, Fecha Recepción VE, Texto Variable Observaciones."
-          }
+          },
+          "avisos": "Los filtros salen del código M del archivo: si Compras los cambia ahí, hay que reflejarlo acá. Con estos filtros, demoradas da 257 ítems en 30 grupos y sin entrega 343 en 92, que es lo que muestra el archivo."
         }
       ]
     },
@@ -656,6 +657,168 @@
         }
       ],
       "carpetaLocal": "C:/Users/admin/OneDrive - OffalExp SA/Documentos - Offal Exp/Gerencia de Gestion"
+    },
+    "gestion-presentacion": {
+      "carpeta": "Gerencia de Gestion  (el pptx del corte, en la raíz de la carpeta)",
+      "carpetaLocal": "C:/Users/admin/OneDrive - OffalExp SA/Documentos - Offal Exp/Gerencia de Gestion",
+      "extractor": "gestion-presentacion",
+      "fuentes": [
+        {
+          "id": "presentacion-gerencial",
+          "archivo": "Tablero de Control General - Corte <fecha>.pptx",
+          "destino": "client/src/dashboards/gestion-presentacion.html",
+          "constante": "DATA",
+          "hojas": "ppt/charts/chartN.xml (las series con sus números) y ppt/slides/slideN.xml (los textos que escribe la Gerencia)",
+          "cuenta": "Un .pptx es un zip de XML: se abre con el módulo CFB que ya trae xlsx, sin dependencias nuevas. Los gráficos generales NO se toman por número —el orden cambia entre cortes— sino que cada uno se reconoce por el título o por los nombres de sus series. Los de cada gerencia salen de ppt/slides/_rels/slideN.xml.rels, que dice qué gráficos cuelgan de esa diapositiva: así la serie mensual y la apertura por sector son siempre las de esa gerencia y no las de la siguiente. De las diapositivas salen el corte, la tabla de KPI, el plan de acción general y, por cada gerencia, el desvío del mes, el acumulado, el monto, el peso sobre PB y los comentarios.",
+          "control": "Cada gerencia se cruza contra sí misma: la tarjeta escrita a mano (AR$ …MM) tiene que dar lo mismo que gasto − presupuesto del último mes del gráfico. En el corte de julio 2026 no cierran dos: Operaciones (tarjeta AR$ 295MM, gráfico 208,5 MM) y RRHH (tarjeta AR$ -16MM, gráfico +15,7 MM, signo cambiado). La ventana muestra las dos cifras y la corrida lo avisa.",
+          "unidades": "Los importes van en MM (millones), como el eje de los gráficos del archivo (#,##0,,\" MM\") y las tarjetas (AR$ -48,5MM). Los desvíos vienen del archivo como fracción y se guardan ya en porcentaje con dos decimales: redondear la fracción antes de multiplicar por cien convertía -6,90% en -7,00%.",
+          "cuenta2": "La ventana replica la filmina bloque por bloque: KPI del corte, Presupuesto vs Real (barras presupuesto/gasto/diferencia + línea de % variación + el PROM. al pie), Presión macroeconómica, Costo x Tonelada (sin y con Capex, con la línea de target y las toneladas del mes debajo del eje), Recupero sin Capex (las cuatro series en USD/Tn más las seis tarjetas y la NOTA), Toneladas Procesadas (los cuatro tipos con su línea de tendencia) y una filmina por gerencia con gráfico · cifras · apertura por sector y las bandas de Comentarios y Plan de Acción.",
+          "derivado": "Dos números no están en el archivo y se recalculan: el PROM. de Presupuesto vs Real, que la filmina imprime dentro del gráfico y es el desvío ponderado del acumulado (total diferencia / total presupuesto = +1,4% en julio), y las toneladas del mes, que se suman de las cuatro series de Toneladas Procesadas porque la serie del gráfico de costo viene redondeada.",
+          "falta": "Si un corte nuevo cambia los títulos de los gráficos o el orden de los textos, la corrida lo avisa (\"no encuentro el gráfico de …\") en vez de cargar cualquier cosa. Lo macro no sale del pptx: la presentación lo pega como imagen, sin datos detrás. Son DOS gráficos distintos, los dos en tools/macro-gestion.json: el de 12 meses (bloque \"anual\", con la línea roja del mes del corte) va al lado de Presupuesto vs Real, y el de dos años ene-25 → dic-26 (bloque \"bienal\", con la marca del reinicio anual) es el de la filmina de Presión macroeconómica. Lo único exacto de todo eso es la fila de la brecha 2026 que la filmina imprime al pie; el resto se transcribe de las imágenes con precisión de medio punto. Ojo que los dos gráficos no coinciden entre sí en 2026: en el bienal la brecha se estabiliza cerca de 16-17 pp hasta diciembre y en el anual baja hasta 7,5 pp — la ventana lo dice al pie del gráfico."
+        }
+      ]
+    },
+    "lavado": {
+      "carpeta": "Gerencia de Operaciones/Lavadero",
+      "extractor": "lavado",
+      "fuentes": [
+        {
+          "id": "lavados",
+          "archivo": "reporte-lavados-AAAAMMDD-HHMM.xlsx  (todas las que haya) + Registro de lavadero.xlsx",
+          "destino": [
+            "client/src/dashboards/lavado-camiones.html",
+            "client/src/dashboards/lavado-informe.html",
+            "client/src/dashboards/lavado-kpi.html"
+          ],
+          "constante": "DATA",
+          "hojas": "«Detalle» en las exportaciones de la app de lavados; «Respuestas de formulario 1» (o «Form_Responses») en la descarga cruda del form.",
+          "columnas": {
+            "Marca temporal": "momento en que el operario cerró el registro; con la patente forma la clave para no duplicar",
+            "Fecha / Turno": "jornada y turno (Mañana 06:00-17:59, Tarde el resto)",
+            "Tipo": "Camion | Hielo | Varias. Sólo los camiones cuentan como cantidad; las tareas aportan tiempo",
+            "Patente / Equipo": "la unidad lavada",
+            "Dársena / Frigorífico / Tambores / Pallets": "sólo en el formato de circuito camión",
+            "Operarios": "lista separada por comas; cada uno recibe el ciclo completo del lavado",
+            "Atraco→Lavado / Lavado / Fin→Desatraco / Total": "las cuatro duraciones; en el formato corto sólo viene Total",
+            "Semana": "semana ISO de la fecha",
+            "Incidencias": "texto libre del operario; se clasifica en las familias de pérdida del proceso"
+          },
+          "cuenta": "Se unen TODAS las exportaciones que haya en la carpeta: cada una es una foto de un período distinto y ninguna sola tiene todo. La clave es «marca temporal + patente» y, ante un duplicado, gana el registro del formato completo (el que trae atraco y desatraco). La descarga cruda del form sólo aporta lo que ninguna exportación tenga. Cantidad = camiones (las tareas de hielo o varias no suman unidades, sólo tiempo). Horas hombre = Σ(ciclo × operarios de ese lavado), no ciclo × operarios distintos. Para los promedios se descartan los ciclos de menos de 2 minutos o de más de 2 horas y los lavados de más de 2 horas: son registros mal cerrados o unidades que quedaron atracadas por otra causa (carga de tambores, parada de comida). Quedan listados en «calidad del dato»."
+        },
+        {
+          "id": "costo-lavadero",
+          "archivo": "(no se lee un Excel: se toma de los tableros que ya lo mantienen)",
+          "destino": [
+            "client/src/dashboards/lavado-kpi.html",
+            "client/src/dashboards/lavado-informe.html"
+          ],
+          "constante": "DATA.costo",
+          "hojas": "RESUMEN de presupuesto-lavadero.html (extractor «presupuesto») y D_RAW de matriz-costo-logistica.html (extractor «logistica»)",
+          "cuenta": "El form no tiene costo. La mano de obra propia, la eventual y el material salen del Presupuesto del Lavadero; la cantidad de lavados y el $/lavado que se informan, de la matriz de costo. Por eso el orden de actualización importa: primero «presupuesto» y «logistica», después «lavado»."
+        }
+      ],
+      "ventana": "Logística › Lavado de Camiones. La ventana navega por dentro (LavadoCamiones.jsx): Tablero, Informe del sector y KPI del Lavadero, los tres sobre el mismo DATA."
+    },
+    "saturacion": {
+      "carpeta": "Gerencia de Operaciones/Logistica",
+      "extractor": "saturacion",
+      "ventana": "Logística › Saturación de Flota. Navega por dentro (SaturacionFlota.jsx): Indicadores e Informe diario, los dos sobre el mismo DATA.",
+      "fuentes": [
+        {
+          "id": "hojas-de-ruta",
+          "archivo": "HOJA DE RUTA - TRANSPORTE.xlsx  (todas las copias que haya)",
+          "destino": [
+            "client/src/dashboards/saturacion-flota.html",
+            "client/src/dashboards/saturacion-diario.html"
+          ],
+          "constante": "DATA",
+          "hojas": "«Respuestas» (el volcado del form) y «Base» (patente → tipo de unidad)",
+          "columnas": {
+            "Id": "id del formulario; es la clave para unir copias sin duplicar",
+            "Fecha": "jornada del viaje",
+            "Patente": "la unidad que tracciona: tractor o chasis/balancín",
+            "Destino": "el frigorífico o punto al que va",
+            "Semi Lleva": "el remolque que sale de planta en ese viaje",
+            "Semi Trae": "el remolque que vuelve a entrar en ese viaje"
+          },
+          "cuenta": "La hoja «Respuestas» NO acumula: guarda una ventana y el resto se archiva en la base (transporte.HojasRuta). Por eso se leen TODAS las copias que haya en las carpetas y se unen por Id. El padrón está embebido en el extractor, como lo pasó Logística: 16 tractores, 5 toritos, 6 chasis, 2 balancines, 46 semis, 4 bateas y 16 fuera de servicio. Los dos parques se miden con reglas distintas, que son las del sector: el SEMI tiene la regla de un viaje por día (vuelve cargado y se descarga esa noche o al día siguiente), así que su saturación es salidas del día ÷ semis disponibles, más la ocupación real contando cada uno desde que sale hasta que vuelve. El TRACTOR no tiene esa regla: sale con un vacío y vuelve con un lleno, así que encadena; su saturación se calcula convirtiendo la carga del día en tractores con el rendimiento medido (1,66 intercambios o 1,46 dedicados por tractor-día, sobre los días en que hizo un solo tipo). Un viaje es DEDICADO cuando lleva y trae la misma unidad —bateas de sebo a Swift, Refinería y Grabya, y los viajes de Arre Beef, Ramallo y Hugues— y ahí el tractor no encadena; de 354 viajes a esos destinos, 349 dan dedicados en el dato y ninguno intercambio. Chasis y balancines son unidad completa y sí cumplen un viaje por día. Los toritos son de patio y no cuentan como capacidad. Lo que hace viajes y no está en el padrón se cuenta aparte como motriz de afuera. Los ciclos de semi que cruzan un hueco de datos se descartan: miden el hueco, no la rotación."
+        },
+        {
+          "id": "capacidad-de-flota",
+          "archivo": "(no se lee un Excel: se toma del tablero que ya lo mantiene)",
+          "destino": [
+            "client/src/dashboards/saturacion-flota.html",
+            "client/src/dashboards/saturacion-diario.html"
+          ],
+          "constante": "DATA.capacidad",
+          "hojas": "DATA de disponibilidad-flota.html (extractor «logistica»)",
+          "cuenta": "El denominador es la flota realmente disponible: el padrón de unidades menos las paradas de esa semana. Por eso este grupo se corre DESPUÉS de «logistica»: si la disponibilidad está vieja, la saturación sale mal."
+        }
+      ],
+      "carpetaLocal": "C:/Users/admin/OneDrive - OffalExp SA/Documentos - Offal Exp/Gerencia de Operaciones/Logistica"
+    },
+    "objetivos-logistica": {
+      "carpeta": "Gerencia de Operaciones/Logistica",
+      "carpetaLocal": "C:/Users/admin/OneDrive - OffalExp SA/Documentos - Offal Exp/Gerencia de Operaciones/Logistica",
+      "extractor": "objetivos-logistica",
+      "ventana": "Logística › Objetivo › Seguimiento de KPI.",
+      "fuentes": [
+        {
+          "id": "colgado-propio",
+          "archivo": "HOJA DE RUTA - TRANSPORTE.xlsx",
+          "destino": [
+            "client/src/dashboards/objetivos-logistica.html"
+          ],
+          "constante": "DATA",
+          "hojas": "las que tengan fecha, patente, destino y semi lleva/trae",
+          "cuenta": "KPI 1, numerador: los viajes con destino «RUNFO (COLGADO)» son los de colgado que pasamos a hacer con flota propia una vez reparados los equipos de frío. El destino se escribe a mano y aparece también como «RUNFO (COLGADOS)», por eso se busca por la palabra COLGADO. Se deduplica igual que en Saturación de Flota, porque las hojas por año se pisan."
+        },
+        {
+          "id": "colgado-fletero",
+          "archivo": "2026 Consumo de combustible.xlsx",
+          "destino": [
+            "client/src/dashboards/objetivos-logistica.html"
+          ],
+          "constante": "DATA",
+          "hojas": "KG-FLETES-DESCRIMINADO 2026 (encabezado en la SEGUNDA fila: la primera sólo tiene el año)",
+          "columnas": {
+            "DÍA": "fecha del viaje",
+            "TRANSPORTE": "el transportista",
+            "ORIGEN / DESTINO": "a dónde fue",
+            "MERCADERÍA": "FRESCA | SEBO | COLGADO | ESTADIA — se filtra COLGADO",
+            "TARIFA(SIN IVA)": "lo que se le paga al fletero",
+            "KILOS": "kilos del viaje"
+          },
+          "cuenta": "KPI 1, denominador: los viajes de colgado que todavía hace un fletero. El total del mes es propios + fleteros."
+        },
+        {
+          "id": "rutas-propias",
+          "archivo": "2026 Consumo de combustible.xlsx",
+          "destino": [
+            "client/src/dashboards/objetivos-logistica.html"
+          ],
+          "constante": "DATA",
+          "hojas": "ResumenKgs",
+          "columnas": {
+            "Fecha": "del ingreso",
+            "Proveedor": "el frigorífico; se toman ARRE BEEF S.A y BLACK BAMBOO ENTERPRISES S.A",
+            "Patente": "la unidad",
+            "Kilos": "del ingreso",
+            "TRANSPORTE": "PROPIO o FLETES"
+          },
+          "cuenta": "KPI 2: son dos rutas que antes se hacían enteras con flete. El valor es la proporción de ingresos de esos dos proveedores que llegaron con TRANSPORTE = PROPIO."
+        },
+        {
+          "id": "costo-ajustado",
+          "archivo": "(no se lee un Excel: se toma del tablero que ya lo mantiene)",
+          "destino": [
+            "client/src/dashboards/objetivos-logistica.html"
+          ],
+          "constante": "DATA",
+          "hojas": "D_RAW de matriz-costo-logistica.html (extractor «logistica»)",
+          "cuenta": "KPI 3: la variación del costo real por tonelada descargada contra el mes anterior ajustado por el INDEC del mes. Se evalúa dentro del año y no contra el año pasado, así que enero es la base y no tiene variación. Negativo es bueno. Por eso este grupo se corre DESPUÉS de «logistica»."
+        }
+      ]
     }
   }
 }

@@ -1,0 +1,82 @@
+{
+  "_": "Los dos gráficos macro de la presentación. NO salen del pptx: los dos están pegados como IMAGEN, sin datos detrás, así que se transcriben a mano de la filmina y se actualizan con cada corte.",
+  "corte": "Corte 31 de julio de 2026",
+
+  "anual": {
+    "_": "El gráfico chico que va al lado de Presupuesto vs Real: sólo 2026, con la línea roja vertical en el mes del corte.",
+    "titulo": "Presión dólar mayorista vs IPC · 2026",
+    "meses": ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+    "series": [
+      {
+        "nom": "IPC acumulado",
+        "color": "#2f7ed8",
+        "_": "Calculada como dólar + brecha, para que las tres líneas cierren entre sí. Coincide con la línea azul de la filmina dentro de 0,4 pp.",
+        "vals": [2.3, 4.6, 6.6, 9.0, 12.3, 15.4, 18.3, 21.0, 23.6, 26.4, 29.0, 31.5]
+      },
+      {
+        "nom": "Dólar mayorista acumulado",
+        "color": "#e07a3f",
+        "_": "Leída de la imagen, con precisión de aproximadamente medio punto porcentual.",
+        "vals": [0.0, -2.5, -3.5, -4.8, -3.8, -1.0, 2.2, 5.7, 9.5, 14.0, 18.7, 24.0]
+      },
+      {
+        "nom": "Brecha IPC − dólar",
+        "color": "#3d9140",
+        "_": "Los únicos valores exactos: son los que la filmina imprime en la fila al pie.",
+        "vals": [2.3, 7.1, 10.1, 13.8, 16.1, 16.4, 16.1, 15.3, 14.1, 12.4, 10.3, 7.5]
+      }
+    ],
+    "marcas": [{ "mes": "Jul", "texto": "16,1%", "color": "#e01b24" }]
+  },
+
+  "bienal": {
+    "_": "El gráfico grande de la filmina de Presión macroeconómica: dos años, de enero 2025 a diciembre 2026, con el corte del acumulado en el cambio de año.",
+    "titulo": "Presión dólar mayorista vs IPC · 2025-2026",
+    "meses": ["ene-25", "feb-25", "mar-25", "abr-25", "may-25", "jun-25", "jul-25", "ago-25", "sept-25", "oct-25", "nov-25", "dic-25",
+      "ene-26", "feb-26", "mar-26", "abr-26", "may-26", "jun-26", "jul-26", "ago-26", "sept-26", "oct-26", "nov-26", "dic-26"],
+    "series": [
+      {
+        "nom": "IPC acumulado",
+        "color": "#1a9b8a",
+        "vals": [1.7, 4.5, 7.3, 10.3, 13.3, 16.0, 18.4, 21.2, 22.8, 25.1, 27.2, 29.0,
+          2.7, 5.8, 9.4, 12.3, 14.8, 17.1, 19.2, 21.5, 23.7, 25.6, 27.4, 30.0]
+      },
+      {
+        "nom": "Dólar mayorista acumulado",
+        "color": "#f0a95c",
+        "vals": [1.0, 2.6, 3.7, 8.8, 11.6, 14.8, 18.7, 22.5, 25.0, 27.8, 30.4, 33.5,
+          0.1, -2.7, -3.9, -4.9, -3.9, -0.8, 2.6, 4.1, 6.4, 8.6, 11.5, 13.7]
+      },
+      {
+        "nom": "Brecha IPC − dólar",
+        "color": "#d94a3d",
+        "_": "Derivada: IPC − dólar, así las tres líneas cierran entre sí.",
+        "derivada": "resta"
+      }
+    ],
+    "marcas": [
+      { "mes": "ene-26", "pie": "reinicio anual", "color": "#8fa3ad" },
+      { "mes": "jul-26", "color": "#8fa3ad" }
+    ],
+    "aviso": "En 2026 este gráfico no coincide con el de 12 meses ni con la fila que la filmina imprime al pie: acá la brecha se estabiliza cerca de 16-17 pp hasta diciembre, y en el otro baja hasta 7,5 pp. Son dos recorridos distintos del dólar dentro del mismo archivo."
+  },
+
+  "brechaMesAMes": {
+    "_": "La fila roja al pie de la filmina de Presión macroeconómica.",
+    "titulo": "Brecha IPC − dólar, mes a mes (pp) 2026",
+    "meses": ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"],
+    "vals": [2.3, 7.1, 10.1, 13.8, 16.1, 16.4, 16.1, 15.3, 14.1, 12.4, 10.3, 7.5]
+  },
+
+  "hitos": [
+    { "l": "Máxima", "v": "16,4 pp", "mes": "Junio" },
+    { "l": "Mínima", "v": "2,3 pp", "mes": "Enero" },
+    { "l": "Cierre", "v": "7,5 pp", "mes": "Diciembre" }
+  ],
+  "lectura": [
+    "Junio: brecha máxima +16,4 pp",
+    "Diciembre: brecha residual +7,5 pp"
+  ],
+  "comentario": "El dólar recupera 8,9 pp entre junio y diciembre, pero todavía queda retrasado contra IPC.",
+  "falta": "De todo lo macro, lo único que sale de un número escrito en la filmina es la fila de la brecha 2026. El resto se transcribe de los gráficos —que son imágenes— con precisión de medio punto. Si aparece el Excel que los alimenta, se reemplazan por los valores exactos."
+}

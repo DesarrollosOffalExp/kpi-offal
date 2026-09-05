@@ -375,7 +375,7 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
       const u = a.u[dom] = a.u[dom] || { dom, tipo: txt(r[2]) || '', obs: txt(r[3]) || '', destino: txt(r[4]) || '', dias: 0 };
       u.dias++;                        // una fila = un día parado
     }
-    const weeks = Object.keys(porSem).map(Number).sort((a, b) => a - b).map(w => {
+    let weeks = Object.keys(porSem).map(Number).sort((a, b) => a - b).map(w => {
       const a = porSem[w];
       const unidades = Object.values(a.u).sort((x, y) => x.dom.localeCompare(y.dom, 'es'));
       const paradas = unidades.length, disp = total - paradas;
@@ -391,9 +391,19 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
       const faltan = disponibles.filter(u => !u.tipo).length;
       log('   tipos de unidad: ' + tiposHallados.map(t => t + ' ' + disponibles.filter(u => u.tipo === t).length).join(' · ') +
         (faltan ? ' · ! ' + faltan + ' sin tipo' : ''));
-      const dif = viejo.weeks.filter(v => JSON.stringify(v) !== JSON.stringify(weeks.find(x => x.week === v.week)));
+      const dif = viejo.weeks.filter(v => {
+        const n = weeks.find(x => x.week === v.week);
+        return n && JSON.stringify(v) !== JSON.stringify(n);
+      });
       log('   ' + (dif.length ? '~ cambiaron en la planilla ' + dif.length + ' semana(s): S' + dif.map(x => x.week).join(', S')
-        : '✓ las ' + viejo.weeks.length + ' semanas ya cargadas dan igual'));
+        : '✓ las ' + viejo.weeks.filter(v => weeks.some(x => x.week === v.week)).length + ' semanas ya cargadas dan igual'));
+      // las que estaban cargadas y el archivo ya no trae
+      const perdidas = viejo.weeks.filter(v => !weeks.some(x => x.week === v.week));
+      if (perdidas.length) {
+        log('   ! el archivo ya no trae ' + perdidas.length + ' semana(s) que estaban cargadas: S' +
+          perdidas.map(x => x.week).join(', S') + ' · se conservan, revisar la hoja BASE DE DATOS');
+        weeks = weeks.concat(perdidas).sort((a, b) => a.week - b.week);
+      }
       log('   ' + viejo.weeks.length + ' → ' + weeks.length + ' semanas · última S' + weeks[weeks.length - 1].week +
         ' (hasta el ' + weeks[weeks.length - 1].hasta + ')');
     }
@@ -692,6 +702,12 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
         })();
         const gasoilPorMes = (function () {
           // nuestro precio por litro, ponderado por los litros de cada compra
+          // La hoja puede no estar: en septiembre de 2026 desapareció del libro.
+          // Sin ella no se pierde nada de lo ya cargado, sólo no hay precio nuevo.
+          if (!wb.hojas.some(h => /^PRECIO GASOIL$/i.test(String(h).trim()))) {
+            log('   ! el libro no trae la hoja PRECIO GASOIL: la métrica queda sin el precio del gasoil que compramos');
+            return {};
+          }
           const g = wb.filas('PRECIO GASOIL'), o = {};
           for (let i = 1; i < g.length; i++) {
             const r = g[i]; if (!r || !(r[1] instanceof Date)) continue;
@@ -942,6 +958,9 @@ exports.actualizar = async function ({ leer, escribir, log, util }) {
     for (let i = fEnc + 1; i < r.length; i++) {
       const x = r[i]; if (!x) continue;
       const g = txt(x[2]); if (!g || /^total/i.test(g)) break;
+      // Servicios públicos se sacó de las cuentas de todos los sectores: la
+      // electricidad y el gas se analizan aparte, no dentro del presupuesto.
+      if (g.toUpperCase() === 'SERVICIOS PUBLICOS') continue;
       grupos.push({ g, vals: cols.map(c => num(x[c.j])) });
     }
     const RESUMEN = { meses: cols.map(c => c.mes), grupos };

@@ -51,30 +51,30 @@ const COMPRAS = {
   objetivos: {"persona":"Juan Retamero","total":5,"meses":["Ene","Feb","Mar","Abr","May","Jun","Jul"],"filas":[{"n":"1","objetivo":"Mejorar un 10% el costo por tonelada mediante la mejora de costos de compras","kpi":"SE DEBE SACAR EL INFORME \"IMFORME DE PRECIOS PROMEDIO PONDERADO\" (ES EL UNICO QUE ENCONTRAMOS QUE TIRABA LOS PRECIOS DE LOS MATERIALES) MES A MES Y SE LO DEBE CALCULAR CON LA INFLACION MENSUAL.","area":"Compras","meta":"4%","vals":["-6%","-5%","-4%","-6%","-2%","",""]},{"n":"2","objetivo":"","kpi":"INDICADOR DE NUEVOS PROVEEDORES EN EL PERIODO MEDIDO","area":"Compras","meta":"2%","vals":["","","","","3%","6%","7%"]},{"n":"3","objetivo":"","kpi":"LICITACIONES","area":"Compras","meta":"2%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"4","objetivo":"Asegurar el proyecto de transformación antes del fin del 1er semestre","kpi":"MATRIZ","area":"Compras","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"5","objetivo":"","kpi":"MATRIZ DE HABILIDADES","area":"Compras","meta":"50%","vals":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]},{"n":"6","objetivo":"Cumplimiento >70%","kpi":"INFORMES DE GESTION","area":"Compras","meta":"70%","vals":["","","","","","",""]}],"promedio":null},
   kpis: [
     // 1er conjunto: entender de dónde nace el total de pendientes.
-    { id: 'pendientes', grupo: 'Pendientes y vencidos', titulo: 'Total Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 313,
+    { id: 'pendientes', grupo: 'Pendientes y vencidos', titulo: 'Total Pendientes', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 146,
       info: 'Total de requisiciones pendientes al cierre de la semana. (COMPRAS, columna O)' },
-    { id: 'sin_tratar', grupo: 'Pendientes y vencidos', titulo: 'Requis sin Tratar', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 292,
+    { id: 'sin_tratar', grupo: 'Pendientes y vencidos', titulo: 'Requis sin Tratar', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 118,
       info: 'Requisiciones de la semana que quedaron sin gestionar. (COMPRAS, columna G)' },
-    { id: 'vencidas', grupo: 'Pendientes y vencidos', titulo: 'Total Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
-      desglose: [{ nombre: 'Nuevas', valor: 5 }, { nombre: 'Viejas', valor: 12 }],
+    { id: 'vencidas', grupo: 'Pendientes y vencidos', titulo: 'Total Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 12,
+      desglose: [{ nombre: 'Nuevas', valor: 1 }, { nombre: 'Viejas', valor: 11 }],
       info: 'Requisiciones vencidas (pasaron su plazo), con desglose entre nuevas y viejas. (COMPRAS, columna J; K nuevas / L viejas)' },
-    { id: 'total_sin_tratar', grupo: 'Pendientes y vencidos', titulo: 'Total de Requis Sin Tratar', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 313,
+    { id: 'total_sin_tratar', grupo: 'Pendientes y vencidos', titulo: 'Total de Requis Sin Tratar', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 146,
       info: 'Total de requisiciones sin tratar (acumulado: anteriores + de la semana). (COMPRAS, columna H)' },
-    { id: 'ant_vencidas', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 17,
+    { id: 'ant_vencidas', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Vencidas', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 12,
       info: 'Requisiciones vencidas que vienen de semanas anteriores. (COMPRAS, columna A)' },
-    { id: 'ant_sin_vencer', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Sin Vencer', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 4,
+    { id: 'ant_sin_vencer', grupo: 'Pendientes y vencidos', titulo: 'Anteriores Sin Vencer', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 16,
       info: 'Requisiciones de semanas anteriores que aún no vencieron. (COMPRAS, columna B)' },
     // 2do conjunto: actividad de la semana.
-    { id: 'requis_semana', grupo: 'Actividad de la semana', titulo: 'Requis de la Semana', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 339,
+    { id: 'requis_semana', grupo: 'Actividad de la semana', titulo: 'Requis de la Semana', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 247,
       info: 'Requisiciones de compra ingresadas en la semana. (COMPRAS, columna C)' },
-    { id: 'tratadas', grupo: 'Actividad de la semana', titulo: 'Requis Tratadas', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 45,
+    { id: 'tratadas', grupo: 'Actividad de la semana', titulo: 'Requis Tratadas', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 126,
       info: 'Requisiciones gestionadas / resueltas en la semana. (COMPRAS, columna D)' },
   ],
   graficos: [
     { tipo: 'bar', grupo: 'Pendientes y vencidos', titulo: 'Composición de pendientes', info: 'De qué se componen los pendientes de la última semana.',
-      datos: [{ nombre: 'Por vencer', valor: 202 }, { nombre: 'En plazo', valor: 94 }, { nombre: 'Vencidas', valor: 17 }] },
+      datos: [{ nombre: 'Por vencer', valor: 61 }, { nombre: 'En plazo', valor: 73 }, { nombre: 'Vencidas', valor: 12 }] },
     { tipo: 'bar', grupo: 'Actividad de la semana', titulo: 'Gestión de la semana', info: 'Flujo de requisiciones de la última semana: ingresadas, tratadas y las que quedaron.',
-      datos: [{ nombre: 'Ingresadas', valor: 339 }, { nombre: 'Tratadas', valor: 45 }, { nombre: 'Sin tratar', valor: 292 }, { nombre: 'Rechazadas', valor: 1 }, { nombre: 'Anuladas', valor: 1 }] },
+      datos: [{ nombre: 'Ingresadas', valor: 247 }, { nombre: 'Tratadas', valor: 126 }, { nombre: 'Sin tratar', valor: 118 }, { nombre: 'Rechazadas', valor: 2 }, { nombre: 'Anuladas', valor: 1 }] },
     // Vencidas por semana: gráfico embebido (ComprasVencidas.jsx) con el desglose de la
     // tabla A112 (composición de las vencidas por semana de origen). Solo registra el grupo/subtab.
     { tipo: 'tabla', grupo: 'Vencidas por semana', titulo: 'Vencidas por semana', info: 'Desglose de cómo se componen las vencidas por semana de origen (hoja KPI · A112).', columnas: [], filas: [] },
@@ -160,7 +160,7 @@ const SISTEMAS = {
 // Los nombres de las ventanas no llevan mes ni semana: el período lo muestra
 // cada tablero a partir de sus propios datos.
 const G = { costo: 'Matriz de Costo', metrica: 'Métrica de Costo', fletes: 'Métrica de Fletes', flota: 'Disponibilidad de Flota',
-  lavado: 'Lavado de Camiones', tambores: 'Necesidad de Tambores', cierre: 'Cierre Enero–Febrero',
+  saturacion: 'Saturación de Flota', lavado: 'Lavado de Camiones', tambores: 'Necesidad de Tambores', cierre: 'Cierre Enero–Febrero',
   gasoil: 'Consumo de Gasoil', frig: 'Costo por Frigorífico', hiel: 'Stock de Hiel' };
 // Rendimiento KG/LT semana a semana (S1–S31) para el histórico de gasoil.
 const KGLT = [9.07, 6.19, 6.38, 6.79, 5.71, 3.75, 4.12, 5.15, 6.17, 6.30, 5.89, 6.31, 6.29, 7.90, 5.48, 6.11, 6.09, 5.16, 6.63, 6.11, 5.52, 5.66, 5.71, 6.16, 4.63, 5.32, 6.84, 6.61, 6.59, 6.67, 6.21];
@@ -197,13 +197,12 @@ const LOGISTICA = {
     { id: 'fuera_serv', grupo: G.flota, titulo: 'Unidades fuera de servicio', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 15,
       desglose: [{ nombre: 'Tractor', valor: 3 }, { nombre: 'Semi', valor: 11 }, { nombre: 'Bateas', valor: 1 }],
       info: 'Unidades con parada temporal (FS) en la semana. Las de baja permanente (FSP) NO se cuentan. Detalle en la tabla. (DISPONIBILIDAD DE FLOTA)' },
-    // Lavado de Camiones (Sem 30)
-    { id: 'camiones_lav', grupo: G.lavado, titulo: 'Camiones lavados', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 215,
-      info: 'Total de camiones lavados en la semana. (LAVADO DE CAMIONES)' },
-    { id: 'hs_lavado', grupo: G.lavado, titulo: 'Horas de lavado', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 686,
-      info: 'Horas totales de lavado en la semana. (LAVADO DE CAMIONES)' },
-    { id: 'operarios', grupo: G.lavado, titulo: 'Operarios presentes', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 21,
-      desglose: [{ nombre: 'Por nómina', valor: 23 }], info: 'Operarios presentes vs. nómina. (LAVADO DE CAMIONES)' },
+    // Saturación de Flota (embebido; SaturacionFlota.jsx). Sólo registra el grupo/subtab.
+    { id: 'saturacion_reg', grupo: G.saturacion, titulo: 'Saturación de Flota', unidad: '', formato: 'numero', sentido: 'down', meta: null, valor: 0,
+      info: 'Los viajes de la hoja de ruta contra la flota que queda disponible, separando lo que tracciona (tractores, chasis y balancines) de lo que se arrastra (semis y bateas). La regla es un viaje por unidad por día. (HOJA DE RUTA - TRANSPORTE + Disponibilidad de Flota)' },
+    // Lavado de Camiones (embebido; LavadoCamiones.jsx). Sólo registra el grupo/subtab.
+    { id: 'lavado_reg', grupo: G.lavado, titulo: 'Lavado de Camiones', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: 0,
+      info: 'La ventana navega por dentro: Tablero (cada unidad con sus tiempos, dotación y observación), Informe del sector (la lectura y las conclusiones) y KPI del Lavadero (el cuadro de mando de proceso y costo). (form de control de lavado de camiones + Presupuesto del Lavadero)' },
     // Cuenta de Tambores (Sem 31)
     { id: 'stock_tambores', grupo: G.tambores, titulo: 'Stock final de tambores', unidad: '', formato: 'numero', sentido: 'up', meta: null, valor: -280,
       desglose: [{ nombre: 'Enviados', valor: 18761 }, { nombre: 'Recibidos', valor: 18809 }],
@@ -380,6 +379,7 @@ const GESTION = {
   kpis: [],
   graficos: [
     { tipo: 'tabla', grupo: 'Presupuesto', titulo: 'Presupuesto', info: 'Presupuestado vs. gasto real de la Gerencia de Gestión, por mes analizado.', columnas: [], filas: [] },
+    { tipo: 'tabla', grupo: 'Presentación Gerencial', titulo: 'Presentación Gerencial', info: 'Réplica del Tablero de Control General que arma la Gerencia de Gestión en PowerPoint.', columnas: [], filas: [] },
   ],
 };
 

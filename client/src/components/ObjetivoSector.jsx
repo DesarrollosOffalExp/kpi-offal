@@ -3,6 +3,7 @@ import Ventanas from './Ventanas';
 import CuadroObjetivos from './CuadroObjetivos';
 import ObjetivosEstrategicos from './ObjetivosEstrategicos';
 import ComprasPrecios from './ComprasPrecios';
+import ObjetivosLogistica from './ObjetivosLogistica';
 
 // Sección "Objetivo" de un sector, dividida en ventanas. Primero el objetivo
 // estratégico (el número del sector mes a mes y el desglose de sus KPI) y
@@ -23,6 +24,9 @@ export default function ObjetivoSector({ sectorKey, data }) {
   ];
   if (data && data.filas) ventanas.push({ key: 'asignados', nombre: 'KPI asignados', hint: 'Los objetivos cargados al sector' });
   if (sectorKey === 'compras') ventanas.push({ key: 'precios', nombre: 'Precios real vs. ajustado', hint: 'Seguimiento del objetivo de costo' });
+  // Logística: el cuadro de arriba dice qué se comprometió; esta ventana, cuánto
+  // se cumplió, con la justificación de cada valor.
+  if (sectorKey === 'logística') ventanas.push({ key: 'seguimiento', nombre: 'Seguimiento de KPI', hint: 'Los KPI asignados, calculados mes a mes' });
 
   const [ventana, setVentana] = useState(ventanas[0].key);
   const activa = ventanas.some((v) => v.key === ventana) ? ventana : ventanas[0].key;
@@ -35,6 +39,7 @@ export default function ObjetivoSector({ sectorKey, data }) {
       )}
       {activa === 'asignados' && <CuadroObjetivos data={data} />}
       {activa === 'precios' && <div className="marco-embebido"><ComprasPrecios /></div>}
+      {activa === 'seguimiento' && <div className="marco-embebido"><ObjetivosLogistica /></div>}
     </div>
   );
 }

@@ -21,6 +21,7 @@ import PresupuestoCongelado from './components/PresupuestoCongelado';
 import PresupuestoTaller from './components/PresupuestoTaller';
 import PresupuestoLavadero from './components/PresupuestoLavadero';
 import PresupuestoGestion from './components/PresupuestoGestion';
+import GestionPresentacion from './components/GestionPresentacion';
 import DisponibilidadFlota from './components/DisponibilidadFlota';
 import NecesidadTambores from './components/NecesidadTambores';
 import ObjetivoSector from './components/ObjetivoSector';
@@ -30,6 +31,8 @@ import StockHiel from './components/StockHiel';
 import ConsumoGasoil from './components/ConsumoGasoil';
 import CostoFrigorifico from './components/CostoFrigorifico';
 import MetricaCosto from './components/MetricaCosto';
+import LavadoCamiones from './components/LavadoCamiones';
+import SaturacionFlota from './components/SaturacionFlota';
 import MetricaFletes from './components/MetricaFletes';
 import CierreEneFeb from './components/CierreEneFeb';
 import ProductividadArmado from './components/ProductividadArmado';
@@ -269,6 +272,26 @@ export default function App() {
                   <div className="grupo" key={g}>
                     {!conSub && <h2 className="grupo-titulo">{g}</h2>}
                     <CierreEneFeb />
+                  </div>
+                );
+              }
+              // Saturación de Flota (Logística): la hoja de ruta contra la flota disponible.
+              const esSaturacion = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Saturación de Flota');
+              if (esSaturacion) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <SaturacionFlota onSub={setSubSistemas} />
+                  </div>
+                );
+              }
+              // Lavado de Camiones (Logística): el form de control de lavado, semana a semana.
+              const esLavado = sector.key === 'logística' && typeof g === 'string' && g.startsWith('Lavado de Camiones');
+              if (esLavado) {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <LavadoCamiones onSub={setSubSistemas} />
                   </div>
                 );
               }
@@ -512,6 +535,15 @@ export default function App() {
                 );
               }
               // Presupuesto (Gestión): tabla ejecutiva embebida de la Gerencia de Gestión.
+              // Presentación Gerencial (Gestión): réplica del PowerPoint del corte.
+              if (sector.key === 'gestión' && g === 'Presentación Gerencial') {
+                return (
+                  <div className="grupo" key={g}>
+                    {!conSub && <h2 className="grupo-titulo">{g}</h2>}
+                    <GestionPresentacion />
+                  </div>
+                );
+              }
               const esPresupGes = sector.key === 'gestión' && typeof g === 'string' && g.startsWith('Presupuesto');
               if (esPresupGes) {
                 return (

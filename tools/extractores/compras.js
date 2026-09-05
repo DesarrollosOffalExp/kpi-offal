@@ -185,7 +185,8 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
     const ST = {
       sem: W.sem, total,
       urgentes: sin.filter(r => String(r['Columna1'] || '').toLowerCase() === 'urgente').length,
-      lunes: iso(lunes), habiles, feriados: FERIADOS, dias,
+      // sólo los feriados que caen dentro de la semana, no toda la lista
+      lunes: iso(lunes), habiles, feriados: FERIADOS.filter(f => f >= iso(lunes) && f <= iso(new Date(lunes.getTime() + 6 * 86400000))), dias,
       promDias: Math.round(dias.reduce((a, d) => a + (d.dias || 0) * d.n, 0) / total * 100) / 100,
       unDiaOMenos: dias.filter(d => (d.dias || 0) <= 1).reduce((a, d) => a + d.n, 0),
       fueraSemana: dias.filter(d => !d.habil).reduce((a, d) => a + d.n, 0),
@@ -196,7 +197,7 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
     const ru = {};
     sin.forEach(r => { const k = txt(r['Rubros']) || 'Sin rubro'; ru[k] = (ru[k] || 0) + 1; });
     ST.rubros = Object.entries(ru).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k, v]) => ({ k, v }));
-    log('   ' + total + ' sin tratar · ' + habiles.length + ' días hábiles (feriados: ' + (FERIADOS.join(', ') || 'ninguno') + ')');
+    log('   ' + total + ' sin tratar · ' + habiles.length + ' días hábiles' + (ST.feriados.length ? ' (feriados: ' + ST.feriados.join(', ') + ')' : ''));
     dias.forEach(d => log('     ' + d.dia.padEnd(10) + String(d.n).padStart(4) + '  ' + (d.habil ? d.dias + ' día(s) para tratar' : 'fuera de la semana hábil')));
     escribir('client/src/dashboards/compras-pendientes.html', 'ST', ST, { decl: 'var' });
   }
@@ -250,12 +251,29 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
       cant: col('Cantidad Solicitada'), pend: col('Cantidad Pendiente'),
       est: col('Estado'), estIt: col('Estado del Item'), comp: col('Comprador Asignado'),
       ent: col('Fecha Entrega'), rec: col('Fecha Recepción VE'), obs: col('Texto Variable Observaciones'),
+      ofi: col('Oficina de Compras'), sinEnt: col('tiempo sin entrega'),
     };
     const hoy = new Date(); hoy.setUTCHours(0, 0, 0, 0);
     const ene1 = new Date(Date.UTC(hoy.getUTCFullYear(), 0, 1));
     const dmy = f => String(f.getUTCDate()).padStart(2, '0') + '/' + String(f.getUTCMonth() + 1).padStart(2, '0') + '/' + f.getUTCFullYear();
     const limpio = v => String(v == null ? '' : v).replace(/\r/g, '').replace(/\n+/g, ' · ').replace(/\s+/g, ' ').trim();
-    const viva = e => /aprobad|emitid/i.test(String(e || ''));
+    // Los mismos filtros que la consulta Power Query «Demora» del archivo, que
+    // es lo que la gente de Compras mira. Están en el código M embebido:
+    //   Oficina de Compras ∈ {01-MAT NO PRODUCTIVOS, 03-ART DE OFICINA}
+    //   Rubro ∉ {FLETES Y ACARREOS, SERVICIOS}
+    //   Estado = "Aprobada/o"   (sólo aprobadas: las emitidas no entran)
+    // y después, según la vista:
+    //   demoradas  → tiempo sin entrega entre -1200 y -1, y Estado del Item ≠ Anulada/o
+    //   sin entrega → tiempo sin entrega ≥ 1
+    const OFICINAS = ['01-MAT NO PRODUCTIVOS', '03-ART DE OFICINA'];
+    const RUBROS_FUERA = ['FLETES Y ACARREOS', 'SERVICIOS'];
+    // El universo que miran todas las consultas del archivo: qué oficina compra
+    // y qué rubro. El estado va aparte, porque no es el mismo en las tres vistas.
+    const delPadron = r => OFICINAS.includes(limpio(r[K.ofi]))
+      && !RUBROS_FUERA.includes(limpio(r[K.rubro]));
+    const enPadron = r => delPadron(r) && limpio(r[K.est]) === 'Aprobada/o';
+    // la propia planilla calcula los días: negativo es vencido, positivo es que falta
+    const diasSin = r => (K.sinEnt >= 0 && typeof r[K.sinEnt] === 'number') ? r[K.sinEnt] : null;
 
     /* --- 1) demoradas: pendiente, sin recibir, vencida y del año en curso --- */
     const dem = [], sinEnt = [];
@@ -272,8 +290,24 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
         pend, estItem: limpio(r[K.estIt]), comprador: limpio(r[K.comp]),
         obs: limpio(r[K.obs]),
       };
-      // informe de puntualidad: sólo las que ya se recibieron
-      if (ent instanceof Date && rec instanceof Date) {
+      // Demoradas y sin entrega, con los filtros de la consulta. Va antes del
+      // informe porque la consulta no descarta las que ya tienen recepción: se
+      // reparten sólo por el signo de «tiempo sin entrega».
+      if (enPadron(r)) {
+        const dias = diasSin(r);
+        if (dias != null) {
+          const f = Object.assign({ fEntrega: ent instanceof Date ? dmy(ent) : '', fRecep: '', dias: Math.round(dias) }, fila);
+          if (dias >= 1) { pendientes++; sinEnt.push(f); }
+          else if (dias <= -1 && dias >= -1200 && limpio(r[K.estIt]) !== 'Anulada/o') { pendientes++; dem.push(f); }
+        }
+      }
+      // Informe de puntualidad: las que ya se recibieron, sobre el mismo universo
+      // que las otras dos vistas. No se les pide Estado = "Aprobada/o" porque una
+      // OC entregada pasa a "Cancelada/o" —es el estado del 91 % de las recibidas,
+      // y es el que tiene puesto la tabla dinámica del archivo—; sí se descartan
+      // los ítems anulados, como hace la consulta Demora.
+      if (ent instanceof Date && rec instanceof Date
+        && delPadron(r) && limpio(r[K.estIt]) !== 'Anulada/o') {
         recibidos++;
         const tarde = rec > ent;
         const a = rec.getUTCFullYear(), m = rec.getUTCMonth() + 1;
@@ -286,12 +320,6 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
         const pv = provAll[fila.prov] = provAll[fila.prov] || { k: fila.prov, ot: 0, late: 0 }; pv[tarde ? 'late' : 'ot']++;
         continue;
       }
-      if (!(ent instanceof Date) || rec instanceof Date || pend <= 0 || !viva(r[K.est])) continue;
-      pendientes++;
-      const dias = Math.round((ent - hoy) / 86400000);
-      const f = Object.assign({ fEntrega: dmy(ent), fRecep: '', dias }, fila);
-      sinEnt.push(f);                                  // toda OC pendiente de entrega
-      if (ent < hoy && ent >= ene1) dem.push(f);        // vencida y del año en curso
     }
 
     /* --- demoradas, agrupadas por proveedor y rubro --- */
@@ -355,13 +383,15 @@ exports.actualizar = async function ({ leer, escribir, log, dry, util }) {
     const totalHoja = fTot ? (typeof fTot[2] === 'number' ? fTot[2] : null) : null;
     if (totalHoja != null && totalHoja !== sinEnt.length)
       log('   ! la hoja "sin entrega" totaliza ' + totalHoja + ' ítems y de Reporte salen ' + sinEnt.length);
+    // con los filtros de la consulta, acá no hay vencidas: son las que todavía
+    // no llegaron a su fecha. Lo que importa es cuántas vencen en la semana.
+    const enOchoDias = sinEnt.filter(x => x.dias >= 1 && x.dias <= 8).length;
     log('   sin entrega: ' + sinEnt.length + ' ítems en ' + grupos.length + ' grupos · ' +
-      sinEnt.filter(x => x.dias < 0).length + ' ya vencidos' + (vSin ? ' (antes ' + vSin.totalItems + ')' : ''));
+      enOchoDias + ' vencen dentro de 8 días' + (vSin ? ' (antes ' + vSin.totalItems + ')' : ''));
     escribir(dSin, 'DATA', {
       generado: dmy(hoy), totalItems: sinEnt.length, totalGrupos: grupos.length,
       totalProveedores: new Set(sinEnt.map(i => i.prov)).size,
-      vencidos: sinEnt.filter(x => x.dias < 0).length,
-      porVencer: sinEnt.filter(x => x.dias >= 0).length,
+      vencidos: 0, porVencer: sinEnt.length, enOchoDias,
       totalHoja, grupos,
     });
   }
