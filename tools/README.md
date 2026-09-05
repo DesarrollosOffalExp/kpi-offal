@@ -15,7 +15,8 @@ node tools/actualizar.js fabrica-hielo
 ```
 
 Grupos disponibles: `fabrica-hielo`, `compras`, `sistemas`, `objetivos`,
-`presupuesto`, `insumos`, `logistica`, `saturacion`, `lavado`, `gestion`,
+`presupuesto`, `insumos`, `logistica`, `saturacion`, `objetivos-logistica`,
+`lavado`, `gestion`,
 `gestion-presentacion`. Sin argumentos lista todo lo que sabe hacer.
 
 Dos grupos dependen de otros y por eso van al final:
@@ -23,6 +24,7 @@ Dos grupos dependen de otros y por eso van al final:
 - `lavado` después de `presupuesto` y `logistica`: el form de lavado no tiene
   costo, así que el tablero de KPI lo toma de los tableros que ellos dejan
   escritos.
+- `objetivos-logistica` después de `logistica`: el KPI de costo sale de la matriz.
 - `saturacion` después de `logistica`: el denominador es la flota disponible que
   deja escrita Disponibilidad de Flota. Si esa está vieja, la saturación sale mal.
 
@@ -90,6 +92,37 @@ suposición se rompió.
   que fue un arqueo). El saldo es la suma de la S21 a la S32 y `Año 2026` la de
   la S34 en adelante. Los cortes están en la constante `TRAMOS` del extractor y
   cada corrida controla que las dos columnas den la suma de sus semanas.
+
+## Los KPI asignados a Logística, calculados
+
+El cuadro de «KPI asignados» viene del archivo de objetivos con las celdas en
+blanco o en `N/A`: dice qué se comprometió pero no cuánto se cumplió. El grupo
+`objetivos-logistica` calcula los tres que se pueden medir y guarda con cada
+valor **cómo se formó**, para que al hacer clic se vea el numerador, el
+denominador y de qué archivo salió cada número.
+
+- **Colgado con flota propia.** Numerador: los viajes de la hoja de ruta con
+  destino `RUNFO (COLGADO)` —el destino se escribe a mano y aparece también como
+  `RUNFO (COLGADOS)`, por eso se busca la palabra—. Denominador: esos más los de
+  `KG-FLETES-DESCRIMINADO 2026` con `MERCADERÍA = COLGADO`. **El encabezado de
+  esa hoja está en la segunda fila**: la primera sólo tiene el año.
+- **Rutas que pasaron a flota propia.** De `ResumenKgs`, los ingresos de
+  `ARRE BEEF S.A` y `BLACK BAMBOO ENTERPRISES S.A`, contando como propio lo que
+  tiene `TRANSPORTE = PROPIO`. Son dos rutas que antes se hacían enteras con
+  flete.
+- **Costo real contra el ajustado por INDEC.** Sale de `D_RAW` de la matriz, que
+  ya lo calcula: real del mes contra el real del mes anterior inflado por el
+  INDEC. Se evalúa dentro del año y no contra el año pasado, así que enero es la
+  base y no tiene variación. **Negativo es bueno.** Por eso el grupo se corre
+  después de `logistica`.
+
+Un mes se marca **parcial** cuando una fuente llegó y la otra no —hoy septiembre
+tiene el viaje propio cargado en la hoja de ruta y el archivo de fletes todavía
+sin cerrar, así que el 100 % no es un logro, es un mes a medio contar.
+
+El cuarto KPI del cuadro, «INFORMES DE GESTION», **no se calcula**: necesita que
+los informes se carguen en algún lado para poder contarlos, y hoy no hay de dónde
+leerlos. La fila se deja vacía en vez de completarla con un supuesto.
 
 ## La hoja de ruta y la saturación de flota
 

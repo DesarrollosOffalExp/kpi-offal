@@ -756,6 +756,69 @@
         }
       ],
       "carpetaLocal": "C:/Users/admin/OneDrive - OffalExp SA/Documentos - Offal Exp/Gerencia de Operaciones/Logistica"
+    },
+    "objetivos-logistica": {
+      "carpeta": "Gerencia de Operaciones/Logistica",
+      "carpetaLocal": "C:/Users/admin/OneDrive - OffalExp SA/Documentos - Offal Exp/Gerencia de Operaciones/Logistica",
+      "extractor": "objetivos-logistica",
+      "ventana": "Logística › Objetivo › Seguimiento de KPI.",
+      "fuentes": [
+        {
+          "id": "colgado-propio",
+          "archivo": "HOJA DE RUTA - TRANSPORTE.xlsx",
+          "destino": [
+            "client/src/dashboards/objetivos-logistica.html"
+          ],
+          "constante": "DATA",
+          "hojas": "las que tengan fecha, patente, destino y semi lleva/trae",
+          "cuenta": "KPI 1, numerador: los viajes con destino «RUNFO (COLGADO)» son los de colgado que pasamos a hacer con flota propia una vez reparados los equipos de frío. El destino se escribe a mano y aparece también como «RUNFO (COLGADOS)», por eso se busca por la palabra COLGADO. Se deduplica igual que en Saturación de Flota, porque las hojas por año se pisan."
+        },
+        {
+          "id": "colgado-fletero",
+          "archivo": "2026 Consumo de combustible.xlsx",
+          "destino": [
+            "client/src/dashboards/objetivos-logistica.html"
+          ],
+          "constante": "DATA",
+          "hojas": "KG-FLETES-DESCRIMINADO 2026 (encabezado en la SEGUNDA fila: la primera sólo tiene el año)",
+          "columnas": {
+            "DÍA": "fecha del viaje",
+            "TRANSPORTE": "el transportista",
+            "ORIGEN / DESTINO": "a dónde fue",
+            "MERCADERÍA": "FRESCA | SEBO | COLGADO | ESTADIA — se filtra COLGADO",
+            "TARIFA(SIN IVA)": "lo que se le paga al fletero",
+            "KILOS": "kilos del viaje"
+          },
+          "cuenta": "KPI 1, denominador: los viajes de colgado que todavía hace un fletero. El total del mes es propios + fleteros."
+        },
+        {
+          "id": "rutas-propias",
+          "archivo": "2026 Consumo de combustible.xlsx",
+          "destino": [
+            "client/src/dashboards/objetivos-logistica.html"
+          ],
+          "constante": "DATA",
+          "hojas": "ResumenKgs",
+          "columnas": {
+            "Fecha": "del ingreso",
+            "Proveedor": "el frigorífico; se toman ARRE BEEF S.A y BLACK BAMBOO ENTERPRISES S.A",
+            "Patente": "la unidad",
+            "Kilos": "del ingreso",
+            "TRANSPORTE": "PROPIO o FLETES"
+          },
+          "cuenta": "KPI 2: son dos rutas que antes se hacían enteras con flete. El valor es la proporción de ingresos de esos dos proveedores que llegaron con TRANSPORTE = PROPIO."
+        },
+        {
+          "id": "costo-ajustado",
+          "archivo": "(no se lee un Excel: se toma del tablero que ya lo mantiene)",
+          "destino": [
+            "client/src/dashboards/objetivos-logistica.html"
+          ],
+          "constante": "DATA",
+          "hojas": "D_RAW de matriz-costo-logistica.html (extractor «logistica»)",
+          "cuenta": "KPI 3: la variación del costo real por tonelada descargada contra el mes anterior ajustado por el INDEC del mes. Se evalúa dentro del año y no contra el año pasado, así que enero es la base y no tiene variación. Negativo es bueno. Por eso este grupo se corre DESPUÉS de «logistica»."
+        }
+      ]
     }
   }
 }
